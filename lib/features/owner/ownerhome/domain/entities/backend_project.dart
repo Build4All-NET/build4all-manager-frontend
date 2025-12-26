@@ -3,6 +3,10 @@ class BackendProject {
   final String name;
   final String description;
   final bool active;
+
+  // ✅ NEW
+  final String? projectType;
+
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -11,6 +15,7 @@ class BackendProject {
     required this.name,
     required this.description,
     required this.active,
+    this.projectType,
     this.createdAt,
     this.updatedAt,
   });

@@ -9,6 +9,7 @@ abstract class OwnerHomeEvent extends Equatable {
 class OwnerHomeStarted extends OwnerHomeEvent {
   final int ownerId;
   const OwnerHomeStarted(this.ownerId);
+
   @override
   List<Object?> get props => [ownerId];
 }
@@ -16,6 +17,7 @@ class OwnerHomeStarted extends OwnerHomeEvent {
 class OwnerHomeRefreshed extends OwnerHomeEvent {
   final int ownerId;
   const OwnerHomeRefreshed(this.ownerId);
+
   @override
   List<Object?> get props => [ownerId];
 }

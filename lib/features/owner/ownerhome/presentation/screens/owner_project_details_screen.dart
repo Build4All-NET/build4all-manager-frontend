@@ -1,7 +1,7 @@
 import 'package:build4all_manager/features/owner/ownerhome/presentation/specs/project_details_specs.dart';
-import 'package:build4all_manager/features/owner/ownerrequests/presentation/screens/owner_requests_screen.dart';
 import 'package:build4all_manager/shared/themes/app_theme.dart';
 import 'package:build4all_manager/shared/themes/theme_palette.dart';
+import 'package:build4all_manager/shared/widgets/app_toast.dart'; // ✅ NEW
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:build4all_manager/l10n/app_localizations.dart';
@@ -28,11 +28,12 @@ class OwnerProjectDetailsScreen extends StatelessWidget {
 
     final spec = themedSpecFor(context, tpl.kind);
     final tint = tpl.tint ?? _projectTint(tpl.kind, cs);
-    final projectTitle = _projectTitle(tpl, l10n); // ✅ use name, not desc
+    final projectTitle = _projectTitle(tpl, l10n);
 
     final pagePad = width >= 480
         ? const EdgeInsets.symmetric(horizontal: 20, vertical: 16)
         : ux.pagePad;
+
     final radiusLg = ux.radiusLg;
     final radiusMd = ux.radiusMd;
 
@@ -55,7 +56,7 @@ class OwnerProjectDetailsScreen extends StatelessWidget {
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
-          projectTitle, // ✅ show project name here
+          projectTitle,
           style: GoogleFonts.inter(fontWeight: FontWeight.w700),
         ),
       ),
@@ -75,10 +76,7 @@ class OwnerProjectDetailsScreen extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(16, 22, 16, 16),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [
-                      tint,
-                      tint.withOpacity(.9),
-                    ],
+                    colors: [tint, tint.withOpacity(.9)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -142,7 +140,7 @@ class OwnerProjectDetailsScreen extends StatelessWidget {
               ),
             ),
 
-            // CTA
+            // CTA (✅ uses AppToast + GoRouter)
             SliverToBoxAdapter(
               child: Padding(
                 padding: EdgeInsets.fromLTRB(
@@ -154,21 +152,22 @@ class OwnerProjectDetailsScreen extends StatelessWidget {
                 child: InkWell(
                   borderRadius: BorderRadius.circular(radiusLg),
                   onTap: () {
-                    if (canRequest) {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => OwnerRequestScreen(
-                            ownerId: ownerId,
-                            initialProjectId: initialProjectId,
-                            initialAppName: initialAppName,
-                          ),
-                        ),
-                      );
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(l10n.owner_proj_comingSoon)),
-                      );
+                    if (!canRequest) {
+                      AppToast.info(context, l10n.owner_proj_comingSoon);
+                      return;
                     }
+
+                    // Optional: small confirmation toast
+                    AppToast.success(context, l10n.owner_proj_open);
+
+                    // ✅ Use GoRouter and pass prefills
+                    context.push(
+                      '/owner/requests',
+                      extra: {
+                        'projectId': initialProjectId,
+                        'appName': initialAppName,
+                      },
+                    );
                   },
                   child: _CreateCtaCard(
                     spec: spec,
@@ -336,7 +335,6 @@ Color _projectTint(String kind, ColorScheme cs) {
   }
 }
 
-/// ✅ Get the localized project **name** based on tpl.titleKey
 String _projectTitle(ProjectTemplate tpl, AppLocalizations l10n) {
   switch (tpl.titleKey) {
     case 'owner_proj_activities_title':
@@ -348,9 +346,11 @@ String _projectTitle(ProjectTemplate tpl, AppLocalizations l10n) {
     case 'owner_proj_services_title':
       return l10n.owner_proj_services_title;
     default:
-      return tpl.titleKey; // fallback (just in case)
+      return tpl.titleKey;
   }
 }
+
+/* ---------------- UI bits (unchanged) ---------------- */
 
 class _SectionTitle extends StatelessWidget {
   final double padH;
@@ -460,7 +460,7 @@ class _MetricItem extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
               if (suffixStar) ...[
-                const SizedBox(height: 0, width: 4),
+                const SizedBox(width: 4),
                 const Icon(Icons.star_rounded, size: 16, color: Colors.amber),
               ],
             ],
@@ -494,10 +494,7 @@ class _CreateCtaCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [
-            tint,
-            tint.withOpacity(.88),
-          ],
+          colors: [tint, tint.withOpacity(.88)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),

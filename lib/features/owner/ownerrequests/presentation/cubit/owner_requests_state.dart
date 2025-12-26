@@ -22,6 +22,15 @@ class OwnerRequestsState extends Equatable {
   final Project? selected;
   final String appName;
 
+  // ✅ NEW runtime-config fields
+  final int? currencyId;
+  final String? apiBaseUrlOverride;
+
+  final String? navJson;
+  final String? homeJson;
+  final String? enabledFeaturesJson;
+  final String? brandingJson;
+
   final AppRequest? lastCreated;
   final String? builtApkUrl;
   final String? builtAt;
@@ -40,6 +49,12 @@ class OwnerRequestsState extends Equatable {
     required this.logoFilePath,
     required this.selected,
     required this.appName,
+    required this.currencyId,
+    required this.apiBaseUrlOverride,
+    required this.navJson,
+    required this.homeJson,
+    required this.enabledFeaturesJson,
+    required this.brandingJson,
     required this.lastCreated,
     required this.builtApkUrl,
     required this.builtAt,
@@ -59,6 +74,12 @@ class OwnerRequestsState extends Equatable {
         logoFilePath = null,
         selected = null,
         appName = '',
+        currencyId = null,
+        apiBaseUrlOverride = null,
+        navJson = null,
+        homeJson = null,
+        enabledFeaturesJson = null,
+        brandingJson = null,
         lastCreated = null,
         builtApkUrl = null,
         builtAt = null;
@@ -77,6 +98,12 @@ class OwnerRequestsState extends Equatable {
     String? logoFilePath,
     Project? selected,
     String? appName,
+    int? currencyId,
+    String? apiBaseUrlOverride,
+    String? navJson,
+    String? homeJson,
+    String? enabledFeaturesJson,
+    String? brandingJson,
     AppRequest? lastCreated,
     String? builtApkUrl,
     String? builtAt,
@@ -95,6 +122,12 @@ class OwnerRequestsState extends Equatable {
       logoFilePath: logoFilePath ?? this.logoFilePath,
       selected: selected ?? this.selected,
       appName: appName ?? this.appName,
+      currencyId: currencyId ?? this.currencyId,
+      apiBaseUrlOverride: apiBaseUrlOverride ?? this.apiBaseUrlOverride,
+      navJson: navJson ?? this.navJson,
+      homeJson: homeJson ?? this.homeJson,
+      enabledFeaturesJson: enabledFeaturesJson ?? this.enabledFeaturesJson,
+      brandingJson: brandingJson ?? this.brandingJson,
       lastCreated: lastCreated ?? this.lastCreated,
       builtApkUrl: builtApkUrl ?? this.builtApkUrl,
       builtAt: builtAt ?? this.builtAt,
@@ -116,6 +149,12 @@ class OwnerRequestsState extends Equatable {
         logoFilePath,
         selected,
         appName,
+        currencyId,
+        apiBaseUrlOverride,
+        navJson,
+        homeJson,
+        enabledFeaturesJson,
+        brandingJson,
         lastCreated,
         builtApkUrl,
         builtAt,

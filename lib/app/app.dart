@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
-import 'package:build4all_manager/app/router/router.dart'
-    as nav; // ← UNCOMMENTED
+import 'package:build4all_manager/app/router/router.dart' as nav;
 import 'package:build4all_manager/features/theme_manager/data/local_theme_store.dart';
 import 'package:build4all_manager/features/theme_manager/presentation/theme_cubit.dart';
 import 'package:build4all_manager/l10n/app_localizations.dart';
@@ -23,10 +22,7 @@ class Build4AllManagerApp extends StatelessWidget {
             theme: vm.light,
             darkTheme: vm.dark,
             themeMode: vm.mode,
-
             routerConfig: nav.router,
-
-            // Localizations
             supportedLocales: const [
               Locale('en'),
               Locale('ar'),
@@ -38,8 +34,6 @@ class Build4AllManagerApp extends StatelessWidget {
               GlobalCupertinoLocalizations.delegate,
               GlobalWidgetsLocalizations.delegate,
             ],
-
-            // Optional: better handling for RTL (Arabic) and unknown locales
             localeListResolutionCallback: (locales, supported) {
               if (locales == null || locales.isEmpty) return supported.first;
               final first = locales.first;

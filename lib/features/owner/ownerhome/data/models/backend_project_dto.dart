@@ -5,6 +5,10 @@ class BackendProjectDto {
   final String projectName;
   final String description;
   final bool active;
+
+  // ✅ NEW
+  final String? projectType; // e.g. "ECOMMERCE", "ACTIVITIES", ...
+
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -13,6 +17,7 @@ class BackendProjectDto {
     required this.projectName,
     required this.description,
     required this.active,
+    this.projectType,
     this.createdAt,
     this.updatedAt,
   });
@@ -22,10 +27,14 @@ class BackendProjectDto {
         (iso == null || iso.isEmpty) ? null : DateTime.tryParse(iso);
 
     return BackendProjectDto(
-      id: j['id'] as int,
+      id: (j['id'] as num).toInt(),
       projectName: (j['projectName'] ?? '').toString(),
       description: (j['description'] ?? '').toString(),
       active: j['active'] == true,
+
+      // ✅ NEW
+      projectType: j['projectType']?.toString(),
+
       createdAt: _p(j['createdAt']?.toString()),
       updatedAt: _p(j['updatedAt']?.toString()),
     );
@@ -36,6 +45,10 @@ class BackendProjectDto {
         name: projectName,
         description: description,
         active: active,
+
+        // ✅ NEW
+        projectType: projectType,
+
         createdAt: createdAt,
         updatedAt: updatedAt,
       );

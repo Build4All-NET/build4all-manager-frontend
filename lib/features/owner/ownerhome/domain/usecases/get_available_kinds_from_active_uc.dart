@@ -3,17 +3,33 @@ import '../repositories/i_owner_projects_repository.dart';
 
 class _KindMapper {
   static String? map(BackendProject p) {
+    // ✅ only active projects count
     if (!p.active) return null;
-    final n = p.name.toLowerCase();
 
-    if (p.id == 1 || n.contains('default') || n.contains('activity')) {
-      return 'activities';
+    final t = (p.projectType ?? '').toUpperCase().trim();
+
+    // ✅ Map backend projectType → UI kind
+    switch (t) {
+      case 'ACTIVITIES':
+      case 'ACTIVITY':
+        return 'activities';
+
+      case 'ECOMMERCE':
+      case 'E_COMMERCE':
+      case 'SHOP':
+        return 'ecommerce';
+
+      case 'GYM':
+      case 'FITNESS':
+        return 'gym';
+
+      case 'SERVICES':
+      case 'SERVICE':
+        return 'services';
+
+      default:
+        return null; // unknown type → ignored
     }
-    if (n.contains('ecommerce') || n.contains('shop')) return 'ecommerce';
-    if (n.contains('gym') || n.contains('fitness')) return 'gym';
-    if (n.contains('service')) return 'services';
-
-    return null;
   }
 }
 
@@ -24,10 +40,14 @@ class GetAvailableKindsFromActiveUc {
   Future<Set<String>> call() async {
     final list = await repo.getProjects();
     final kinds = <String>{};
+
     for (final p in list) {
       final k = _KindMapper.map(p);
       if (k != null) kinds.add(k);
     }
+
+    // ✅ optional fallback if backend returns nothing
+    if (kinds.isEmpty) return const {'activities'};
     return kinds;
   }
 }

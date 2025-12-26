@@ -1,5 +1,6 @@
 import 'package:build4all_manager/shared/themes/app_theme.dart';
 import 'package:build4all_manager/shared/widgets/search_input.dart';
+import 'package:build4all_manager/shared/widgets/app_toast.dart'; // ✅ NEW
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -26,7 +27,7 @@ import '../widgets/project_template_card.dart';
 class OwnerHomeScreen extends StatelessWidget {
   final int ownerId;
   final Dio dio;
-  final String? ownerName; // 👈 NEW
+  final String? ownerName;
 
   const OwnerHomeScreen({
     super.key,
@@ -37,10 +38,8 @@ class OwnerHomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // existing repo (recent requests + config)
     final generalRepo = OwnerRepositoryImpl(OwnerApi(dio));
 
-    // new repo for /api/projects (kinds availability)
     final projectsRepo = OwnerProjectsRepositoryImpl(OwnerProjectsApi(dio));
     final getAvailableKinds = GetAvailableKindsFromActiveUc(projectsRepo);
 
@@ -50,16 +49,13 @@ class OwnerHomeScreen extends StatelessWidget {
         getAppConfig: GetAppConfigUc(generalRepo),
         getAvailableKinds: getAvailableKinds,
       )..add(OwnerHomeStarted(ownerId)),
-      child: _HomeScaffold(
-        ownerName: ownerName,
-      ),
+      child: _HomeScaffold(ownerName: ownerName),
     );
   }
 }
 
 class _HomeScaffold extends StatelessWidget {
   final String? ownerName;
-
   const _HomeScaffold({this.ownerName});
 
   @override
@@ -68,9 +64,7 @@ class _HomeScaffold extends StatelessWidget {
     return Scaffold(
       backgroundColor: cs.background,
       body: SafeArea(
-        child: _HomeBody(
-          ownerName: ownerName,
-        ),
+        child: _HomeBody(ownerName: ownerName),
       ),
     );
   }
@@ -78,7 +72,6 @@ class _HomeScaffold extends StatelessWidget {
 
 class _HomeBody extends StatelessWidget {
   final String? ownerName;
-
   const _HomeBody({this.ownerName});
 
   @override
@@ -93,22 +86,35 @@ class _HomeBody extends StatelessWidget {
         ? const EdgeInsets.symmetric(horizontal: 20, vertical: 16)
         : ux.pagePad;
 
-    // 👇 greeting text with fallback
-    final String greeting = (ownerName == null || ownerName!.trim().isEmpty)
+    final greeting = (ownerName == null || ownerName!.trim().isEmpty)
         ? l10n.owner_home_hello
         : '${l10n.owner_home_hello} $ownerName';
 
+    final ownerId =
+        (context.findAncestorWidgetOfExactType<OwnerHomeScreen>()!).ownerId;
+
     return Padding(
       padding: pagePad,
-      child: BlocBuilder<OwnerHomeBloc, OwnerHomeState>(
+      child: BlocConsumer<OwnerHomeBloc, OwnerHomeState>(
+        listenWhen: (prev, curr) {
+          // ✅ only react when error changes
+          final prevErr = _errText(prev);
+          final currErr = _errText(curr);
+          return prevErr != currErr && (currErr?.isNotEmpty ?? false);
+        },
+        listener: (context, state) {
+          final msg = _errText(state);
+          if (msg != null && msg.trim().isNotEmpty) {
+            AppToast.error(context, msg);
+          }
+        },
         builder: (context, state) {
-          final ownerId =
-              (context.findAncestorWidgetOfExactType<OwnerHomeScreen>()!)
-                  .ownerId;
-
           return RefreshIndicator(
-            onRefresh: () async =>
-                context.read<OwnerHomeBloc>().add(OwnerHomeRefreshed(ownerId)),
+            onRefresh: () async {
+              context.read<OwnerHomeBloc>().add(OwnerHomeRefreshed(ownerId));
+              // ✅ optional toast (small info)
+              AppToast.info(context, l10n.refresh);
+            },
             child: CustomScrollView(
               physics: const BouncingScrollPhysics(
                 parent: AlwaysScrollableScrollPhysics(),
@@ -122,9 +128,8 @@ class _HomeBody extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // small subtitle above name – you can put "Owner Hub" or leave empty
                             Text(
-                              '', // you can change to 'Owner Hub' if you want
+                              '',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: tt.labelSmall?.copyWith(
@@ -133,19 +138,13 @@ class _HomeBody extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(height: 4),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    greeting, // 👈 uses ownerName now
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: tt.headlineSmall?.copyWith(
-                                      fontWeight: FontWeight.w800,
-                                    ),
-                                  ),
-                                ),
-                              ],
+                            Text(
+                              greeting,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: tt.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.w800,
+                              ),
                             ),
                             const SizedBox(height: 6),
                             Text(
@@ -182,41 +181,49 @@ class _HomeBody extends StatelessWidget {
                 ),
                 const SliverToBoxAdapter(child: SizedBox(height: 12)),
 
-                // ----- Projects grid -----
+                // ----- Projects grid (with toast) -----
                 SliverPadding(
                   padding: EdgeInsets.only(bottom: ux.radiusMd),
                   sliver: SliverLayoutBuilder(
                     builder: (context, constraints) {
                       final cross = constraints.crossAxisExtent;
-                      final aspect = cross < 340
-                          ? 0.78
-                          : (cross < 420)
-                              ? 0.90
-                              : 1.02;
+
+                      // ✅ better responsiveness: choose columns based on width
+                      final cols = cross >= 900 ? 4 : (cross >= 600 ? 3 : 2);
+                      const spacing = 12.0;
+
+                      final cardW = (cross - (spacing * (cols - 1))) / cols;
+                      final aspect =
+                          cardW < 190 ? 0.86 : (cardW < 230 ? 0.95 : 1.05);
 
                       return SliverGrid(
-                        gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                          maxCrossAxisExtent: 260,
-                          mainAxisSpacing: 12,
-                          crossAxisSpacing: 12,
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: cols,
+                          mainAxisSpacing: spacing,
+                          crossAxisSpacing: spacing,
                           childAspectRatio: aspect,
                         ),
                         delegate: SliverChildBuilderDelegate(
                           (context, i) {
                             final tpl = projectTemplates[i];
-                            final isAvailable =
-                                state.availableKinds.contains(tpl.kind);
+                            final isAvailable = state.availableKinds
+                                .contains(tpl.kind.toLowerCase());
 
                             return ProjectTemplateCard(
                               tpl: tpl,
                               isAvailable: isAvailable,
-                              // ✅ always open details (even if Coming soon)
-                              onOpen: () => context.push(
-                                '/owner/project/${tpl.id}',
-                                extra: {
-                                  'canRequest': isAvailable, // true or false
-                                },
-                              ),
+                              onOpen: () {
+                                // ✅ toast for non-available projects
+                                if (!isAvailable) {
+                                  AppToast.info(
+                                      context, l10n.owner_proj_comingSoon);
+                                }
+
+                                context.push(
+                                  '/owner/project/${tpl.id}',
+                                  extra: {'canRequest': isAvailable},
+                                );
+                              },
                             );
                           },
                           childCount: projectTemplates.length,
@@ -240,7 +247,11 @@ class _HomeBody extends StatelessWidget {
                         ),
                       ),
                       TextButton(
-                        onPressed: () => context.push('/owner/requests'),
+                        onPressed: () {
+                          // optional tiny toast
+                          // AppToast.info(context, l10n.owner_home_openingRequests);
+                          context.push('/owner/requests');
+                        },
                         child: Text(l10n.owner_home_viewAll),
                       ),
                     ],
@@ -257,8 +268,9 @@ class _HomeBody extends StatelessWidget {
                         l10n.owner_home_noRecent,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: tt.bodyMedium
-                            ?.copyWith(color: cs.onSurface.withOpacity(.7)),
+                        style: tt.bodyMedium?.copyWith(
+                          color: cs.onSurface.withOpacity(.7),
+                        ),
                       ),
                     ),
                   )
@@ -276,10 +288,24 @@ class _HomeBody extends StatelessWidget {
       ),
     );
   }
+
+  // ✅ supports multiple possible state shapes without breaking compile
+  String? _errText(OwnerHomeState s) {
+    try {
+      final dynamic d = s;
+      final e = d.error ?? d.errorMessage ?? d.message;
+      if (e == null) return null;
+      final t = e.toString();
+      return t.trim().isEmpty ? null : t;
+    } catch (_) {
+      return null;
+    }
+  }
 }
 
 class _LoadingList extends StatelessWidget {
   const _LoadingList();
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;

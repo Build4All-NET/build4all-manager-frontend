@@ -1,730 +1,648 @@
-import 'package:build4all_manager/core/network/dio_client.dart';
-import 'package:build4all_manager/features/owner/common/domain/entities/app_request.dart';
-import 'package:build4all_manager/features/owner/ownerrequests/data/repositories/owner_requests_repository_impl.dart';
-import 'package:build4all_manager/features/owner/ownerrequests/data/services/owner_requests_api.dart';
-import 'package:build4all_manager/features/owner/ownerrequests/data/services/themes_api.dart';
-import 'package:build4all_manager/features/owner/ownerrequests/domain/entities/theme_lite.dart';
-import 'package:build4all_manager/features/owner/ownerrequests/presentation/cubit/owner_requests_cubit.dart';
-import 'package:build4all_manager/features/owner/ownerrequests/presentation/cubit/owner_requests_state.dart';
-import 'package:build4all_manager/l10n/app_localizations.dart';
-import 'package:build4all_manager/shared/themes/app_theme.dart'; // UiTokens
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'dart:convert';
+import 'dart:io';
 
-// === shared UI ===
+import 'package:build4all_manager/features/owner/ownerrequests/data/models/currency_model.dart';
+import 'package:build4all_manager/features/owner/ownerrequests/data/services/owner_requests_api.dart';
 import 'package:build4all_manager/shared/widgets/app_button.dart';
 import 'package:build4all_manager/shared/widgets/app_text_field.dart';
-import 'package:build4all_manager/shared/widgets/top_toast.dart';
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:dio/dio.dart';
 
-import '../../domain/entities/project.dart';
-
-class OwnerRequestScreen extends StatelessWidget {
-  final int ownerId;
-  final int? initialProjectId;
-  final String? initialAppName;
-
-  const OwnerRequestScreen({
-    super.key,
-    required this.ownerId,
-    this.initialProjectId,
-    this.initialAppName,
-  });
+class OwnerRequestScreen extends StatefulWidget {
+  final String baseUrl; // ex: http://192.168.1.3:8080
+  const OwnerRequestScreen({super.key, required this.baseUrl});
 
   @override
-  Widget build(BuildContext context) {
-    final dio = DioClient.ensure();
-    final api = OwnerRequestsApi(dio);
-    final repo = OwnerRequestsRepositoryImpl(api, ThemesApi(dio));
+  State<OwnerRequestScreen> createState() => _OwnerRequestScreenState();
+}
 
-    return BlocProvider(
-      create: (_) => OwnerRequestsCubit(repo: repo, ownerId: ownerId)
-        ..setConcreteApi(api)
-        ..init(),
-      child: _OwnerRequestView(
-        initialProjectId: initialProjectId,
-        initialAppName: initialAppName,
-      ),
+class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
+  late final OwnerRequestApi api;
+
+  // Controllers
+  final _formKey = GlobalKey<FormState>();
+
+  final _notesCtrl = TextEditingController();
+
+  final _primaryCtrl = TextEditingController(text: '#EC4899');
+  final _secondaryCtrl = TextEditingController(text: '#111827');
+  final _bgCtrl = TextEditingController(text: '#FFFFFF');
+  final _onBgCtrl = TextEditingController(text: '#374151');
+  final _errorCtrl = TextEditingController(text: '#DC2626');
+
+  final _apiOverrideCtrl = TextEditingController();
+
+  final _navCtrl = TextEditingController(
+    text: jsonEncode([
+      {"id": "home", "label": "Home", "icon": "home"},
+      {"id": "explore", "label": "Explore", "icon": "search"},
+      {"id": "cart", "label": "Cart", "icon": "shopping_cart"},
+      {"id": "profile", "label": "Profile", "icon": "person"},
+    ]),
+  );
+
+  final _homeCtrl = TextEditingController(
+    text: jsonEncode({
+      "sections": [
+        {"id": "header", "type": "HEADER", "layout": "full", "limit": 1},
+        {"id": "search", "type": "SEARCH", "layout": "full", "limit": 1},
+        {"id": "hero_banner", "type": "BANNER", "layout": "full", "limit": 1},
+        {
+          "id": "categories",
+          "type": "CATEGORY_CHIPS",
+          "layout": "horizontal",
+          "limit": 10
+        },
+        {
+          "id": "flash_sale",
+          "type": "ITEM_LIST",
+          "feature": "ITEMS",
+          "layout": "horizontal",
+          "limit": 10
+        },
+      ]
+    }),
+  );
+
+  final _featuresCtrl = TextEditingController(
+    text: jsonEncode(["ITEMS", "BOOKING", "REVIEWS", "ORDERS"]),
+  );
+
+  final _brandingCtrl = TextEditingController(
+    text: jsonEncode({"splashColor": "#FFFFFF"}),
+  );
+
+  // State
+  bool _loading = false;
+  String? _error;
+  String? _success;
+
+  List<CurrencyModel> _currencies = [];
+  CurrencyModel? _selectedCurrency;
+
+  File? _logoFile;
+
+  @override
+  void initState() {
+    super.initState();
+    api = OwnerRequestApi(
+      dio: Dio(BaseOptions(connectTimeout: const Duration(seconds: 15))),
+      baseUrl: widget.baseUrl,
     );
+    _loadCurrencies();
   }
-}
-
-class _OwnerRequestView extends StatefulWidget {
-  final int? initialProjectId;
-  final String? initialAppName;
-  const _OwnerRequestView(
-      {super.key, this.initialProjectId, this.initialAppName});
 
   @override
-  State<_OwnerRequestView> createState() => _OwnerRequestViewState();
-}
+  void dispose() {
+    _notesCtrl.dispose();
+    _primaryCtrl.dispose();
+    _secondaryCtrl.dispose();
+    _bgCtrl.dispose();
+    _onBgCtrl.dispose();
+    _errorCtrl.dispose();
+    _apiOverrideCtrl.dispose();
+    _navCtrl.dispose();
+    _homeCtrl.dispose();
+    _featuresCtrl.dispose();
+    _brandingCtrl.dispose();
+    super.dispose();
+  }
 
-class _OwnerRequestViewState extends State<_OwnerRequestView> {
-  bool _appliedInit = false;
+  Future<void> _loadCurrencies() async {
+    setState(() {
+      _error = null;
+      _success = null;
+    });
 
+    try {
+      final list = await api.fetchCurrencies();
+      setState(() {
+        _currencies = list;
+        // default select: EUR if exists else first
+        _selectedCurrency =
+            list.where((c) => c.code.toUpperCase() == 'EUR').isNotEmpty
+                ? list.firstWhere((c) => c.code.toUpperCase() == 'EUR')
+                : (list.isNotEmpty ? list.first : null);
+      });
+    } catch (e) {
+      setState(() => _error = 'Failed to load currencies: $e');
+    }
+  }
+
+  Future<void> _pickLogo() async {
+    final picker = ImagePicker();
+    final res =
+        await picker.pickImage(source: ImageSource.gallery, imageQuality: 85);
+    if (res == null) return;
+    setState(() {
+      _logoFile = File(res.path);
+      _success = null;
+      _error = null;
+    });
+  }
+
+  void _removeLogo() {
+    setState(() {
+      _logoFile = null;
+      _success = null;
+      _error = null;
+    });
+  }
+
+  // ---------- validation helpers ----------
+  String? _validateHex(String? v) {
+    final s = (v ?? '').trim();
+    if (s.isEmpty) return 'Required';
+    final ok = RegExp(r'^#([0-9a-fA-F]{6}|[0-9a-fA-F]{8})$').hasMatch(s);
+    if (!ok) return 'Use hex like #RRGGBB (or #AARRGGBB)';
+    return null;
+  }
+
+  String? _validateJson(String? v) {
+    final s = (v ?? '').trim();
+    if (s.isEmpty) return 'Required';
+    try {
+      jsonDecode(s);
+      return null;
+    } catch (_) {
+      return 'Invalid JSON (fix brackets/quotes)';
+    }
+  }
+
+  Color _hexToColor(String hex, {Color fallback = Colors.transparent}) {
+    try {
+      var h = hex.trim().replaceAll('#', '');
+      if (h.length == 6) h = 'FF$h';
+      final val = int.parse(h, radix: 16);
+      return Color(val);
+    } catch (_) {
+      return fallback;
+    }
+  }
+
+  Future<void> _submit() async {
+    FocusScope.of(context).unfocus();
+    setState(() {
+      _error = null;
+      _success = null;
+    });
+
+    if (_selectedCurrency == null) {
+      setState(() => _error = 'Select a currency first');
+      return;
+    }
+
+    if (!_formKey.currentState!.validate()) {
+      setState(() => _error = 'Fix the highlighted fields first');
+      return;
+    }
+
+    setState(() => _loading = true);
+
+    try {
+      await api.submitOwnerRequest(
+        // themeId: null, // keep null unless you enable it
+        notes: _notesCtrl.text.trim(),
+        primaryColor: _primaryCtrl.text.trim(),
+        secondaryColor: _secondaryCtrl.text.trim(),
+        backgroundColor: _bgCtrl.text.trim(),
+        onBackgroundColor: _onBgCtrl.text.trim(),
+        errorColor: _errorCtrl.text.trim(),
+        currencyId: _selectedCurrency!.id,
+        navJson: _navCtrl.text.trim(),
+        homeJson: _homeCtrl.text.trim(),
+        enabledFeaturesJson: _featuresCtrl.text.trim(),
+        brandingJson: _brandingCtrl.text.trim(),
+        apiBaseUrlOverride: _apiOverrideCtrl.text.trim().isEmpty
+            ? null
+            : _apiOverrideCtrl.text.trim(),
+        logoFile: _logoFile,
+      );
+
+      setState(() {
+        _success = 'Request submitted ✅ (backend will base64 the JSON)';
+      });
+    } catch (e) {
+      setState(() => _error = 'Submit failed: $e');
+    } finally {
+      setState(() => _loading = false);
+    }
+  }
+
+  // ---------- UI ----------
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
-    final ux = Theme.of(context).extension<UiTokens>()!;
-    final width = MediaQuery.of(context).size.width;
-    final pagePad = width >= 480
-        ? const EdgeInsets.symmetric(horizontal: 20, vertical: 16)
-        : ux.pagePad;
 
-    return BlocConsumer<OwnerRequestsCubit, OwnerRequestsState>(
-      listenWhen: (p, c) =>
-          p.error != c.error ||
-          p.lastCreated != c.lastCreated ||
-          p.builtApkUrl != c.builtApkUrl ||
-          (!_appliedInit && p.projects.isEmpty && c.projects.isNotEmpty),
-      listener: (context, s) async {
-        // prefill once
-        if (!_appliedInit && s.projects.isNotEmpty) {
-          _appliedInit = true;
-          final c = context.read<OwnerRequestsCubit>();
-          if (widget.initialProjectId != null) {
-            final p = s.projects.firstWhere(
-              (p) => p.id == widget.initialProjectId,
-              orElse: () => s.projects.first,
-            );
-            c.selectProject(p);
-          }
-          final name = (widget.initialAppName ?? '').trim();
-          if (name.isNotEmpty) c.setAppName(name);
-        }
-
-        // toasts (no SnackBars)
-        if (s.error != null && s.error!.isNotEmpty) {
-          final msg = switch (s.error) {
-            '_ERR_NO_PROJECT_' => l10n.owner_request_error_choose_project,
-            '_ERR_NO_APPNAME_' => l10n.owner_request_error_app_name,
-            _ => s.error!,
-          };
-          showTopToast(context, msg, type: ToastType.error, haptics: true);
-        }
-        if (s.lastCreated != null &&
-            (s.builtApkUrl == null || s.builtApkUrl!.isEmpty)) {
-          showTopToast(context, l10n.owner_request_success,
-              type: ToastType.success, haptics: true);
-        }
-        if (s.builtApkUrl != null && s.builtApkUrl!.isNotEmpty) {
-          showTopToast(context, l10n.owner_request_build_done,
-              type: ToastType.success, haptics: true);
-        }
-      },
-      builder: (context, s) {
-        final tt = Theme.of(context).textTheme;
-        final radiusMd = ux.radiusMd;
-
-        // hero
-        final hero = Container(
-          margin: EdgeInsets.fromLTRB(pagePad.horizontal / 2, pagePad.vertical,
-              pagePad.horizontal / 2, 12),
-          padding: const EdgeInsets.fromLTRB(16, 18, 16, 16),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                cs.primary.withOpacity(.12),
-                cs.secondary.withOpacity(.08)
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(ux.radiusLg + 4),
-            border: Border.all(color: cs.outline.withOpacity(.16)),
-            boxShadow: ux.cardShadow,
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Owner App Request'),
+        actions: [
+          IconButton(
+            onPressed: _loading ? null : _loadCurrencies,
+            icon: const Icon(Icons.refresh),
+            tooltip: 'Reload currencies',
           ),
-          child: Row(
+        ],
+      ),
+      body: SafeArea(
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            padding: const EdgeInsets.all(16),
             children: [
-              Container(
-                height: 48,
-                width: 48,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: cs.primary.withOpacity(.16),
-                  borderRadius: BorderRadius.circular(ux.radiusMd),
-                ),
-                child: Icon(Icons.rocket_launch, color: cs.primary),
+              _BannerNote(
+                icon: Icons.info_outline,
+                color: cs.primary,
+                text:
+                    'We send RAW JSON strings in form-data. Backend does the base64. '
+                    'So don’t encode anything here. Just valid JSON.',
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: DefaultTextStyle(
-                  style: tt.bodyMedium!
-                      .copyWith(color: cs.onSurface.withOpacity(.85)),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(l10n.owner_request_title,
-                          style: tt.titleMedium
-                              ?.copyWith(fontWeight: FontWeight.w800)),
-                      const SizedBox(height: 4),
-                      Text(l10n.owner_request_submit_hint,
-                          maxLines: 2, overflow: TextOverflow.ellipsis),
-                    ],
-                  ),
-                ),
+
+              const SizedBox(height: 12),
+
+              if (_error != null) _StatusBox(text: _error!, isError: true),
+              if (_success != null) _StatusBox(text: _success!, isError: false),
+
+              const SizedBox(height: 8),
+
+              // Notes
+              AppTextField(
+                controller: _notesCtrl,
+                label: 'Notes',
+                hint: 'Explain what app you want (type, features, vibe...)',
+                maxLines: 3,
+                validator: (v) =>
+                    (v == null || v.trim().isEmpty) ? 'Required' : null,
+                filled: true,
+                margin: const EdgeInsets.only(bottom: 12),
+              ),
+
+              // Currency dropdown (IMPORTANT)
+              _CurrencyDropdown(
+                currencies: _currencies,
+                value: _selectedCurrency,
+                onChanged: _loading
+                    ? null
+                    : (c) => setState(() {
+                          _selectedCurrency = c;
+                          _success = null;
+                          _error = null;
+                        }),
+              ),
+
+              const SizedBox(height: 16),
+
+              // Palette section
+              Text('Palette', style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: 8),
+
+              _ColorRow(
+                label: 'Primary',
+                controller: _primaryCtrl,
+                validator: _validateHex,
+                preview: _hexToColor(_primaryCtrl.text),
+                onChanged: (_) => setState(() {}),
+              ),
+              _ColorRow(
+                label: 'Secondary',
+                controller: _secondaryCtrl,
+                validator: _validateHex,
+                preview: _hexToColor(_secondaryCtrl.text),
+                onChanged: (_) => setState(() {}),
+              ),
+              _ColorRow(
+                label: 'Background',
+                controller: _bgCtrl,
+                validator: _validateHex,
+                preview: _hexToColor(_bgCtrl.text),
+                onChanged: (_) => setState(() {}),
+              ),
+              _ColorRow(
+                label: 'On Background',
+                controller: _onBgCtrl,
+                validator: _validateHex,
+                preview: _hexToColor(_onBgCtrl.text),
+                onChanged: (_) => setState(() {}),
+              ),
+              _ColorRow(
+                label: 'Error',
+                controller: _errorCtrl,
+                validator: _validateHex,
+                preview: _hexToColor(_errorCtrl.text),
+                onChanged: (_) => setState(() {}),
+              ),
+
+              const SizedBox(height: 16),
+
+              // Optional API override
+              AppTextField(
+                controller: _apiOverrideCtrl,
+                label: 'apiBaseUrlOverride (optional)',
+                hint: 'Leave empty unless you want runtime override',
+                filled: true,
+                margin: const EdgeInsets.only(bottom: 12),
+              ),
+
+              // JSON payloads
+              Text('Runtime JSON (raw)',
+                  style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: 8),
+
+              AppTextField(
+                controller: _navCtrl,
+                label: 'navJson',
+                hint: '[{...}]',
+                minLines: 4,
+                maxLines: 10,
+                validator: _validateJson,
+                filled: true,
+                margin: const EdgeInsets.only(bottom: 12),
+              ),
+              AppTextField(
+                controller: _homeCtrl,
+                label: 'homeJson',
+                hint: '{ "sections": [...] }',
+                minLines: 4,
+                maxLines: 12,
+                validator: _validateJson,
+                filled: true,
+                margin: const EdgeInsets.only(bottom: 12),
+              ),
+              AppTextField(
+                controller: _featuresCtrl,
+                label: 'enabledFeaturesJson',
+                hint: '["ITEMS","ORDERS"]',
+                minLines: 2,
+                maxLines: 6,
+                validator: _validateJson,
+                filled: true,
+                margin: const EdgeInsets.only(bottom: 12),
+              ),
+              AppTextField(
+                controller: _brandingCtrl,
+                label: 'brandingJson',
+                hint: '{ "splashColor": "#FFFFFF" }',
+                minLines: 2,
+                maxLines: 6,
+                validator: _validateJson,
+                filled: true,
+                margin: const EdgeInsets.only(bottom: 16),
+              ),
+
+              // Logo
+              Text('Logo (optional)',
+                  style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: 8),
+              _LogoPicker(
+                file: _logoFile,
+                onPick: _loading ? null : _pickLogo,
+                onRemove: _loading ? null : _removeLogo,
+              ),
+
+              const SizedBox(height: 20),
+
+              AppButton(
+                onPressed: _loading ? null : _submit,
+                label: _loading ? 'Submitting…' : 'Submit Request',
+                expand: true,
+                isBusy: _loading,
+              ),
+
+              const SizedBox(height: 10),
+              Text(
+                'FYI: If Postman works but Flutter fails → it’s usually endpoint path or field name mismatch. '
+                'This screen matches your screenshot keys exactly.',
+                style: Theme.of(context)
+                    .textTheme
+                    .bodySmall
+                    ?.copyWith(color: cs.onSurface.withOpacity(.65)),
               ),
             ],
           ),
-        );
-
-        // form
-        final form = ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 640),
-          child: Card(
-            elevation: 0,
-            clipBehavior: Clip.antiAlias,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(ux.radiusLg),
-              side: BorderSide(color: cs.outline.withOpacity(.22)),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: s.loading
-                  ? const SizedBox(
-                      height: 240,
-                      child: Center(child: CircularProgressIndicator()))
-                  : Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // 🔹 Project dropdown with rounded, nicer style
-                        DropdownButtonFormField<Project?>(
-                          value: s.selected,
-                          isExpanded: true,
-                          decoration: InputDecoration(
-                            labelText: l10n.owner_request_project,
-                            filled: true,
-                            fillColor: cs.surfaceContainerLowest,
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 12,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(radiusMd),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(radiusMd),
-                              borderSide: BorderSide(
-                                color: cs.outline.withOpacity(.35),
-                              ),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(radiusMd),
-                              borderSide: BorderSide(
-                                color: cs.primary,
-                                width: 1.6,
-                              ),
-                            ),
-                          ),
-                          style: tt.bodyMedium,
-                          icon: Icon(
-                            Icons.keyboard_arrow_down_rounded,
-                            color: cs.onSurface.withOpacity(.75),
-                          ),
-                          borderRadius: BorderRadius.circular(radiusMd + 4),
-                          items: s.projects
-                              .map(
-                                (p) => DropdownMenuItem<Project?>(
-                                  value: p,
-                                  child: Text(
-                                    p.name,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              )
-                              .toList(),
-                          onChanged:
-                              context.read<OwnerRequestsCubit>().selectProject,
-                        ),
-                        const SizedBox(height: 12),
-
-                        // shared input
-                        AppTextField(
-                          label: l10n.owner_request_appName,
-                          hint: l10n.owner_request_appName_hint,
-                          initialValue: s.appName,
-                          prefix: const Icon(Icons.edit_outlined),
-                          onChanged:
-                              context.read<OwnerRequestsCubit>().setAppName,
-                          filled: true,
-                          size: AppInputSize.md,
-                          margin: const EdgeInsets.only(top: 0),
-                        ),
-                        const SizedBox(height: 12),
-
-                        AppTextField(
-                          label: l10n.owner_request_logo_url,
-                          hint: l10n.owner_request_logo_url_hint,
-                          initialValue: s.logoUrl ?? '',
-                          prefix: const Icon(Icons.image_outlined),
-                          onChanged: (v) => context
-                              .read<OwnerRequestsCubit>()
-                              .setLogoUrl(v.trim().isEmpty ? null : v.trim()),
-                          filled: true,
-                          size: AppInputSize.md,
-                        ),
-                        const SizedBox(height: 8),
-
-                        Row(
-                          children: [
-                            AppButton(
-                              onPressed: s.uploadingLogo
-                                  ? null
-                                  : context
-                                      .read<OwnerRequestsCubit>()
-                                      .pickLogoFile,
-                              type: AppButtonType.outline,
-                              size: AppButtonSize.sm,
-                              leading: s.uploadingLogo
-                                  ? null
-                                  : const Icon(Icons.upload_file),
-                              isBusy: s.uploadingLogo,
-                              label: l10n.owner_request_upload_logo,
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: _UploadPathPreview(
-                                path: s.logoFilePath,
-                                url: s.logoUrl,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-
-                        // 🔹 Theme dropdown with same rounded style
-                        _ThemePicker(
-                          themes: s.themes,
-                          selectedId: s.selectedThemeId,
-                          onChanged:
-                              context.read<OwnerRequestsCubit>().setThemeId,
-                          label: l10n.owner_request_theme_pref,
-                        ),
-                        const SizedBox(height: 16),
-
-                        // shared primary button
-                        AppButton(
-                          onPressed: s.submitting
-                              ? null
-                              : context
-                                  .read<OwnerRequestsCubit>()
-                                  .submitAutoOneShot,
-                          isBusy: s.submitting,
-                          expand: true,
-                          type: AppButtonType.primary,
-                          size: AppButtonSize.lg,
-                          leading: const Icon(Icons.rocket_launch),
-                          label: l10n.owner_request_submit_and_build,
-                          semanticLabel: l10n.owner_request_submit_and_build,
-                        ),
-                        const SizedBox(height: 10),
-
-                        // built APK quick action
-                        if ((s.builtApkUrl ?? '').isNotEmpty)
-                          AppButton(
-                            onPressed: () async {
-                              final uri = Uri.parse(s.builtApkUrl!);
-                              if (await canLaunchUrl(uri)) {
-                                await launchUrl(
-                                  uri,
-                                  mode: LaunchMode.externalApplication,
-                                );
-                              } else {
-                                showTopToast(
-                                  context,
-                                  l10n.common_download,
-                                  type: ToastType.info,
-                                );
-                              }
-                            },
-                            type: AppButtonType.secondary,
-                            size: AppButtonSize.md,
-                            leading: const Icon(Icons.download_rounded),
-                            label: l10n.common_download_apk,
-                          ),
-                      ],
-                    ),
-            ),
-          ),
-        );
-
-        final requests = _SectionCard(
-          title: l10n.owner_request_my_requests,
-          child: _RequestsList(requests: s.myRequests),
-        );
-
-        // layout
-        final content = LayoutBuilder(
-          builder: (ctx, bx) {
-            final isWide = bx.maxWidth >= 980;
-            if (isWide) {
-              return Padding(
-                padding: EdgeInsets.fromLTRB(pagePad.horizontal / 2, 0,
-                    pagePad.horizontal / 2, pagePad.vertical),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      flex: 2,
-                      child: ListView(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        children: [form],
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      flex: 3,
-                      child: ListView(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        children: [requests],
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }
-            return Padding(
-              padding: EdgeInsets.fromLTRB(pagePad.horizontal / 2, 0,
-                  pagePad.horizontal / 2, pagePad.vertical),
-              child: Column(
-                  children: [form, const SizedBox(height: 16), requests]),
-            );
-          },
-        );
-
-        return Scaffold(
-          backgroundColor: cs.background,
-          appBar: AppBar(
-            backgroundColor: cs.surface,
-            elevation: 0,
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back_rounded),
-              onPressed: () =>
-                  Navigator.of(context).pop(), // 🔙 back to details
-            ),
-            title: Text(
-              '', // you can swap to l10n if you add a key
-              style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-            ),
-          ),
-          body: SafeArea(
-            child: CustomScrollView(
-              physics: const BouncingScrollPhysics(
-                parent: AlwaysScrollableScrollPhysics(),
-              ),
-              slivers: [
-                SliverToBoxAdapter(child: hero),
-                SliverToBoxAdapter(child: content),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
-
-/* ========== helpers / shared pieces ========== */
-
-class _UploadPathPreview extends StatelessWidget {
-  final String? path;
-  final String? url;
-  const _UploadPathPreview({required this.path, required this.url});
-
-  @override
-  Widget build(BuildContext context) {
-    final tt = Theme.of(context).textTheme;
-    final hasPath = (path ?? '').isNotEmpty;
-    final hasUrl = !hasPath && (url ?? '').isNotEmpty;
-    if (!hasPath && !hasUrl) return const SizedBox.shrink();
-
-    final text = hasPath ? (path!.split(RegExp(r'[\\/]+')).last) : url!;
-    return Tooltip(
-      message: hasPath ? path! : url!,
-      child: Text(
-        text,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: tt.bodySmall,
+        ),
       ),
     );
   }
 }
 
-class _ThemePicker extends StatelessWidget {
-  final List<ThemeLite> themes;
-  final int? selectedId;
-  final ValueChanged<int?> onChanged;
-  final String label;
+// ----------------- widgets -----------------
 
-  const _ThemePicker({
-    required this.themes,
-    required this.selectedId,
+class _CurrencyDropdown extends StatelessWidget {
+  final List<CurrencyModel> currencies;
+  final CurrencyModel? value;
+  final ValueChanged<CurrencyModel?>? onChanged;
+
+  const _CurrencyDropdown({
+    required this.currencies,
+    required this.value,
     required this.onChanged,
-    required this.label,
   });
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
-    final ux = Theme.of(context).extension<UiTokens>()!;
-    final tt = Theme.of(context).textTheme;
-    final radiusMd = ux.radiusMd;
 
-    final items = <DropdownMenuItem<int?>>[
-      DropdownMenuItem<int?>(
-        value: null,
-        child: Text(l10n.owner_request_theme_default),
-      ),
-      ...themes.map((t) {
-        final nav = (t.menuType ?? '').isEmpty ? '' : ' – ${t.menuType}';
-        final color = _primaryColorOf(t);
-        return DropdownMenuItem<int?>(
-          value: t.id,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (color != null)
-                Container(
-                  width: 10,
-                  height: 10,
-                  margin: const EdgeInsets.only(right: 8),
-                  decoration: BoxDecoration(
-                    color: color,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-              Flexible(
-                child: Text(
-                  '${t.name}$nav',
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-        );
-      }),
-    ];
-
-    return DropdownButtonFormField<int?>(
-      value: selectedId,
-      isExpanded: true,
-      decoration: InputDecoration(
-        labelText: label,
-        filled: true,
-        fillColor: cs.surfaceContainerLowest,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 14,
-          vertical: 12,
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(radiusMd),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(radiusMd),
-          borderSide: BorderSide(
-            color: cs.outline.withOpacity(.35),
-          ),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(radiusMd),
-          borderSide: BorderSide(
-            color: cs.primary,
-            width: 1.6,
-          ),
-        ),
-      ),
-      style: tt.bodyMedium,
-      icon: Icon(
-        Icons.keyboard_arrow_down_rounded,
-        color: cs.onSurface.withOpacity(.75),
-      ),
-      borderRadius: BorderRadius.circular(radiusMd + 4),
-      items: items,
-      onChanged: onChanged,
-    );
-  }
-
-  Color? _primaryColorOf(ThemeLite t) {
-    final v = (t.valuesMobile)['primaryColor'];
-    if (v is! String) return null;
-    final hex = v.trim();
-    if (!hex.startsWith('#')) return null;
-    final clean = hex.substring(1);
-    final int? rgb = int.tryParse(clean, radix: 16);
-    if (rgb == null) return null;
-    final hasAlpha = clean.length == 8;
-    return Color((hasAlpha ? 0x00000000 : 0xFF000000) | rgb);
-  }
-}
-
-class _RequestsList extends StatelessWidget {
-  final List<AppRequest> requests;
-  const _RequestsList({required this.requests});
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
-
-    if (requests.isEmpty) {
-      return _EmptyBox(text: l10n.owner_request_no_requests_yet);
-    }
-
-    return ListView.separated(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: requests.length,
-      separatorBuilder: (_, __) =>
-          Divider(height: 1, color: cs.outlineVariant.withOpacity(.3)),
-      itemBuilder: (_, i) {
-        final r = requests[i];
-        return ListTile(
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          leading: Container(
-            height: 38,
-            width: 38,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: cs.primary.withOpacity(.10),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(Icons.description_outlined, color: cs.primary),
-          ),
-          title: Text(
-            r.appName,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: tt.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
-          ),
-          subtitle: Text('${r.status} • ${_fmt(r.createdAt)}'),
-          trailing: _StatusChip(status: r.status),
-        );
-      },
-    );
-  }
-
-  String _fmt(DateTime d) =>
-      '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
-}
-
-class _StatusChip extends StatelessWidget {
-  final String status;
-  const _StatusChip({required this.status});
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final norm = status.toUpperCase();
-    late final Color bg;
-    late final Color fg;
-    switch (norm) {
-      case 'DELIVERED':
-      case 'APPROVED':
-        bg = Colors.green.withOpacity(.18);
-        fg = Colors.green.shade800;
-        break;
-      case 'REJECTED':
-        bg = Colors.red.withOpacity(.18);
-        fg = Colors.red.shade800;
-        break;
-      case 'IN_PRODUCTION':
-        bg = Colors.orange.withOpacity(.18);
-        fg = Colors.orange.shade800;
-        break;
-      case 'PENDING':
-      default:
-        bg = cs.surfaceContainerHighest.withOpacity(.5);
-        fg = cs.onSurface.withOpacity(.8);
-    }
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: cs.outlineVariant),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.payments_outlined),
+          const SizedBox(width: 10),
+          Expanded(
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<CurrencyModel>(
+                value: value,
+                isExpanded: true,
+                hint: const Text('Select currency'),
+                items: currencies
+                    .map(
+                      (c) => DropdownMenuItem(
+                        value: c,
+                        child: Text(c.label, overflow: TextOverflow.ellipsis),
+                      ),
+                    )
+                    .toList(),
+                onChanged: onChanged,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ColorRow extends StatelessWidget {
+  final String label;
+  final TextEditingController controller;
+  final String? Function(String?) validator;
+  final Color preview;
+  final ValueChanged<String> onChanged;
+
+  const _ColorRow({
+    required this.label,
+    required this.controller,
+    required this.validator,
+    required this.preview,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    return Row(
+      children: [
+        Expanded(
+          child: AppTextField(
+            controller: controller,
+            label: '$label Color',
+            hint: '#RRGGBB',
+            validator: validator,
+            filled: true,
+            margin: const EdgeInsets.only(bottom: 10),
+            onChanged: onChanged,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Container(
+          width: 44,
+          height: 44,
+          margin: const EdgeInsets.only(bottom: 10),
+          decoration: BoxDecoration(
+            color: preview,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: cs.outlineVariant),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _LogoPicker extends StatelessWidget {
+  final File? file;
+  final VoidCallback? onPick;
+  final VoidCallback? onRemove;
+
+  const _LogoPicker(
+      {required this.file, required this.onPick, required this.onRemove});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: cs.outlineVariant),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 52,
+            height: 52,
+            decoration: BoxDecoration(
+              color: cs.surface,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: cs.outlineVariant),
+            ),
+            child: file == null
+                ? Icon(Icons.image_outlined, color: cs.onSurfaceVariant)
+                : ClipRRect(
+                    borderRadius: BorderRadius.circular(14),
+                    child: Image.file(file!, fit: BoxFit.cover),
+                  ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              file == null
+                  ? 'No logo selected'
+                  : file!.path.split(Platform.pathSeparator).last,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          const SizedBox(width: 12),
+          if (file != null)
+            IconButton(
+                onPressed: onRemove, icon: const Icon(Icons.delete_outline)),
+          AppButton(
+            onPressed: onPick,
+            label: 'Pick',
+            type: AppButtonType.outline,
+            size: AppButtonSize.sm,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BannerNote extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final String text;
+
+  const _BannerNote(
+      {required this.icon, required this.color, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: cs.outlineVariant),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: color),
+          const SizedBox(width: 10),
+          Expanded(child: Text(text)),
+        ],
+      ),
+    );
+  }
+}
+
+class _StatusBox extends StatelessWidget {
+  final String text;
+  final bool isError;
+  const _StatusBox({required this.text, required this.isError});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final bg = isError ? cs.errorContainer : cs.secondaryContainer;
+    final fg = isError ? cs.onErrorContainer : cs.onSecondaryContainer;
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(14),
       ),
-      child: Text(
-        norm,
-        style: TextStyle(
-          color: fg,
-          fontWeight: FontWeight.w700,
-          fontSize: 12,
-        ),
-      ),
-    );
-  }
-}
-
-class _EmptyBox extends StatelessWidget {
-  final String text;
-  const _EmptyBox({required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final ux = Theme.of(context).extension<UiTokens>()!;
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 16),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(ux.radiusLg),
-        color: cs.surfaceContainerHighest.withOpacity(.4),
-        border: Border.all(color: cs.outline.withOpacity(.3)),
-        boxShadow: ux.cardShadow,
-      ),
-      child: Center(
-        child: Text(
-          text,
-          textAlign: TextAlign.center,
-        ),
-      ),
-    );
-  }
-}
-
-class _SectionCard extends StatelessWidget {
-  final String title;
-  final Widget child;
-  final EdgeInsetsGeometry? padding;
-
-  const _SectionCard({
-    required this.title,
-    required this.child,
-    this.padding,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
-    final ux = Theme.of(context).extension<UiTokens>()!;
-
-    return Card(
-      elevation: 0,
-      clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(ux.radiusLg),
-        side: BorderSide(color: cs.outline.withOpacity(.22)),
-      ),
-      child: Padding(
-        padding: padding ?? const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w800),
-            ),
-            const SizedBox(height: 12),
-            child,
-          ],
-        ),
+      child: Row(
+        children: [
+          Icon(isError ? Icons.error_outline : Icons.check_circle_outline,
+              color: fg),
+          const SizedBox(width: 10),
+          Expanded(child: Text(text, style: TextStyle(color: fg))),
+        ],
       ),
     );
   }

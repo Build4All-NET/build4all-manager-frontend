@@ -28,7 +28,6 @@ class OwnerProjectsScreen extends StatefulWidget {
 }
 
 class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
-  // How many cards we show at a time
   static const int _pageSize = 12;
   int _visibleCount = _pageSize;
 
@@ -44,10 +43,7 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
 
     Future<void> _refresh(BuildContext ctx) async {
       ctx.read<OwnerProjectsBloc>().add(OwnerProjectsStarted(widget.ownerId));
-      // when refreshing, reset visible count
-      setState(() {
-        _visibleCount = _pageSize;
-      });
+      setState(() => _visibleCount = _pageSize);
       await Future.delayed(const Duration(milliseconds: 250));
     }
 
@@ -93,10 +89,8 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
                     child: BlocBuilder<OwnerProjectsBloc, OwnerProjectsState>(
                       builder: (context, state) {
                         final l10n = AppLocalizations.of(context)!;
-                        final gridConfig = _gridConfig(viewport.maxWidth);
-                        final double gridBottom = gridConfig.bottomPad;
+                        final double bottomPad = 16;
 
-                        // number of items we REALLY show now
                         final int total = state.filtered.length;
                         final int visible =
                             total == 0 ? 0 : _visibleCount.clamp(0, total);
@@ -116,20 +110,14 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
                               const SliverToBoxAdapter(
                                   child: SizedBox(height: 12)),
 
-                              // Loading state
+                              // Loading
                               if (state.loading) ...[
                                 SliverPadding(
-                                  padding: EdgeInsets.only(bottom: gridBottom),
-                                  sliver: _GridSkeleton(
-                                    maxCrossAxisExtent:
-                                        gridConfig.maxCrossAxisExtent,
-                                    childAspectRatio: gridConfig.aspect,
-                                    crossAxisSpacing: gridConfig.spacing,
-                                    mainAxisSpacing: gridConfig.spacing,
-                                  ),
+                                  padding: EdgeInsets.only(bottom: bottomPad),
+                                  sliver: const _ListSkeleton(count: 6),
                                 ),
 
-                                // Error state
+                                // Error
                               ] else if (state.error != null) ...[
                                 SliverFillRemaining(
                                   hasScrollBody: false,
@@ -140,36 +128,32 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
                                   ),
                                 ),
 
-                                // Empty state
+                                // Empty
                               ] else if (total == 0) ...[
                                 SliverFillRemaining(
                                   hasScrollBody: false,
                                   child: _EmptyProjects(l10n: l10n),
                                 ),
 
-                                // Data state
+                                // Data
                               ] else ...[
-                                // Grid of tiles (paged)
+                                // ✅ FULL-WIDTH LIST (instead of grid)
                                 SliverPadding(
-                                  padding: EdgeInsets.only(bottom: 12),
-                                  sliver: SliverGrid(
-                                    gridDelegate:
-                                        SliverGridDelegateWithMaxCrossAxisExtent(
-                                      maxCrossAxisExtent:
-                                          gridConfig.maxCrossAxisExtent,
-                                      childAspectRatio: gridConfig.aspect,
-                                      crossAxisSpacing: gridConfig.spacing,
-                                      mainAxisSpacing: gridConfig.spacing,
-                                    ),
+                                  padding: const EdgeInsets.only(bottom: 12),
+                                  sliver: SliverList(
                                     delegate: SliverChildBuilderDelegate(
                                       (context, index) {
                                         final item = state.filtered[index];
-                                        return ProjectTile(
-                                          project: item,
-                                          serverRootNoApi:
-                                              _serverRootNoApi(widget.dio),
-                                          onRebuild: (p) =>
-                                              _rebuildAndRefresh(context, p),
+                                        return Padding(
+                                          padding:
+                                              const EdgeInsets.only(bottom: 12),
+                                          child: ProjectTile(
+                                            project: item,
+                                            serverRootNoApi:
+                                                _serverRootNoApi(widget.dio),
+                                            onRebuild: (p) =>
+                                                _rebuildAndRefresh(context, p),
+                                          ),
                                         );
                                       },
                                       childCount: visible,
@@ -177,12 +161,12 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
                                   ),
                                 ),
 
-                                // "Load more" button if we still have more data
+                                // Load more
                                 if (visible < total)
                                   SliverToBoxAdapter(
                                     child: Padding(
                                       padding: EdgeInsets.only(
-                                        bottom: gridBottom,
+                                        bottom: bottomPad,
                                         top: 4,
                                       ),
                                       child: Center(
@@ -195,21 +179,15 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
                                             });
                                           },
                                           icon: const Icon(
-                                            Icons.expand_more_rounded,
-                                          ),
-                                          label: Text(
-                                            l10n.owner_projects_onlyReady
-                                                    .isNotEmpty
-                                                ? 'Load more'
-                                                : 'Load more', // you can localize it later
-                                          ),
+                                              Icons.expand_more_rounded),
+                                          label: const Text('Load more'),
                                         ),
                                       ),
                                     ),
                                   )
                                 else
                                   SliverToBoxAdapter(
-                                    child: SizedBox(height: gridBottom),
+                                    child: SizedBox(height: bottomPad),
                                   ),
                               ],
                             ],
@@ -233,7 +211,7 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
     if (viewportWidth >= 1600) return 1400;
     if (viewportWidth >= 1400) return 1280;
     if (viewportWidth >= 1200) return 1100;
-    return viewportWidth; // phones/tablets full width
+    return viewportWidth;
   }
 
   double _contentHPad(double viewportWidth) {
@@ -241,49 +219,6 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
     if (viewportWidth < 420) return 10;
     if (viewportWidth < 600) return 12;
     return 16;
-  }
-
-  _GridConf _gridConfig(double viewportWidth) {
-    double maxCross;
-    double aspect; // width / height
-    double spacing;
-
-    if (viewportWidth < 360) {
-      maxCross = 220;
-      aspect = 0.70; // taller tile
-      spacing = 10;
-    } else if (viewportWidth < 420) {
-      maxCross = 240;
-      aspect = 0.75;
-      spacing = 10;
-    } else if (viewportWidth < 520) {
-      maxCross = 260;
-      aspect = 0.80;
-      spacing = 12;
-    } else if (viewportWidth < 760) {
-      maxCross = 280;
-      aspect = 0.88;
-      spacing = 12;
-    } else if (viewportWidth < 1000) {
-      maxCross = 310;
-      aspect = 0.95;
-      spacing = 12;
-    } else if (viewportWidth < 1400) {
-      maxCross = 330;
-      aspect = 1.00;
-      spacing = 14;
-    } else {
-      maxCross = 360;
-      aspect = 1.05;
-      spacing = 14;
-    }
-
-    return _GridConf(
-      maxCrossAxisExtent: maxCross,
-      aspect: aspect,
-      spacing: spacing,
-      bottomPad: 16,
-    );
   }
 }
 
@@ -392,10 +327,8 @@ class _SearchField extends StatelessWidget {
         style: tt.bodyMedium,
         decoration: InputDecoration(
           prefixIcon: const Icon(Icons.search_rounded),
-          suffixIcon: Icon(
-            Icons.tune_rounded,
-            color: cs.onSurface.withOpacity(.55),
-          ),
+          suffixIcon:
+              Icon(Icons.tune_rounded, color: cs.onSurface.withOpacity(.55)),
           hintText: l10n.owner_projects_searchHint,
           filled: true,
           fillColor: cs.surface,
@@ -492,53 +425,28 @@ class _EmptyProjects extends StatelessWidget {
   }
 }
 
-class _GridSkeleton extends StatelessWidget {
-  final double maxCrossAxisExtent;
-  final double childAspectRatio;
-  final double crossAxisSpacing;
-  final double mainAxisSpacing;
-
-  const _GridSkeleton({
-    required this.maxCrossAxisExtent,
-    required this.childAspectRatio,
-    required this.crossAxisSpacing,
-    required this.mainAxisSpacing,
-  });
+class _ListSkeleton extends StatelessWidget {
+  final int count;
+  const _ListSkeleton({required this.count});
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
 
-    return SliverGrid(
-      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-        maxCrossAxisExtent: maxCrossAxisExtent,
-        childAspectRatio: childAspectRatio,
-        crossAxisSpacing: crossAxisSpacing,
-        mainAxisSpacing: mainAxisSpacing,
-      ),
+    return SliverList(
       delegate: SliverChildBuilderDelegate(
-        (context, _) => Container(
-          decoration: BoxDecoration(
-            color: cs.surfaceVariant.withOpacity(.5),
-            borderRadius: BorderRadius.circular(16),
+        (context, index) => Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: Container(
+            height: 140,
+            decoration: BoxDecoration(
+              color: cs.surfaceVariant.withOpacity(.5),
+              borderRadius: BorderRadius.circular(16),
+            ),
           ),
         ),
-        childCount: 6,
+        childCount: count,
       ),
     );
   }
-}
-
-class _GridConf {
-  final double maxCrossAxisExtent;
-  final double aspect;
-  final double spacing;
-  final double bottomPad;
-
-  _GridConf({
-    required this.maxCrossAxisExtent,
-    required this.aspect,
-    required this.spacing,
-    required this.bottomPad,
-  });
 }

@@ -6,8 +6,7 @@ class OwnerProjectsApi {
   OwnerProjectsApi(this.dio);
 
   Future<List<BackendProjectDto>> fetchProjects() async {
-    // GET /api/projects
-    final res = await dio.get('/projects');
+    final res = await dio.get('/projects'); // GET /api/projects
     final data = (res.data as List?) ?? const [];
     return data
         .map((e) => BackendProjectDto.fromJson(e as Map<String, dynamic>))

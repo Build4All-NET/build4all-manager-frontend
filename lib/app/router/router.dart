@@ -1,4 +1,4 @@
-//import 'package:build4all_manager/features/owner/ownerhome/data/static_project_models.dart';
+import 'package:build4all_manager/app/nav_key.dart';
 import 'package:build4all_manager/features/owner/ownerhome/data/static_project_models.dart';
 import 'package:build4all_manager/features/owner/ownerhome/presentation/screens/owner_project_details_screen.dart';
 import 'package:build4all_manager/features/owner/ownerrequests/presentation/screens/owner_requests_screen.dart';
@@ -16,7 +16,6 @@ import 'package:build4all_manager/features/auth/presentation/screens/super_admin
 import 'package:build4all_manager/features/owner/ownernav/presentation/screens/owner_nav_shell.dart';
 import 'package:build4all_manager/features/owner/ownerhome/presentation/screens/owner_home_screen.dart';
 import 'package:build4all_manager/features/owner/ownerprojects/presentation/screens/owner_projects_screen.dart';
-
 import 'package:build4all_manager/features/owner/ownerprofile/presentation/screens/owner_profile_screen.dart';
 
 // l10n
@@ -44,7 +43,6 @@ import 'package:build4all_manager/core/network/dio_client.dart';
 // JWT helpers
 import 'package:build4all_manager/core/auth/jwt_claims.dart';
 
-/// simple DI helper for the register flow
 Widget _withOwnerRegBloc(Widget child) {
   final IAuthRepository repo =
       AuthRepositoryImpl(api: AuthApi(), jwtStore: JwtLocalDataSource());
@@ -68,23 +66,18 @@ const _publicPaths = <String>{
 };
 
 final router = GoRouter(
+  navigatorKey: appNavKey, // ✅ THIS is the correct spot
   initialLocation: '/',
   routes: [
     GoRoute(path: '/', builder: (_, __) => const SplashGate()),
     GoRoute(path: '/login', builder: (_, __) => const AppLoginScreen()),
     GoRoute(path: '/loginScreen', builder: (_, __) => const AppLoginScreen()),
     GoRoute(path: '/manager', builder: (_, __) => const SuperAdminHomeScreen()),
-
-    // OWNER shell – ownerId resolved from JWT
     GoRoute(path: '/owner', builder: (_, __) => const _OwnerEntryLoader()),
-
-    // Deep links under OWNER
     GoRoute(
       path: '/owner/projects',
       builder: (_, __) => const _OwnerProjectsBuilder(),
     ),
-
-    // ✅ Details page now wrapped to resolve ownerId before building the screen
     GoRoute(
       path: '/owner/project/:id',
       builder: (context, state) {
@@ -97,7 +90,6 @@ final router = GoRouter(
         return _OwnerProjectDetailsBuilder(tpl: tpl);
       },
     ),
-
     GoRoute(
       path: '/owner/requests',
       builder: (context, state) {
@@ -110,14 +102,10 @@ final router = GoRouter(
         );
       },
     ),
-
-    // Profile deep-link — opens shell on the Profile tab
     GoRoute(
       path: '/owner/profile',
       builder: (_, __) => const _OwnerEntryLoader(initialIndex: 2),
     ),
-
-    // Register flow
     GoRoute(
       path: '/owner/register',
       builder: (_, __) => _withOwnerRegBloc(const OwnerRegisterEmailScreen()),
@@ -149,17 +137,20 @@ final router = GoRouter(
 );
 
 Future<String?> _authRedirect(BuildContext context, GoRouterState state) async {
-  final IAuthRepository repo =
-      AuthRepositoryImpl(api: AuthApi(), jwtStore: JwtLocalDataSource());
+  final store = JwtLocalDataSource();
+  final (token, roleRaw) = await store.read();
 
-  final role = (await GetStoredRoleUseCase(repo).call()).toUpperCase();
+  final role = roleRaw.toUpperCase().trim();
   final loc = state.matchedLocation;
   final isPublic = _publicPaths.contains(loc);
 
-  if (role.isEmpty) return isPublic ? null : '/login';
+  if (token.isEmpty || role.isEmpty) {
+    return isPublic ? null : '/login';
+  }
 
   final goingToAuth =
       loc.startsWith('/login') || loc.startsWith('/owner/register');
+
   if (goingToAuth) return role == 'SUPER_ADMIN' ? '/manager' : '/owner';
 
   if (role == 'SUPER_ADMIN' && (loc == '/owner' || loc == '/home')) {
@@ -172,7 +163,6 @@ Future<String?> _authRedirect(BuildContext context, GoRouterState state) async {
   return null;
 }
 
-/// -------- ownerId from JWT (async) ----------
 Future<int?> _loadOwnerIdFromJwt() async {
   try {
     final store = JwtLocalDataSource();
@@ -180,7 +170,6 @@ Future<int?> _loadOwnerIdFromJwt() async {
     if (token.isEmpty) return null;
 
     final claims = JwtClaims.decode(token);
-    // Your payload style: {"id":1,"role":"OWNER", ...}
     final id =
         JwtClaims.extractInt(claims, ['id', 'ownerId', 'adminId', 'sub']);
     return id;
@@ -189,15 +178,12 @@ Future<int?> _loadOwnerIdFromJwt() async {
   }
 }
 
-/// ✅ NEW: load ownerId + ownerName from JWT
-/// ✅ NEW: load ownerId + ownerName from JWT
 Future<(int?, String?)> _loadOwnerProfileFromJwt() async {
   try {
     final store = JwtLocalDataSource();
     final (token, _) = await store.read();
     if (token.isEmpty) return (null, null);
 
-    // This is nullable: Map<String, dynamic>?
     final Map<String, dynamic>? claims = JwtClaims.decode(token);
 
     final id = JwtClaims.extractInt(
@@ -205,7 +191,6 @@ Future<(int?, String?)> _loadOwnerProfileFromJwt() async {
       ['id', 'ownerId', 'adminId', 'sub'],
     );
 
-    // 👇 all access is now null-safe with `?`
     final rawName =
         (claims?['name'] ?? claims?['fullName'] ?? claims?['username'])
             ?.toString()
@@ -219,9 +204,8 @@ Future<(int?, String?)> _loadOwnerProfileFromJwt() async {
   }
 }
 
-/// Loads ownerId + ownerName then mounts OwnerEntry
 class _OwnerEntryLoader extends StatelessWidget {
-  final int initialIndex; // 0: Home, 1: Projects, 2: Profile
+  final int initialIndex;
   const _OwnerEntryLoader({super.key, this.initialIndex = 0});
 
   @override
@@ -257,7 +241,6 @@ class _OwnerEntryLoader extends StatelessWidget {
   }
 }
 
-/// Builds OwnerProjectsScreen with ownerId from JWT (direct link support)
 class _OwnerProjectsBuilder extends StatelessWidget {
   const _OwnerProjectsBuilder({super.key});
   @override
@@ -274,15 +257,15 @@ class _OwnerProjectsBuilder extends StatelessWidget {
         if (ownerId == null) {
           WidgetsBinding.instance
               .addPostFrameCallback((_) => context.go('/login'));
+          return const SizedBox.shrink();
         }
         final Dio dio = DioClient.ensure();
-        return OwnerProjectsScreen(ownerId: ownerId!, dio: dio);
+        return OwnerProjectsScreen(ownerId: ownerId, dio: dio);
       },
     );
   }
 }
 
-/// ✅ resolve ownerId then build the Project Details screen
 class _OwnerProjectDetailsBuilder extends StatelessWidget {
   final ProjectTemplate tpl;
   const _OwnerProjectDetailsBuilder({super.key, required this.tpl});
@@ -309,11 +292,10 @@ class _OwnerProjectDetailsBuilder extends StatelessWidget {
   }
 }
 
-// OwnerEntry with the real screens + deep-linking index
 class OwnerEntry extends StatelessWidget {
-  final String? backendMenuType; // "bottom" | "top" | "drawer"
+  final String? backendMenuType;
   final int ownerId;
-  final String? ownerName; // 👈 NEW
+  final String? ownerName;
   final Dio dio;
   final int initialIndex;
 
@@ -338,7 +320,7 @@ class OwnerEntry extends StatelessWidget {
         page: OwnerHomeScreen(
           ownerId: ownerId,
           dio: dio,
-          ownerName: ownerName, // 👈 pass it
+          ownerName: ownerName,
         ),
       ),
       OwnerDestination(
@@ -366,8 +348,11 @@ class OwnerEntry extends StatelessWidget {
 class _OwnerRequestsBuilder extends StatelessWidget {
   final int? initialProjectId;
   final String? initialAppName;
-  const _OwnerRequestsBuilder(
-      {super.key, this.initialProjectId, this.initialAppName});
+  const _OwnerRequestsBuilder({
+    super.key,
+    this.initialProjectId,
+    this.initialAppName,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -376,7 +361,8 @@ class _OwnerRequestsBuilder extends StatelessWidget {
       builder: (context, snap) {
         if (snap.connectionState != ConnectionState.done) {
           return const Scaffold(
-              body: Center(child: CircularProgressIndicator()));
+            body: Center(child: CircularProgressIndicator()),
+          );
         }
         final ownerId = snap.data;
         if (ownerId == null) {
@@ -385,9 +371,8 @@ class _OwnerRequestsBuilder extends StatelessWidget {
           return const SizedBox.shrink();
         }
         return OwnerRequestScreen(
-          ownerId: ownerId,
-          initialProjectId: initialProjectId,
-          initialAppName: initialAppName,
+          baseUrl: DioClient.ensure().options.baseUrl,
+          
         );
       },
     );

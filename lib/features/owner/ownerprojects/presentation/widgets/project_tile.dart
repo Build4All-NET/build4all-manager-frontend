@@ -7,7 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 class ProjectTile extends StatelessWidget {
   final OwnerProject project;
   final String serverRootNoApi; // host without /api
-  final Future<void> Function(OwnerProject p)? onRebuild; // optional
+  final Future<void> Function(OwnerProject p)? onRebuild;
 
   const ProjectTile({
     super.key,
@@ -105,17 +105,8 @@ class ProjectTile extends StatelessWidget {
       builder: (context, c) {
         final double w = c.maxWidth;
 
-        // Make banner a bit smaller on very narrow tiles
-        final double bannerH = w < 210
-            ? 68
-            : w < 260
-                ? 76
-                : w < 320
-                    ? 84
-                    : 92;
-
-        // If tile is very narrow, stack actions vertically
-        final bool compactActions = w < 260;
+        // only stack actions on super narrow widths
+        final bool compactActions = w < 420;
 
         return Container(
           decoration: BoxDecoration(
@@ -133,10 +124,10 @@ class ProjectTile extends StatelessWidget {
           clipBehavior: Clip.antiAlias,
           child: Column(
             children: [
-              // ---------- Banner ----------
+              // ✅ Flexible banner height (title can wrap)
               Container(
-                height: bannerH,
                 width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 12),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [band.withOpacity(.18), band.withOpacity(.06)],
@@ -163,40 +154,35 @@ class ProjectTile extends StatelessWidget {
                 ),
               ),
 
-              // ---------- Body ----------
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _StatusPill(
-                        ready: ready,
-                        text: ready
-                            ? l10n.owner_projects_ready
-                            : l10n.owner_projects_building,
-                        color: ready ? cs.primary : cs.tertiary,
-                      ),
-                      const Spacer(),
-                      _ActionsRow(
-                        compact: compactActions,
-                        ready: ready,
-                        onOpen: () => _openApk(context),
-                        onRebuild: (onRebuild == null)
-                            ? null
-                            : () async {
-                                await onRebuild!(project);
-                                if (context.mounted) {
-                                  showTopToast(
-                                    context,
-                                    'Rebuild queued',
-                                    type: ToastType.info,
-                                  );
-                                }
-                              },
-                      ),
-                    ],
-                  ),
+              // Body
+              Padding(
+                padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _StatusPill(
+                      ready: ready,
+                      text: ready
+                          ? l10n.owner_projects_ready
+                          : l10n.owner_projects_building,
+                      color: ready ? cs.primary : cs.tertiary,
+                    ),
+                    const SizedBox(height: 12),
+                    _ActionsRow(
+                      compact: compactActions,
+                      ready: ready,
+                      onOpen: () => _openApk(context),
+                      onRebuild: (onRebuild == null)
+                          ? null
+                          : () async {
+                              await onRebuild!(project);
+                              if (context.mounted) {
+                                showTopToast(context, 'Rebuild queued',
+                                    type: ToastType.info);
+                              }
+                            },
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -227,13 +213,14 @@ class _TitleBlock extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // ✅ Wrap title (2 lines)
         Text(
           appName,
-          maxLines: 1,
+          maxLines: 2,
           overflow: TextOverflow.ellipsis,
-          style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w900),
+          style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w900),
         ),
-        const SizedBox(height: 2),
+        const SizedBox(height: 4),
         Text(
           '$slug · $statusLabel',
           maxLines: 1,
@@ -246,7 +233,7 @@ class _TitleBlock extends StatelessWidget {
 }
 
 class _ActionsRow extends StatelessWidget {
-  final bool compact; // vertical on tiny widths
+  final bool compact;
   final bool ready;
   final VoidCallback? onOpen;
   final VoidCallback? onRebuild;
@@ -273,9 +260,7 @@ class _ActionsRow extends StatelessWidget {
       ),
     );
 
-    if (stretch) {
-      return SizedBox(width: double.infinity, child: btn);
-    }
+    if (stretch) return SizedBox(width: double.infinity, child: btn);
     return Expanded(child: btn);
   }
 
@@ -291,16 +276,13 @@ class _ActionsRow extends StatelessWidget {
       ),
     );
 
-    if (stretch) {
-      return SizedBox(width: double.infinity, child: btn);
-    }
+    if (stretch) return SizedBox(width: double.infinity, child: btn);
     return Expanded(child: btn);
   }
 
   @override
   Widget build(BuildContext context) {
     if (!compact) {
-      // Horizontal layout → safe Row
       return Row(
         children: [
           _openBtn(context, stretch: false),
@@ -310,7 +292,6 @@ class _ActionsRow extends StatelessWidget {
       );
     }
 
-    // Vertical layout → no Expanded
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [

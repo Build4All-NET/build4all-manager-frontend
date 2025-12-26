@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:equatable/equatable.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -14,8 +13,8 @@ class OwnerRequestsCubit extends Cubit<OwnerRequestsState> {
   final IOwnerRequestsRepository repo;
   final int ownerId;
 
-  OwnerRequestsApi? _api;
-  void setConcreteApi(OwnerRequestsApi api) => _api = api;
+  OwnerRequestApi? _api;
+  void setConcreteApi(OwnerRequestApi api) => _api = api;
 
   OwnerRequestsCubit({required this.repo, required this.ownerId})
       : super(const OwnerRequestsState.initial());
@@ -39,9 +38,22 @@ class OwnerRequestsCubit extends Cubit<OwnerRequestsState> {
 
   void selectProject(Project? p) => emit(state.copyWith(selected: p));
   void setAppName(String v) => emit(state.copyWith(appName: v));
+
   void setLogoUrl(String? v) =>
       emit(state.copyWith(logoUrl: v, logoFilePath: null));
+
   void setThemeId(int? id) => emit(state.copyWith(selectedThemeId: id));
+
+  // ✅ new setters
+  void setCurrencyId(int? id) => emit(state.copyWith(currencyId: id));
+  void setApiBaseUrlOverride(String? v) => emit(
+        state.copyWith(apiBaseUrlOverride: (v ?? '').trim().isEmpty ? null : v),
+      );
+  void setNavJson(String? v) => emit(state.copyWith(navJson: v));
+  void setHomeJson(String? v) => emit(state.copyWith(homeJson: v));
+  void setEnabledFeaturesJson(String? v) =>
+      emit(state.copyWith(enabledFeaturesJson: v));
+  void setBrandingJson(String? v) => emit(state.copyWith(brandingJson: v));
 
   Future<void> pickLogoFile() async {
     final result = await FilePicker.platform
@@ -82,12 +94,28 @@ class OwnerRequestsCubit extends Cubit<OwnerRequestsState> {
         'appName': state.appName.trim(),
         'slug': slug,
         if (state.selectedThemeId != null) 'themeId': state.selectedThemeId,
+
+        // ✅ new fields
+        if (state.currencyId != null) 'currencyId': state.currencyId,
+        if ((state.apiBaseUrlOverride ?? '').trim().isNotEmpty)
+          'apiBaseUrlOverride': state.apiBaseUrlOverride!.trim(),
+
+        if ((state.navJson ?? '').trim().isNotEmpty) 'navJson': state.navJson,
+        if ((state.homeJson ?? '').trim().isNotEmpty)
+          'homeJson': state.homeJson,
+        if ((state.enabledFeaturesJson ?? '').trim().isNotEmpty)
+          'enabledFeaturesJson': state.enabledFeaturesJson,
+        if ((state.brandingJson ?? '').trim().isNotEmpty)
+          'brandingJson': state.brandingJson,
       };
 
       if ((state.logoFilePath ?? '').isNotEmpty) {
-        fields['file'] = await MultipartFile.fromFile(state.logoFilePath!,
-            filename: 'logo.png');
+        fields['file'] = await MultipartFile.fromFile(
+          state.logoFilePath!,
+          filename: 'logo.png',
+        );
       } else if ((state.logoUrl ?? '').isNotEmpty) {
+        // works only if backend accepts logoUrl param (optional)
         fields['logoUrl'] = state.logoUrl;
       }
 
@@ -101,6 +129,7 @@ class OwnerRequestsCubit extends Cubit<OwnerRequestsState> {
       );
 
       final data = (res.data as Map).map((k, v) => MapEntry(k.toString(), v));
+
       final returnedSlug = (data['slug'] ?? '').toString();
       final returnedStatus = (data['status'] ?? '').toString();
       final apkUrl = (data['apkUrl'] ?? '').toString();
@@ -127,11 +156,19 @@ class OwnerRequestsCubit extends Cubit<OwnerRequestsState> {
         myRequests: reqs,
         lastCreated: created,
         builtApkUrl: apkUrl.isEmpty ? null : apkUrl,
+
+        // reset form
         selected: null,
         appName: '',
         logoUrl: null,
         logoFilePath: null,
         selectedThemeId: null,
+        currencyId: null,
+        apiBaseUrlOverride: null,
+        navJson: null,
+        homeJson: null,
+        enabledFeaturesJson: null,
+        brandingJson: null,
       ));
     } catch (e) {
       emit(state.copyWith(submitting: false, error: e.toString()));
