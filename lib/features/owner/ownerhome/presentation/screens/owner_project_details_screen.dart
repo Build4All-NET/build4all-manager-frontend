@@ -37,13 +37,17 @@ class OwnerProjectDetailsScreen extends StatelessWidget {
     final radiusLg = ux.radiusLg;
     final radiusMd = ux.radiusMd;
 
-    final int initialProjectId = _resolveProjectId(tpl.kind);
     final String? initialAppName = _prefillName(tpl.kind);
 
     final extra = GoRouterState.of(context).extra;
+
     final bool canRequest = (extra is Map && extra['canRequest'] is bool)
         ? extra['canRequest'] as bool
         : false;
+
+    final int? initialProjectId = (extra is Map && extra['projectId'] is int)
+        ? extra['projectId'] as int
+        : null;
 
     return Scaffold(
       backgroundColor: cs.background,
@@ -152,19 +156,19 @@ class OwnerProjectDetailsScreen extends StatelessWidget {
                 child: InkWell(
                   borderRadius: BorderRadius.circular(radiusLg),
                   onTap: () {
-                    if (!canRequest) {
+                    if (!canRequest ||
+                        initialProjectId == null ||
+                        initialProjectId <= 0) {
                       AppToast.info(context, l10n.owner_proj_comingSoon);
                       return;
                     }
 
-                    // Optional: small confirmation toast
                     AppToast.success(context, l10n.owner_proj_open);
 
-                    // ✅ Use GoRouter and pass prefills
                     context.push(
                       '/owner/requests',
                       extra: {
-                        'projectId': initialProjectId,
+                        'projectId': initialProjectId, // ✅ real DB id
                         'appName': initialAppName,
                       },
                     );
@@ -290,20 +294,6 @@ class OwnerProjectDetailsScreen extends StatelessWidget {
 
 /* ---------------- helpers ---------------- */
 
-int _resolveProjectId(String id) {
-  switch (id) {
-    case 'activities':
-      return 1;
-    case 'ecommerce':
-      return 2;
-    case 'gym':
-      return 3;
-    case 'services':
-      return 4;
-    default:
-      return 0;
-  }
-}
 
 String? _prefillName(String id) {
   switch (id) {

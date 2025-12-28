@@ -306,5 +306,106 @@
   "billing": "الفوترة",
   "copy": "نسخ",
   "owner_proj_comingSoon": "قريباً"
+,
+  "owner_request_title": "إنشاء طلب تطبيق",
+  "refresh": "تحديث",
+  "submit": "إرسال",
+  "cancel": "إلغاء",
+  "use": "استخدام",
+  "preview": "معاينة",
+
+  "common_remove": "إزالة",
+
+  "err_required": "مطلوب",
+
+  "owner_request_hero_title": "أنشئ تطبيق جديد",
+  "owner_request_hero_subtitle": "اختر الثيم والـ runtime بشكل بصري. نحن ننشئ JSON تلقائياً.",
+
+  "owner_request_basics_title": "الأساسيات",
+  "owner_request_basics_subtitle": "معلومات مطلوبة لإنشاء تطبيقك.",
+
+  "owner_request_project_id": "رقم المشروع",
+  "owner_request_project_id_hint": "محدد من المشروع",
+
+  "owner_request_app_name": "اسم التطبيق",
+  "owner_request_app_name_hint": "مثال: MyHobbySphereApp",
+
+  "owner_request_notes": "ملاحظات",
+  "owner_request_notes_hint": "وصف مختصر / طلب خاص / أي شيء مهم…",
+
+  "owner_request_settings_title": "إعدادات التطبيق",
+  "owner_request_settings_subtitle": "العملة + رابط API اختياري.",
+
+  "owner_request_api_override": "تغيير رابط API (اختياري)",
+  "owner_request_api_override_hint": "مثال: http://192.168.1.7:8080",
+
+  "owner_request_palette_title": "الألوان",
+  "owner_request_palette_subtitle": "اختر قالب جاهز أو عدّل الألوان.",
+
+  "owner_request_runtime_title": "إعدادات Runtime",
+  "owner_request_runtime_subtitle": "التنقّل + الصفحة الرئيسية + الميزات (بدون كتابة JSON).",
+
+  "owner_request_branding_title": "الهوية",
+  "owner_request_branding_subtitle": "الشعار اختياري لكنه يعطي شكل احترافي.",
+
+  "owner_request_err_load_currencies": "فشل تحميل العملات",
+  "owner_request_err_valid_number": "أدخل رقم صحيح",
+  "owner_request_err_select_currency": "اختر عملة أولاً",
+  "owner_request_err_fix_fields": "عدّل الحقول المظللة",
+  "owner_request_err_app_name_required": "اسم التطبيق مطلوب",
+
+  "owner_request_logo_selected": "تم اختيار الشعار",
+  "owner_request_logo_removed": "تم حذف الشعار",
+  "owner_request_no_logo": "لا يوجد شعار",
+  "owner_request_pick_logo": "اختيار",
+
+  "owner_request_select_currency": "اختر العملة",
+  "owner_request_tap_to_choose": "اضغط للاختيار",
+  "owner_request_pick_currency": "اختيار العملة",
+  "owner_request_currency_search_hint": "ابحث بالاسم / الكود / المعرف",
+
+  "owner_request_currency_set": "تم اختيار العملة {code}",
+  "@owner_request_currency_set": {
+    "placeholders": {
+      "code": { "type": "String" }
+    }
+  },
+
+  "owner_request_submit_ready": "جاهز للإرسال؟",
+  "owner_request_submit_desc": "سيبدأ CI لإنشاء ملفات البناء.",
+  "owner_request_submitting": "جاري الإرسال…",
+  "owner_request_submit_success": "تم إرسال الطلب ✅ بدأ CI. قريباً APK 🚀",
+
+  "owner_request_submit_failed": "فشل الإرسال: {msg}",
+  "@owner_request_submit_failed": {
+    "placeholders": {
+      "msg": { "type": "String" }
+    }
+  },
+
+  "owner_request_selected": "محدد",
+  "owner_request_tap_to_apply": "اضغط للتطبيق",
+
+  "owner_request_primary": "أساسي",
+  "owner_request_secondary": "ثانوي",
+  "owner_request_background": "الخلفية",
+  "owner_request_text_on_background": "نص (على الخلفية)",
+  "owner_request_error": "خطأ",
+
+  "owner_request_pick_primary": "اختر اللون الأساسي",
+  "owner_request_pick_secondary": "اختر اللون الثانوي",
+  "owner_request_pick_background": "اختر لون الخلفية",
+  "owner_request_pick_text_color": "اختر لون النص",
+  "owner_request_pick_error": "اختر لون الخطأ",
+
+  "owner_request_quick_colors": "ألوان سريعة",
+  "owner_request_hex_optional": "Hex (اختياري)",
+  "owner_request_hex_hint": "#RRGGBB",
+  "owner_request_err_hex_format": "استخدم #RRGGBB",
+
+  "owner_request_your_app": "تطبيقك",
+  "owner_request_preview_hello_owner": "مرحباً يا مالك 👋",
+  "owner_request_preview_desc": "هكذا سيظهر الثيم في تطبيقك."
+
 
 }

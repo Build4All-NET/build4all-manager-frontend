@@ -7,13 +7,11 @@ import 'package:url_launcher/url_launcher.dart';
 class ProjectTile extends StatelessWidget {
   final OwnerProject project;
   final String serverRootNoApi; // host without /api
-  final Future<void> Function(OwnerProject p)? onRebuild;
 
   const ProjectTile({
     super.key,
     required this.project,
     required this.serverRootNoApi,
-    this.onRebuild,
   });
 
   String _abs(String? maybe) {
@@ -28,6 +26,7 @@ class ProjectTile extends StatelessWidget {
   Future<void> _openApk(BuildContext context) async {
     final urlStr = _abs(project.apkUrl);
     if (urlStr.isEmpty) return;
+
     final uri = Uri.tryParse(urlStr);
     if (uri == null) return;
 
@@ -40,6 +39,7 @@ class ProjectTile extends StatelessWidget {
       );
       return;
     }
+
     await launchUrl(uri, mode: LaunchMode.externalApplication);
     showTopToast(context, 'Download started', type: ToastType.success);
   }
@@ -48,6 +48,7 @@ class ProjectTile extends StatelessWidget {
     const double radius = 14.0;
     const double size = 48.0;
     final logo = project.logoUrl;
+
     if (logo != null && logo.trim().isNotEmpty) {
       final src = _abs(logo);
       return ClipRRect(
@@ -64,6 +65,7 @@ class ProjectTile extends StatelessWidget {
         ),
       );
     }
+
     return _initialAvatar(band);
   }
 
@@ -92,7 +94,6 @@ class ProjectTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
     final l10n = AppLocalizations.of(context)!;
 
     final ready = project.isApkReady;
@@ -124,7 +125,7 @@ class ProjectTile extends StatelessWidget {
           clipBehavior: Clip.antiAlias,
           child: Column(
             children: [
-              // ✅ Flexible banner height (title can wrap)
+              // Banner
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: 12),
@@ -172,15 +173,6 @@ class ProjectTile extends StatelessWidget {
                       compact: compactActions,
                       ready: ready,
                       onOpen: () => _openApk(context),
-                      onRebuild: (onRebuild == null)
-                          ? null
-                          : () async {
-                              await onRebuild!(project);
-                              if (context.mounted) {
-                                showTopToast(context, 'Rebuild queued',
-                                    type: ToastType.info);
-                              }
-                            },
                     ),
                   ],
                 ),
@@ -213,7 +205,6 @@ class _TitleBlock extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // ✅ Wrap title (2 lines)
         Text(
           appName,
           maxLines: 2,
@@ -236,13 +227,11 @@ class _ActionsRow extends StatelessWidget {
   final bool compact;
   final bool ready;
   final VoidCallback? onOpen;
-  final VoidCallback? onRebuild;
 
   const _ActionsRow({
     required this.compact,
     required this.ready,
     required this.onOpen,
-    required this.onRebuild,
   });
 
   Widget _openBtn(BuildContext context, {required bool stretch}) {
@@ -264,30 +253,12 @@ class _ActionsRow extends StatelessWidget {
     return Expanded(child: btn);
   }
 
-  Widget _rebuildBtn(BuildContext context, {required bool stretch}) {
-    final btn = OutlinedButton.icon(
-      onPressed: onRebuild,
-      icon: const Icon(Icons.build_rounded, size: 18),
-      label: const Text('Rebuild', maxLines: 1),
-      style: OutlinedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        minimumSize: Size.zero,
-      ),
-    );
-
-    if (stretch) return SizedBox(width: double.infinity, child: btn);
-    return Expanded(child: btn);
-  }
-
   @override
   Widget build(BuildContext context) {
     if (!compact) {
       return Row(
         children: [
           _openBtn(context, stretch: false),
-          const SizedBox(width: 8),
-          _rebuildBtn(context, stretch: false),
         ],
       );
     }
@@ -296,8 +267,6 @@ class _ActionsRow extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _openBtn(context, stretch: true),
-        const SizedBox(height: 8),
-        _rebuildBtn(context, stretch: true),
       ],
     );
   }

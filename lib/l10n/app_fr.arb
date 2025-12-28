@@ -306,4 +306,105 @@
   "copy": "Copier",
   "owner_proj_comingSoon": "Bientôt disponible"
 
+,
+  "owner_request_title": "Créer une demande d’application",
+  "refresh": "Rafraîchir",
+  "submit": "Envoyer",
+  "cancel": "Annuler",
+  "use": "Utiliser",
+  "preview": "Aperçu",
+
+  "common_remove": "Retirer",
+
+  "err_required": "Obligatoire",
+
+  "owner_request_hero_title": "Créer une nouvelle app",
+  "owner_request_hero_subtitle": "Choisis le thème + runtime visuellement. On génère le JSON automatiquement.",
+
+  "owner_request_basics_title": "Bases",
+  "owner_request_basics_subtitle": "Infos requises pour générer ton app.",
+
+  "owner_request_project_id": "ID du projet",
+  "owner_request_project_id_hint": "Sélectionné depuis le projet",
+
+  "owner_request_app_name": "Nom de l’app",
+  "owner_request_app_name_hint": "ex: MyHobbySphereApp",
+
+  "owner_request_notes": "Notes",
+  "owner_request_notes_hint": "Description courte / demande spéciale / tout ce qui est important…",
+
+  "owner_request_settings_title": "Paramètres de l’app",
+  "owner_request_settings_subtitle": "Devise + override API optionnel.",
+
+  "owner_request_api_override": "Override de l’URL API (optionnel)",
+  "owner_request_api_override_hint": "ex: http://192.168.1.7:8080",
+
+  "owner_request_palette_title": "Palette",
+  "owner_request_palette_subtitle": "Choisis un preset ou personnalise les couleurs.",
+
+  "owner_request_runtime_title": "Config Runtime",
+  "owner_request_runtime_subtitle": "Navigation + home + features (sans écrire du JSON).",
+
+  "owner_request_branding_title": "Branding",
+  "owner_request_branding_subtitle": "Logo optionnel mais plus pro.",
+
+  "owner_request_err_load_currencies": "Échec du chargement des devises",
+  "owner_request_err_valid_number": "Entrez un nombre valide",
+  "owner_request_err_select_currency": "Sélectionnez une devise d’abord",
+  "owner_request_err_fix_fields": "Corrigez les champs en erreur",
+  "owner_request_err_app_name_required": "Le nom de l’app est requis",
+
+  "owner_request_logo_selected": "Logo sélectionné",
+  "owner_request_logo_removed": "Logo supprimé",
+  "owner_request_no_logo": "Aucun logo",
+  "owner_request_pick_logo": "Choisir",
+
+  "owner_request_select_currency": "Choisir une devise",
+  "owner_request_tap_to_choose": "Appuyez pour choisir",
+  "owner_request_pick_currency": "Choisir la devise",
+  "owner_request_currency_search_hint": "Rechercher par libellé / code / id",
+
+  "owner_request_currency_set": "Devise définie : {code}",
+  "@owner_request_currency_set": {
+    "placeholders": {
+      "code": { "type": "String" }
+    }
+  },
+
+  "owner_request_submit_ready": "Prêt à envoyer ?",
+  "owner_request_submit_desc": "Déclenche le CI et génère les builds.",
+  "owner_request_submitting": "Envoi…",
+  "owner_request_submit_success": "Demande envoyée ✅ CI lancé. APK bientôt 🚀",
+
+  "owner_request_submit_failed": "Échec de l’envoi : {msg}",
+  "@owner_request_submit_failed": {
+    "placeholders": {
+      "msg": { "type": "String" }
+    }
+  },
+
+  "owner_request_selected": "Sélectionné",
+  "owner_request_tap_to_apply": "Appuyez pour appliquer",
+
+  "owner_request_primary": "Primaire",
+  "owner_request_secondary": "Secondaire",
+  "owner_request_background": "Fond",
+  "owner_request_text_on_background": "Texte (onBackground)",
+  "owner_request_error": "Erreur",
+
+  "owner_request_pick_primary": "Choisir Primaire",
+  "owner_request_pick_secondary": "Choisir Secondaire",
+  "owner_request_pick_background": "Choisir Fond",
+  "owner_request_pick_text_color": "Choisir couleur du texte",
+  "owner_request_pick_error": "Choisir Erreur",
+
+  "owner_request_quick_colors": "Couleurs rapides",
+  "owner_request_hex_optional": "Hex (optionnel)",
+  "owner_request_hex_hint": "#RRGGBB",
+  "owner_request_err_hex_format": "Utilisez #RRGGBB",
+
+  "owner_request_your_app": "Votre app",
+  "owner_request_preview_hello_owner": "Salut propriétaire 👋",
+  "owner_request_preview_desc": "Voilà à quoi ressemble ton thème."
 }
+

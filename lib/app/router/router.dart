@@ -1,6 +1,7 @@
 import 'package:build4all_manager/app/nav_key.dart';
 import 'package:build4all_manager/features/owner/ownerhome/data/static_project_models.dart';
 import 'package:build4all_manager/features/owner/ownerhome/presentation/screens/owner_project_details_screen.dart';
+import 'package:build4all_manager/features/owner/ownernav/presentation/controllers/owner_nav_cubit.dart';
 import 'package:build4all_manager/features/owner/ownerrequests/presentation/screens/owner_requests_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -337,11 +338,15 @@ class OwnerEntry extends StatelessWidget {
       ),
     ];
 
-    return OwnerNavShell(
-      destinations: destinations,
-      backendMenuType: backendMenuType ?? 'bottom',
-      initialIndex: initialIndex,
+  return BlocProvider(
+      create: (_) => OwnerNavCubit(initialIndex: 0),
+      child: OwnerNavShell(
+        backendMenuType: backendMenuType,
+        destinations: destinations,
+        initialIndex: 0,
+      ),
     );
+
   }
 }
 
@@ -370,10 +375,14 @@ class _OwnerRequestsBuilder extends StatelessWidget {
               .addPostFrameCallback((_) => context.go('/login'));
           return const SizedBox.shrink();
         }
-        return OwnerRequestScreen(
+       return OwnerRequestScreen(
           baseUrl: DioClient.ensure().options.baseUrl,
-          
+          ownerId: ownerId,
+          dio: DioClient.ensure(),
+          initialProjectId: initialProjectId,
+          initialAppName: initialAppName,
         );
+
       },
     );
   }

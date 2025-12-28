@@ -189,7 +189,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get themes_colors_section => 'Colors';
 
   @override
-  String get err_required => 'This field is required';
+  String get err_required => 'Required';
 
   @override
   String get common_more => 'More';
@@ -431,7 +431,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get owner_projects_openInBrowser => 'Open';
 
   @override
-  String get owner_request_title => 'Request Your App';
+  String get owner_request_title => 'Create App Request';
 
   @override
   String get owner_request_submit_hint => 'Pick a project, name your app, add a logo (optional), choose a theme, then submit to build.';
@@ -876,4 +876,191 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get owner_proj_comingSoon => 'Coming Soon';
+
+  @override
+  String get submit => 'Submit';
+
+  @override
+  String get use => 'Use';
+
+  @override
+  String get preview => 'Preview';
+
+  @override
+  String get common_remove => 'Remove';
+
+  @override
+  String get owner_request_hero_title => 'Build a new app';
+
+  @override
+  String get owner_request_hero_subtitle => 'Pick theme + runtime visually. We generate JSON behind the scenes.';
+
+  @override
+  String get owner_request_basics_title => 'Basics';
+
+  @override
+  String get owner_request_basics_subtitle => 'Required info to generate your app.';
+
+  @override
+  String get owner_request_project_id => 'Project ID';
+
+  @override
+  String get owner_request_project_id_hint => 'Selected from project';
+
+  @override
+  String get owner_request_app_name => 'App name';
+
+  @override
+  String get owner_request_app_name_hint => 'ex: MyHobbySphereApp';
+
+  @override
+  String get owner_request_notes => 'Notes';
+
+  @override
+  String get owner_request_notes_hint => 'Short description / special request / anything important…';
+
+  @override
+  String get owner_request_settings_title => 'App Settings';
+
+  @override
+  String get owner_request_settings_subtitle => 'Currency + optional API override.';
+
+  @override
+  String get owner_request_api_override => 'API base URL override (optional)';
+
+  @override
+  String get owner_request_api_override_hint => 'ex: http://192.168.1.7:8080';
+
+  @override
+  String get owner_request_palette_title => 'Palette';
+
+  @override
+  String get owner_request_palette_subtitle => 'Pick a preset or customize colors.';
+
+  @override
+  String get owner_request_runtime_title => 'Runtime Config';
+
+  @override
+  String get owner_request_runtime_subtitle => 'Navigation + home layout + feature flags (no JSON typing).';
+
+  @override
+  String get owner_request_branding_title => 'Branding';
+
+  @override
+  String get owner_request_branding_subtitle => 'Logo is optional but makes it look legit.';
+
+  @override
+  String get owner_request_err_load_currencies => 'Failed to load currencies';
+
+  @override
+  String get owner_request_err_valid_number => 'Enter a valid number';
+
+  @override
+  String get owner_request_err_select_currency => 'Select a currency first';
+
+  @override
+  String get owner_request_err_fix_fields => 'Fix the highlighted fields';
+
+  @override
+  String get owner_request_err_app_name_required => 'App name is required';
+
+  @override
+  String get owner_request_logo_selected => 'Logo selected';
+
+  @override
+  String get owner_request_logo_removed => 'Logo removed';
+
+  @override
+  String get owner_request_no_logo => 'No logo selected';
+
+  @override
+  String get owner_request_pick_logo => 'Pick';
+
+  @override
+  String get owner_request_select_currency => 'Select currency';
+
+  @override
+  String get owner_request_tap_to_choose => 'Tap to choose';
+
+  @override
+  String get owner_request_pick_currency => 'Pick currency';
+
+  @override
+  String get owner_request_currency_search_hint => 'Search by label / code / id';
+
+  @override
+  String owner_request_currency_set(String code) {
+    return 'Currency set to $code';
+  }
+
+  @override
+  String get owner_request_submit_ready => 'Ready to submit?';
+
+  @override
+  String get owner_request_submit_desc => 'Triggers CI and generates build artifacts.';
+
+  @override
+  String get owner_request_submit_success => 'Request submitted ✅ CI started. APK soon 🚀';
+
+  @override
+  String owner_request_submit_failed(String msg) {
+    return 'Submit failed: $msg';
+  }
+
+  @override
+  String get owner_request_selected => 'Selected';
+
+  @override
+  String get owner_request_tap_to_apply => 'Tap to apply';
+
+  @override
+  String get owner_request_primary => 'Primary';
+
+  @override
+  String get owner_request_secondary => 'Secondary';
+
+  @override
+  String get owner_request_background => 'Background';
+
+  @override
+  String get owner_request_text_on_background => 'Text (onBackground)';
+
+  @override
+  String get owner_request_error => 'Error';
+
+  @override
+  String get owner_request_pick_primary => 'Pick Primary';
+
+  @override
+  String get owner_request_pick_secondary => 'Pick Secondary';
+
+  @override
+  String get owner_request_pick_background => 'Pick Background';
+
+  @override
+  String get owner_request_pick_text_color => 'Pick Text Color';
+
+  @override
+  String get owner_request_pick_error => 'Pick Error';
+
+  @override
+  String get owner_request_quick_colors => 'Quick colors';
+
+  @override
+  String get owner_request_hex_optional => 'Hex (optional)';
+
+  @override
+  String get owner_request_hex_hint => '#RRGGBB';
+
+  @override
+  String get owner_request_err_hex_format => 'Use #RRGGBB';
+
+  @override
+  String get owner_request_your_app => 'Your App';
+
+  @override
+  String get owner_request_preview_hello_owner => 'Hello owner 👋';
+
+  @override
+  String get owner_request_preview_desc => 'This is how your theme looks.';
 }

@@ -1,14 +1,13 @@
+// lib/features/owner/ownerhome/domain/usecases/get_available_kinds_from_active_uc.dart
 import '../entities/backend_project.dart';
 import '../repositories/i_owner_projects_repository.dart';
 
 class _KindMapper {
   static String? map(BackendProject p) {
-    // ✅ only active projects count
     if (!p.active) return null;
 
     final t = (p.projectType ?? '').toUpperCase().trim();
 
-    // ✅ Map backend projectType → UI kind
     switch (t) {
       case 'ACTIVITIES':
       case 'ACTIVITY':
@@ -28,7 +27,7 @@ class _KindMapper {
         return 'services';
 
       default:
-        return null; // unknown type → ignored
+        return null;
     }
   }
 }
@@ -37,17 +36,22 @@ class GetAvailableKindsFromActiveUc {
   final IOwnerProjectsRepository repo;
   const GetAvailableKindsFromActiveUc(this.repo);
 
-  Future<Set<String>> call() async {
+  /// ✅ kind -> real DB projectId
+  /// ✅ ONLY active projects included
+  /// ✅ NO fallback default (if all inactive => returns empty map)
+  Future<Map<String, int>> call() async {
     final list = await repo.getProjects();
-    final kinds = <String>{};
+
+    final map = <String, int>{};
 
     for (final p in list) {
       final k = _KindMapper.map(p);
-      if (k != null) kinds.add(k);
+      if (k == null) continue;
+
+      // if multiple active projects share same type, keep first one
+      map.putIfAbsent(k, () => p.id);
     }
 
-    // ✅ optional fallback if backend returns nothing
-    if (kinds.isEmpty) return const {'activities'};
-    return kinds;
+    return map; // ✅ can be empty (this is what you want)
   }
 }

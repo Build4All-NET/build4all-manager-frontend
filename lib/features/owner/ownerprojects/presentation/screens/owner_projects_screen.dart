@@ -151,8 +151,7 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
                                             project: item,
                                             serverRootNoApi:
                                                 _serverRootNoApi(widget.dio),
-                                            onRebuild: (p) =>
-                                                _rebuildAndRefresh(context, p),
+                                          
                                           ),
                                         );
                                       },

@@ -1,6 +1,10 @@
 // lib/features/owner/ownernav/presentation/screens/owner_nav_shell.dart
+
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:build4all_manager/l10n/app_localizations.dart';
+
+import 'package:build4all_manager/features/owner/ownernav/presentation/controllers/owner_nav_cubit.dart';
 import '../widgets/owner_pill_nav_bar.dart';
 
 enum OwnerMenuType { top, bottom, drawer }
@@ -22,6 +26,7 @@ class OwnerDestination {
   final IconData selectedIcon;
   final String label;
   final Widget page;
+
   const OwnerDestination({
     required this.icon,
     required this.selectedIcon,
@@ -34,6 +39,8 @@ class OwnerNavShell extends StatefulWidget {
   final String? backendMenuType; // "top" | "bottom" | "drawer"
   final OwnerMenuType? override; // force locally
   final List<OwnerDestination> destinations;
+
+  /// Default tab index if cubit not yet set
   final int initialIndex;
 
   const OwnerNavShell({
@@ -50,7 +57,6 @@ class OwnerNavShell extends StatefulWidget {
 
 class _OwnerNavShellState extends State<OwnerNavShell>
     with TickerProviderStateMixin {
-  late int _index;
   TabController? _tab;
   final _scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -60,8 +66,7 @@ class _OwnerNavShellState extends State<OwnerNavShell>
   @override
   void initState() {
     super.initState();
-    _index = widget.initialIndex;
-    _attachTabIfNeeded();
+    _attachTabIfNeeded(widget.initialIndex);
   }
 
   @override
@@ -70,23 +75,24 @@ class _OwnerNavShellState extends State<OwnerNavShell>
     if (oldWidget.destinations.length != widget.destinations.length ||
         oldWidget.override != widget.override ||
         oldWidget.backendMenuType != widget.backendMenuType) {
-      if (_index >= widget.destinations.length) {
-        _index =
-            widget.destinations.isEmpty ? 0 : widget.destinations.length - 1;
-      }
-      _attachTabIfNeeded();
+      final idx = context.read<OwnerNavCubit>().state.index;
+      _attachTabIfNeeded(idx);
     }
   }
 
-  void _attachTabIfNeeded() {
+  void _attachTabIfNeeded(int currentIndex) {
     _tab?.dispose();
     if (widget.destinations.isEmpty) return;
-    _index = _index.clamp(0, widget.destinations.length - 1);
+
+    final safeIndex = currentIndex.clamp(0, widget.destinations.length - 1);
+
     if (_mode == OwnerMenuType.top) {
       _tab = TabController(length: widget.destinations.length, vsync: this)
-        ..index = _index
+        ..index = safeIndex
         ..addListener(() {
-          if (_tab!.indexIsChanging) setState(() => _index = _tab!.index);
+          if (_tab!.indexIsChanging) {
+            context.read<OwnerNavCubit>().setIndex(_tab!.index);
+          }
         });
     } else {
       _tab = null;
@@ -104,111 +110,128 @@ class _OwnerNavShellState extends State<OwnerNavShell>
     final pages = widget.destinations;
     final l10n = AppLocalizations.of(context)!;
 
-    // super simple breakpoint: rail on wide screens
+    // Breakpoint: rail on wide screens
     final width = MediaQuery.of(context).size.width;
     final useRail = width >= 900 && _mode == OwnerMenuType.bottom;
 
-    // Shared body (keeps state of each page)
-    final body = AnimatedSwitcher(
-      duration: const Duration(milliseconds: 220),
-      child: IndexedStack(
-        key: ValueKey(_index),
-        index: _index,
-        children: [for (final d in pages) d.page],
-      ),
-    );
+    return BlocBuilder<OwnerNavCubit, OwnerNavState>(
+      builder: (context, navState) {
+        // keep index safe
+        final index =
+            pages.isEmpty ? 0 : navState.index.clamp(0, pages.length - 1);
 
-    switch (_mode) {
-      case OwnerMenuType.top:
-        // Top tab bar *inside* body (no AppBar).
-        return Scaffold(
-          key: _scaffoldKey,
-          body: SafeArea(
-            child: Column(
-              children: [
-                _TopTabsStrip(tab: _tab!, pages: pages),
-                const SizedBox(height: 8),
-                Expanded(child: body),
-              ],
-            ),
-          ),
-        );
-
-      case OwnerMenuType.drawer:
-        // Drawer with a floating hamburger (no AppBar).
-        return Scaffold(
-          key: _scaffoldKey,
-          drawer: _buildDrawer(context, pages),
-          body: SafeArea(
-            child: Stack(
-              children: [
-                Positioned.fill(child: body),
-                Positioned(
-                  top: 12,
-                  left: 12,
-                  child: _FabHamburger(onTap: () {
-                    _scaffoldKey.currentState?.openDrawer();
-                  }),
-                ),
-              ],
-            ),
-          ),
-        );
-
-      case OwnerMenuType.bottom:
-      default:
-        // Phones: bottom pill nav; Tablets/Desktops: left NavigationRail
-        if (useRail) {
-          return Scaffold(
-            key: _scaffoldKey,
-            body: SafeArea(
-              child: Row(
-                children: [
-                  _OwnerRail(
-                    index: _index,
-                    onSelect: (i) => setState(() => _index = i),
-                    pages: pages,
-                  ),
-                  const VerticalDivider(width: 1),
-                  Expanded(child: body),
-                ],
-              ),
-            ),
-          );
+        // keep TabController synced (top mode only)
+        if (_mode == OwnerMenuType.top &&
+            _tab != null &&
+            _tab!.index != index) {
+          _tab!.index = index;
         }
 
-        return Scaffold(
-          key: _scaffoldKey,
-          body: SafeArea(child: body),
-          bottomNavigationBar: OwnerPillNavBar(
-            currentIndex: _index,
-            onTap: (i) => setState(() => _index = i),
-            items: [
-              OwnerPillNavItem(
-                icon: const Text('🏠', style: TextStyle(fontSize: 22)),
-                label: l10n.owner_nav_home,
-              ),
-              OwnerPillNavItem(
-                icon: const Text('🧮', style: TextStyle(fontSize: 22)),
-                label: l10n.owner_nav_projects,
-              ),
-              OwnerPillNavItem(
-                icon: const Text('👤', style: TextStyle(fontSize: 22)),
-                label: l10n.owner_nav_profile,
-              ),
-            ],
+        final body = AnimatedSwitcher(
+          duration: const Duration(milliseconds: 220),
+          child: IndexedStack(
+            key: ValueKey(index),
+            index: index,
+            children: [for (final d in pages) d.page],
           ),
         );
-    }
+
+        switch (_mode) {
+          case OwnerMenuType.top:
+            return Scaffold(
+              key: _scaffoldKey,
+              body: SafeArea(
+                child: Column(
+                  children: [
+                    if (_tab != null) _TopTabsStrip(tab: _tab!, pages: pages),
+                    const SizedBox(height: 8),
+                    Expanded(child: body),
+                  ],
+                ),
+              ),
+            );
+
+          case OwnerMenuType.drawer:
+            return Scaffold(
+              key: _scaffoldKey,
+              drawer: _buildDrawer(context, pages, index),
+              body: SafeArea(
+                child: Stack(
+                  children: [
+                    Positioned.fill(child: body),
+                    Positioned(
+                      top: 12,
+                      left: 12,
+                      child: _FabHamburger(
+                        onTap: () => _scaffoldKey.currentState?.openDrawer(),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+
+          case OwnerMenuType.bottom:
+          default:
+            if (useRail) {
+              return Scaffold(
+                key: _scaffoldKey,
+                body: SafeArea(
+                  child: Row(
+                    children: [
+                      _OwnerRail(
+                        index: index,
+                        onSelect: (i) =>
+                            context.read<OwnerNavCubit>().setIndex(i),
+                        pages: pages,
+                      ),
+                      const VerticalDivider(width: 1),
+                      Expanded(child: body),
+                    ],
+                  ),
+                ),
+              );
+            }
+
+            return Scaffold(
+              key: _scaffoldKey,
+              body: SafeArea(child: body),
+              bottomNavigationBar: OwnerPillNavBar(
+                currentIndex: index,
+                onTap: (i) => context.read<OwnerNavCubit>().setIndex(i),
+                items: [
+                  OwnerPillNavItem(
+                    icon: const Text('🏠', style: TextStyle(fontSize: 22)),
+                    label: l10n.owner_nav_home,
+                  ),
+                  OwnerPillNavItem(
+                    icon: const Text('🧮', style: TextStyle(fontSize: 22)),
+                    label: l10n.owner_nav_projects,
+                  ),
+                  OwnerPillNavItem(
+                    icon: const Text('👤', style: TextStyle(fontSize: 22)),
+                    label: l10n.owner_nav_profile,
+                  ),
+                ],
+              ),
+            );
+        }
+      },
+    );
   }
 
-  Widget _buildDrawer(BuildContext context, List<OwnerDestination> pages) {
+  Widget _buildDrawer(
+    BuildContext context,
+    List<OwnerDestination> pages,
+    int index,
+  ) {
     final cs = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context)!;
+
     return NavigationDrawer(
-      selectedIndex: _index,
+      selectedIndex: index,
       onDestinationSelected: (i) {
-        setState(() => _index = i);
+        context.read<OwnerNavCubit>().setIndex(i);
         Navigator.of(context).maybePop();
       },
       children: [
@@ -224,10 +247,10 @@ class _OwnerNavShellState extends State<OwnerNavShell>
             alignment: Alignment.bottomLeft,
             child: Text(
               l10n.owner_nav_title,
-              style: Theme.of(context)
-                  .textTheme
-                  .headlineSmall
-                  ?.copyWith(color: cs.onPrimary, fontWeight: FontWeight.w800),
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    color: cs.onPrimary,
+                    fontWeight: FontWeight.w800,
+                  ),
             ),
           ),
         ),
@@ -278,6 +301,7 @@ class _TopTabsStrip extends StatelessWidget {
 class _FabHamburger extends StatelessWidget {
   final VoidCallback onTap;
   const _FabHamburger({required this.onTap});
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
@@ -301,6 +325,7 @@ class _OwnerRail extends StatelessWidget {
   final int index;
   final ValueChanged<int> onSelect;
   final List<OwnerDestination> pages;
+
   const _OwnerRail({
     required this.index,
     required this.onSelect,

@@ -1,3 +1,4 @@
+// lib/features/owner/ownerhome/presentation/bloc/owner_home_bloc.dart
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../common/domain/entities/app_config.dart';
@@ -27,19 +28,20 @@ class OwnerHomeBloc extends Bloc<OwnerHomeEvent, OwnerHomeState> {
     final ownerId =
         (e is OwnerHomeStarted) ? e.ownerId : (e as OwnerHomeRefreshed).ownerId;
 
-    // ✅ IMPORTANT: reset kinds FIRST so all cards become inactive immediately
+    // ✅ reset to disable all cards immediately
     emit(state.copyWith(
       loading: true,
       error: null,
-      availableKinds: const {}, // 👈 key fix
+      availableKinds: const {},
+      kindToProjectId: const {},
     ));
 
     try {
-      // ✅ Fetch requests
+      // ✅ requests
       final List<AppRequest> reqs = await getMyRequests(ownerId);
       reqs.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
-      // ✅ Fetch config (optional)
+      // ✅ config (optional)
       AppConfig? cfg;
       try {
         cfg = await getAppConfig();
@@ -47,37 +49,35 @@ class OwnerHomeBloc extends Bloc<OwnerHomeEvent, OwnerHomeState> {
         cfg = null;
       }
 
-      // ✅ Fetch kinds (main)
-      Set<String> kinds = const {};
+      // ✅ projects kinds map (main)
+      Map<String, int> kindMap;
       try {
-        final raw = await getAvailableKinds(); // expects Set<String>
-        kinds = _normalizeKinds(raw);
+        kindMap = await getAvailableKinds(); // Map<String,int>
       } catch (_) {
-        // ✅ if backend fails => KEEP EMPTY (everything inactive)
-        kinds = const {};
+        // if backend fails => keep disabled
+        kindMap = const {};
       }
+
+      final kinds = kindMap.keys
+          .map((e) => e.toString().trim().toLowerCase())
+          .where((e) => e.isNotEmpty)
+          .toSet();
 
       emit(state.copyWith(
         loading: false,
         recent: reqs.take(5).toList(),
         config: cfg,
         availableKinds: kinds,
+        kindToProjectId: kindMap,
         error: null,
       ));
     } catch (err) {
       emit(state.copyWith(
         loading: false,
         error: err.toString(),
-        availableKinds: const {}, // stay inactive on error
+        availableKinds: const {},
+        kindToProjectId: const {},
       ));
     }
-  }
-
-  // ✅ Normalize so contains works even if backend returns "ECOMMERCE"
-  Set<String> _normalizeKinds(Set<String> kinds) {
-    return kinds
-        .map((e) => e.toString().trim().toLowerCase())
-        .where((e) => e.isNotEmpty)
-        .toSet();
   }
 }

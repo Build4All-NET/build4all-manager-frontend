@@ -460,7 +460,7 @@ abstract class AppLocalizations {
   /// No description provided for @err_required.
   ///
   /// In en, this message translates to:
-  /// **'This field is required'**
+  /// **'Required'**
   String get err_required;
 
   /// No description provided for @common_more.
@@ -940,7 +940,7 @@ abstract class AppLocalizations {
   /// No description provided for @owner_request_title.
   ///
   /// In en, this message translates to:
-  /// **'Request Your App'**
+  /// **'Create App Request'**
   String get owner_request_title;
 
   /// No description provided for @owner_request_submit_hint.
@@ -1818,6 +1818,372 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Coming Soon'**
   String get owner_proj_comingSoon;
+
+  /// No description provided for @submit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit'**
+  String get submit;
+
+  /// No description provided for @use.
+  ///
+  /// In en, this message translates to:
+  /// **'Use'**
+  String get use;
+
+  /// No description provided for @preview.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview'**
+  String get preview;
+
+  /// No description provided for @common_remove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get common_remove;
+
+  /// No description provided for @owner_request_hero_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Build a new app'**
+  String get owner_request_hero_title;
+
+  /// No description provided for @owner_request_hero_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick theme + runtime visually. We generate JSON behind the scenes.'**
+  String get owner_request_hero_subtitle;
+
+  /// No description provided for @owner_request_basics_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Basics'**
+  String get owner_request_basics_title;
+
+  /// No description provided for @owner_request_basics_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Required info to generate your app.'**
+  String get owner_request_basics_subtitle;
+
+  /// No description provided for @owner_request_project_id.
+  ///
+  /// In en, this message translates to:
+  /// **'Project ID'**
+  String get owner_request_project_id;
+
+  /// No description provided for @owner_request_project_id_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected from project'**
+  String get owner_request_project_id_hint;
+
+  /// No description provided for @owner_request_app_name.
+  ///
+  /// In en, this message translates to:
+  /// **'App name'**
+  String get owner_request_app_name;
+
+  /// No description provided for @owner_request_app_name_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'ex: MyHobbySphereApp'**
+  String get owner_request_app_name_hint;
+
+  /// No description provided for @owner_request_notes.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get owner_request_notes;
+
+  /// No description provided for @owner_request_notes_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Short description / special request / anything important…'**
+  String get owner_request_notes_hint;
+
+  /// No description provided for @owner_request_settings_title.
+  ///
+  /// In en, this message translates to:
+  /// **'App Settings'**
+  String get owner_request_settings_title;
+
+  /// No description provided for @owner_request_settings_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Currency + optional API override.'**
+  String get owner_request_settings_subtitle;
+
+  /// No description provided for @owner_request_api_override.
+  ///
+  /// In en, this message translates to:
+  /// **'API base URL override (optional)'**
+  String get owner_request_api_override;
+
+  /// No description provided for @owner_request_api_override_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'ex: http://192.168.1.7:8080'**
+  String get owner_request_api_override_hint;
+
+  /// No description provided for @owner_request_palette_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Palette'**
+  String get owner_request_palette_title;
+
+  /// No description provided for @owner_request_palette_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a preset or customize colors.'**
+  String get owner_request_palette_subtitle;
+
+  /// No description provided for @owner_request_runtime_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Runtime Config'**
+  String get owner_request_runtime_title;
+
+  /// No description provided for @owner_request_runtime_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Navigation + home layout + feature flags (no JSON typing).'**
+  String get owner_request_runtime_subtitle;
+
+  /// No description provided for @owner_request_branding_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Branding'**
+  String get owner_request_branding_title;
+
+  /// No description provided for @owner_request_branding_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Logo is optional but makes it look legit.'**
+  String get owner_request_branding_subtitle;
+
+  /// No description provided for @owner_request_err_load_currencies.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load currencies'**
+  String get owner_request_err_load_currencies;
+
+  /// No description provided for @owner_request_err_valid_number.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid number'**
+  String get owner_request_err_valid_number;
+
+  /// No description provided for @owner_request_err_select_currency.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a currency first'**
+  String get owner_request_err_select_currency;
+
+  /// No description provided for @owner_request_err_fix_fields.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix the highlighted fields'**
+  String get owner_request_err_fix_fields;
+
+  /// No description provided for @owner_request_err_app_name_required.
+  ///
+  /// In en, this message translates to:
+  /// **'App name is required'**
+  String get owner_request_err_app_name_required;
+
+  /// No description provided for @owner_request_logo_selected.
+  ///
+  /// In en, this message translates to:
+  /// **'Logo selected'**
+  String get owner_request_logo_selected;
+
+  /// No description provided for @owner_request_logo_removed.
+  ///
+  /// In en, this message translates to:
+  /// **'Logo removed'**
+  String get owner_request_logo_removed;
+
+  /// No description provided for @owner_request_no_logo.
+  ///
+  /// In en, this message translates to:
+  /// **'No logo selected'**
+  String get owner_request_no_logo;
+
+  /// No description provided for @owner_request_pick_logo.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick'**
+  String get owner_request_pick_logo;
+
+  /// No description provided for @owner_request_select_currency.
+  ///
+  /// In en, this message translates to:
+  /// **'Select currency'**
+  String get owner_request_select_currency;
+
+  /// No description provided for @owner_request_tap_to_choose.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to choose'**
+  String get owner_request_tap_to_choose;
+
+  /// No description provided for @owner_request_pick_currency.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick currency'**
+  String get owner_request_pick_currency;
+
+  /// No description provided for @owner_request_currency_search_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by label / code / id'**
+  String get owner_request_currency_search_hint;
+
+  /// No description provided for @owner_request_currency_set.
+  ///
+  /// In en, this message translates to:
+  /// **'Currency set to {code}'**
+  String owner_request_currency_set(String code);
+
+  /// No description provided for @owner_request_submit_ready.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to submit?'**
+  String get owner_request_submit_ready;
+
+  /// No description provided for @owner_request_submit_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Triggers CI and generates build artifacts.'**
+  String get owner_request_submit_desc;
+
+  /// No description provided for @owner_request_submit_success.
+  ///
+  /// In en, this message translates to:
+  /// **'Request submitted ✅ CI started. APK soon 🚀'**
+  String get owner_request_submit_success;
+
+  /// No description provided for @owner_request_submit_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit failed: {msg}'**
+  String owner_request_submit_failed(String msg);
+
+  /// No description provided for @owner_request_selected.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected'**
+  String get owner_request_selected;
+
+  /// No description provided for @owner_request_tap_to_apply.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to apply'**
+  String get owner_request_tap_to_apply;
+
+  /// No description provided for @owner_request_primary.
+  ///
+  /// In en, this message translates to:
+  /// **'Primary'**
+  String get owner_request_primary;
+
+  /// No description provided for @owner_request_secondary.
+  ///
+  /// In en, this message translates to:
+  /// **'Secondary'**
+  String get owner_request_secondary;
+
+  /// No description provided for @owner_request_background.
+  ///
+  /// In en, this message translates to:
+  /// **'Background'**
+  String get owner_request_background;
+
+  /// No description provided for @owner_request_text_on_background.
+  ///
+  /// In en, this message translates to:
+  /// **'Text (onBackground)'**
+  String get owner_request_text_on_background;
+
+  /// No description provided for @owner_request_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get owner_request_error;
+
+  /// No description provided for @owner_request_pick_primary.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick Primary'**
+  String get owner_request_pick_primary;
+
+  /// No description provided for @owner_request_pick_secondary.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick Secondary'**
+  String get owner_request_pick_secondary;
+
+  /// No description provided for @owner_request_pick_background.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick Background'**
+  String get owner_request_pick_background;
+
+  /// No description provided for @owner_request_pick_text_color.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick Text Color'**
+  String get owner_request_pick_text_color;
+
+  /// No description provided for @owner_request_pick_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick Error'**
+  String get owner_request_pick_error;
+
+  /// No description provided for @owner_request_quick_colors.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick colors'**
+  String get owner_request_quick_colors;
+
+  /// No description provided for @owner_request_hex_optional.
+  ///
+  /// In en, this message translates to:
+  /// **'Hex (optional)'**
+  String get owner_request_hex_optional;
+
+  /// No description provided for @owner_request_hex_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'#RRGGBB'**
+  String get owner_request_hex_hint;
+
+  /// No description provided for @owner_request_err_hex_format.
+  ///
+  /// In en, this message translates to:
+  /// **'Use #RRGGBB'**
+  String get owner_request_err_hex_format;
+
+  /// No description provided for @owner_request_your_app.
+  ///
+  /// In en, this message translates to:
+  /// **'Your App'**
+  String get owner_request_your_app;
+
+  /// No description provided for @owner_request_preview_hello_owner.
+  ///
+  /// In en, this message translates to:
+  /// **'Hello owner 👋'**
+  String get owner_request_preview_hello_owner;
+
+  /// No description provided for @owner_request_preview_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'This is how your theme looks.'**
+  String get owner_request_preview_desc;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

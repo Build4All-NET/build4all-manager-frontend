@@ -206,14 +206,17 @@ class _HomeBody extends StatelessWidget {
                         delegate: SliverChildBuilderDelegate(
                           (context, i) {
                             final tpl = projectTemplates[i];
-                            final isAvailable = state.availableKinds
-                                .contains(tpl.kind.toLowerCase());
+                            final kind = tpl.kind.toLowerCase();
+
+                            final isAvailable =
+                                state.availableKinds.contains(kind);
+                            final int? realProjectId =
+                                state.kindToProjectId[kind];
 
                             return ProjectTemplateCard(
                               tpl: tpl,
                               isAvailable: isAvailable,
                               onOpen: () {
-                                // ✅ toast for non-available projects
                                 if (!isAvailable) {
                                   AppToast.info(
                                       context, l10n.owner_proj_comingSoon);
@@ -221,7 +224,10 @@ class _HomeBody extends StatelessWidget {
 
                                 context.push(
                                   '/owner/project/${tpl.id}',
-                                  extra: {'canRequest': isAvailable},
+                                  extra: {
+                                    'canRequest': isAvailable,
+                                    'projectId': realProjectId, // ✅ nullable
+                                  },
                                 );
                               },
                             );

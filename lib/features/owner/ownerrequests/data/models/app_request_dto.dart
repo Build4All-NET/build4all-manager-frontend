@@ -1,21 +1,21 @@
 class AppRequestDto {
-  final int id;
-  final int ownerId;
+  final int id; // backend doesn't send it => default 0
+  final int ownerId; // backend sends adminId
   final int projectId;
   final String appName;
   final String status;
   final String slug;
+
   final String? apkUrl;
-  final String? bundleUrl;
-  final String? ipaUrl;
   final String? logoUrl;
 
-  // extra new fields (optional)
   final int? ownerProjectLinkId;
   final String? manifestUrlHint;
   final String? runtimeConfigUrl;
+  final int? currencyId;
+  final String? message;
 
-  AppRequestDto({
+  const AppRequestDto({
     required this.id,
     required this.ownerId,
     required this.projectId,
@@ -23,48 +23,47 @@ class AppRequestDto {
     required this.status,
     required this.slug,
     this.apkUrl,
-    this.bundleUrl,
-    this.ipaUrl,
     this.logoUrl,
     this.ownerProjectLinkId,
     this.manifestUrlHint,
     this.runtimeConfigUrl,
+    this.currencyId,
+    this.message,
   });
 
-  factory AppRequestDto.fromJson(Map<String, dynamic> j) {
-    int toInt(dynamic v, {int def = 0}) =>
-        int.tryParse((v ?? def).toString()) ?? def;
-
-    String toStr(dynamic v) => (v ?? '').toString();
-
-    // Supports both:
-    // - classic AppRequest row: {id, ownerId, projectId, appName, status, slug, apkUrl...}
-    // - auto endpoint response: {adminId, projectId, ownerProjectLinkId, slug, appName, status, apkUrl, logoUrl, manifestUrlHint, runtimeConfigUrl...}
-    final owner = j.containsKey('ownerId') ? j['ownerId'] : j['adminId'];
-
-    return AppRequestDto(
-      id: toInt(j['id'], def: 0),
-      ownerId: toInt(owner, def: 0),
-      projectId: toInt(j['projectId'], def: 0),
-      appName: toStr(j['appName']),
-      status: toStr(j['status']).isEmpty ? 'APPROVED' : toStr(j['status']),
-      slug: toStr(j['slug']),
-      apkUrl: toStr(j['apkUrl']).isEmpty ? null : toStr(j['apkUrl']),
-      bundleUrl: toStr(j['bundleUrl']).isEmpty ? null : toStr(j['bundleUrl']),
-      ipaUrl: toStr(j['ipaUrl']).isEmpty ? null : toStr(j['ipaUrl']),
-      logoUrl: toStr(j['logoUrl']).isEmpty ? null : toStr(j['logoUrl']),
-      ownerProjectLinkId: j['ownerProjectLinkId'] == null
-          ? null
-          : toInt(j['ownerProjectLinkId'], def: 0),
-      manifestUrlHint: toStr(j['manifestUrlHint']).isEmpty
-          ? null
-          : toStr(j['manifestUrlHint']),
-      runtimeConfigUrl: toStr(j['runtimeConfigUrl']).isEmpty
-          ? null
-          : toStr(j['runtimeConfigUrl']),
-    );
+  static int _toInt(dynamic v, {int def = 0}) {
+    if (v == null) return def;
+    return int.tryParse(v.toString()) ?? def;
   }
 
-  // if you have an entity mapper:
-  // AppRequest toEntity() => AppRequest(...); // keep your existing logic
+  static String _toStr(dynamic v, {String def = ''}) {
+    if (v == null) return def;
+    return v.toString();
+  }
+
+  static String? _toNullableStr(dynamic v) {
+    if (v == null) return null;
+    final s = v.toString().trim();
+    return s.isEmpty ? null : s;
+  }
+
+  factory AppRequestDto.fromJson(Map<String, dynamic> j) {
+    return AppRequestDto(
+      id: _toInt(j['id'], def: 0), // not in response -> 0
+      ownerId: _toInt(j['ownerId'] ?? j['adminId'], def: 0), // 👈 IMPORTANT
+      projectId: _toInt(j['projectId'], def: 0),
+      appName: _toStr(j['appName']),
+      status: _toStr(j['status']),
+      slug: _toStr(j['slug']),
+      apkUrl: _toNullableStr(j['apkUrl']),
+      logoUrl: _toNullableStr(j['logoUrl']),
+      ownerProjectLinkId: j['ownerProjectLinkId'] == null
+          ? null
+          : _toInt(j['ownerProjectLinkId']),
+      manifestUrlHint: _toNullableStr(j['manifestUrlHint']),
+      runtimeConfigUrl: _toNullableStr(j['runtimeConfigUrl']),
+      currencyId: j['currencyId'] == null ? null : _toInt(j['currencyId']),
+      message: _toNullableStr(j['message']),
+    );
+  }
 }

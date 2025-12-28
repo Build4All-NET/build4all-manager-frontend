@@ -1,10 +1,7 @@
-// runtime_presets.dart
-// Simple "palette" presets so owners pick configs instead of pasting base64.
-
 class RuntimePreset {
   final String id;
   final String label;
-  final String json; // raw JSON string (backend will b64 it for CI)
+  final String json; // RAW JSON string
   const RuntimePreset(this.id, this.label, this.json);
 }
 
@@ -36,18 +33,6 @@ class RuntimePresets {
     ),
   ];
 
-  static const featuresPresets = <RuntimePreset>[
-    RuntimePreset('feat_ecommerce_core', 'E-commerce Core', '''
-["ITEMS","CART","ORDERS","REVIEWS"]
-'''),
-    RuntimePreset('feat_services_core', 'Services Core', '''
-["SERVICES","BOOKING","REVIEWS","CHAT"]
-'''),
-    RuntimePreset('feat_full', 'Full (Everything)', '''
-["ITEMS","CART","ORDERS","BOOKING","REVIEWS","CHAT","NOTIFICATIONS"]
-'''),
-  ];
-
   static const homePresets = <RuntimePreset>[
     RuntimePreset(
       'home_shop_default',
@@ -59,51 +44,22 @@ class RuntimePresets {
     {"id":"search","type":"SEARCH","layout":"full","limit":1},
     {"id":"hero_banner","type":"BANNER","layout":"full","limit":1},
     {"id":"categories","type":"CATEGORY_CHIPS","layout":"horizontal","limit":10},
-    {"id":"flash_sale","type":"ITEM_LIST","feature":"ITEMS","layout":"horizontal","limit":10},
-    {"id":"new_arrivals","type":"ITEM_LIST","feature":"ITEMS","layout":"vertical","limit":10}
-  ]
-}
-''',
-    ),
-    RuntimePreset(
-      'home_services_default',
-      'Home (Services Default)',
-      '''
-{
-  "sections":[
-    {"id":"header","type":"HEADER","layout":"full","limit":1},
-    {"id":"search","type":"SEARCH","layout":"full","limit":1},
-    {"id":"featured","type":"SERVICE_LIST","feature":"SERVICES","layout":"horizontal","limit":10},
-    {"id":"top_rated","type":"SERVICE_LIST","feature":"SERVICES","layout":"vertical","limit":10},
-    {"id":"reviews","type":"REVIEW_LIST","feature":"REVIEWS","layout":"vertical","limit":4}
+    {"id":"flash_sale","type":"ITEM_LIST","feature":"ITEMS","layout":"horizontal","limit":10}
   ]
 }
 ''',
     ),
   ];
 
+  static const featuresPresets = <RuntimePreset>[
+    RuntimePreset('feat_ecommerce', 'E-commerce Core', '''
+["ITEMS","BOOKING","REVIEWS","ORDERS"]
+'''),
+  ];
+
   static const brandingPresets = <RuntimePreset>[
-    RuntimePreset(
-      'brand_default_light',
-      'Branding (Light)',
-      '''
-{
-  "splashColor":"#FFFFFF",
-  "logoShape":"rounded",
-  "logoPadding":10
-}
-''',
-    ),
-    RuntimePreset(
-      'brand_dark',
-      'Branding (Dark)',
-      '''
-{
-  "splashColor":"#0B0F14",
-  "logoShape":"rounded",
-  "logoPadding":10
-}
-''',
-    ),
+    RuntimePreset('brand_light', 'Branding (Light)', '''
+{ "splashColor": "#FFFFFF" }
+'''),
   ];
 }
