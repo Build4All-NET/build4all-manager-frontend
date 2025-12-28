@@ -406,5 +406,37 @@
   "owner_request_your_app": "Votre app",
   "owner_request_preview_hello_owner": "Salut propriétaire 👋",
   "owner_request_preview_desc": "Voilà à quoi ressemble ton thème."
+,
+  "super_create_project_title": "Créer un projet",
+  "super_create_project_subtitle": "Ajoutez un nouveau modèle de projet que les owners pourront utiliser.",
+  "super_project_name": "Nom du projet",
+  "super_project_name_hint": "Exemple : HobbySphere",
+  "super_project_description": "Description",
+  "super_project_description_hint": "Courte description (optionnel)",
+  "super_project_type": "Type de projet",
+  "project_type_ecommerce": "E-commerce",
+  "project_type_services": "Services",
+  "project_type_activities": "Activités",
+  "super_project_active": "Actif",
+  "super_project_active_hint": "Si désactivé, les owners ne peuvent pas l’utiliser tant qu’il n’est pas activé.",
+  "super_create_project_btn": "Créer le projet",
+  "super_create_another": "Créer un autre",
+  "super_project_name_required": "Le nom du projet est obligatoire",
+  "super_project_name_exists": "Ce nom de projet existe déjà",
+  "super_create_project_created_id": "Créé avec succès (ID : {id})",
+  "@super_create_project_created_id": {
+    "placeholders": {
+      "id": { "type": "String" }
+    }
+  },
+  "super_create_project_success": "Projet \"{name}\" créé avec succès !",
+  "@super_create_project_success": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "common_loading": "Chargement...",
+  "common_forbidden": "Accès refusé",
+  "common_unauthorized": "Non autorisé"
 }
 

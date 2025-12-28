@@ -1063,4 +1063,71 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get owner_request_preview_desc => 'This is how your theme looks.';
+
+  @override
+  String get super_create_project_title => 'Create Project';
+
+  @override
+  String get super_create_project_subtitle => 'Add a new project template for owners to use.';
+
+  @override
+  String get super_project_name => 'Project name';
+
+  @override
+  String get super_project_name_hint => 'Example: HobbySphere';
+
+  @override
+  String get super_project_description => 'Description';
+
+  @override
+  String get super_project_description_hint => 'Short description (optional)';
+
+  @override
+  String get super_project_type => 'Project type';
+
+  @override
+  String get project_type_ecommerce => 'E-commerce';
+
+  @override
+  String get project_type_services => 'Services';
+
+  @override
+  String get project_type_activities => 'Activities';
+
+  @override
+  String get super_project_active => 'Active';
+
+  @override
+  String get super_project_active_hint => 'If disabled, owners can’t use it until activated.';
+
+  @override
+  String get super_create_project_btn => 'Create project';
+
+  @override
+  String get super_create_another => 'Create another';
+
+  @override
+  String get super_project_name_required => 'Project name is required';
+
+  @override
+  String get super_project_name_exists => 'This project name already exists';
+
+  @override
+  String super_create_project_created_id(String id) {
+    return 'Created successfully (ID: $id)';
+  }
+
+  @override
+  String super_create_project_success(String name) {
+    return 'Project \"$name\" created successfully!';
+  }
+
+  @override
+  String get common_loading => 'Loading...';
+
+  @override
+  String get common_forbidden => 'Forbidden';
+
+  @override
+  String get common_unauthorized => 'Unauthorized';
 }

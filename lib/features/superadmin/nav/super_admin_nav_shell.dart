@@ -20,6 +20,7 @@ class SuperAdminDestination {
   final IconData selectedIcon;
   final String label;
   final Widget page;
+
   const SuperAdminDestination({
     required this.icon,
     required this.selectedIcon,
@@ -40,6 +41,7 @@ class SuperAdminNavShell extends StatefulWidget {
     this.override,
   });
 
+
   State<SuperAdminNavShell> createState() => _SuperAdminNavShellState();
 }
 
@@ -55,25 +57,55 @@ class _SuperAdminNavShellState extends State<SuperAdminNavShell>
   void initState() {
     super.initState();
     _maybeAttachTabController();
+    _clampIndex();
   }
 
   @override
   void didUpdateWidget(covariant SuperAdminNavShell oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.destinations.length != widget.destinations.length ||
-        oldWidget.override != widget.override ||
-        oldWidget.backendMenuType != widget.backendMenuType) {
+
+    final menuChanged = oldWidget.override != widget.override ||
+        oldWidget.backendMenuType != widget.backendMenuType;
+
+    final lenChanged =
+        oldWidget.destinations.length != widget.destinations.length;
+
+    if (menuChanged || lenChanged) {
       _maybeAttachTabController();
+      _clampIndex();
+    }
+  }
+
+  void _clampIndex() {
+    if (widget.destinations.isEmpty) {
+      if (_index != 0) setState(() => _index = 0);
+      return;
+    }
+
+    if (_index < 0 || _index >= widget.destinations.length) {
+      setState(() => _index = 0);
+    }
+
+    // keep TabController in sync if mode is top
+    if (_mode == SuperMenuType.top && _tab != null) {
+      final safe = _index.clamp(0, widget.destinations.length - 1);
+      if (_tab!.index != safe) {
+        _tab!.index = safe;
+      }
     }
   }
 
   void _maybeAttachTabController() {
     _tab?.dispose();
-    if (_mode == SuperMenuType.top) {
-      _tab = TabController(length: widget.destinations.length, vsync: this)
-        ..addListener(() {
-          if (_tab!.indexIsChanging) setState(() => _index = _tab!.index);
-        });
+
+    if (_mode == SuperMenuType.top && widget.destinations.isNotEmpty) {
+      _tab = TabController(length: widget.destinations.length, vsync: this);
+
+      // keep _index updated when user taps tab
+      _tab!.addListener(() {
+        if (_tab!.indexIsChanging) return;
+        if (mounted) setState(() => _index = _tab!.index);
+      });
     } else {
       _tab = null;
     }
@@ -85,21 +117,47 @@ class _SuperAdminNavShellState extends State<SuperAdminNavShell>
     super.dispose();
   }
 
+  void _goTo(int i) {
+    if (widget.destinations.isEmpty) return;
+
+    final safe = i.clamp(0, widget.destinations.length - 1);
+    setState(() => _index = safe);
+
+    if (_mode == SuperMenuType.top && _tab != null && _tab!.index != safe) {
+      _tab!.animateTo(safe);
+    }
+  }
+
   PreferredSizeWidget _appBar(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
 
+    final titleText = widget.destinations.isEmpty
+        ? l10n.nav_super_admin
+        : widget.destinations[_index.clamp(0, widget.destinations.length - 1)]
+            .label;
+
     return AppBar(
-      titleSpacing: 8,
+      titleSpacing: 12,
       title: Row(
         children: [
           Container(
             width: 10,
             height: 10,
-            margin: const EdgeInsets.only(right: 8),
+            margin: const EdgeInsets.only(right: 10),
             decoration: BoxDecoration(
               color: cs.primary,
               borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              titleText,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
             ),
           ),
         ],
@@ -107,12 +165,12 @@ class _SuperAdminNavShellState extends State<SuperAdminNavShell>
       actions: [
         IconButton(
           tooltip: l10n.nav_dashboard,
-          onPressed: () => setState(() => _index = 0),
+          onPressed: () => _goTo(0),
           icon: const Icon(Icons.dashboard_customize_rounded),
         ),
-        const SizedBox(width: 4),
+        const SizedBox(width: 6),
       ],
-      bottom: _mode == SuperMenuType.top
+      bottom: (_mode == SuperMenuType.top && _tab != null)
           ? TabBar(
               controller: _tab,
               isScrollable: true,
@@ -129,6 +187,13 @@ class _SuperAdminNavShellState extends State<SuperAdminNavShell>
   @override
   Widget build(BuildContext context) {
     final pages = widget.destinations;
+
+    if (pages.isEmpty) {
+      return Scaffold(
+        appBar: _appBar(context),
+        body: const Center(child: Text("No destinations configured")),
+      );
+    }
 
     switch (_mode) {
       case SuperMenuType.top:
@@ -169,7 +234,7 @@ class _SuperAdminNavShellState extends State<SuperAdminNavShell>
           bottomNavigationBar: NavigationBar(
             height: 72,
             selectedIndex: _index,
-            onDestinationSelected: (i) => setState(() => _index = i),
+            onDestinationSelected: _goTo,
             destinations: [
               for (final d in pages)
                 NavigationDestination(
@@ -190,7 +255,7 @@ class _SuperAdminNavShellState extends State<SuperAdminNavShell>
     return NavigationDrawer(
       selectedIndex: _index,
       onDestinationSelected: (i) {
-        setState(() => _index = i);
+        _goTo(i);
         Navigator.of(context).maybePop();
       },
       children: [

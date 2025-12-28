@@ -500,4 +500,36 @@
 
   
   
+,
+  "super_create_project_title": "Create Project",
+  "super_create_project_subtitle": "Add a new project template for owners to use.",
+  "super_project_name": "Project name",
+  "super_project_name_hint": "Example: HobbySphere",
+  "super_project_description": "Description",
+  "super_project_description_hint": "Short description (optional)",
+  "super_project_type": "Project type",
+  "project_type_ecommerce": "E-commerce",
+  "project_type_services": "Services",
+  "project_type_activities": "Activities",
+  "super_project_active": "Active",
+  "super_project_active_hint": "If disabled, owners can’t use it until activated.",
+  "super_create_project_btn": "Create project",
+  "super_create_another": "Create another",
+  "super_project_name_required": "Project name is required",
+  "super_project_name_exists": "This project name already exists",
+  "super_create_project_created_id": "Created successfully (ID: {id})",
+  "@super_create_project_created_id": {
+    "placeholders": {
+      "id": { "type": "String" }
+    }
+  },
+  "super_create_project_success": "Project \"{name}\" created successfully!",
+  "@super_create_project_success": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "common_loading": "Loading...",
+  "common_forbidden": "Forbidden",
+  "common_unauthorized": "Unauthorized"
 }

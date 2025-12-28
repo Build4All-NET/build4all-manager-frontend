@@ -189,7 +189,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get themes_colors_section => 'الألوان';
 
   @override
-  String get err_required => 'هذا الحقل مطلوب';
+  String get err_required => 'مطلوب';
 
   @override
   String get common_more => 'More';
@@ -431,7 +431,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get owner_projects_openInBrowser => 'فتح';
 
   @override
-  String get owner_request_title => 'طلب تطبيقك';
+  String get owner_request_title => 'إنشاء طلب تطبيق';
 
   @override
   String get owner_request_submit_hint => 'اختر مشروعًا، أضف اسم التطبيق، حمل الشعار (اختياري)، اختر سمة، ثم أرسل للبناء.';
@@ -464,7 +464,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get owner_request_submit => 'إرسال';
 
   @override
-  String get owner_request_submitting => 'جارٍ الإرسال…';
+  String get owner_request_submitting => 'جاري الإرسال…';
 
   @override
   String get owner_request_submit_and_build => 'إرسال وبناء APK';
@@ -878,189 +878,256 @@ class AppLocalizationsAr extends AppLocalizations {
   String get owner_proj_comingSoon => 'قريباً';
 
   @override
-  String get submit => 'Submit';
+  String get submit => 'إرسال';
 
   @override
-  String get use => 'Use';
+  String get use => 'استخدام';
 
   @override
-  String get preview => 'Preview';
+  String get preview => 'معاينة';
 
   @override
-  String get common_remove => 'Remove';
+  String get common_remove => 'إزالة';
 
   @override
-  String get owner_request_hero_title => 'Build a new app';
+  String get owner_request_hero_title => 'أنشئ تطبيق جديد';
 
   @override
-  String get owner_request_hero_subtitle => 'Pick theme + runtime visually. We generate JSON behind the scenes.';
+  String get owner_request_hero_subtitle => 'اختر الثيم والـ runtime بشكل بصري. نحن ننشئ JSON تلقائياً.';
 
   @override
-  String get owner_request_basics_title => 'Basics';
+  String get owner_request_basics_title => 'الأساسيات';
 
   @override
-  String get owner_request_basics_subtitle => 'Required info to generate your app.';
+  String get owner_request_basics_subtitle => 'معلومات مطلوبة لإنشاء تطبيقك.';
 
   @override
-  String get owner_request_project_id => 'Project ID';
+  String get owner_request_project_id => 'رقم المشروع';
 
   @override
-  String get owner_request_project_id_hint => 'Selected from project';
+  String get owner_request_project_id_hint => 'محدد من المشروع';
 
   @override
-  String get owner_request_app_name => 'App name';
+  String get owner_request_app_name => 'اسم التطبيق';
 
   @override
-  String get owner_request_app_name_hint => 'ex: MyHobbySphereApp';
+  String get owner_request_app_name_hint => 'مثال: MyHobbySphereApp';
 
   @override
-  String get owner_request_notes => 'Notes';
+  String get owner_request_notes => 'ملاحظات';
 
   @override
-  String get owner_request_notes_hint => 'Short description / special request / anything important…';
+  String get owner_request_notes_hint => 'وصف مختصر / طلب خاص / أي شيء مهم…';
 
   @override
-  String get owner_request_settings_title => 'App Settings';
+  String get owner_request_settings_title => 'إعدادات التطبيق';
 
   @override
-  String get owner_request_settings_subtitle => 'Currency + optional API override.';
+  String get owner_request_settings_subtitle => 'العملة + رابط API اختياري.';
 
   @override
-  String get owner_request_api_override => 'API base URL override (optional)';
+  String get owner_request_api_override => 'تغيير رابط API (اختياري)';
 
   @override
-  String get owner_request_api_override_hint => 'ex: http://192.168.1.7:8080';
+  String get owner_request_api_override_hint => 'مثال: http://192.168.1.7:8080';
 
   @override
-  String get owner_request_palette_title => 'Palette';
+  String get owner_request_palette_title => 'الألوان';
 
   @override
-  String get owner_request_palette_subtitle => 'Pick a preset or customize colors.';
+  String get owner_request_palette_subtitle => 'اختر قالب جاهز أو عدّل الألوان.';
 
   @override
-  String get owner_request_runtime_title => 'Runtime Config';
+  String get owner_request_runtime_title => 'إعدادات Runtime';
 
   @override
-  String get owner_request_runtime_subtitle => 'Navigation + home layout + feature flags (no JSON typing).';
+  String get owner_request_runtime_subtitle => 'التنقّل + الصفحة الرئيسية + الميزات (بدون كتابة JSON).';
 
   @override
-  String get owner_request_branding_title => 'Branding';
+  String get owner_request_branding_title => 'الهوية';
 
   @override
-  String get owner_request_branding_subtitle => 'Logo is optional but makes it look legit.';
+  String get owner_request_branding_subtitle => 'الشعار اختياري لكنه يعطي شكل احترافي.';
 
   @override
-  String get owner_request_err_load_currencies => 'Failed to load currencies';
+  String get owner_request_err_load_currencies => 'فشل تحميل العملات';
 
   @override
-  String get owner_request_err_valid_number => 'Enter a valid number';
+  String get owner_request_err_valid_number => 'أدخل رقم صحيح';
 
   @override
-  String get owner_request_err_select_currency => 'Select a currency first';
+  String get owner_request_err_select_currency => 'اختر عملة أولاً';
 
   @override
-  String get owner_request_err_fix_fields => 'Fix the highlighted fields';
+  String get owner_request_err_fix_fields => 'عدّل الحقول المظللة';
 
   @override
-  String get owner_request_err_app_name_required => 'App name is required';
+  String get owner_request_err_app_name_required => 'اسم التطبيق مطلوب';
 
   @override
-  String get owner_request_logo_selected => 'Logo selected';
+  String get owner_request_logo_selected => 'تم اختيار الشعار';
 
   @override
-  String get owner_request_logo_removed => 'Logo removed';
+  String get owner_request_logo_removed => 'تم حذف الشعار';
 
   @override
-  String get owner_request_no_logo => 'No logo selected';
+  String get owner_request_no_logo => 'لا يوجد شعار';
 
   @override
-  String get owner_request_pick_logo => 'Pick';
+  String get owner_request_pick_logo => 'اختيار';
 
   @override
-  String get owner_request_select_currency => 'Select currency';
+  String get owner_request_select_currency => 'اختر العملة';
 
   @override
-  String get owner_request_tap_to_choose => 'Tap to choose';
+  String get owner_request_tap_to_choose => 'اضغط للاختيار';
 
   @override
-  String get owner_request_pick_currency => 'Pick currency';
+  String get owner_request_pick_currency => 'اختيار العملة';
 
   @override
-  String get owner_request_currency_search_hint => 'Search by label / code / id';
+  String get owner_request_currency_search_hint => 'ابحث بالاسم / الكود / المعرف';
 
   @override
   String owner_request_currency_set(String code) {
-    return 'Currency set to $code';
+    return 'تم اختيار العملة $code';
   }
 
   @override
-  String get owner_request_submit_ready => 'Ready to submit?';
+  String get owner_request_submit_ready => 'جاهز للإرسال؟';
 
   @override
-  String get owner_request_submit_desc => 'Triggers CI and generates build artifacts.';
+  String get owner_request_submit_desc => 'سيبدأ CI لإنشاء ملفات البناء.';
 
   @override
-  String get owner_request_submit_success => 'Request submitted ✅ CI started. APK soon 🚀';
+  String get owner_request_submit_success => 'تم إرسال الطلب ✅ بدأ CI. قريباً APK 🚀';
 
   @override
   String owner_request_submit_failed(String msg) {
-    return 'Submit failed: $msg';
+    return 'فشل الإرسال: $msg';
   }
 
   @override
-  String get owner_request_selected => 'Selected';
+  String get owner_request_selected => 'محدد';
 
   @override
-  String get owner_request_tap_to_apply => 'Tap to apply';
+  String get owner_request_tap_to_apply => 'اضغط للتطبيق';
 
   @override
-  String get owner_request_primary => 'Primary';
+  String get owner_request_primary => 'أساسي';
 
   @override
-  String get owner_request_secondary => 'Secondary';
+  String get owner_request_secondary => 'ثانوي';
 
   @override
-  String get owner_request_background => 'Background';
+  String get owner_request_background => 'الخلفية';
 
   @override
-  String get owner_request_text_on_background => 'Text (onBackground)';
+  String get owner_request_text_on_background => 'نص (على الخلفية)';
 
   @override
-  String get owner_request_error => 'Error';
+  String get owner_request_error => 'خطأ';
 
   @override
-  String get owner_request_pick_primary => 'Pick Primary';
+  String get owner_request_pick_primary => 'اختر اللون الأساسي';
 
   @override
-  String get owner_request_pick_secondary => 'Pick Secondary';
+  String get owner_request_pick_secondary => 'اختر اللون الثانوي';
 
   @override
-  String get owner_request_pick_background => 'Pick Background';
+  String get owner_request_pick_background => 'اختر لون الخلفية';
 
   @override
-  String get owner_request_pick_text_color => 'Pick Text Color';
+  String get owner_request_pick_text_color => 'اختر لون النص';
 
   @override
-  String get owner_request_pick_error => 'Pick Error';
+  String get owner_request_pick_error => 'اختر لون الخطأ';
 
   @override
-  String get owner_request_quick_colors => 'Quick colors';
+  String get owner_request_quick_colors => 'ألوان سريعة';
 
   @override
-  String get owner_request_hex_optional => 'Hex (optional)';
+  String get owner_request_hex_optional => 'Hex (اختياري)';
 
   @override
   String get owner_request_hex_hint => '#RRGGBB';
 
   @override
-  String get owner_request_err_hex_format => 'Use #RRGGBB';
+  String get owner_request_err_hex_format => 'استخدم #RRGGBB';
 
   @override
-  String get owner_request_your_app => 'Your App';
+  String get owner_request_your_app => 'تطبيقك';
 
   @override
-  String get owner_request_preview_hello_owner => 'Hello owner 👋';
+  String get owner_request_preview_hello_owner => 'مرحباً يا مالك 👋';
 
   @override
-  String get owner_request_preview_desc => 'This is how your theme looks.';
+  String get owner_request_preview_desc => 'هكذا سيظهر الثيم في تطبيقك.';
+
+  @override
+  String get super_create_project_title => 'إنشاء مشروع';
+
+  @override
+  String get super_create_project_subtitle => 'أضف قالب مشروع جديد ليستخدمه الـ Owners.';
+
+  @override
+  String get super_project_name => 'اسم المشروع';
+
+  @override
+  String get super_project_name_hint => 'مثال: HobbySphere';
+
+  @override
+  String get super_project_description => 'الوصف';
+
+  @override
+  String get super_project_description_hint => 'وصف مختصر (اختياري)';
+
+  @override
+  String get super_project_type => 'نوع المشروع';
+
+  @override
+  String get project_type_ecommerce => 'متجر إلكتروني';
+
+  @override
+  String get project_type_services => 'خدمات';
+
+  @override
+  String get project_type_activities => 'أنشطة';
+
+  @override
+  String get super_project_active => 'مفعّل';
+
+  @override
+  String get super_project_active_hint => 'إذا كان غير مفعّل، لن يتمكن الـ Owners من استخدامه حتى يتم تفعيله.';
+
+  @override
+  String get super_create_project_btn => 'إنشاء المشروع';
+
+  @override
+  String get super_create_another => 'إنشاء واحد آخر';
+
+  @override
+  String get super_project_name_required => 'اسم المشروع مطلوب';
+
+  @override
+  String get super_project_name_exists => 'اسم المشروع موجود مسبقاً';
+
+  @override
+  String super_create_project_created_id(String id) {
+    return 'تم الإنشاء بنجاح (المعرف: $id)';
+  }
+
+  @override
+  String super_create_project_success(String name) {
+    return 'تم إنشاء المشروع \"$name\" بنجاح!';
+  }
+
+  @override
+  String get common_loading => 'جارٍ التحميل...';
+
+  @override
+  String get common_forbidden => 'ممنوع';
+
+  @override
+  String get common_unauthorized => 'غير مصرح';
 }

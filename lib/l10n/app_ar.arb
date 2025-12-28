@@ -407,5 +407,37 @@
   "owner_request_preview_hello_owner": "مرحباً يا مالك 👋",
   "owner_request_preview_desc": "هكذا سيظهر الثيم في تطبيقك."
 
-
+,
+  "super_create_project_title": "إنشاء مشروع",
+  "super_create_project_subtitle": "أضف قالب مشروع جديد ليستخدمه الـ Owners.",
+  "super_project_name": "اسم المشروع",
+  "super_project_name_hint": "مثال: HobbySphere",
+  "super_project_description": "الوصف",
+  "super_project_description_hint": "وصف مختصر (اختياري)",
+  "super_project_type": "نوع المشروع",
+  "project_type_ecommerce": "متجر إلكتروني",
+  "project_type_services": "خدمات",
+  "project_type_activities": "أنشطة",
+  "super_project_active": "مفعّل",
+  "super_project_active_hint": "إذا كان غير مفعّل، لن يتمكن الـ Owners من استخدامه حتى يتم تفعيله.",
+  "super_create_project_btn": "إنشاء المشروع",
+  "super_create_another": "إنشاء واحد آخر",
+  "super_project_name_required": "اسم المشروع مطلوب",
+  "super_project_name_exists": "اسم المشروع موجود مسبقاً",
+  "super_create_project_created_id": "تم الإنشاء بنجاح (المعرف: {id})",
+  "@super_create_project_created_id": {
+    "placeholders": {
+      "id": { "type": "String" }
+    }
+  },
+  "super_create_project_success": "تم إنشاء المشروع \"{name}\" بنجاح!",
+  "@super_create_project_success": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "common_loading": "جارٍ التحميل...",
+  "common_forbidden": "ممنوع",
+  "common_unauthorized": "غير مصرح"
 }
+

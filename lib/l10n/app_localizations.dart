@@ -2184,6 +2184,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This is how your theme looks.'**
   String get owner_request_preview_desc;
+
+  /// No description provided for @super_create_project_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Project'**
+  String get super_create_project_title;
+
+  /// No description provided for @super_create_project_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a new project template for owners to use.'**
+  String get super_create_project_subtitle;
+
+  /// No description provided for @super_project_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Project name'**
+  String get super_project_name;
+
+  /// No description provided for @super_project_name_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Example: HobbySphere'**
+  String get super_project_name_hint;
+
+  /// No description provided for @super_project_description.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get super_project_description;
+
+  /// No description provided for @super_project_description_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Short description (optional)'**
+  String get super_project_description_hint;
+
+  /// No description provided for @super_project_type.
+  ///
+  /// In en, this message translates to:
+  /// **'Project type'**
+  String get super_project_type;
+
+  /// No description provided for @project_type_ecommerce.
+  ///
+  /// In en, this message translates to:
+  /// **'E-commerce'**
+  String get project_type_ecommerce;
+
+  /// No description provided for @project_type_services.
+  ///
+  /// In en, this message translates to:
+  /// **'Services'**
+  String get project_type_services;
+
+  /// No description provided for @project_type_activities.
+  ///
+  /// In en, this message translates to:
+  /// **'Activities'**
+  String get project_type_activities;
+
+  /// No description provided for @super_project_active.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get super_project_active;
+
+  /// No description provided for @super_project_active_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'If disabled, owners can’t use it until activated.'**
+  String get super_project_active_hint;
+
+  /// No description provided for @super_create_project_btn.
+  ///
+  /// In en, this message translates to:
+  /// **'Create project'**
+  String get super_create_project_btn;
+
+  /// No description provided for @super_create_another.
+  ///
+  /// In en, this message translates to:
+  /// **'Create another'**
+  String get super_create_another;
+
+  /// No description provided for @super_project_name_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Project name is required'**
+  String get super_project_name_required;
+
+  /// No description provided for @super_project_name_exists.
+  ///
+  /// In en, this message translates to:
+  /// **'This project name already exists'**
+  String get super_project_name_exists;
+
+  /// No description provided for @super_create_project_created_id.
+  ///
+  /// In en, this message translates to:
+  /// **'Created successfully (ID: {id})'**
+  String super_create_project_created_id(String id);
+
+  /// No description provided for @super_create_project_success.
+  ///
+  /// In en, this message translates to:
+  /// **'Project \"{name}\" created successfully!'**
+  String super_create_project_success(String name);
+
+  /// No description provided for @common_loading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading...'**
+  String get common_loading;
+
+  /// No description provided for @common_forbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'Forbidden'**
+  String get common_forbidden;
+
+  /// No description provided for @common_unauthorized.
+  ///
+  /// In en, this message translates to:
+  /// **'Unauthorized'**
+  String get common_unauthorized;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
