@@ -1,66 +1,67 @@
 import 'dart:convert';
 
-enum MenuType { bottom, drawer }
+enum MenuType { bottom, hamburger }
 
-class RuntimeDraft {
-  final MenuType menuType;
+class NavItemDraft {
+  final String id;
+  final String label;
+  final String icon; // "home" | "search" | "cart" | "profile" | ...
+  final bool enabled;
 
-  final List<NavItemDraft> navItems;
-  final List<HomeSectionDraft> homeSections;
-  final Set<String> enabledFeatures;
-
-  final String splashMode; // "auto" | "light" | "dark"
-  final bool showSearchOnExplore; // example of extra branding/runtime flags
-
-  const RuntimeDraft({
-    required this.menuType,
-    required this.navItems,
-    required this.homeSections,
-    required this.enabledFeatures,
-    required this.splashMode,
-    required this.showSearchOnExplore,
+  const NavItemDraft({
+    required this.id,
+    required this.label,
+    required this.icon,
+    required this.enabled,
   });
 
-  RuntimeDraft copyWith({
-    MenuType? menuType,
-    List<NavItemDraft>? navItems,
-    List<HomeSectionDraft>? homeSections,
-    Set<String>? enabledFeatures,
-    String? splashMode,
-    bool? showSearchOnExplore,
+  NavItemDraft copyWith({
+    String? id,
+    String? label,
+    String? icon,
+    bool? enabled,
   }) {
-    return RuntimeDraft(
-      menuType: menuType ?? this.menuType,
-      navItems: navItems ?? this.navItems,
-      homeSections: homeSections ?? this.homeSections,
-      enabledFeatures: enabledFeatures ?? this.enabledFeatures,
-      splashMode: splashMode ?? this.splashMode,
-      showSearchOnExplore: showSearchOnExplore ?? this.showSearchOnExplore,
+    return NavItemDraft(
+      id: id ?? this.id,
+      label: label ?? this.label,
+      icon: icon ?? this.icon,
+      enabled: enabled ?? this.enabled,
     );
   }
+}
 
-  /// ✅ Build the 4 JSON strings for backend
-  RuntimeJsonOut toJsonOut() {
-    final navJson = jsonEncode(navItems.map((e) => e.toJson()).toList());
+class HomeSectionDraft {
+  final String id; // internal only (we will hide in UI)
+  final String type; // HEADER/BANNER/ITEM_LIST...
+  final String layout; // carousel/grid/hero...
+  final String? feature; // optional: ITEMS/BOOKING...
+  final int limit;
+  final bool enabled;
 
-    final homeJson = jsonEncode({
-      "sections": homeSections.map((e) => e.toJson()).toList(),
-    });
+  const HomeSectionDraft({
+    required this.id,
+    required this.type,
+    required this.layout,
+    this.feature,
+    required this.limit,
+    required this.enabled,
+  });
 
-    final enabledJson = jsonEncode(enabledFeatures.toList()..sort());
-
-    final brandingJson = jsonEncode({
-      "splashColor": "#FFFFFF", // keep current behavior
-      "menuType": menuType.name, // bottom/drawer
-      "splashMode": splashMode,
-      "showSearchOnExplore": showSearchOnExplore,
-    });
-
-    return RuntimeJsonOut(
-      navJson: navJson,
-      homeJson: homeJson,
-      enabledFeaturesJson: enabledJson,
-      brandingJson: brandingJson,
+  HomeSectionDraft copyWith({
+    String? id,
+    String? type,
+    String? layout,
+    String? feature,
+    int? limit,
+    bool? enabled,
+  }) {
+    return HomeSectionDraft(
+      id: id ?? this.id,
+      type: type ?? this.type,
+      layout: layout ?? this.layout,
+      feature: feature ?? this.feature,
+      limit: limit ?? this.limit,
+      enabled: enabled ?? this.enabled,
     );
   }
 }
@@ -79,106 +80,148 @@ class RuntimeJsonOut {
   });
 }
 
-class NavItemDraft {
-  final String id;
-  final String label;
-  final String icon;
-  final bool enabled;
+class RuntimeDraft {
+  final MenuType menuType;
 
-  const NavItemDraft({
-    required this.id,
-    required this.label,
-    required this.icon,
-    this.enabled = true,
+  // Branding flags (still in payload even if preview doesn't use them)
+  final String splashMode;
+  final bool showSearchOnExplore;
+
+  final Set<String> enabledFeatures;
+  final List<NavItemDraft> navItems;
+  final List<HomeSectionDraft> homeSections;
+
+  const RuntimeDraft({
+    required this.menuType,
+    required this.splashMode,
+    required this.showSearchOnExplore,
+    required this.enabledFeatures,
+    required this.navItems,
+    required this.homeSections,
   });
 
-  NavItemDraft copyWith({bool? enabled}) {
-    return NavItemDraft(
-      id: id,
-      label: label,
-      icon: icon,
-      enabled: enabled ?? this.enabled,
+  RuntimeDraft copyWith({
+    MenuType? menuType,
+    String? splashMode,
+    bool? showSearchOnExplore,
+    Set<String>? enabledFeatures,
+    List<NavItemDraft>? navItems,
+    List<HomeSectionDraft>? homeSections,
+  }) {
+    return RuntimeDraft(
+      menuType: menuType ?? this.menuType,
+      splashMode: splashMode ?? this.splashMode,
+      showSearchOnExplore: showSearchOnExplore ?? this.showSearchOnExplore,
+      enabledFeatures: enabledFeatures ?? this.enabledFeatures,
+      navItems: navItems ?? this.navItems,
+      homeSections: homeSections ?? this.homeSections,
     );
   }
 
-  Map<String, dynamic> toJson() => {
-        "id": id,
-        "label": label,
-        "icon": icon,
-      };
-}
+  /// ✅ IMPORTANT:
+  /// - navJson will contain ONLY enabled items so that uncheck => disappears from preview menu.
+  /// - brandingJson will output menuType as "bottom" or "hamburger"
+  RuntimeJsonOut toJsonOut() {
+    final enabledNav = navItems.where((e) => e.enabled).toList();
 
-class HomeSectionDraft {
-  final String id;
-  final String type;
-  final String layout;
-  final int limit;
-  final bool enabled;
-  final String? feature;
+    final navJson = jsonEncode(
+      enabledNav
+          .map((e) => {
+                "id": e.id,
+                "label": e.label,
+                "icon": e.icon,
+              })
+          .toList(),
+    );
 
-  const HomeSectionDraft({
-    required this.id,
-    required this.type,
-    required this.layout,
-    required this.limit,
-    this.enabled = true,
-    this.feature,
-  });
+    final brandingJson = jsonEncode({
+      "menuType": menuType == MenuType.bottom ? "bottom" : "hamburger",
+      "splashMode": splashMode,
+      "showSearchOnExplore": showSearchOnExplore,
+    });
 
-  HomeSectionDraft copyWith({bool? enabled, int? limit}) {
-    return HomeSectionDraft(
-      id: id,
-      type: type,
-      layout: layout,
-      limit: limit ?? this.limit,
-      enabled: enabled ?? this.enabled,
-      feature: feature,
+    final enabledFeaturesJson = jsonEncode(enabledFeatures.toList());
+
+    final enabledHome = homeSections.where((s) => s.enabled).toList();
+    final homeJson = jsonEncode({
+      "sections": enabledHome
+          .map((s) => {
+                "type": s.type,
+                "layout": s.layout,
+                "feature": s.feature,
+                "limit": s.limit,
+              })
+          .toList()
+    });
+
+    return RuntimeJsonOut(
+      navJson: navJson,
+      homeJson: homeJson,
+      enabledFeaturesJson: enabledFeaturesJson,
+      brandingJson: brandingJson,
     );
   }
-
-  Map<String, dynamic> toJson() => {
-        "id": id,
-        "type": type,
-        "layout": layout,
-        "limit": limit,
-        if (feature != null) "feature": feature,
-      };
 }
 
 class RuntimeDefaults {
   static RuntimeDraft defaults() {
     return RuntimeDraft(
       menuType: MenuType.bottom,
+      splashMode: "auto",
+      showSearchOnExplore: true,
+      enabledFeatures: {"ITEMS", "BOOKING", "REVIEWS", "ORDERS"},
       navItems: const [
-        NavItemDraft(id: "home", label: "Home", icon: "home"),
-        NavItemDraft(id: "explore", label: "Explore", icon: "search"),
-        NavItemDraft(id: "cart", label: "Cart", icon: "shopping_cart"),
-        NavItemDraft(id: "profile", label: "Profile", icon: "person"),
+        NavItemDraft(
+          id: "HOME",
+          label: "Home",
+          icon: "home",
+          enabled: true,
+        ),
+        NavItemDraft(
+          id: "EXPLORE",
+          label: "Explore",
+          icon: "search",
+          enabled: true,
+        ),
+        NavItemDraft(
+          id: "CART",
+          label: "Cart",
+          icon: "cart",
+          enabled: true,
+        ),
+        NavItemDraft(
+          id: "PROFILE",
+          label: "Profile",
+          icon: "profile",
+          enabled: true,
+        ),
       ],
       homeSections: const [
         HomeSectionDraft(
-            id: "header", type: "HEADER", layout: "full", limit: 1),
-        HomeSectionDraft(
-            id: "search", type: "SEARCH", layout: "full", limit: 1),
-        HomeSectionDraft(
-            id: "hero_banner", type: "BANNER", layout: "full", limit: 1),
-        HomeSectionDraft(
-          id: "categories",
-          type: "CATEGORY_CHIPS",
-          layout: "horizontal",
-          limit: 10,
+          id: "S1",
+          type: "BANNER",
+          layout: "hero",
+          feature: null,
+          limit: 3,
+          enabled: true,
         ),
         HomeSectionDraft(
-          id: "flash_sale",
+          id: "S2",
           type: "ITEM_LIST",
-          layout: "horizontal",
-          limit: 10,
+          layout: "carousel",
           feature: "ITEMS",
+          limit: 10,
+          enabled: true,
+        ),
+        HomeSectionDraft(
+          id: "S3",
+          type: "CATEGORY_CHIPS",
+          layout: "chips",
+          feature: null,
+          limit: 8,
+          enabled: true,
         ),
       ],
-      enabledFeatures: {"ITEMS", "BOOKING", "REVIEWS", "ORDERS"},
-      splashMode: "auto",
-      showSearchOnExplore: true,
     );
   }
 }

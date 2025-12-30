@@ -20,6 +20,7 @@ class RuntimeSection extends StatelessWidget {
       children: [
         Text('Runtime Config', style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 10),
+
         _Card(
           child: _MenuTypePicker(
             value: draft.menuType,
@@ -27,16 +28,7 @@ class RuntimeSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
-        _Card(
-          child: _BrandingFlags(
-            splashMode: draft.splashMode,
-            showSearchOnExplore: draft.showSearchOnExplore,
-            onSplashMode: (v) => onChanged(draft.copyWith(splashMode: v)),
-            onSearchExplore: (v) =>
-                onChanged(draft.copyWith(showSearchOnExplore: v)),
-          ),
-        ),
-        const SizedBox(height: 12),
+
         _Card(
           child: _FeaturesPicker(
             selected: draft.enabledFeatures,
@@ -44,6 +36,7 @@ class RuntimeSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
+
         _Card(
           child: _NavEditor(
             navItems: draft.navItems,
@@ -51,16 +44,42 @@ class RuntimeSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
+
         _Card(
           child: _HomeEditor(
             sections: draft.homeSections,
             onChanged: (list) => onChanged(draft.copyWith(homeSections: list)),
           ),
         ),
+
         const SizedBox(height: 12),
-        _GeneratedPreview(
-          out: draft.toJsonOut(),
-          borderColor: cs.outlineVariant,
+
+        // Debug JSON (optional): keep or remove as you want
+        ExpansionTile(
+          tilePadding: EdgeInsets.zero,
+          title: const Text('Generated JSON (debug only)'),
+          children: [
+            _JsonBox(
+              title: 'brandingJson',
+              value: draft.toJsonOut().brandingJson,
+              borderColor: cs.outlineVariant,
+            ),
+            _JsonBox(
+              title: 'enabledFeaturesJson',
+              value: draft.toJsonOut().enabledFeaturesJson,
+              borderColor: cs.outlineVariant,
+            ),
+            _JsonBox(
+              title: 'navJson',
+              value: draft.toJsonOut().navJson,
+              borderColor: cs.outlineVariant,
+            ),
+            _JsonBox(
+              title: 'homeJson',
+              value: draft.toJsonOut().homeJson,
+              borderColor: cs.outlineVariant,
+            ),
+          ],
         ),
       ],
     );
@@ -83,52 +102,10 @@ class _MenuTypePicker extends StatelessWidget {
         SegmentedButton<MenuType>(
           segments: const [
             ButtonSegment(value: MenuType.bottom, label: Text('Bottom')),
-            ButtonSegment(value: MenuType.drawer, label: Text('Drawer')),
+            ButtonSegment(value: MenuType.hamburger, label: Text('Hamburger')),
           ],
           selected: {value},
           onSelectionChanged: (set) => onChanged(set.first),
-        ),
-      ],
-    );
-  }
-}
-
-class _BrandingFlags extends StatelessWidget {
-  final String splashMode;
-  final bool showSearchOnExplore;
-  final ValueChanged<String> onSplashMode;
-  final ValueChanged<bool> onSearchExplore;
-
-  const _BrandingFlags({
-    required this.splashMode,
-    required this.showSearchOnExplore,
-    required this.onSplashMode,
-    required this.onSearchExplore,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Branding', style: Theme.of(context).textTheme.labelLarge),
-        const SizedBox(height: 8),
-        DropdownButtonFormField<String>(
-          value: splashMode,
-          decoration: const InputDecoration(labelText: 'Splash mode'),
-          items: const [
-            DropdownMenuItem(value: "auto", child: Text("Auto")),
-            DropdownMenuItem(value: "light", child: Text("Light")),
-            DropdownMenuItem(value: "dark", child: Text("Dark")),
-          ],
-          onChanged: (v) => onSplashMode(v ?? "auto"),
-        ),
-        const SizedBox(height: 8),
-        SwitchListTile(
-          contentPadding: EdgeInsets.zero,
-          title: const Text('Show search on Explore'),
-          value: showSearchOnExplore,
-          onChanged: onSearchExplore,
         ),
       ],
     );
@@ -165,9 +142,29 @@ class _FeaturesPicker extends StatelessWidget {
           children: [
             for (final f in all)
               FilterChip(
-                label: Text(f),
+                label: Text(
+                  f,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    color: selected.contains(f)
+                        ? cs.onPrimary
+                        : cs.onSurface,
+                  ),
+                ),
                 selected: selected.contains(f),
-                selectedColor: cs.primaryContainer,
+
+                // ✅ Selected color = submit button color (primary)
+                selectedColor: cs.primary,
+
+                // ✅ Unselected color: NOT white
+                backgroundColor: cs.surfaceContainerHighest,
+                surfaceTintColor: cs.surfaceContainerHighest,
+
+                shape: StadiumBorder(
+                  side: BorderSide(
+                    color: selected.contains(f) ? cs.primary : cs.outlineVariant,
+                  ),
+                ),
                 onSelected: (ok) {
                   final next = {...selected};
                   ok ? next.add(f) : next.remove(f);
@@ -196,10 +193,14 @@ class _NavEditor extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('Navigation', style: Theme.of(context).textTheme.labelLarge),
-        const SizedBox(height: 8),
-        Text('Toggle tabs + reorder (drag).',
-            style: Theme.of(context).textTheme.bodySmall),
+        const SizedBox(height: 6),
+        Text(
+          'Check/uncheck to show/hide in preview menu. Drag enabled items to reorder.',
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
         const SizedBox(height: 10),
+
+        // Enabled (reorderable)
         ReorderableListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -211,46 +212,125 @@ class _NavEditor extends StatelessWidget {
             final item = enabledList.removeAt(oldIndex);
             enabledList.insert(newIndex, item);
 
+            // keep disabled at end
             onChanged([...enabledList, ...disabled]);
           },
           itemBuilder: (ctx, i) {
             final item = enabled[i];
-            return ListTile(
+            return _NavRow(
               key: ValueKey(item.id),
-              title: Text(item.label),
-              subtitle: Text(item.id),
-              trailing: const Icon(Icons.drag_handle_rounded),
-              leading: Checkbox(
-                value: item.enabled,
-                onChanged: (v) {
-                  final next = navItems
-                      .map((x) =>
-                          x.id == item.id ? x.copyWith(enabled: v ?? true) : x)
-                      .toList();
-                  onChanged(next);
-                },
-              ),
+              item: item,
+              onToggle: (v) {
+                final next = navItems
+                    .map((x) => x.id == item.id ? x.copyWith(enabled: v) : x)
+                    .toList();
+                onChanged(next);
+              },
             );
           },
         ),
-        const SizedBox(height: 8),
-        ...disabled.map(
-          (item) => ListTile(
-            title: Text(item.label),
-            subtitle: Text(item.id),
-            leading: Checkbox(
-              value: item.enabled,
-              onChanged: (v) {
+
+        if (disabled.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          Text(
+            'Disabled (${disabled.length})',
+            style: Theme.of(context).textTheme.labelLarge,
+          ),
+          const SizedBox(height: 6),
+          for (final item in disabled)
+            _NavRow(
+              key: ValueKey('d_${item.id}'),
+              item: item,
+              showDrag: false,
+              onToggle: (v) {
                 final next = navItems
-                    .map((x) =>
-                        x.id == item.id ? x.copyWith(enabled: v ?? false) : x)
+                    .map((x) => x.id == item.id ? x.copyWith(enabled: v) : x)
                     .toList();
                 onChanged(next);
               },
             ),
-          ),
-        ),
+        ],
       ],
+    );
+  }
+}
+
+class _NavRow extends StatelessWidget {
+  final NavItemDraft item;
+  final bool showDrag;
+  final ValueChanged<bool> onToggle;
+
+  const _NavRow({
+    super.key,
+    required this.item,
+    required this.onToggle,
+    this.showDrag = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: cs.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: cs.outlineVariant),
+      ),
+      child: Row(
+        children: [
+          Checkbox(
+            value: item.enabled,
+            onChanged: (v) => onToggle(v ?? false),
+          ),
+          Expanded(
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    item.label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontWeight: FontWeight.w900),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                _MiniTag(text: item.id), // ✅ no "=" anywhere
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          if (showDrag) const Icon(Icons.drag_handle_rounded),
+        ],
+      ),
+    );
+  }
+}
+
+class _MiniTag extends StatelessWidget {
+  final String text;
+  const _MiniTag({required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: cs.outlineVariant),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w800,
+          color: cs.onSurface.withOpacity(.8),
+        ),
+      ),
     );
   }
 }
@@ -265,102 +345,77 @@ class _HomeEditor extends StatelessWidget {
   Widget build(BuildContext context) {
     final enabled = sections.where((s) => s.enabled).toList();
     final disabled = sections.where((s) => !s.enabled).toList();
-    final cs = Theme.of(context).colorScheme;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Text('Home Sections',
-                style: Theme.of(context).textTheme.labelLarge),
-            const Spacer(),
-            _TinyHintChip(text: 'Drag'),
-          ],
-        ),
-        const SizedBox(height: 8),
+        Text('Home Sections', style: Theme.of(context).textTheme.labelLarge),
+        const SizedBox(height: 6),
         Text(
-          'Enable / reorder sections and edit limits.',
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: cs.onSurface.withOpacity(.65),
-              ),
+          'Check/uncheck to show/hide in preview. Drag enabled items to reorder.',
+          style: Theme.of(context).textTheme.bodySmall,
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 10),
+
         ReorderableListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           itemCount: enabled.length,
           onReorder: (oldIndex, newIndex) {
             if (newIndex > oldIndex) newIndex -= 1;
-
-            final enabledList = [...enabled];
-            final item = enabledList.removeAt(oldIndex);
-            enabledList.insert(newIndex, item);
-
-            onChanged([...enabledList, ...disabled]);
+            final list = [...enabled];
+            final item = list.removeAt(oldIndex);
+            list.insert(newIndex, item);
+            onChanged([...list, ...disabled]);
           },
           itemBuilder: (ctx, i) {
             final s = enabled[i];
-            return Padding(
+            return _HomeRow(
               key: ValueKey(s.id),
-              padding: const EdgeInsets.only(bottom: 10),
-              child: _HomeSectionRow(
-                section: s,
-                onToggle: (v) {
+              section: s,
+              onToggle: (v) {
+                onChanged(sections
+                    .map((x) => x.id == s.id ? x.copyWith(enabled: v) : x)
+                    .toList());
+              },
+              onLimitTap: () async {
+                final next = await _pickLimit(context, s.limit);
+                if (next != null) {
                   onChanged(sections
-                      .map((x) => x.id == s.id ? x.copyWith(enabled: v) : x)
+                      .map((x) => x.id == s.id ? x.copyWith(limit: next) : x)
                       .toList());
-                },
-                onLimitTap: () async {
-                  final next = await _pickLimit(context, s.limit);
-                  if (next != null) {
-                    onChanged(sections
-                        .map((x) => x.id == s.id ? x.copyWith(limit: next) : x)
-                        .toList());
-                  }
-                },
-              ),
+                }
+              },
             );
           },
         ),
+
         if (disabled.isNotEmpty) ...[
-          const SizedBox(height: 6),
-          Theme(
-            data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-            child: ExpansionTile(
-              tilePadding: EdgeInsets.zero,
-              title: Text(
-                'Disabled sections (${disabled.length})',
-                style: Theme.of(context).textTheme.labelLarge,
-              ),
-              children: [
-                const SizedBox(height: 6),
-                ...disabled.map(
-                  (s) => Padding(
-                    padding: const EdgeInsets.only(bottom: 10),
-                    child: _HomeSectionRow(
-                      section: s,
-                      onToggle: (v) {
-                        onChanged(sections
-                            .map((x) =>
-                                x.id == s.id ? x.copyWith(enabled: v) : x)
-                            .toList());
-                      },
-                      onLimitTap: () async {
-                        final next = await _pickLimit(context, s.limit);
-                        if (next != null) {
-                          onChanged(sections
-                              .map((x) =>
-                                  x.id == s.id ? x.copyWith(limit: next) : x)
-                              .toList());
-                        }
-                      },
-                    ),
-                  ),
-                ),
-              ],
-            ),
+          const SizedBox(height: 8),
+          Text(
+            'Disabled (${disabled.length})',
+            style: Theme.of(context).textTheme.labelLarge,
           ),
+          const SizedBox(height: 6),
+          for (final s in disabled)
+            _HomeRow(
+              key: ValueKey('d_${s.id}'),
+              section: s,
+              showDrag: false,
+              onToggle: (v) {
+                onChanged(sections
+                    .map((x) => x.id == s.id ? x.copyWith(enabled: v) : x)
+                    .toList());
+              },
+              onLimitTap: () async {
+                final next = await _pickLimit(context, s.limit);
+                if (next != null) {
+                  onChanged(sections
+                      .map((x) => x.id == s.id ? x.copyWith(limit: next) : x)
+                      .toList());
+                }
+              },
+            ),
         ],
       ],
     );
@@ -390,151 +445,67 @@ class _HomeEditor extends StatelessWidget {
   }
 }
 
-class _HomeSectionRow extends StatelessWidget {
+class _HomeRow extends StatelessWidget {
   final HomeSectionDraft section;
+  final bool showDrag;
   final ValueChanged<bool> onToggle;
   final VoidCallback onLimitTap;
 
-  const _HomeSectionRow({
+  const _HomeRow({
     super.key,
     required this.section,
     required this.onToggle,
     required this.onLimitTap,
+    this.showDrag = true,
   });
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-
-    final icon = _iconFor(section.type);
     final title = _prettyType(section.type);
 
+    // ✅ One line summary, no id, no "full", no "="
+    final parts = <String>[
+      title,
+      section.layout,
+      'Limit ${section.limit}',
+      if (section.feature != null) section.feature!,
+    ];
+
     return Container(
-      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
       decoration: BoxDecoration(
         color: cs.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(color: cs.outlineVariant),
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // icon
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: cs.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: cs.outlineVariant),
-            ),
-            child: Icon(icon, color: cs.primary),
+          Checkbox(
+            value: section.enabled,
+            onChanged: (v) => onToggle(v ?? false),
           ),
-          const SizedBox(width: 12),
-
-          // main text area
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
+            child: InkWell(
+              onTap: onLimitTap,
+              borderRadius: BorderRadius.circular(12),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 2),
+                child: Text(
+                  parts.join(' • '),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(fontWeight: FontWeight.w900),
                 ),
-                const SizedBox(height: 6),
-
-                // ✅ Wrap pills so no overflow
-                Wrap(
-                  spacing: 6,
-                  runSpacing: 6,
-                  children: [
-                    _Pill(
-                      text: section.layout,
-                      bg: cs.surfaceContainerHighest,
-                      fg: cs.onSurfaceVariant,
-                    ),
-                    if (section.feature != null)
-                      _Pill(
-                        text: section.feature!,
-                        bg: cs.primaryContainer,
-                        fg: cs.onPrimaryContainer,
-                      ),
-                    _Pill(
-                      text: 'id: ${section.id}',
-                      bg: cs.surfaceContainerHighest,
-                      fg: cs.onSurface.withOpacity(.75),
-                    ),
-                  ],
-                ),
-              ],
+              ),
             ),
           ),
-
-          const SizedBox(width: 10),
-
-          // ✅ fixed width controls column (prevents RenderFlex overflow)
-          SizedBox(
-            width: 120,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                InkWell(
-                  borderRadius: BorderRadius.circular(999),
-                  onTap: onLimitTap,
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: cs.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(999),
-                      border: Border.all(color: cs.outlineVariant),
-                    ),
-                    child: Text(
-                      'Limit ${section.limit}',
-                      style: const TextStyle(fontWeight: FontWeight.w800),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 10),
-
-                // ✅ FittedBox so Switch+Icon never overflow
-                FittedBox(
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Switch.adaptive(
-                        value: section.enabled,
-                        onChanged: onToggle,
-                      ),
-                      const Icon(Icons.drag_handle_rounded),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
+          const SizedBox(width: 8),
+          if (showDrag) const Icon(Icons.drag_handle_rounded),
         ],
       ),
     );
-  }
-
-  static IconData _iconFor(String type) {
-    switch (type.toUpperCase()) {
-      case 'HEADER':
-        return Icons.view_day_rounded;
-      case 'SEARCH':
-        return Icons.search_rounded;
-      case 'BANNER':
-        return Icons.photo_library_outlined;
-      case 'CATEGORY_CHIPS':
-        return Icons.category_outlined;
-      case 'ITEM_LIST':
-        return Icons.view_carousel_outlined;
-      default:
-        return Icons.widgets_outlined;
-    }
   }
 
   static String _prettyType(String type) {
@@ -550,89 +521,6 @@ class _HomeSectionRow extends StatelessWidget {
         final s = t.toLowerCase().replaceAll('_', ' ');
         return s.isEmpty ? type : '${s[0].toUpperCase()}${s.substring(1)}';
     }
-  }
-}
-
-class _Pill extends StatelessWidget {
-  final String text;
-  final Color bg;
-  final Color fg;
-
-  const _Pill({required this.text, required this.bg, required this.fg});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(
-        text,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: TextStyle(
-          color: fg,
-          fontWeight: FontWeight.w700,
-          fontSize: 12,
-        ),
-      ),
-    );
-  }
-}
-
-class _TinyHintChip extends StatelessWidget {
-  final String text;
-  const _TinyHintChip({required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: cs.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: cs.outlineVariant),
-      ),
-      child: Text(
-        text,
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: cs.onSurface.withOpacity(.7),
-            ),
-      ),
-    );
-  }
-}
-
-class _GeneratedPreview extends StatelessWidget {
-  final RuntimeJsonOut out;
-  final Color borderColor;
-
-  const _GeneratedPreview({required this.out, required this.borderColor});
-
-  @override
-  Widget build(BuildContext context) {
-    return ExpansionTile(
-      tilePadding: EdgeInsets.zero,
-      title: const Text('Generated JSON (debug only)'),
-      children: [
-        _JsonBox(
-            title: 'navJson', value: out.navJson, borderColor: borderColor),
-        _JsonBox(
-            title: 'homeJson', value: out.homeJson, borderColor: borderColor),
-        _JsonBox(
-            title: 'enabledFeaturesJson',
-            value: out.enabledFeaturesJson,
-            borderColor: borderColor),
-        _JsonBox(
-            title: 'brandingJson',
-            value: out.brandingJson,
-            borderColor: borderColor),
-      ],
-    );
   }
 }
 

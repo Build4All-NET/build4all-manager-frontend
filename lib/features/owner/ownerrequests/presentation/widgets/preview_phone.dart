@@ -17,7 +17,7 @@ import 'palette_builder.dart';
 /// Backward compatibility:
 /// - If brandingJson has menuType="drawer", we treat it as hamburger.
 /// ===============================================================
-class PhonePreview extends StatelessWidget {
+class PhonePreview extends StatefulWidget {
   final String appName;
   final ThemeDraft draft;
   final File? logoFile;
@@ -41,11 +41,39 @@ class PhonePreview extends StatelessWidget {
   });
 
   @override
+  State<PhonePreview> createState() => _PhonePreviewState();
+
+  static Color _on(Color bg) =>
+      bg.computeLuminance() > 0.55 ? Colors.black : Colors.white;
+
+  static Color _headerBlue(Color primary) {
+    final lum = primary.computeLuminance();
+    if (lum < 0.35) return primary;
+    return const Color(0xFF0B6EA8);
+  }
+}
+
+class _PhonePreviewState extends State<PhonePreview> {
+  int _index = 0;
+
+  @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
 
-    final navItems = _tryParseNav(navJson);
-    final menuType = _tryBrandingMenuType(brandingJson); // bottom | hamburger
+    final navItems = _tryParseNav(widget.navJson);
+    final menuType = _tryBrandingMenuType(widget.brandingJson); // bottom | hamburger
+
+    // safety: if nav count changes because you disabled items
+    final items = navItems.isEmpty
+        ? const [
+            _NavItem(label: 'Home', icon: Icons.home_rounded),
+            _NavItem(label: 'Explore', icon: Icons.search_rounded),
+            _NavItem(label: 'Cart', icon: Icons.shopping_cart_rounded),
+            _NavItem(label: 'Profile', icon: Icons.person_rounded),
+          ]
+        : navItems;
+
+    if (_index >= items.length) _index = 0;
 
     return Container(
       width: 310,
@@ -64,70 +92,66 @@ class PhonePreview extends StatelessWidget {
           child: ClipRRect(
             borderRadius: BorderRadius.circular(20),
             child: Container(
-              color: draft.background,
+              color: widget.draft.background,
               child: Column(
                 children: [
                   // Status bar
                   Container(
                     height: 22,
-                    color: _headerBlue(draft.primary),
+                    color: PhonePreview._headerBlue(widget.draft.primary),
                     padding: const EdgeInsets.symmetric(horizontal: 10),
                     child: Row(
                       children: [
                         Text(
                           "9:41",
                           style: TextStyle(
-                            color: _on(_headerBlue(draft.primary)),
+                            color: PhonePreview._on(
+                                PhonePreview._headerBlue(widget.draft.primary)),
                             fontWeight: FontWeight.w800,
                             fontSize: 11,
                           ),
                         ),
                         const Spacer(),
                         Icon(Icons.signal_cellular_4_bar,
-                            size: 14, color: _on(_headerBlue(draft.primary))),
+                            size: 14,
+                            color: PhonePreview._on(
+                                PhonePreview._headerBlue(widget.draft.primary))),
                         const SizedBox(width: 6),
                         Icon(Icons.wifi,
-                            size: 14, color: _on(_headerBlue(draft.primary))),
+                            size: 14,
+                            color: PhonePreview._on(
+                                PhonePreview._headerBlue(widget.draft.primary))),
                         const SizedBox(width: 6),
                         Icon(Icons.battery_full,
-                            size: 14, color: _on(_headerBlue(draft.primary))),
+                            size: 14,
+                            color: PhonePreview._on(
+                                PhonePreview._headerBlue(widget.draft.primary))),
                       ],
                     ),
                   ),
 
                   // Header (App name + icons + search) + ✅ hamburger icon support
                   _Header(
-                    appName: appName,
-                    headerColor: _headerBlue(draft.primary),
+                    appName: widget.appName,
+                    headerColor: PhonePreview._headerBlue(widget.draft.primary),
                     menuType: menuType,
                   ),
 
                   // Content
                   Expanded(
                     child: _Body(
-                      draft: draft,
-                      currency: currency,
+                      draft: widget.draft,
+                      currency: widget.currency,
                     ),
                   ),
 
                   // Bottom nav only if menuType == bottom
                   if (menuType == 'bottom')
                     _BottomNav(
-                      draft: draft,
-                      items: navItems.isEmpty
-                          ? const [
-                              _NavItem(label: 'Home', icon: Icons.home_rounded),
-                              _NavItem(
-                                  label: 'Explore',
-                                  icon: Icons.search_rounded),
-                              _NavItem(
-                                  label: 'Cart',
-                                  icon: Icons.shopping_cart_rounded),
-                              _NavItem(
-                                  label: 'Profile',
-                                  icon: Icons.person_rounded),
-                            ]
-                          : navItems,
+                      draft: widget.draft,
+                      items: items,
+                      index: _index,
+                      onTap: (i) => setState(() => _index = i),
                     ),
                 ],
               ),
@@ -166,11 +190,8 @@ class PhonePreview extends StatelessWidget {
       if (m is Map) {
         final v = (m['menuType'] ?? '').toString().toLowerCase().trim();
 
-        // ✅ new
         if (v == 'hamburger') return 'hamburger';
-
-        // ✅ old backward compatible
-        if (v == 'drawer') return 'hamburger';
+        if (v == 'drawer') return 'hamburger'; // backward compatible
 
         return 'bottom';
       }
@@ -194,15 +215,6 @@ class PhonePreview extends StatelessWidget {
       default:
         return Icons.circle_outlined;
     }
-  }
-
-  static Color _on(Color bg) =>
-      bg.computeLuminance() > 0.55 ? Colors.black : Colors.white;
-
-  static Color _headerBlue(Color primary) {
-    final lum = primary.computeLuminance();
-    if (lum < 0.35) return primary;
-    return const Color(0xFF0B6EA8);
   }
 }
 
@@ -233,12 +245,10 @@ class _Header extends StatelessWidget {
         children: [
           Row(
             children: [
-              // ✅ Hamburger menu icon
               if (isHamburger) ...[
                 Icon(Icons.menu_rounded, color: onHeader, size: 22),
                 const SizedBox(width: 10),
               ],
-
               Expanded(
                 child: Text(
                   appName,
@@ -251,14 +261,12 @@ class _Header extends StatelessWidget {
                   ),
                 ),
               ),
-
               Icon(Icons.search_rounded, color: onHeader, size: 20),
               const SizedBox(width: 10),
               Stack(
                 clipBehavior: Clip.none,
                 children: [
-                  Icon(Icons.shopping_cart_outlined,
-                      color: onHeader, size: 20),
+                  Icon(Icons.shopping_cart_outlined, color: onHeader, size: 20),
                   Positioned(
                     right: -4,
                     top: -4,
@@ -651,15 +659,19 @@ class _TrustItem extends StatelessWidget {
 }
 
 /// ===============================================================
-/// Bottom Navigation
+/// Bottom Navigation (interactive)
 /// ===============================================================
 class _BottomNav extends StatelessWidget {
   final ThemeDraft draft;
   final List<_NavItem> items;
+  final int index;
+  final ValueChanged<int> onTap;
 
   const _BottomNav({
     required this.draft,
     required this.items,
+    required this.index,
+    required this.onTap,
   });
 
   @override
@@ -677,10 +689,13 @@ class _BottomNav extends StatelessWidget {
         children: [
           for (int i = 0; i < items.length.clamp(0, 5); i++)
             Expanded(
-              child: _NavButton(
-                draft: draft,
-                item: items[i],
-                active: i == 0,
+              child: InkWell(
+                onTap: () => onTap(i),
+                child: _NavButton(
+                  draft: draft,
+                  item: items[i],
+                  active: i == index,
+                ),
               ),
             ),
         ],
