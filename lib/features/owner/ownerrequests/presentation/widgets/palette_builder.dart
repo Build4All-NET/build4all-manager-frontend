@@ -1,6 +1,4 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
 /// ----------------------------
 /// THEME DRAFT (what owner edits)
@@ -110,35 +108,19 @@ class ThemePresets {
       ),
     ),
   ];
+
+  static ThemePreset byId(String id) =>
+      presets.firstWhere((p) => p.id == id, orElse: () => presets.first);
 }
 
-/// ----------------------------
-/// BUILDER (draft -> themeJson)
-/// ----------------------------
-class ThemeJsonBuilder {
-  static String toThemeJson(ThemeDraft d) {
-    final map = {
-      "colors": {
-        "primary": _hex(d.primary),
-        "secondary": _hex(d.secondary),
-        "background": _hex(d.background),
-        "onBackground": _hex(d.onBackground),
-        "error": _hex(d.error),
-      },
-      // You can extend later without changing request contract:
-      "borders": {"radius": 14},
-      "spacing": {"base": 8},
-    };
-    return jsonEncode(map);
-  }
-
-  static String _hex(Color c) {
-    // #RRGGBB (ignore alpha for simplicity)
-    final r = c.red.toRadixString(16).padLeft(2, '0');
-    final g = c.green.toRadixString(16).padLeft(2, '0');
-    final b = c.blue.toRadixString(16).padLeft(2, '0');
-    return '#${r}${g}${b}'.toUpperCase();
-  }
+/// --------------------------------------------------------------
+/// Shared helper used by OwnerRequestScreen for submit payload
+/// --------------------------------------------------------------
+String hexOf(Color c) {
+  final r = c.red.toRadixString(16).padLeft(2, '0');
+  final g = c.green.toRadixString(16).padLeft(2, '0');
+  final b = c.blue.toRadixString(16).padLeft(2, '0');
+  return '#${r}${g}${b}'.toUpperCase();
 }
 
 /// ----------------------------
@@ -150,12 +132,16 @@ class PaletteSection extends StatelessWidget {
   final ValueChanged<ThemeDraft> onChanged;
   final ValueChanged<String?> onPresetChanged;
 
+  /// ✅ If false, hide the bottom "Preview" block (as requested).
+  final bool showPreview;
+
   const PaletteSection({
     super.key,
     required this.draft,
     required this.selectedPresetId,
     required this.onChanged,
     required this.onPresetChanged,
+    this.showPreview = true,
   });
 
   @override
@@ -178,177 +164,136 @@ class PaletteSection extends StatelessWidget {
 
         const SizedBox(height: 12),
 
-        // Custom tiles
         _TileRow(
           label: 'Primary',
           color: draft.primary,
-          onTap: () => _pickColor(
-            context,
-            title: 'Pick Primary',
-            start: draft.primary,
-            onPicked: (c) {
-              onPresetChanged(null); // custom mode
-              onChanged(draft.copyWith(primary: c));
-            },
-          ),
+          onTap: () async {
+            final picked = await _pick(context, draft.primary);
+            if (picked == null) return;
+            onPresetChanged(null);
+            onChanged(draft.copyWith(primary: picked));
+          },
         ),
         _TileRow(
           label: 'Secondary',
           color: draft.secondary,
-          onTap: () => _pickColor(
-            context,
-            title: 'Pick Secondary',
-            start: draft.secondary,
-            onPicked: (c) {
-              onPresetChanged(null);
-              onChanged(draft.copyWith(secondary: c));
-            },
-          ),
+          onTap: () async {
+            final picked = await _pick(context, draft.secondary);
+            if (picked == null) return;
+            onPresetChanged(null);
+            onChanged(draft.copyWith(secondary: picked));
+          },
         ),
         _TileRow(
           label: 'Background',
           color: draft.background,
-          onTap: () => _pickColor(
-            context,
-            title: 'Pick Background',
-            start: draft.background,
-            onPicked: (c) {
-              onPresetChanged(null);
-              onChanged(draft.copyWith(background: c));
-            },
-          ),
+          onTap: () async {
+            final picked = await _pick(context, draft.background);
+            if (picked == null) return;
+            onPresetChanged(null);
+            onChanged(draft.copyWith(background: picked));
+          },
         ),
         _TileRow(
           label: 'Text (onBackground)',
           color: draft.onBackground,
-          onTap: () => _pickColor(
-            context,
-            title: 'Pick Text Color',
-            start: draft.onBackground,
-            onPicked: (c) {
-              onPresetChanged(null);
-              onChanged(draft.copyWith(onBackground: c));
-            },
-          ),
+          onTap: () async {
+            final picked = await _pick(context, draft.onBackground);
+            if (picked == null) return;
+            onPresetChanged(null);
+            onChanged(draft.copyWith(onBackground: picked));
+          },
         ),
         _TileRow(
           label: 'Error',
           color: draft.error,
-          onTap: () => _pickColor(
-            context,
-            title: 'Pick Error',
-            start: draft.error,
-            onPicked: (c) {
-              onPresetChanged(null);
-              onChanged(draft.copyWith(error: c));
-            },
-          ),
+          onTap: () async {
+            final picked = await _pick(context, draft.error);
+            if (picked == null) return;
+            onPresetChanged(null);
+            onChanged(draft.copyWith(error: picked));
+          },
         ),
 
-        const SizedBox(height: 12),
-
-        _ThemePreview(draft: draft),
-
-        const SizedBox(height: 6),
-
-        // Helpful info line
-        Row(
-          children: [
-            Icon(Icons.auto_awesome, size: 18, color: cs.primary),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                'Owners pick colors visually. We generate themeJson automatically.',
-                style: Theme.of(context)
-                    .textTheme
-                    .bodySmall
-                    ?.copyWith(color: cs.onSurface.withOpacity(.65)),
+        // ✅ Hide the bottom "Preview" block if requested
+        if (showPreview) ...[
+          const SizedBox(height: 12),
+          _ThemePreview(draft: draft),
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              Icon(Icons.auto_awesome, size: 18, color: cs.primary),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Owners pick colors visually. We generate themeJson automatically.',
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodySmall
+                      ?.copyWith(color: cs.onSurface.withOpacity(.65)),
+                ),
               ),
-            ),
-          ],
-        ),
+            ],
+          ),
+        ],
       ],
     );
   }
 
-  static Future<void> _pickColor(
-    BuildContext context, {
-    required String title,
-    required Color start,
-    required ValueChanged<Color> onPicked,
-  }) async {
+  // Simple color picker using showDialog (no extra deps)
+  static Future<Color?> _pick(BuildContext context, Color start) async {
     Color temp = start;
 
-    await showModalBottomSheet(
+    return showDialog<Color>(
       context: context,
-      showDragHandle: true,
-      isScrollControlled: true,
       builder: (ctx) {
-        final cs = Theme.of(ctx).colorScheme;
-        return SafeArea(
-          child: Padding(
-            padding: EdgeInsets.only(
-              left: 16,
-              right: 16,
-              top: 8,
-              bottom: MediaQuery.of(ctx).viewInsets.bottom + 16,
-            ),
+        return AlertDialog(
+          title: const Text('Pick color'),
+          content: SingleChildScrollView(
             child: Column(
-              mainAxisSize: MainAxisSize.min,
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(title,
-                          style: Theme.of(ctx).textTheme.titleMedium),
-                    ),
-                    Icon(Icons.palette_outlined, color: cs.primary),
-                  ],
+                // RGB sliders (lightweight, no packages)
+                _Slider(
+                  label: 'R',
+                  value: temp.red.toDouble(),
+                  onChanged: (v) => temp = temp.withRed(v.toInt()),
                 ),
-                const SizedBox(height: 12),
-
-                ColorPicker(
-                  pickerColor: temp,
-                  onColorChanged: (c) => temp = c,
-                  enableAlpha: false,
-                  labelTypes: const [],
-                  displayThumbColor: true,
+                _Slider(
+                  label: 'G',
+                  value: temp.green.toDouble(),
+                  onChanged: (v) => temp = temp.withGreen(v.toInt()),
                 ),
-
-                const SizedBox(height: 12),
-
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => Navigator.pop(ctx),
-                        child: const Text('Cancel'),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.pop(ctx);
-                          onPicked(temp);
-                        },
-                        child: const Text('Use'),
-                      ),
-                    ),
-                  ],
+                _Slider(
+                  label: 'B',
+                  value: temp.blue.toDouble(),
+                  onChanged: (v) => temp = temp.withBlue(v.toInt()),
+                ),
+                const SizedBox(height: 10),
+                Container(
+                  height: 40,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: temp,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: Theme.of(ctx).colorScheme.outlineVariant),
+                  ),
                 ),
               ],
             ),
           ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(ctx, temp),
+              child: const Text('Use'),
+            ),
+          ],
         );
       },
     );
   }
 }
 
-/// ----------------------------
-/// PRESET GRID
-/// ----------------------------
 class _PresetGrid extends StatelessWidget {
   final String? selectedId;
   final ValueChanged<ThemePreset> onSelect;
@@ -446,9 +391,6 @@ class _MiniSwatches extends StatelessWidget {
   }
 }
 
-/// ----------------------------
-/// TILE ROW
-/// ----------------------------
 class _TileRow extends StatelessWidget {
   final String label;
   final Color color;
@@ -500,9 +442,6 @@ class _TileRow extends StatelessWidget {
   }
 }
 
-/// ----------------------------
-/// PREVIEW
-/// ----------------------------
 class _ThemePreview extends StatelessWidget {
   final ThemeDraft draft;
   const _ThemePreview({required this.draft});
@@ -523,8 +462,6 @@ class _ThemePreview extends StatelessWidget {
         children: [
           Text('Preview', style: Theme.of(context).textTheme.titleSmall),
           const SizedBox(height: 10),
-
-          // Fake app bar
           Container(
             height: 42,
             padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -549,10 +486,7 @@ class _ThemePreview extends StatelessWidget {
               ],
             ),
           ),
-
           const SizedBox(height: 10),
-
-          // Fake body
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
@@ -623,8 +557,52 @@ class _ThemePreview extends StatelessWidget {
     );
   }
 
-  static Color _on(Color bg) {
-    // simple luminance check for readable text
-    return bg.computeLuminance() > 0.55 ? Colors.black : Colors.white;
+  static Color _on(Color bg) =>
+      bg.computeLuminance() > 0.55 ? Colors.black : Colors.white;
+}
+
+class _Slider extends StatefulWidget {
+  final String label;
+  final double value;
+  final ValueChanged<double> onChanged;
+
+  const _Slider({
+    required this.label,
+    required this.value,
+    required this.onChanged,
+  });
+
+  @override
+  State<_Slider> createState() => _SliderState();
+}
+
+class _SliderState extends State<_Slider> {
+  late double v;
+
+  @override
+  void initState() {
+    super.initState();
+    v = widget.value;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        SizedBox(width: 18, child: Text(widget.label)),
+        Expanded(
+          child: Slider(
+            min: 0,
+            max: 255,
+            value: v.clamp(0, 255),
+            onChanged: (x) {
+              setState(() => v = x);
+              widget.onChanged(x);
+            },
+          ),
+        ),
+        SizedBox(width: 40, child: Text(v.toInt().toString())),
+      ],
+    );
   }
 }
