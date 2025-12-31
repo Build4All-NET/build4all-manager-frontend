@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
 /// ----------------------------
 /// THEME DRAFT (what owner edits)
@@ -242,56 +243,57 @@ class PaletteSection extends StatelessWidget {
 
   // Simple color picker using showDialog (no extra deps)
   static Future<Color?> _pick(BuildContext context, Color start) async {
-    Color temp = start;
+  Color temp = start;
 
-    return showDialog<Color>(
-      context: context,
-      builder: (ctx) {
-        return AlertDialog(
-          title: const Text('Pick color'),
-          content: SingleChildScrollView(
-            child: Column(
-              children: [
-                // RGB sliders (lightweight, no packages)
-                _Slider(
-                  label: 'R',
-                  value: temp.red.toDouble(),
-                  onChanged: (v) => temp = temp.withRed(v.toInt()),
+  return showDialog<Color>(
+    context: context,
+    builder: (ctx) {
+      final cs = Theme.of(ctx).colorScheme;
+
+      return AlertDialog(
+        title: const Text('Pick color'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // ✅ Color wheel + saturation/value (best UX)
+              ColorPicker(
+                pickerColor: temp,
+                onColorChanged: (c) => temp = c,
+                enableAlpha: false, // set true if you want alpha
+                labelTypes: const [], // hides RGBA labels
+                portraitOnly: true,
+              ),
+
+              const SizedBox(height: 12),
+
+              // ✅ Optional: show selected color preview
+              Container(
+                height: 44,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: temp,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: cs.outlineVariant),
                 ),
-                _Slider(
-                  label: 'G',
-                  value: temp.green.toDouble(),
-                  onChanged: (v) => temp = temp.withGreen(v.toInt()),
-                ),
-                _Slider(
-                  label: 'B',
-                  value: temp.blue.toDouble(),
-                  onChanged: (v) => temp = temp.withBlue(v.toInt()),
-                ),
-                const SizedBox(height: 10),
-                Container(
-                  height: 40,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: temp,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: Theme.of(ctx).colorScheme.outlineVariant),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(ctx, temp),
-              child: const Text('Use'),
-            ),
-          ],
-        );
-      },
-    );
-  }
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, temp),
+            child: const Text('Use'),
+          ),
+        ],
+      );
+    },
+  );
+}
 }
 
 class _PresetGrid extends StatelessWidget {

@@ -1,3 +1,4 @@
+// lib/features/owner/ownerrequests/presentation/widgets/preview_phone.dart
 import 'dart:convert';
 import 'dart:io';
 
@@ -6,18 +7,7 @@ import 'package:flutter/material.dart';
 import '../../data/models/currency_model.dart';
 import 'palette_builder.dart';
 
-/// ===============================================================
-/// PhonePreview (Figma-exact)
-///
-/// ✅ Update:
-/// - Menu Type:
-///   - bottom     => bottom navigation visible
-///   - hamburger  => show hamburger icon in header + hide bottom nav
-///
-/// Backward compatibility:
-/// - If brandingJson has menuType="drawer", we treat it as hamburger.
-/// ===============================================================
-class PhonePreview extends StatefulWidget {
+class PhonePreview extends StatelessWidget {
   final String appName;
   final ThemeDraft draft;
   final File? logoFile;
@@ -41,39 +31,13 @@ class PhonePreview extends StatefulWidget {
   });
 
   @override
-  State<PhonePreview> createState() => _PhonePreviewState();
-
-  static Color _on(Color bg) =>
-      bg.computeLuminance() > 0.55 ? Colors.black : Colors.white;
-
-  static Color _headerBlue(Color primary) {
-    final lum = primary.computeLuminance();
-    if (lum < 0.35) return primary;
-    return const Color(0xFF0B6EA8);
-  }
-}
-
-class _PhonePreviewState extends State<PhonePreview> {
-  int _index = 0;
-
-  @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
 
-    final navItems = _tryParseNav(widget.navJson);
-    final menuType = _tryBrandingMenuType(widget.brandingJson); // bottom | hamburger
-
-    // safety: if nav count changes because you disabled items
-    final items = navItems.isEmpty
-        ? const [
-            _NavItem(label: 'Home', icon: Icons.home_rounded),
-            _NavItem(label: 'Explore', icon: Icons.search_rounded),
-            _NavItem(label: 'Cart', icon: Icons.shopping_cart_rounded),
-            _NavItem(label: 'Profile', icon: Icons.person_rounded),
-          ]
-        : navItems;
-
-    if (_index >= items.length) _index = 0;
+    final navItems = _tryParseNav(navJson);
+    final menuType = _tryBrandingMenuType(brandingJson); // bottom | hamburger
+    final features = _tryParseFeatures(enabledFeaturesJson);
+    final sections = _tryParseHome(homeJson);
 
     return Container(
       width: 310,
@@ -92,66 +56,72 @@ class _PhonePreviewState extends State<PhonePreview> {
           child: ClipRRect(
             borderRadius: BorderRadius.circular(20),
             child: Container(
-              color: widget.draft.background,
+              color: draft.background,
               child: Column(
                 children: [
                   // Status bar
                   Container(
                     height: 22,
-                    color: PhonePreview._headerBlue(widget.draft.primary),
+                    color: _headerBlue(draft.primary),
                     padding: const EdgeInsets.symmetric(horizontal: 10),
                     child: Row(
                       children: [
                         Text(
                           "9:41",
                           style: TextStyle(
-                            color: PhonePreview._on(
-                                PhonePreview._headerBlue(widget.draft.primary)),
+                            color: _on(_headerBlue(draft.primary)),
                             fontWeight: FontWeight.w800,
                             fontSize: 11,
                           ),
                         ),
                         const Spacer(),
                         Icon(Icons.signal_cellular_4_bar,
-                            size: 14,
-                            color: PhonePreview._on(
-                                PhonePreview._headerBlue(widget.draft.primary))),
+                            size: 14, color: _on(_headerBlue(draft.primary))),
                         const SizedBox(width: 6),
                         Icon(Icons.wifi,
-                            size: 14,
-                            color: PhonePreview._on(
-                                PhonePreview._headerBlue(widget.draft.primary))),
+                            size: 14, color: _on(_headerBlue(draft.primary))),
                         const SizedBox(width: 6),
                         Icon(Icons.battery_full,
-                            size: 14,
-                            color: PhonePreview._on(
-                                PhonePreview._headerBlue(widget.draft.primary))),
+                            size: 14, color: _on(_headerBlue(draft.primary))),
                       ],
                     ),
                   ),
 
-                  // Header (App name + icons + search) + ✅ hamburger icon support
+                  // Header
                   _Header(
-                    appName: widget.appName,
-                    headerColor: PhonePreview._headerBlue(widget.draft.primary),
+                    appName: appName,
+                    headerColor: _headerBlue(draft.primary),
                     menuType: menuType,
                   ),
 
-                  // Content
+                  // Body (dynamic sections + feature row)
                   Expanded(
                     child: _Body(
-                      draft: widget.draft,
-                      currency: widget.currency,
+                      draft: draft,
+                      currency: currency,
+                      features: features,
+                      sections: sections,
                     ),
                   ),
 
                   // Bottom nav only if menuType == bottom
                   if (menuType == 'bottom')
                     _BottomNav(
-                      draft: widget.draft,
-                      items: items,
-                      index: _index,
-                      onTap: (i) => setState(() => _index = i),
+                      draft: draft,
+                      items: navItems.isEmpty
+                          ? const [
+                              _NavItem(label: 'Home', icon: Icons.home_rounded),
+                              _NavItem(
+                                  label: 'Explore',
+                                  icon: Icons.search_rounded),
+                              _NavItem(
+                                  label: 'Cart',
+                                  icon: Icons.shopping_cart_rounded),
+                              _NavItem(
+                                  label: 'Profile',
+                                  icon: Icons.person_rounded),
+                            ]
+                          : navItems,
                     ),
                 ],
               ),
@@ -183,16 +153,41 @@ class _PhonePreviewState extends State<PhonePreview> {
     return const [];
   }
 
+  List<String> _tryParseFeatures(String enabledFeaturesJson) {
+    try {
+      final d = jsonDecode(enabledFeaturesJson);
+      if (d is List) {
+        return d.map((e) => e.toString()).toList();
+      }
+    } catch (_) {}
+    return const [];
+  }
+
+  List<_HomeSection> _tryParseHome(String homeJson) {
+    try {
+      final d = jsonDecode(homeJson);
+      if (d is List) {
+        return d.map((e) {
+          final m = (e as Map).cast<String, dynamic>();
+          return _HomeSection(
+            type: (m['type'] ?? '').toString(),
+            layout: (m['layout'] ?? '').toString(),
+            limit: int.tryParse('${m['limit']}') ?? 6,
+          );
+        }).toList();
+      }
+    } catch (_) {}
+    return const [];
+  }
+
   /// Returns: "bottom" or "hamburger"
   String _tryBrandingMenuType(String brandingJson) {
     try {
       final m = jsonDecode(brandingJson);
       if (m is Map) {
         final v = (m['menuType'] ?? '').toString().toLowerCase().trim();
-
         if (v == 'hamburger') return 'hamburger';
-        if (v == 'drawer') return 'hamburger'; // backward compatible
-
+        if (v == 'drawer') return 'hamburger'; // backward compat
         return 'bottom';
       }
     } catch (_) {}
@@ -216,16 +211,24 @@ class _PhonePreviewState extends State<PhonePreview> {
         return Icons.circle_outlined;
     }
   }
+
+  static Color _on(Color bg) =>
+      bg.computeLuminance() > 0.55 ? Colors.black : Colors.white;
+
+  static Color _headerBlue(Color primary) {
+    final lum = primary.computeLuminance();
+    if (lum < 0.35) return primary;
+    return const Color(0xFF0B6EA8);
+  }
 }
 
 /// ===============================================================
-/// Header (App name + icons + search)
-/// - If menuType == hamburger => show hamburger icon
+/// Header (hamburger supported)
 /// ===============================================================
 class _Header extends StatelessWidget {
   final String appName;
   final Color headerColor;
-  final String menuType; // bottom | hamburger
+  final String menuType;
 
   const _Header({
     required this.appName,
@@ -263,33 +266,7 @@ class _Header extends StatelessWidget {
               ),
               Icon(Icons.search_rounded, color: onHeader, size: 20),
               const SizedBox(width: 10),
-              Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Icon(Icons.shopping_cart_outlined, color: onHeader, size: 20),
-                  Positioned(
-                    right: -4,
-                    top: -4,
-                    child: Container(
-                      width: 14,
-                      height: 14,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(99),
-                      ),
-                      child: Text(
-                        "1",
-                        style: TextStyle(
-                          color: headerColor,
-                          fontSize: 9,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+              Icon(Icons.shopping_cart_outlined, color: onHeader, size: 20),
             ],
           ),
           const SizedBox(height: 10),
@@ -326,15 +303,19 @@ class _Header extends StatelessWidget {
 }
 
 /// ===============================================================
-/// Body (same as before)
+/// Body (renders features + home sections)
 /// ===============================================================
 class _Body extends StatelessWidget {
   final ThemeDraft draft;
   final CurrencyModel? currency;
+  final List<String> features;
+  final List<_HomeSection> sections;
 
   const _Body({
     required this.draft,
     required this.currency,
+    required this.features,
+    required this.sections,
   });
 
   @override
@@ -346,12 +327,63 @@ class _Body extends StatelessWidget {
         ? currency!.symbol.trim()
         : "\$";
 
+    final list = sections.isEmpty
+        ? const [
+            _HomeSection(type: 'HEADER', layout: 'FULL', limit: 1),
+            _HomeSection(type: 'SEARCH', layout: 'FULL', limit: 1),
+            _HomeSection(type: 'BANNER', layout: 'FULL', limit: 1),
+            _HomeSection(type: 'ITEM_LIST', layout: 'HORIZONTAL', limit: 6),
+          ]
+        : sections;
+
     return Container(
       color: bg,
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
       child: ListView(
         physics: const BouncingScrollPhysics(),
         children: [
+          // ✅ Features row affects preview
+          if (features.isNotEmpty) ...[
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final f in features.take(6))
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: draft.primary.withOpacity(.12),
+                      borderRadius: BorderRadius.circular(999),
+                      border:
+                          Border.all(color: draft.primary.withOpacity(.35)),
+                    ),
+                    child: Text(
+                      f,
+                      style: TextStyle(
+                        color: draft.primary,
+                        fontWeight: FontWeight.w900,
+                        fontSize: 10,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 12),
+          ],
+
+          // ✅ Render home sections in order
+          for (final s in list) ..._renderSection(context, s, on, money),
+        ],
+      ),
+    );
+  }
+
+  List<Widget> _renderSection(
+      BuildContext context, _HomeSection s, Color on, String money) {
+    switch (s.type.toUpperCase()) {
+      case 'HEADER':
+        return [
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             decoration: BoxDecoration(
@@ -380,67 +412,75 @@ class _Body extends StatelessWidget {
                 ),
                 const SizedBox(width: 10),
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Flash Sale",
-                        style: TextStyle(
-                          color: on,
-                          fontWeight: FontWeight.w900,
-                          fontSize: 13,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        "Up to 50% Off",
-                        style: TextStyle(
-                          color: on.withOpacity(.75),
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
+                  child: Text(
+                    "Welcome",
+                    style: TextStyle(
+                      color: on,
+                      fontWeight: FontWeight.w900,
+                      fontSize: 13,
+                    ),
                   ),
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      "Ends in",
-                      style: TextStyle(
-                        color: on.withOpacity(.7),
-                        fontSize: 10,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      "24:53:30",
-                      style: TextStyle(
-                        color: draft.primary,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                  ],
                 ),
               ],
             ),
           ),
           const SizedBox(height: 12),
-          const _SectionRow(
-            title: "Best Sellers",
-            onTapText: "View All",
-            icon: Icons.emoji_events_rounded,
+        ];
+
+      case 'SEARCH':
+        return [
+          Container(
+            height: 44,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.black.withOpacity(.06)),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.search_rounded,
+                    size: 18, color: on.withOpacity(.6)),
+                const SizedBox(width: 8),
+                Text(
+                  "Search...",
+                  style: TextStyle(
+                    color: on.withOpacity(.55),
+                    fontWeight: FontWeight.w700,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: 10),
-          const _SectionRow(
-            title: "New Arrivals",
-            onTapText: "View All",
-            icon: Icons.auto_awesome_rounded,
+          const SizedBox(height: 12),
+        ];
+
+      case 'BANNER':
+        return [
+          Container(
+            height: 90,
+            decoration: BoxDecoration(
+              color: draft.primary.withOpacity(.15),
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: draft.primary.withOpacity(.25)),
+            ),
+            alignment: Alignment.center,
+            child: Text(
+              "Hero Banner",
+              style: TextStyle(
+                color: draft.primary,
+                fontWeight: FontWeight.w900,
+                fontSize: 12,
+              ),
+            ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
+        ];
+
+      case 'ITEM_LIST':
+      default:
+        return [
           Row(
             children: [
               Expanded(child: _ProductCard(draft: draft, money: money)),
@@ -449,62 +489,8 @@ class _Body extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.black.withOpacity(.06)),
-            ),
-            child: const Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _TrustItem(icon: Icons.local_shipping_outlined, text: "Free Ship"),
-                _TrustItem(icon: Icons.verified_user_outlined, text: "Secure"),
-                _TrustItem(icon: Icons.history_rounded, text: "30-Day Return"),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SectionRow extends StatelessWidget {
-  final String title;
-  final String onTapText;
-  final IconData icon;
-
-  const _SectionRow({
-    required this.title,
-    required this.onTapText,
-    required this.icon,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Row(
-      children: [
-        Icon(icon, size: 18, color: cs.onSurface),
-        const SizedBox(width: 6),
-        Expanded(
-          child: Text(
-            title,
-            style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13),
-          ),
-        ),
-        Text(
-          onTapText,
-          style: TextStyle(
-            color: cs.primary,
-            fontWeight: FontWeight.w800,
-            fontSize: 11,
-          ),
-        ),
-      ],
-    );
+        ];
+    }
   }
 }
 
@@ -538,40 +524,16 @@ class _ProductCard extends StatelessWidget {
       child: Column(
         children: [
           Expanded(
-            child: Stack(
-              children: [
-                Center(
-                  child: Container(
-                    width: 64,
-                    height: 64,
-                    decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(.04),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(Icons.inventory_2_outlined, size: 26),
-                  ),
+            child: Center(
+              child: Container(
+                width: 64,
+                height: 64,
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(.04),
+                  shape: BoxShape.circle,
                 ),
-                Positioned(
-                  left: 10,
-                  top: 10,
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFF3B30),
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                    child: const Text(
-                      "Low Stock",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w900,
-                        fontSize: 9,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+                child: const Icon(Icons.inventory_2_outlined, size: 26),
+              ),
             ),
           ),
           Container(height: 1, color: Colors.black.withOpacity(.06)),
@@ -633,45 +595,14 @@ class _ProductCard extends StatelessWidget {
   }
 }
 
-class _TrustItem extends StatelessWidget {
-  final IconData icon;
-  final String text;
-
-  const _TrustItem({
-    required this.icon,
-    required this.text,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Row(
-      children: [
-        Icon(icon, size: 16, color: cs.onSurface),
-        const SizedBox(width: 6),
-        Text(
-          text,
-          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 10),
-        ),
-      ],
-    );
-  }
-}
-
-/// ===============================================================
-/// Bottom Navigation (interactive)
-/// ===============================================================
+/// Bottom nav
 class _BottomNav extends StatelessWidget {
   final ThemeDraft draft;
   final List<_NavItem> items;
-  final int index;
-  final ValueChanged<int> onTap;
 
   const _BottomNav({
     required this.draft,
     required this.items,
-    required this.index,
-    required this.onTap,
   });
 
   @override
@@ -689,13 +620,10 @@ class _BottomNav extends StatelessWidget {
         children: [
           for (int i = 0; i < items.length.clamp(0, 5); i++)
             Expanded(
-              child: InkWell(
-                onTap: () => onTap(i),
-                child: _NavButton(
-                  draft: draft,
-                  item: items[i],
-                  active: i == index,
-                ),
+              child: _NavButton(
+                draft: draft,
+                item: items[i],
+                active: i == 0,
               ),
             ),
         ],
@@ -742,4 +670,16 @@ class _NavItem {
   final String label;
   final IconData icon;
   const _NavItem({required this.label, required this.icon});
+}
+
+class _HomeSection {
+  final String type;
+  final String layout;
+  final int limit;
+
+  const _HomeSection({
+    required this.type,
+    required this.layout,
+    required this.limit,
+  });
 }

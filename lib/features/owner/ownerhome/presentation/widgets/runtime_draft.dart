@@ -1,114 +1,69 @@
+// lib/features/owner/ownerrequests/presentation/widgets/runtime_draft.dart
 import 'dart:convert';
 
-/// ===============================================================
-/// RuntimeDraft
-///
-/// What the owner configures under "Runtime Config".
-///
-/// ✅ Update:
-/// - Menu Type is now:
-///   - bottom       => bottom navigation
-///   - hamburger    => hamburger menu (instead of "drawer")
-///
-/// Note:
-/// - We keep backward compatibility:
-///   - if old JSON contains "drawer", we treat it as "hamburger".
-/// ===============================================================
+enum MenuType { bottom, hamburger }
 
-enum MenuType {
-  bottom,
-  hamburger,
-}
+class NavItemDraft {
+  final String id; // internal key (HOME, EXPLORE...)
+  final String label; // visible label
+  final String icon; // icon key string
+  final bool enabled;
 
-extension MenuTypeX on MenuType {
-  String get code => switch (this) {
-        MenuType.bottom => 'bottom',
-        MenuType.hamburger => 'hamburger',
-      };
-
-  String get uiLabel => switch (this) {
-        MenuType.bottom => 'Bottom Navigation',
-        MenuType.hamburger => 'Hamburger menu',
-      };
-
-  static MenuType fromAny(dynamic v) {
-    final s = (v ?? '').toString().toLowerCase().trim();
-    if (s == 'hamburger') return MenuType.hamburger;
-
-    // ✅ backward compatible
-    if (s == 'drawer') return MenuType.hamburger;
-
-    return MenuType.bottom;
-  }
-}
-
-class RuntimeDraft {
-  final MenuType menuType;
-
-  /// You may already have more runtime flags/fields.
-  /// Keep adding them here as needed without changing the backend contract.
-
-  const RuntimeDraft({
-    required this.menuType,
+  const NavItemDraft({
+    required this.id,
+    required this.label,
+    required this.icon,
+    required this.enabled,
   });
 
-  RuntimeDraft copyWith({
-    MenuType? menuType,
+  NavItemDraft copyWith({
+    String? id,
+    String? label,
+    String? icon,
+    bool? enabled,
   }) {
-    return RuntimeDraft(
-      menuType: menuType ?? this.menuType,
+    return NavItemDraft(
+      id: id ?? this.id,
+      label: label ?? this.label,
+      icon: icon ?? this.icon,
+      enabled: enabled ?? this.enabled,
     );
   }
+}
 
-  /// Output container used by OwnerRequestScreen to send strings to backend
-  RuntimeJsonOut toJsonOut() {
-    // navJson/homeJson/enabledFeaturesJson can remain your existing logic.
-    // Here we keep them minimal and stable.
-    final navJson = jsonEncode([
-      {"label": "Home", "icon": "home"},
-      {"label": "Explore", "icon": "search"},
-      {"label": "Cart", "icon": "shopping_cart"},
-      {"label": "Profile", "icon": "person"},
-    ]);
+class HomeSectionDraft {
+  final String id; // internal key
+  final String type; // HEADER, SEARCH, BANNER, CATEGORY_CHIPS, ITEM_LIST
+  final String layout; // HORIZONTAL/GRID/etc
+  final int limit;
+  final bool enabled;
+  final String? feature;
 
-    final homeJson = jsonEncode({
-      "sections": [
-        {"code": "flash_sale"},
-        {"code": "best_sellers"},
-        {"code": "new_arrivals"},
-      ]
-    });
+  const HomeSectionDraft({
+    required this.id,
+    required this.type,
+    required this.layout,
+    required this.limit,
+    required this.enabled,
+    this.feature,
+  });
 
-    final enabledFeaturesJson = jsonEncode([
-      "catalog",
-      "cart",
-      "orders",
-      "profile",
-    ]);
-
-    // ✅ IMPORTANT: brandingJson now uses "hamburger"
-    // instead of "drawer".
-    final brandingJson = jsonEncode({
-      "menuType": menuType.code, // bottom | hamburger
-    });
-
-    return RuntimeJsonOut(
-      navJson: navJson,
-      homeJson: homeJson,
-      enabledFeaturesJson: enabledFeaturesJson,
-      brandingJson: brandingJson,
+  HomeSectionDraft copyWith({
+    String? id,
+    String? type,
+    String? layout,
+    int? limit,
+    bool? enabled,
+    String? feature,
+  }) {
+    return HomeSectionDraft(
+      id: id ?? this.id,
+      type: type ?? this.type,
+      layout: layout ?? this.layout,
+      limit: limit ?? this.limit,
+      enabled: enabled ?? this.enabled,
+      feature: feature ?? this.feature,
     );
-  }
-
-  /// Optional: parse from existing json if you ever load saved runtime config
-  static RuntimeDraft fromBrandingJson(String brandingJson) {
-    try {
-      final d = jsonDecode(brandingJson);
-      if (d is Map) {
-        return RuntimeDraft(menuType: MenuTypeX.fromAny(d['menuType']));
-      }
-    } catch (_) {}
-    return RuntimeDefaults.defaults();
   }
 }
 
@@ -126,11 +81,140 @@ class RuntimeJsonOut {
   });
 }
 
-/// Defaults holder
-class RuntimeDefaults {
-  static RuntimeDraft defaults() {
-    return const RuntimeDraft(
-      menuType: MenuType.bottom,
+class RuntimeDraft {
+  final MenuType menuType;
+
+  /// Set of enabled feature codes (ITEMS, BOOKING, REVIEWS, ORDERS, COUPONS, NOTIFICATIONS)
+  final Set<String> enabledFeatures;
+
+  /// Navigation config for preview + submit
+  final List<NavItemDraft> navItems;
+
+  /// Home sections config for preview + submit
+  final List<HomeSectionDraft> homeSections;
+
+  const RuntimeDraft({
+    required this.menuType,
+    required this.enabledFeatures,
+    required this.navItems,
+    required this.homeSections,
+  });
+
+  RuntimeDraft copyWith({
+    MenuType? menuType,
+    Set<String>? enabledFeatures,
+    List<NavItemDraft>? navItems,
+    List<HomeSectionDraft>? homeSections,
+  }) {
+    return RuntimeDraft(
+      menuType: menuType ?? this.menuType,
+      enabledFeatures: enabledFeatures ?? this.enabledFeatures,
+      navItems: navItems ?? this.navItems,
+      homeSections: homeSections ?? this.homeSections,
     );
   }
+
+  RuntimeJsonOut toJsonOut() {
+    // ✅ Only enabled nav items are exported -> affects preview bottom nav
+    final nav = navItems
+        .where((x) => x.enabled)
+        .map((x) => {
+              "id": x.id,
+              "label": x.label,
+              "icon": x.icon,
+            })
+        .toList();
+
+    // ✅ Only enabled home sections are exported -> affects preview
+    final home = homeSections
+        .where((x) => x.enabled)
+        .map((x) => {
+              "type": x.type,
+              "layout": x.layout,
+              "limit": x.limit,
+              if (x.feature != null) "feature": x.feature,
+            })
+        .toList();
+
+    // ✅ Export enabled features list
+    final features = enabledFeatures.toList()..sort();
+
+    // ✅ BrandingJson is used by PhonePreview for menuType
+    final branding = {
+      "menuType": menuType == MenuType.hamburger ? "hamburger" : "bottom",
+    };
+
+    return RuntimeJsonOut(
+      navJson: jsonEncode(nav),
+      homeJson: jsonEncode(home),
+      enabledFeaturesJson: jsonEncode(features),
+      brandingJson: jsonEncode(branding),
+    );
+  }
+}
+
+class RuntimeDefaults {
+  static RuntimeDraft defaults() {
+    return RuntimeDraft(
+      menuType: MenuType.bottom,
+      enabledFeatures: {
+        "ITEMS",
+        "BOOKING",
+        "REVIEWS",
+        "ORDERS",
+        "COUPONS",
+        "NOTIFICATIONS",
+      },
+      navItems: const [
+        NavItemDraft(id: "HOME", label: "Home", icon: "home", enabled: true),
+        NavItemDraft(
+            id: "EXPLORE", label: "Explore", icon: "search", enabled: true),
+        NavItemDraft(id: "CART", label: "Cart", icon: "cart", enabled: true),
+        NavItemDraft(
+            id: "PROFILE", label: "Profile", icon: "profile", enabled: true),
+      ],
+      homeSections: const [
+        HomeSectionDraft(
+          id: "HEADER",
+          type: "HEADER",
+          layout: "FULL",
+          limit: 1,
+          enabled: true,
+        ),
+        HomeSectionDraft(
+          id: "SEARCH",
+          type: "SEARCH",
+          layout: "FULL",
+          limit: 1,
+          enabled: true,
+        ),
+        HomeSectionDraft(
+          id: "BANNER",
+          type: "BANNER",
+          layout: "FULL",
+          limit: 1,
+          enabled: true,
+        ),
+        HomeSectionDraft(
+          id: "CATEGORY_CHIPS",
+          type: "CATEGORY_CHIPS",
+          layout: "HORIZONTAL",
+          limit: 8,
+          enabled: true,
+        ),
+        HomeSectionDraft(
+          id: "ITEM_LIST",
+          type: "ITEM_LIST",
+          layout: "HORIZONTAL",
+          limit: 10,
+          enabled: true,
+          feature: "ITEMS",
+        ),
+      ],
+    );
+  }
+}
+
+extension MenuTypeUi on MenuType {
+  String get uiLabel => this == MenuType.hamburger ? "Hamburger" : "Bottom";
 }

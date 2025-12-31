@@ -1,11 +1,12 @@
+// lib/features/owner/ownerrequests/presentation/widgets/runtime_draft.dart
 import 'dart:convert';
 
 enum MenuType { bottom, hamburger }
 
 class NavItemDraft {
-  final String id;
-  final String label;
-  final String icon; // "home" | "search" | "cart" | "profile" | ...
+  final String id; // internal key (HOME, EXPLORE...)
+  final String label; // visible label
+  final String icon; // icon key string
   final bool enabled;
 
   const NavItemDraft({
@@ -31,37 +32,37 @@ class NavItemDraft {
 }
 
 class HomeSectionDraft {
-  final String id; // internal only (we will hide in UI)
-  final String type; // HEADER/BANNER/ITEM_LIST...
-  final String layout; // carousel/grid/hero...
-  final String? feature; // optional: ITEMS/BOOKING...
+  final String id; // internal key
+  final String type; // HEADER, SEARCH, BANNER, CATEGORY_CHIPS, ITEM_LIST
+  final String layout; // HORIZONTAL/GRID/etc
   final int limit;
   final bool enabled;
+  final String? feature;
 
   const HomeSectionDraft({
     required this.id,
     required this.type,
     required this.layout,
-    this.feature,
     required this.limit,
     required this.enabled,
+    this.feature,
   });
 
   HomeSectionDraft copyWith({
     String? id,
     String? type,
     String? layout,
-    String? feature,
     int? limit,
     bool? enabled,
+    String? feature,
   }) {
     return HomeSectionDraft(
       id: id ?? this.id,
       type: type ?? this.type,
       layout: layout ?? this.layout,
-      feature: feature ?? this.feature,
       limit: limit ?? this.limit,
       enabled: enabled ?? this.enabled,
+      feature: feature ?? this.feature,
     );
   }
 }
@@ -83,18 +84,17 @@ class RuntimeJsonOut {
 class RuntimeDraft {
   final MenuType menuType;
 
-  // Branding flags (still in payload even if preview doesn't use them)
-  final String splashMode;
-  final bool showSearchOnExplore;
-
+  /// Set of enabled feature codes (ITEMS, BOOKING, REVIEWS, ORDERS, COUPONS, NOTIFICATIONS)
   final Set<String> enabledFeatures;
+
+  /// Navigation config for preview + submit
   final List<NavItemDraft> navItems;
+
+  /// Home sections config for preview + submit
   final List<HomeSectionDraft> homeSections;
 
   const RuntimeDraft({
     required this.menuType,
-    required this.splashMode,
-    required this.showSearchOnExplore,
     required this.enabledFeatures,
     required this.navItems,
     required this.homeSections,
@@ -102,63 +102,53 @@ class RuntimeDraft {
 
   RuntimeDraft copyWith({
     MenuType? menuType,
-    String? splashMode,
-    bool? showSearchOnExplore,
     Set<String>? enabledFeatures,
     List<NavItemDraft>? navItems,
     List<HomeSectionDraft>? homeSections,
   }) {
     return RuntimeDraft(
       menuType: menuType ?? this.menuType,
-      splashMode: splashMode ?? this.splashMode,
-      showSearchOnExplore: showSearchOnExplore ?? this.showSearchOnExplore,
       enabledFeatures: enabledFeatures ?? this.enabledFeatures,
       navItems: navItems ?? this.navItems,
       homeSections: homeSections ?? this.homeSections,
     );
   }
 
-  /// ✅ IMPORTANT:
-  /// - navJson will contain ONLY enabled items so that uncheck => disappears from preview menu.
-  /// - brandingJson will output menuType as "bottom" or "hamburger"
   RuntimeJsonOut toJsonOut() {
-    final enabledNav = navItems.where((e) => e.enabled).toList();
+    // ✅ Only enabled nav items are exported -> affects preview bottom nav
+    final nav = navItems
+        .where((x) => x.enabled)
+        .map((x) => {
+              "id": x.id,
+              "label": x.label,
+              "icon": x.icon,
+            })
+        .toList();
 
-    final navJson = jsonEncode(
-      enabledNav
-          .map((e) => {
-                "id": e.id,
-                "label": e.label,
-                "icon": e.icon,
-              })
-          .toList(),
-    );
+    // ✅ Only enabled home sections are exported -> affects preview
+    final home = homeSections
+        .where((x) => x.enabled)
+        .map((x) => {
+              "type": x.type,
+              "layout": x.layout,
+              "limit": x.limit,
+              if (x.feature != null) "feature": x.feature,
+            })
+        .toList();
 
-    final brandingJson = jsonEncode({
-      "menuType": menuType == MenuType.bottom ? "bottom" : "hamburger",
-      "splashMode": splashMode,
-      "showSearchOnExplore": showSearchOnExplore,
-    });
+    // ✅ Export enabled features list
+    final features = enabledFeatures.toList()..sort();
 
-    final enabledFeaturesJson = jsonEncode(enabledFeatures.toList());
-
-    final enabledHome = homeSections.where((s) => s.enabled).toList();
-    final homeJson = jsonEncode({
-      "sections": enabledHome
-          .map((s) => {
-                "type": s.type,
-                "layout": s.layout,
-                "feature": s.feature,
-                "limit": s.limit,
-              })
-          .toList()
-    });
+    // ✅ BrandingJson is used by PhonePreview for menuType
+    final branding = {
+      "menuType": menuType == MenuType.hamburger ? "hamburger" : "bottom",
+    };
 
     return RuntimeJsonOut(
-      navJson: navJson,
-      homeJson: homeJson,
-      enabledFeaturesJson: enabledFeaturesJson,
-      brandingJson: brandingJson,
+      navJson: jsonEncode(nav),
+      homeJson: jsonEncode(home),
+      enabledFeaturesJson: jsonEncode(features),
+      brandingJson: jsonEncode(branding),
     );
   }
 }
@@ -167,61 +157,64 @@ class RuntimeDefaults {
   static RuntimeDraft defaults() {
     return RuntimeDraft(
       menuType: MenuType.bottom,
-      splashMode: "auto",
-      showSearchOnExplore: true,
-      enabledFeatures: {"ITEMS", "BOOKING", "REVIEWS", "ORDERS"},
+      enabledFeatures: {
+        "ITEMS",
+        "BOOKING",
+        "REVIEWS",
+        "ORDERS",
+        "COUPONS",
+        "NOTIFICATIONS",
+      },
       navItems: const [
+        NavItemDraft(id: "HOME", label: "Home", icon: "home", enabled: true),
         NavItemDraft(
-          id: "HOME",
-          label: "Home",
-          icon: "home",
-          enabled: true,
-        ),
+            id: "EXPLORE", label: "Explore", icon: "search", enabled: true),
+        NavItemDraft(id: "CART", label: "Cart", icon: "cart", enabled: true),
         NavItemDraft(
-          id: "EXPLORE",
-          label: "Explore",
-          icon: "search",
-          enabled: true,
-        ),
-        NavItemDraft(
-          id: "CART",
-          label: "Cart",
-          icon: "cart",
-          enabled: true,
-        ),
-        NavItemDraft(
-          id: "PROFILE",
-          label: "Profile",
-          icon: "profile",
-          enabled: true,
-        ),
+            id: "PROFILE", label: "Profile", icon: "profile", enabled: true),
       ],
       homeSections: const [
         HomeSectionDraft(
-          id: "S1",
+          id: "HEADER",
+          type: "HEADER",
+          layout: "FULL",
+          limit: 1,
+          enabled: true,
+        ),
+        HomeSectionDraft(
+          id: "SEARCH",
+          type: "SEARCH",
+          layout: "FULL",
+          limit: 1,
+          enabled: true,
+        ),
+        HomeSectionDraft(
+          id: "BANNER",
           type: "BANNER",
-          layout: "hero",
-          feature: null,
-          limit: 3,
+          layout: "FULL",
+          limit: 1,
           enabled: true,
         ),
         HomeSectionDraft(
-          id: "S2",
-          type: "ITEM_LIST",
-          layout: "carousel",
-          feature: "ITEMS",
-          limit: 10,
-          enabled: true,
-        ),
-        HomeSectionDraft(
-          id: "S3",
+          id: "CATEGORY_CHIPS",
           type: "CATEGORY_CHIPS",
-          layout: "chips",
-          feature: null,
+          layout: "HORIZONTAL",
           limit: 8,
           enabled: true,
+        ),
+        HomeSectionDraft(
+          id: "ITEM_LIST",
+          type: "ITEM_LIST",
+          layout: "HORIZONTAL",
+          limit: 10,
+          enabled: true,
+          feature: "ITEMS",
         ),
       ],
     );
   }
+}
+
+extension MenuTypeUi on MenuType {
+  String get uiLabel => this == MenuType.hamburger ? "Hamburger" : "Bottom";
 }
