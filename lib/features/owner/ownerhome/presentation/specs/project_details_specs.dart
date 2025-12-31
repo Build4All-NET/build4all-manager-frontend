@@ -88,10 +88,10 @@ ThemedProjectDetailsSpec themedSpecFor(BuildContext context, String projectId) {
   final cs = Theme.of(context).colorScheme;
 
   Color roleAccent(String id) => switch (id) {
-        'activities' => cs.primary,
-        'ecommerce' => cs.tertiaryContainer,
-        'gym' => cs.secondaryContainer,
-        'services' => cs.secondary,
+        //'activities' => cs.primary,
+        'ecommerce' => cs.secondaryContainer,
+       // 'gym' => cs.secondaryContainer,
+       // 'services' => cs.secondary,
         _ => cs.primary,
       };
 
@@ -165,7 +165,7 @@ ThemedProjectDetailsSpec themedSpecFor(BuildContext context, String projectId) {
         ],
       );
 
-    case 'gym':
+    /* case 'gym':
       return ThemedProjectDetailsSpec(
         id: 'gym',
         emoji: '🏋️',
@@ -308,6 +308,8 @@ ThemedProjectDetailsSpec themedSpecFor(BuildContext context, String projectId) {
           InsightLine('⭐️', l.owner_proj_details_act_i1),
           InsightLine('📈', l.owner_proj_details_act_i2),
         ],
-      );
+      ); */
+    default:
+      throw Exception('Unknown projectId: $projectId');
   }
 }

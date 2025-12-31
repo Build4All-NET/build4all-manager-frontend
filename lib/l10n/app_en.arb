@@ -308,7 +308,7 @@
   "owner_proj_details_why": "Why teams love this template",
   "owner_proj_details_primaryCta": "Request this app",
   "owner_proj_details_secondaryCta": "Preview demo",
-  "owner_proj_details_create_title": "Create my project",
+  "owner_proj_details_create_title": "Create my App",
   "owner_proj_details_create_subtitle": "Launch your customized version in minutes.",
   "stat_reviews_hint": "reviews",
   "stat_active_hint": "active deployments",
@@ -461,7 +461,7 @@
   },
 
   "owner_request_submit_ready": "Ready to submit?",
-  "owner_request_submit_desc": "Triggers CI and generates build artifacts.",
+
   "owner_request_submitting": "Submitting…",
   "owner_request_submit_success": "Request submitted ✅ CI started. APK soon 🚀",
 

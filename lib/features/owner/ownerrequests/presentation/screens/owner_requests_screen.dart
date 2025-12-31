@@ -68,7 +68,8 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
 
   final _formKey = GlobalKey<FormState>();
 
-  late final TextEditingController _projectIdCtrl; // still used for submit (hidden from UI)
+  late final TextEditingController
+      _projectIdCtrl; // still used for submit (hidden from UI)
   late final TextEditingController _appNameCtrl;
   final _notesCtrl = TextEditingController();
   final _apiOverrideCtrl = TextEditingController();
@@ -598,7 +599,8 @@ class _CustomizeColumn extends StatelessWidget {
   final CurrencyModel? selectedCurrency;
   final VoidCallback onPickCurrency;
 
-  final TextEditingController projectIdCtrl; // hidden in UI, still required for submit
+  final TextEditingController
+      projectIdCtrl; // hidden in UI, still required for submit
   final TextEditingController appNameCtrl;
   final TextEditingController notesCtrl;
   final TextEditingController apiOverrideCtrl;
@@ -660,13 +662,11 @@ class _CustomizeColumn extends StatelessWidget {
               ?.copyWith(fontWeight: FontWeight.w900),
         ),
         const SizedBox(height: 10),
-
         _PillTabs(
           selected: panel,
           onChanged: onPanelChanged,
         ),
         const SizedBox(height: 12),
-
         AnimatedSwitcher(
           duration: const Duration(milliseconds: 180),
           child: switch (panel) {
@@ -684,7 +684,6 @@ class _CustomizeColumn extends StatelessWidget {
                 onPickLogo: onPickLogo,
                 onRemoveLogo: onRemoveLogo,
               ),
-
             _Panel.palette => IgnorePointer(
                 key: const ValueKey('palette'),
                 ignoring: loading,
@@ -702,7 +701,6 @@ class _CustomizeColumn extends StatelessWidget {
                   ),
                 ),
               ),
-
             _Panel.runtime => IgnorePointer(
                 key: const ValueKey('runtime'),
                 ignoring: loading,
@@ -794,9 +792,18 @@ class _PillTabs extends StatelessWidget {
       ),
       child: Row(
         children: [
-          tab(value: _Panel.identity, label: 'Identity', icon: Icons.badge_outlined),
-          tab(value: _Panel.palette, label: 'Palette', icon: Icons.palette_outlined),
-          tab(value: _Panel.runtime, label: 'Runtime', icon: Icons.tune_rounded),
+          tab(
+              value: _Panel.identity,
+              label: 'Identity',
+              icon: Icons.badge_outlined),
+          tab(
+              value: _Panel.palette,
+              label: 'Palette',
+              icon: Icons.palette_outlined),
+          tab(
+              value: _Panel.runtime,
+              label: 'Runtime',
+              icon: Icons.tune_rounded),
         ],
       ),
     );
@@ -859,7 +866,8 @@ class _IdentityPanel extends StatelessWidget {
             isDense: true,
             filled: true,
             fillColor: cs.surfaceContainerHighest,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
               borderSide: BorderSide(color: cs.outlineVariant),
@@ -870,7 +878,8 @@ class _IdentityPanel extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(color: Color(0xFF16A34A), width: 1.5),
+              borderSide:
+                  const BorderSide(color: Color(0xFF16A34A), width: 1.5),
             ),
           ),
         ),
@@ -903,7 +912,8 @@ class _IdentityPanel extends StatelessWidget {
                 prefixIcon: Icon(Icons.apps_rounded, size: 18, color: hint),
                 hintText: 'My Shop',
               ),
-              validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
+              validator: (v) =>
+                  (v == null || v.trim().isEmpty) ? 'Required' : null,
             ),
 
             const SizedBox(height: 14),
@@ -984,7 +994,8 @@ class _IdentityPanel extends StatelessWidget {
               borderRadius: BorderRadius.circular(14),
               onTap: loading ? null : onPickCurrency,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                 decoration: BoxDecoration(
                   color: cs.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(14),
@@ -1101,7 +1112,7 @@ class _SubmitBar extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    l.owner_request_submit_desc,
+                    "",
                     style: t.bodySmall?.copyWith(
                       color: cs.onSurface.withOpacity(.65),
                     ),

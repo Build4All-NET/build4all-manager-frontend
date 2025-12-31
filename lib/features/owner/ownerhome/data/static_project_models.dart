@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
+// If you want to force tint here too later, uncomment this import.
+// import 'package:build4all_manager/shared/themes/theme_palette.dart';
 
 class ProjectTemplate {
   final int id; // numeric id used by backend & dropdown
-  final String
-      kind; // 'activities' | 'ecommerce' | 'gym' | 'services' (for theming/UI)
+  final String kind; // 'activities' | 'ecommerce' | 'gym' | 'services'
   final String titleKey; // l10n key
   final String descKey; // l10n key
   final String ctaKey; // l10n key
-  final String
-      route; // e.g. '/owner/projects' (list), details use /owner/project/:id
-  final IconData icon; // card icon
-  final Color? tint; // optional, card tint (falls back to theme if null)
+  final String route;
+  final IconData icon;
+  final Color? tint;
 
   const ProjectTemplate({
     required this.id,
@@ -26,15 +26,7 @@ class ProjectTemplate {
 
 /// Local-only static list (no backend).
 const projectTemplates = <ProjectTemplate>[
-  ProjectTemplate(
-    id: 1,
-    kind: 'activities',
-    titleKey: 'owner_proj_activities_title',
-    descKey: 'owner_proj_activities_desc',
-    ctaKey: 'owner_proj_open',
-    route: '/owner/projects',
-    icon: Icons.event_available_rounded,
-  ),
+  // ✅ ONLY SHOW E-COMMERCE NOW:
   ProjectTemplate(
     id: 2,
     kind: 'ecommerce',
@@ -43,6 +35,23 @@ const projectTemplates = <ProjectTemplate>[
     ctaKey: 'owner_proj_open',
     route: '/owner/projects',
     icon: Icons.shopping_bag_rounded,
+    // ✅ Optional: force tint right here too (uncomment import above)
+    // tint: ProjectPalette.gym,
+  ),
+
+  /* ---------------------------------------------------------
+   * ⛔ Disabled for now (DON'T DELETE)
+   * Uncomment later when you want them back
+   * ---------------------------------------------------------
+
+  ProjectTemplate(
+    id: 1,
+    kind: 'activities',
+    titleKey: 'owner_proj_activities_title',
+    descKey: 'owner_proj_activities_desc',
+    ctaKey: 'owner_proj_open',
+    route: '/owner/projects',
+    icon: Icons.event_available_rounded,
   ),
   ProjectTemplate(
     id: 3,
@@ -62,4 +71,6 @@ const projectTemplates = <ProjectTemplate>[
     route: '/owner/projects',
     icon: Icons.home_repair_service_rounded,
   ),
+
+  --------------------------------------------------------- */
 ];

@@ -1,13 +1,13 @@
-import 'package:build4all_manager/features/owner/ownerhome/presentation/specs/project_details_specs.dart';
 import 'package:build4all_manager/shared/themes/app_theme.dart';
 import 'package:build4all_manager/shared/themes/theme_palette.dart';
-import 'package:build4all_manager/shared/widgets/app_toast.dart'; // ✅ NEW
+import 'package:build4all_manager/shared/widgets/app_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:build4all_manager/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../data/static_project_models.dart';
+import '../specs/project_details_specs.dart';
 
 class OwnerProjectDetailsScreen extends StatelessWidget {
   final ProjectTemplate tpl;
@@ -27,7 +27,12 @@ class OwnerProjectDetailsScreen extends StatelessWidget {
     final width = MediaQuery.of(context).size.width;
 
     final spec = themedSpecFor(context, tpl.kind);
-    final tint = tpl.tint ?? _projectTint(tpl.kind, cs);
+
+    // ✅ FORCE ECOMMERCE TO GYM GREEN (DETAILS TOO)
+    final tint = (tpl.kind.toLowerCase() == 'ecommerce')
+        ? ProjectPalette.gym
+        : (tpl.tint ?? _projectTint(tpl.kind, cs));
+
     final projectTitle = _projectTitle(tpl, l10n);
 
     final pagePad = width >= 480
@@ -144,7 +149,7 @@ class OwnerProjectDetailsScreen extends StatelessWidget {
               ),
             ),
 
-            // CTA (✅ uses AppToast + GoRouter)
+            // CTA
             SliverToBoxAdapter(
               child: Padding(
                 padding: EdgeInsets.fromLTRB(
@@ -168,7 +173,7 @@ class OwnerProjectDetailsScreen extends StatelessWidget {
                     context.push(
                       '/owner/requests',
                       extra: {
-                        'projectId': initialProjectId, // ✅ real DB id
+                        'projectId': initialProjectId,
                         'appName': initialAppName,
                       },
                     );
@@ -294,7 +299,6 @@ class OwnerProjectDetailsScreen extends StatelessWidget {
 
 /* ---------------- helpers ---------------- */
 
-
 String? _prefillName(String id) {
   switch (id) {
     case 'activities':
@@ -314,12 +318,16 @@ Color _projectTint(String kind, ColorScheme cs) {
   switch (kind) {
     case 'activities':
       return ProjectPalette.activities;
+
     case 'ecommerce':
-      return ProjectPalette.ecommerce;
+      return ProjectPalette.gym; // ✅ ecommerce = gym green
+
     case 'gym':
       return ProjectPalette.gym;
+
     case 'services':
       return ProjectPalette.services;
+
     default:
       return cs.primary;
   }

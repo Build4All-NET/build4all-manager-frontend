@@ -21,7 +21,10 @@ class ProjectTemplateCard extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
 
-    final tint = tpl.tint ?? _pickTintFor(tpl.kind, cs);
+    // ✅ FORCE ECOMMERCE TO GYM GREEN (even if tpl.tint exists)
+    final tint = (tpl.kind.toLowerCase() == 'ecommerce')
+        ? ProjectPalette.gym
+        : (tpl.tint ?? _pickTintFor(tpl.kind, cs));
 
     final mutedFg = cs.onSurface.withOpacity(isAvailable ? .72 : .45);
     final borderColor = isAvailable
@@ -144,7 +147,7 @@ class ProjectTemplateCard extends StatelessWidget {
       case 'activities':
         return ProjectPalette.activities;
       case 'ecommerce':
-        return ProjectPalette.ecommerce;
+        return ProjectPalette.gym; // ✅ ecommerce follows gym green
       case 'gym':
         return ProjectPalette.gym;
       case 'services':
@@ -160,20 +163,25 @@ class ProjectTemplateCard extends StatelessWidget {
         return l10n.owner_proj_activities_title;
       case 'owner_proj_activities_desc':
         return l10n.owner_proj_activities_desc;
+
       case 'owner_proj_ecom_title':
         return l10n.owner_proj_ecom_title;
       case 'owner_proj_ecom_desc':
         return l10n.owner_proj_ecom_desc;
+
       case 'owner_proj_gym_title':
         return l10n.owner_proj_gym_title;
       case 'owner_proj_gym_desc':
         return l10n.owner_proj_gym_desc;
+
       case 'owner_proj_services_title':
         return l10n.owner_proj_services_title;
       case 'owner_proj_services_desc':
         return l10n.owner_proj_services_desc;
+
       case 'owner_proj_open':
         return l10n.owner_proj_open;
+
       default:
         return key;
     }
