@@ -531,5 +531,51 @@
   },
   "common_loading": "Loading...",
   "common_forbidden": "Forbidden",
-  "common_unauthorized": "Unauthorized"
+  "common_unauthorized": "Unauthorized",
+    "retry": "Retry",
+  "search_owners_hint": "Search owners…",
+  "search_apps_hint": "Search apps…",
+  "empty_owners": "No owners found",
+  "empty_owner_apps": "No apps found for this owner",
+  "unnamed_app": "(Unnamed App)",
+  "toast_app_selected": "App: {slug}",
+  "app_slug_status": "slug: {slug} • {status}",
+  "apps_count": "{count} apps",
+
+  "@toast_app_selected": { "placeholders": { "slug": {} } },
+  "@app_slug_status": { "placeholders": { "slug": {}, "status": {} } },
+  "@apps_count": { "placeholders": { "count": {} } },
+   "ordersLabel": "Orders",
+  "orderLabel": "Order",
+
+  "noOrdersTitle": "No orders",
+  "noOrdersSubtitle": "No orders found for this app with the current filters.",
+
+  "retryLabel": "Retry",
+
+  "allTimeLabel": "All time",
+  "dashboardLabel": "Dashboard",
+  "last7DaysLabel": "Last 7 days",
+  "last30DaysLabel": "Last 30 days",
+  "clearLabel": "Clear",
+
+  "grossSalesLabel": "Gross sales",
+  "paidLabel": "Paid",
+  "outstandingLabel": "Outstanding",
+  "avgOrderLabel": "Average order value",
+  "fullyPaidRateLabel": "Fully paid",
+  "statusBreakdownLabel": "Status breakdown",
+  "paidRevenueLast7DaysLabel": "Paid revenue (last 7 days)",
+
+  "filterAllLabel": "All",
+  "filterPendingLabel": "Pending",
+  "filterCompletedLabel": "Completed",
+  "filterCanceledLabel": "Canceled",
+  "filterRejectedLabel": "Rejected",
+  "filterRefundedLabel": "Refunded",
+
+  "itemsLabel": "Items",
+  "totalLabel": "Total",
+  "remainingLabel": "Remaining",
+  "fullyPaidShortLabel": "Fully paid"
 }

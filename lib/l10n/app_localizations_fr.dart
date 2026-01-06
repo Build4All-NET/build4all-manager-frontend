@@ -997,9 +997,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get owner_request_submit_ready => 'Prêt à envoyer ?';
 
   @override
-  String get owner_request_submit_desc => 'Déclenche le CI et génère les builds.';
-
-  @override
   String get owner_request_submit_success => 'Demande envoyée ✅ CI lancé. APK bientôt 🚀';
 
   @override
@@ -1130,4 +1127,118 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get common_unauthorized => 'Non autorisé';
+
+  @override
+  String get retry => 'Réessayer';
+
+  @override
+  String get search_owners_hint => 'Rechercher des propriétaires…';
+
+  @override
+  String get search_apps_hint => 'Rechercher des apps…';
+
+  @override
+  String get empty_owners => 'Aucun propriétaire trouvé';
+
+  @override
+  String get empty_owner_apps => 'Aucune app pour ce propriétaire';
+
+  @override
+  String get unnamed_app => '(App sans nom)';
+
+  @override
+  String toast_app_selected(Object slug) {
+    return 'App : $slug';
+  }
+
+  @override
+  String app_slug_status(Object slug, Object status) {
+    return 'slug : $slug • $status';
+  }
+
+  @override
+  String apps_count(Object count) {
+    return '$count apps';
+  }
+
+  @override
+  String get ordersLabel => 'Orders';
+
+  @override
+  String get orderLabel => 'Order';
+
+  @override
+  String get noOrdersTitle => 'No orders';
+
+  @override
+  String get noOrdersSubtitle => 'No orders found for this app with the current filters.';
+
+  @override
+  String get retryLabel => 'Retry';
+
+  @override
+  String get allTimeLabel => 'All time';
+
+  @override
+  String get dashboardLabel => 'Dashboard';
+
+  @override
+  String get last7DaysLabel => 'Last 7 days';
+
+  @override
+  String get last30DaysLabel => 'Last 30 days';
+
+  @override
+  String get clearLabel => 'Clear';
+
+  @override
+  String get grossSalesLabel => 'Gross sales';
+
+  @override
+  String get paidLabel => 'Paid';
+
+  @override
+  String get outstandingLabel => 'Outstanding';
+
+  @override
+  String get avgOrderLabel => 'Average order value';
+
+  @override
+  String get fullyPaidRateLabel => 'Fully paid';
+
+  @override
+  String get statusBreakdownLabel => 'Status breakdown';
+
+  @override
+  String get paidRevenueLast7DaysLabel => 'Paid revenue (last 7 days)';
+
+  @override
+  String get filterAllLabel => 'All';
+
+  @override
+  String get filterPendingLabel => 'Pending';
+
+  @override
+  String get filterCompletedLabel => 'Completed';
+
+  @override
+  String get filterCanceledLabel => 'Canceled';
+
+  @override
+  String get filterRejectedLabel => 'Rejected';
+
+  @override
+  String get filterRefundedLabel => 'Refunded';
+
+  @override
+  String get itemsLabel => 'Items';
+
+  @override
+  String get totalLabel => 'Total';
+
+  @override
+  String get remainingLabel => 'Remaining';
+
+  @override
+  String get fullyPaidShortLabel => 'Fully paid';
 }

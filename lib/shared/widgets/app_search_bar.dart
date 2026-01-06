@@ -1,9 +1,3 @@
-// ===== Flutter 3.35.x =====
-// Single-source search widgets with no duplicate back arrows.
-// - If showBack=true => ONLY a back icon is shown inside the field.
-// - If showBack=false => ONLY a search icon is shown inside the field.
-// AppSearchAppBar disables AppBar's default leading to avoid a second arrow.
-
 import 'dart:async';
 import 'package:flutter/material.dart';
 
@@ -14,33 +8,32 @@ class AppSearchBar extends StatefulWidget {
   final ValueChanged<String>? onSubmitted;
   final VoidCallback? onClear;
   final VoidCallback? onFilterPressed;
+
   final bool autofocus;
   final bool readOnly;
   final int debounceMs;
-  final EdgeInsetsGeometry? margin;
-  final bool filled;
+
   final bool showBack;
   final VoidCallback? onBack;
-  final double? borderRadius;
-  final String? semanticLabel;
+
+  final EdgeInsetsGeometry? margin;
+  final double? height;
 
   const AppSearchBar({
     super.key,
     this.initialQuery,
-    this.hint = 'Search…',
+    required this.hint,
     this.onQueryChanged,
     this.onSubmitted,
     this.onClear,
     this.onFilterPressed,
     this.autofocus = false,
     this.readOnly = false,
-    this.debounceMs = 250,
-    this.margin,
-    this.filled = true,
+    this.debounceMs = 220,
     this.showBack = false,
     this.onBack,
-    this.borderRadius,
-    this.semanticLabel,
+    this.margin,
+    this.height,
   });
 
   @override
@@ -71,12 +64,13 @@ class _AppSearchBarState extends State<AppSearchBar> {
     _debounce?.cancel();
     if (widget.debounceMs <= 0) {
       widget.onQueryChanged?.call(q);
+      setState(() {});
       return;
     }
     _debounce = Timer(Duration(milliseconds: widget.debounceMs), () {
       widget.onQueryChanged?.call(q);
     });
-    setState(() {}); // update clear icon visibility
+    setState(() {});
   }
 
   void _clear() {
@@ -87,187 +81,144 @@ class _AppSearchBarState extends State<AppSearchBar> {
     if (!widget.readOnly) _focus.requestFocus();
   }
 
-  ({EdgeInsets pad, double radius, double font, double icon, double height})
-  _metrics(BuildContext ctx) {
-    final mq = MediaQuery.of(ctx);
-    final width = mq.size.width;
-    final shortest = mq.size.shortestSide;
-    final textScale = mq.textScaleFactor.clamp(1.0, 1.3);
-    final isTablet = shortest >= 600;
-    final widthScale = (width / 390).clamp(0.9, 1.18);
-    final scale = isTablet ? widthScale * 1.06 : widthScale;
-
-    double hPad = 14, vPad = 10, font = 15, icon = 20, radius = 14, height = 48;
-
-    final pad = EdgeInsets.symmetric(
-      horizontal: (hPad * scale).clamp(12, 22),
-      vertical: (vPad * scale).clamp(8, 14),
-    );
-    final r = (widget.borderRadius ?? radius * scale).clamp(12, 20).toDouble();
-    final f = (font * scale * textScale).clamp(14, 20).toDouble();
-    final ic = (icon * scale).clamp(18, 24).toDouble();
-    final h = (height * scale).clamp(44, 56).toDouble();
-
-    return (pad: pad, radius: r, font: f, icon: ic, height: h);
-  }
-
-  Widget? _buildPrefixIcon(BuildContext context, double iconSize) {
-    final cs = Theme.of(context).colorScheme;
-    final pad = EdgeInsets.symmetric(horizontal: (iconSize * 0.5).clamp(8, 12));
-
-    if (widget.showBack) {
-      return InkWell(
-        borderRadius: BorderRadius.circular(999),
-        onTap: widget.onBack ?? () => Navigator.maybePop(context),
-        child: Padding(
-          padding: pad,
-          child: Icon(Icons.arrow_back, size: iconSize, color: cs.onSurface),
-        ),
-      );
-    }
-
-    return Padding(
-      padding: pad,
-      child: Icon(
-        Icons.search_rounded,
-        size: iconSize,
-        color: cs.onSurfaceVariant,
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
-    final m = _metrics(context);
 
-    final Color fill = cs.surfaceContainerHighest;
-    final Color stroke = cs.outlineVariant;
-    final Color text = theme.textTheme.bodyLarge?.color ?? cs.onSurface;
-    final Color hint = cs.onSurface.withOpacity(0.55);
+    final hasText = _ctrl.text.trim().isNotEmpty;
 
-    final shape = RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(m.radius),
-      side: BorderSide(color: stroke, width: 1),
-    );
+    final radius = BorderRadius.circular(18);
+    final h = widget.height ?? 52;
 
-    final clearVisible = _ctrl.text.isNotEmpty;
-    final Widget? clear = clearVisible
-        ? IconButton(
-            onPressed: _clear,
-            icon: const Icon(Icons.close_rounded),
-            iconSize: m.icon,
-            tooltip: 'Clear',
+    final containerColor = cs.surfaceContainerHighest;
+    final stroke = cs.outlineVariant.withOpacity(.6);
+
+    final prefix = widget.showBack
+        ? InkWell(
+            borderRadius: BorderRadius.circular(999),
+            onTap: widget.onBack ?? () => Navigator.maybePop(context),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Icon(Icons.arrow_back, color: cs.onSurface, size: 22),
+            ),
           )
-        : null;
-
-    final Widget? filter = widget.onFilterPressed == null
-        ? null
-        : IconButton(
-            onPressed: widget.onFilterPressed,
-            icon: const Icon(Icons.tune_rounded),
-            iconSize: m.icon,
-            tooltip: 'Filters',
+        : Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Icon(Icons.search_rounded,
+                color: cs.onSurfaceVariant, size: 22),
           );
 
-    final field = TextField(
-      controller: _ctrl,
-      focusNode: _focus,
-      autofocus: widget.autofocus,
-      readOnly: widget.readOnly,
-      textInputAction: TextInputAction.search,
-      onChanged: _handleChanged,
-      onSubmitted: widget.onSubmitted,
-      style: theme.textTheme.bodyLarge?.copyWith(fontSize: m.font, color: text),
-      decoration: InputDecoration(
-        hintText: widget.hint,
-        hintStyle: theme.textTheme.bodyMedium?.copyWith(
-          fontSize: m.font,
-          color: hint,
-        ),
-        border: InputBorder.none,
-        isDense: true,
-        contentPadding: EdgeInsets.zero,
-        // >>> Only ONE leading icon (back OR search)
-        prefixIcon: _buildPrefixIcon(context, m.icon),
-        prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
-        // Trailing actions
-        suffixIcon: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [if (clear != null) clear, if (filter != null) filter],
-        ),
-        suffixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
-      ),
+    final suffix = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (hasText)
+          IconButton(
+            onPressed: _clear,
+            tooltip: MaterialLocalizations.of(context).deleteButtonTooltip,
+            icon: Icon(Icons.close_rounded, color: cs.onSurfaceVariant),
+          ),
+        if (widget.onFilterPressed != null)
+          IconButton(
+            onPressed: widget.onFilterPressed,
+            tooltip: 'Filters',
+            icon: Icon(Icons.tune_rounded, color: cs.onSurfaceVariant),
+          ),
+      ],
     );
 
-    Widget bar = Material(
-      color: widget.filled ? fill : Colors.transparent,
-      shape: shape,
+    Widget child = Material(
+      color: containerColor,
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+          borderRadius: radius, side: BorderSide(color: stroke)),
       child: ConstrainedBox(
-        constraints: BoxConstraints(minHeight: m.height),
-        child: Padding(
-          // inner horizontal padding for the whole field
-          padding: EdgeInsets.symmetric(horizontal: m.pad.horizontal / 2),
-          child: field,
+        constraints: BoxConstraints(minHeight: h),
+        child: Row(
+          children: [
+            prefix,
+            Expanded(
+              child: TextField(
+                controller: _ctrl,
+                focusNode: _focus,
+                autofocus: widget.autofocus,
+                readOnly: widget.readOnly,
+                textInputAction: TextInputAction.search,
+                onChanged: _handleChanged,
+                onSubmitted: widget.onSubmitted,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: cs.onSurface,
+                ),
+                decoration: InputDecoration(
+                  isDense: true,
+                  hintText: widget.hint,
+                  hintStyle: theme.textTheme.bodyLarge?.copyWith(
+                    color: cs.onSurface.withOpacity(.55),
+                    fontWeight: FontWeight.w600,
+                  ),
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+              ),
+            ),
+            suffix,
+            const SizedBox(width: 6),
+          ],
         ),
       ),
     );
 
     if (widget.margin != null) {
-      bar = Padding(padding: widget.margin!, child: bar);
+      child = Padding(padding: widget.margin!, child: child);
     }
 
-    return Semantics(
-      label: widget.semanticLabel ?? 'Search',
-      textField: true,
-      child: bar,
-    );
+    return child;
   }
 }
 
-// Convenience: Search bar embedded inside an AppBar.
 class AppSearchAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String? initialQuery;
   final String hint;
+
   final ValueChanged<String>? onQueryChanged;
   final ValueChanged<String>? onSubmitted;
   final VoidCallback? onClear;
   final VoidCallback? onFilterPressed;
+
   final bool autofocus;
   final bool readOnly;
   final int debounceMs;
+
   final bool showBack;
   final VoidCallback? onBack;
-  final bool filled;
-  final double? borderRadius;
 
   const AppSearchAppBar({
     super.key,
     this.initialQuery,
-    this.hint = 'Search…',
+    required this.hint,
     this.onQueryChanged,
     this.onSubmitted,
     this.onClear,
     this.onFilterPressed,
     this.autofocus = false,
     this.readOnly = false,
-    this.debounceMs = 250,
+    this.debounceMs = 220,
     this.showBack = true,
     this.onBack,
-    this.filled = true,
-    this.borderRadius,
   });
 
   @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight + 10);
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+
     return AppBar(
-      // <<< IMPORTANT: prevent AppBar from adding an extra leading back arrow
       automaticallyImplyLeading: false,
+      backgroundColor: theme.colorScheme.surface,
+      elevation: 0,
       titleSpacing: 0,
       title: AppSearchBar(
         initialQuery: initialQuery,
@@ -279,14 +230,10 @@ class AppSearchAppBar extends StatelessWidget implements PreferredSizeWidget {
         autofocus: autofocus,
         readOnly: readOnly,
         debounceMs: debounceMs,
-        showBack: showBack, // shows ONE back icon inside the field
+        showBack: showBack,
         onBack: onBack,
-        filled: filled,
-        borderRadius: borderRadius,
-        margin: const EdgeInsets.symmetric(horizontal: 12),
+        margin: const EdgeInsets.fromLTRB(12, 8, 12, 8),
       ),
-      backgroundColor: theme.colorScheme.surface,
-      elevation: 0,
     );
   }
 }

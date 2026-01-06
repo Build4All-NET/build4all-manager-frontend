@@ -437,6 +437,19 @@
   },
   "common_loading": "Chargement...",
   "common_forbidden": "Accès refusé",
-  "common_unauthorized": "Non autorisé"
+  "common_unauthorized": "Non autorisé",
+   "retry": "Réessayer",
+  "search_owners_hint": "Rechercher des propriétaires…",
+  "search_apps_hint": "Rechercher des apps…",
+  "empty_owners": "Aucun propriétaire trouvé",
+  "empty_owner_apps": "Aucune app pour ce propriétaire",
+  "unnamed_app": "(App sans nom)",
+  "toast_app_selected": "App : {slug}",
+  "app_slug_status": "slug : {slug} • {status}",
+  "apps_count": "{count} apps",
+
+  "@toast_app_selected": { "placeholders": { "slug": {} } },
+  "@app_slug_status": { "placeholders": { "slug": {}, "status": {} } },
+  "@apps_count": { "placeholders": { "count": {} } }
 }
 

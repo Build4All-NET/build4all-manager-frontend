@@ -1342,7 +1342,7 @@ abstract class AppLocalizations {
   /// No description provided for @owner_proj_details_create_title.
   ///
   /// In en, this message translates to:
-  /// **'Create my project'**
+  /// **'Create my App'**
   String get owner_proj_details_create_title;
 
   /// No description provided for @owner_proj_details_create_subtitle.
@@ -2053,12 +2053,6 @@ abstract class AppLocalizations {
   /// **'Ready to submit?'**
   String get owner_request_submit_ready;
 
-  /// No description provided for @owner_request_submit_desc.
-  ///
-  /// In en, this message translates to:
-  /// **'Triggers CI and generates build artifacts.'**
-  String get owner_request_submit_desc;
-
   /// No description provided for @owner_request_submit_success.
   ///
   /// In en, this message translates to:
@@ -2310,6 +2304,222 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unauthorized'**
   String get common_unauthorized;
+
+  /// No description provided for @retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retry;
+
+  /// No description provided for @search_owners_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search owners…'**
+  String get search_owners_hint;
+
+  /// No description provided for @search_apps_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search apps…'**
+  String get search_apps_hint;
+
+  /// No description provided for @empty_owners.
+  ///
+  /// In en, this message translates to:
+  /// **'No owners found'**
+  String get empty_owners;
+
+  /// No description provided for @empty_owner_apps.
+  ///
+  /// In en, this message translates to:
+  /// **'No apps found for this owner'**
+  String get empty_owner_apps;
+
+  /// No description provided for @unnamed_app.
+  ///
+  /// In en, this message translates to:
+  /// **'(Unnamed App)'**
+  String get unnamed_app;
+
+  /// No description provided for @toast_app_selected.
+  ///
+  /// In en, this message translates to:
+  /// **'App: {slug}'**
+  String toast_app_selected(Object slug);
+
+  /// No description provided for @app_slug_status.
+  ///
+  /// In en, this message translates to:
+  /// **'slug: {slug} • {status}'**
+  String app_slug_status(Object slug, Object status);
+
+  /// No description provided for @apps_count.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} apps'**
+  String apps_count(Object count);
+
+  /// No description provided for @ordersLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Orders'**
+  String get ordersLabel;
+
+  /// No description provided for @orderLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Order'**
+  String get orderLabel;
+
+  /// No description provided for @noOrdersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No orders'**
+  String get noOrdersTitle;
+
+  /// No description provided for @noOrdersSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No orders found for this app with the current filters.'**
+  String get noOrdersSubtitle;
+
+  /// No description provided for @retryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retryLabel;
+
+  /// No description provided for @allTimeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'All time'**
+  String get allTimeLabel;
+
+  /// No description provided for @dashboardLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Dashboard'**
+  String get dashboardLabel;
+
+  /// No description provided for @last7DaysLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 7 days'**
+  String get last7DaysLabel;
+
+  /// No description provided for @last30DaysLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 30 days'**
+  String get last30DaysLabel;
+
+  /// No description provided for @clearLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get clearLabel;
+
+  /// No description provided for @grossSalesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Gross sales'**
+  String get grossSalesLabel;
+
+  /// No description provided for @paidLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid'**
+  String get paidLabel;
+
+  /// No description provided for @outstandingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Outstanding'**
+  String get outstandingLabel;
+
+  /// No description provided for @avgOrderLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Average order value'**
+  String get avgOrderLabel;
+
+  /// No description provided for @fullyPaidRateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Fully paid'**
+  String get fullyPaidRateLabel;
+
+  /// No description provided for @statusBreakdownLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Status breakdown'**
+  String get statusBreakdownLabel;
+
+  /// No description provided for @paidRevenueLast7DaysLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid revenue (last 7 days)'**
+  String get paidRevenueLast7DaysLabel;
+
+  /// No description provided for @filterAllLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get filterAllLabel;
+
+  /// No description provided for @filterPendingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get filterPendingLabel;
+
+  /// No description provided for @filterCompletedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get filterCompletedLabel;
+
+  /// No description provided for @filterCanceledLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Canceled'**
+  String get filterCanceledLabel;
+
+  /// No description provided for @filterRejectedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected'**
+  String get filterRejectedLabel;
+
+  /// No description provided for @filterRefundedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Refunded'**
+  String get filterRefundedLabel;
+
+  /// No description provided for @itemsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Items'**
+  String get itemsLabel;
+
+  /// No description provided for @totalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get totalLabel;
+
+  /// No description provided for @remainingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining'**
+  String get remainingLabel;
+
+  /// No description provided for @fullyPaidShortLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Fully paid'**
+  String get fullyPaidShortLabel;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -438,6 +438,19 @@
   },
   "common_loading": "جارٍ التحميل...",
   "common_forbidden": "ممنوع",
-  "common_unauthorized": "غير مصرح"
+  "common_unauthorized": "غير مصرح",
+    "retry": "إعادة المحاولة",
+  "search_owners_hint": "ابحث عن المالكين…",
+  "search_apps_hint": "ابحث عن التطبيقات…",
+  "empty_owners": "لا يوجد مالكون",
+  "empty_owner_apps": "لا يوجد تطبيقات لهذا المالك",
+  "unnamed_app": "(تطبيق بدون اسم)",
+  "toast_app_selected": "التطبيق: {slug}",
+  "app_slug_status": "المعرف: {slug} • {status}",
+  "apps_count": "{count} تطبيق",
+
+  "@toast_app_selected": { "placeholders": { "slug": {} } },
+  "@app_slug_status": { "placeholders": { "slug": {}, "status": {} } },
+  "@apps_count": { "placeholders": { "count": {} } }
 }
 

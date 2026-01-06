@@ -1,4 +1,5 @@
 import 'package:build4all_manager/core/network/dio_client.dart';
+import 'package:build4all_manager/features/superadmin/dashboard/presentation/screens/projects_screen.dart';
 import 'package:build4all_manager/l10n/app_localizations.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -85,6 +86,13 @@ class _DashboardView extends StatelessWidget {
                         value: ov.totalProjects,
                         gradient: _g(context).primary,
                         delayMs: 0,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => const ProjectsScreen()),
+                          );
+                        },
                       ),
                       ProKpiCard(
                         icon: Icons.check_circle_rounded,
