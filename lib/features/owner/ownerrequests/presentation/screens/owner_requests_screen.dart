@@ -493,7 +493,10 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
             filtered = List.of(all);
           } else {
             filtered = all.where((c) {
-              final hay = '${c.label} ${c.code} ${c.id}'.toLowerCase();
+              final hay =
+                  '${c.fullLabel} ${c.code} ${c.symbol} ${c.currencyType} ${c.id}'
+                      .toLowerCase();
+
               return hay.contains(s);
             }).toList();
           }
@@ -556,11 +559,12 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
                           return ListTile(
                             contentPadding: EdgeInsets.zero,
                             title: Text(
-                              c.label,
+                              c.shortLabel, // ✅ clean: "USD ($)"
                               style:
                                   const TextStyle(fontWeight: FontWeight.w700),
                             ),
-                            subtitle: Text('${c.code} • id=${c.id}'),
+                            subtitle:
+                                Text(c.currencyType), // ✅ optional: "US Dollar"
                             trailing: const Icon(Icons.chevron_right_rounded),
                             onTap: () => Navigator.pop(ctx, c),
                           );
@@ -1009,7 +1013,7 @@ class _IdentityPanel extends StatelessWidget {
                       child: Text(
                         selectedCurrency == null
                             ? 'USD - US Dollar'
-                            : '${selectedCurrency!.code} - ${selectedCurrency!.label}',
+                            : selectedCurrency!.shortLabel,
                         style: const TextStyle(
                           fontWeight: FontWeight.w900,
                           fontSize: 13,

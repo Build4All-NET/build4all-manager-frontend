@@ -1,8 +1,8 @@
 class CurrencyModel {
   final int id;
-  final String currencyType;
-  final String code;
-  final String symbol;
+  final String currencyType; // e.g. "US Dollar"
+  final String code; // e.g. "USD"
+  final String symbol; // e.g. "$"
 
   CurrencyModel({
     required this.id,
@@ -20,5 +20,13 @@ class CurrencyModel {
     );
   }
 
-  String get label => '$code ($symbol) • $currencyType';
+  /// ✅ What you want to show in dropdown/list: "USD ($)"
+  String get shortLabel => '$code ($symbol)';
+
+  /// Optional: full label for search or debug: "USD ($) • US Dollar"
+  String get fullLabel => '$code ($symbol) • $currencyType';
+
+  /// Keep compatibility if other screens use `label`
+  /// (make `label` short so UI becomes clean everywhere)
+  String get label => shortLabel;
 }
