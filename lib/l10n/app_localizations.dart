@@ -2520,6 +2520,336 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Fully paid'**
   String get fullyPaidShortLabel;
+
+  /// No description provided for @owner_projects_test.
+  ///
+  /// In en, this message translates to:
+  /// **'TEST'**
+  String get owner_projects_test;
+
+  /// No description provided for @owner_publish_title_play.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish to Google Play Store'**
+  String get owner_publish_title_play;
+
+  /// No description provided for @owner_publish_title_appstore.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish to App Store'**
+  String get owner_publish_title_appstore;
+
+  /// No description provided for @owner_publish_platform_android.
+  ///
+  /// In en, this message translates to:
+  /// **'Android'**
+  String get owner_publish_platform_android;
+
+  /// No description provided for @owner_publish_platform_ios.
+  ///
+  /// In en, this message translates to:
+  /// **'iOS'**
+  String get owner_publish_platform_ios;
+
+  /// No description provided for @owner_publish_request_play.
+  ///
+  /// In en, this message translates to:
+  /// **'Request Publish to Play Store'**
+  String get owner_publish_request_play;
+
+  /// No description provided for @owner_publish_request_appstore.
+  ///
+  /// In en, this message translates to:
+  /// **'Request Publish to App Store'**
+  String get owner_publish_request_appstore;
+
+  /// No description provided for @owner_publish_step1_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Basic Information'**
+  String get owner_publish_step1_title;
+
+  /// No description provided for @owner_publish_step1_sub.
+  ///
+  /// In en, this message translates to:
+  /// **'Provide the basic details about your application'**
+  String get owner_publish_step1_sub;
+
+  /// No description provided for @owner_publish_step2_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Category & Details'**
+  String get owner_publish_step2_title;
+
+  /// No description provided for @owner_publish_step2_sub.
+  ///
+  /// In en, this message translates to:
+  /// **'Categorize your app and provide additional details'**
+  String get owner_publish_step2_sub;
+
+  /// No description provided for @owner_publish_step3_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Legal & Contact'**
+  String get owner_publish_step3_title;
+
+  /// No description provided for @owner_publish_step3_sub.
+  ///
+  /// In en, this message translates to:
+  /// **'These fields are managed by Build4All publisher profile'**
+  String get owner_publish_step3_sub;
+
+  /// No description provided for @owner_publish_step4_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Assets & Screenshots'**
+  String get owner_publish_step4_title;
+
+  /// No description provided for @owner_publish_step4_sub.
+  ///
+  /// In en, this message translates to:
+  /// **'Provide your app icon and screenshots URLs'**
+  String get owner_publish_step4_sub;
+
+  /// No description provided for @owner_publish_app_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Application Name'**
+  String get owner_publish_app_name;
+
+  /// No description provided for @owner_publish_app_name_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'ShopSphere'**
+  String get owner_publish_app_name_hint;
+
+  /// No description provided for @owner_publish_package_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Package Name (Read-only)'**
+  String get owner_publish_package_name;
+
+  /// No description provided for @owner_publish_bundle_id.
+  ///
+  /// In en, this message translates to:
+  /// **'Bundle ID (Read-only)'**
+  String get owner_publish_bundle_id;
+
+  /// No description provided for @owner_publish_short_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Short Description'**
+  String get owner_publish_short_desc;
+
+  /// No description provided for @owner_publish_short_desc_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Brief app description (max 80 characters)'**
+  String get owner_publish_short_desc_hint;
+
+  /// No description provided for @owner_publish_full_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Full Description'**
+  String get owner_publish_full_desc;
+
+  /// No description provided for @owner_publish_full_desc_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Write a full store listing description…'**
+  String get owner_publish_full_desc_hint;
+
+  /// No description provided for @owner_publish_category.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get owner_publish_category;
+
+  /// No description provided for @owner_publish_category_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a category'**
+  String get owner_publish_category_hint;
+
+  /// No description provided for @owner_publish_country.
+  ///
+  /// In en, this message translates to:
+  /// **'Country Availability'**
+  String get owner_publish_country;
+
+  /// No description provided for @owner_publish_pricing.
+  ///
+  /// In en, this message translates to:
+  /// **'Pricing'**
+  String get owner_publish_pricing;
+
+  /// No description provided for @owner_publish_free.
+  ///
+  /// In en, this message translates to:
+  /// **'Free'**
+  String get owner_publish_free;
+
+  /// No description provided for @owner_publish_paid.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid'**
+  String get owner_publish_paid;
+
+  /// No description provided for @owner_publish_content_confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'I confirm that this app complies with store policies and age-appropriate guidelines.'**
+  String get owner_publish_content_confirm;
+
+  /// No description provided for @owner_publish_privacy_url.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy URL'**
+  String get owner_publish_privacy_url;
+
+  /// No description provided for @owner_publish_dev_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Developer Name'**
+  String get owner_publish_dev_name;
+
+  /// No description provided for @owner_publish_dev_email.
+  ///
+  /// In en, this message translates to:
+  /// **'Developer Email'**
+  String get owner_publish_dev_email;
+
+  /// No description provided for @owner_publish_managed_by_build4all.
+  ///
+  /// In en, this message translates to:
+  /// **'Managed by Build4All'**
+  String get owner_publish_managed_by_build4all;
+
+  /// No description provided for @owner_publish_icon_url.
+  ///
+  /// In en, this message translates to:
+  /// **'App Icon URL'**
+  String get owner_publish_icon_url;
+
+  /// No description provided for @owner_publish_icon_url_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'https://.../icon.png'**
+  String get owner_publish_icon_url_hint;
+
+  /// No description provided for @owner_publish_screenshots_urls.
+  ///
+  /// In en, this message translates to:
+  /// **'Screenshots URLs'**
+  String get owner_publish_screenshots_urls;
+
+  /// No description provided for @owner_publish_screenshot.
+  ///
+  /// In en, this message translates to:
+  /// **'Screenshot'**
+  String get owner_publish_screenshot;
+
+  /// No description provided for @owner_publish_shots_rule.
+  ///
+  /// In en, this message translates to:
+  /// **'Required: min 2, max 8 screenshots'**
+  String get owner_publish_shots_rule;
+
+  /// No description provided for @owner_publish_submit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit for Review'**
+  String get owner_publish_submit;
+
+  /// No description provided for @owner_publish_submitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted for review'**
+  String get owner_publish_submitted;
+
+  /// No description provided for @owner_publish_err_appname.
+  ///
+  /// In en, this message translates to:
+  /// **'Application name is required'**
+  String get owner_publish_err_appname;
+
+  /// No description provided for @owner_publish_err_short.
+  ///
+  /// In en, this message translates to:
+  /// **'Short description is required'**
+  String get owner_publish_err_short;
+
+  /// No description provided for @owner_publish_err_short80.
+  ///
+  /// In en, this message translates to:
+  /// **'Short description max 80 characters'**
+  String get owner_publish_err_short80;
+
+  /// No description provided for @owner_publish_err_full.
+  ///
+  /// In en, this message translates to:
+  /// **'Full description is required'**
+  String get owner_publish_err_full;
+
+  /// No description provided for @owner_publish_err_category.
+  ///
+  /// In en, this message translates to:
+  /// **'Category is required'**
+  String get owner_publish_err_category;
+
+  /// No description provided for @owner_publish_err_content_confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'You must confirm content rating compliance'**
+  String get owner_publish_err_content_confirm;
+
+  /// No description provided for @owner_publish_err_icon.
+  ///
+  /// In en, this message translates to:
+  /// **'App icon URL is required'**
+  String get owner_publish_err_icon;
+
+  /// No description provided for @owner_publish_err_shots2.
+  ///
+  /// In en, this message translates to:
+  /// **'At least 2 screenshots are required'**
+  String get owner_publish_err_shots2;
+
+  /// No description provided for @owner_publish_err_shots8.
+  ///
+  /// In en, this message translates to:
+  /// **'Max 8 screenshots allowed'**
+  String get owner_publish_err_shots8;
+
+  /// No description provided for @common_back.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get common_back;
+
+  /// No description provided for @common_continue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get common_continue;
+
+  /// No description provided for @errFixForm.
+  ///
+  /// In en, this message translates to:
+  /// **'Please fix the errors in the form'**
+  String get errFixForm;
+
+  /// No description provided for @msgWelcomeBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome back'**
+  String get msgWelcomeBack;
+
+  /// No description provided for @msgVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified'**
+  String get msgVerified;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

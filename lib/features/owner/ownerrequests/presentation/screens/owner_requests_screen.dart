@@ -72,7 +72,6 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
       _projectIdCtrl; // still used for submit (hidden from UI)
   late final TextEditingController _appNameCtrl;
   final _notesCtrl = TextEditingController();
-  final _apiOverrideCtrl = TextEditingController();
 
   bool _loading = false;
 
@@ -109,7 +108,6 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
     _projectIdCtrl.dispose();
     _appNameCtrl.dispose();
     _notesCtrl.dispose();
-    _apiOverrideCtrl.dispose();
     super.dispose();
   }
 
@@ -143,8 +141,10 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
     final l = AppLocalizations.of(context)!;
 
     final picker = ImagePicker();
-    final res =
-        await picker.pickImage(source: ImageSource.gallery, imageQuality: 85);
+    final res = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 85,
+    );
     if (res == null) return;
 
     if (!mounted) return;
@@ -177,7 +177,7 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
   }
 
   /// ------------------------------------------------------------
-  /// Submit (same backend contract)
+  /// Submit (same backend contract, WITHOUT override url)
   /// ------------------------------------------------------------
   Future<void> _submit() async {
     FocusScope.of(context).unfocus();
@@ -235,9 +235,7 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
         homeJson: out.homeJson,
         enabledFeaturesJson: out.enabledFeaturesJson,
         brandingJson: out.brandingJson,
-        apiBaseUrlOverride: _apiOverrideCtrl.text.trim().isEmpty
-            ? null
-            : _apiOverrideCtrl.text.trim(),
+        // ✅ apiBaseUrlOverride removed بالكامل
         logoFile: _logoFile,
       );
 
@@ -351,7 +349,7 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
                       ),
                       const SizedBox(width: 14),
 
-                      // RIGHT: Customize panels (UPDATED to match screenshot)
+                      // RIGHT: Customize panels
                       Expanded(
                         flex: 5,
                         child: _CustomizeColumn(
@@ -364,19 +362,15 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
                             if (_currencies.isEmpty) await _loadCurrencies();
                             if (!mounted) return;
                             final picked = await _showCurrencySearchSheet(
-                              context,
-                              _currencies,
-                            );
+                                context, _currencies);
                             if (picked != null) {
-                              // ignore: use_build_context_synchronously
                               setState(() => _selectedCurrency = picked);
                             }
                           },
                           projectIdCtrl: _projectIdCtrl,
                           appNameCtrl: _appNameCtrl,
                           notesCtrl: _notesCtrl,
-                          apiOverrideCtrl: _apiOverrideCtrl,
-                          validateInt: _validateInt, // ✅ REQUIRED
+                          validateInt: _validateInt,
                           presetId: _selectedPresetId,
                           draft: _draft,
                           runtime: _runtime,
@@ -438,15 +432,13 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
                       final picked =
                           await _showCurrencySearchSheet(context, _currencies);
                       if (picked != null) {
-                        // ignore: use_build_context_synchronously
                         setState(() => _selectedCurrency = picked);
                       }
                     },
                     projectIdCtrl: _projectIdCtrl,
                     appNameCtrl: _appNameCtrl,
                     notesCtrl: _notesCtrl,
-                    apiOverrideCtrl: _apiOverrideCtrl,
-                    validateInt: _validateInt, // ✅ REQUIRED
+                    validateInt: _validateInt,
                     presetId: _selectedPresetId,
                     draft: _draft,
                     runtime: _runtime,
@@ -496,7 +488,6 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
               final hay =
                   '${c.fullLabel} ${c.code} ${c.symbol} ${c.currencyType} ${c.id}'
                       .toLowerCase();
-
               return hay.contains(s);
             }).toList();
           }
@@ -563,8 +554,7 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
                               style:
                                   const TextStyle(fontWeight: FontWeight.w700),
                             ),
-                            subtitle:
-                                Text(c.currencyType), // ✅ optional: "US Dollar"
+                            subtitle: Text(c.currencyType),
                             trailing: const Icon(Icons.chevron_right_rounded),
                             onTap: () => Navigator.pop(ctx, c),
                           );
@@ -584,15 +574,11 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
 
 /// ===============================================================
 /// Tabs / Panels (App Identity, Palette, Runtime Config)
-///
-/// NOTE:
-/// - Branding removed from tabs (per user request)
 /// ===============================================================
 enum _Panel { identity, palette, runtime }
 
 /// ===============================================================
 /// RIGHT SIDE: "App Settings" title + pill tabs + panel card
-/// Designed to match the provided screenshot.
 /// ===============================================================
 class _CustomizeColumn extends StatelessWidget {
   final TextStyle? titleStyle;
@@ -607,7 +593,6 @@ class _CustomizeColumn extends StatelessWidget {
       projectIdCtrl; // hidden in UI, still required for submit
   final TextEditingController appNameCtrl;
   final TextEditingController notesCtrl;
-  final TextEditingController apiOverrideCtrl;
 
   final String? Function(String?) validateInt;
 
@@ -637,7 +622,6 @@ class _CustomizeColumn extends StatelessWidget {
     required this.projectIdCtrl,
     required this.appNameCtrl,
     required this.notesCtrl,
-    required this.apiOverrideCtrl,
     required this.validateInt,
     required this.presetId,
     required this.draft,
@@ -654,7 +638,6 @@ class _CustomizeColumn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Screenshot uses green selected pill + clean white card.
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -682,7 +665,6 @@ class _CustomizeColumn extends StatelessWidget {
                 projectIdCtrl: projectIdCtrl,
                 appNameCtrl: appNameCtrl,
                 notesCtrl: notesCtrl,
-                apiOverrideCtrl: apiOverrideCtrl,
                 validateInt: validateInt,
                 logoFile: logoFile,
                 onPickLogo: onPickLogo,
@@ -699,7 +681,6 @@ class _CustomizeColumn extends StatelessWidget {
                       selectedPresetId: presetId,
                       onChanged: onDraftChanged,
                       onPresetChanged: onPresetChanged,
-                      // ✅ MUST match screenshot: no "Preview Your App" block.
                       showPreview: false,
                     ),
                   ),
@@ -726,9 +707,7 @@ class _CustomizeColumn extends StatelessWidget {
 }
 
 /// ===============================================================
-/// Pill Tabs (Identity / Palette / Runtime) — matches screenshot
-/// - Background capsule
-/// - Selected tab = green pill + white text
+/// Pill Tabs (Identity / Palette / Runtime)
 /// ===============================================================
 class _PillTabs extends StatelessWidget {
   final _Panel selected;
@@ -739,7 +718,7 @@ class _PillTabs extends StatelessWidget {
     required this.onChanged,
   });
 
-  static const _green = Color(0xFF16A34A); // screenshot vibe
+  static const _green = Color(0xFF16A34A);
 
   @override
   Widget build(BuildContext context) {
@@ -815,12 +794,7 @@ class _PillTabs extends StatelessWidget {
 }
 
 /// ===============================================================
-/// App Identity Panel (matches screenshot)
-///
-/// USER REQUESTS:
-/// ✅ Hide Project ID field (still used on submit)
-/// ✅ Put "App Logo" after "App name"
-/// ✅ Notes at end, not mandatory
+/// App Identity Panel (override URL removed)
 /// ===============================================================
 class _IdentityPanel extends StatelessWidget {
   final bool loading;
@@ -831,7 +805,6 @@ class _IdentityPanel extends StatelessWidget {
   final TextEditingController projectIdCtrl;
   final TextEditingController appNameCtrl;
   final TextEditingController notesCtrl;
-  final TextEditingController apiOverrideCtrl;
 
   final String? Function(String?) validateInt;
 
@@ -847,7 +820,6 @@ class _IdentityPanel extends StatelessWidget {
     required this.projectIdCtrl,
     required this.appNameCtrl,
     required this.notesCtrl,
-    required this.apiOverrideCtrl,
     required this.validateInt,
     required this.logoFile,
     required this.onPickLogo,
@@ -859,9 +831,6 @@ class _IdentityPanel extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final hint = cs.onSurface.withOpacity(.45);
 
-    // Match screenshot:
-    // - Inputs are filled light-gray
-    // - Card is white with subtle shadow
     return _PanelCard(
       child: Theme(
         data: Theme.of(context).copyWith(
@@ -891,7 +860,6 @@ class _IdentityPanel extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // ✅ Project ID hidden (still validated & used on submit)
-            // If you ever need it back for debugging, uncomment below:
             // TextFormField(
             //   controller: projectIdCtrl,
             //   readOnly: true,
@@ -922,7 +890,7 @@ class _IdentityPanel extends StatelessWidget {
 
             const SizedBox(height: 14),
 
-            // App Logo (after App name)
+            // App Logo
             Text(
               'App Logo',
               style: TextStyle(
@@ -1030,27 +998,6 @@ class _IdentityPanel extends StatelessWidget {
 
             const SizedBox(height: 14),
 
-            // API override (optional)
-            Text(
-              'API base URL override (optional)',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w800,
-                color: cs.onSurface.withOpacity(.75),
-              ),
-            ),
-            const SizedBox(height: 6),
-            TextFormField(
-              controller: apiOverrideCtrl,
-              enabled: !loading,
-              decoration: InputDecoration(
-                prefixIcon: Icon(Icons.link_rounded, size: 18, color: hint),
-                hintText: 'https://api.example.com',
-              ),
-            ),
-
-            const SizedBox(height: 14),
-
             // Notes (NOT mandatory)
             Text(
               'Notes',
@@ -1068,7 +1015,6 @@ class _IdentityPanel extends StatelessWidget {
               decoration: const InputDecoration(
                 hintText: 'Add any additional notes...',
               ),
-              // ✅ No validator => optional
             ),
           ],
         ),
@@ -1181,7 +1127,6 @@ class _PanelCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Screenshot = white card, subtle shadow, soft corners.
     final cs = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(14),

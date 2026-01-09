@@ -1,63 +1,117 @@
 {
   "appTitle": "Build4All",
-  "@appTitle": { "description": "Nom de l’application affiché dans l’en-tête de connexion" },
+  "@appTitle": {
+    "description": "App name shown in the login header"
+  },
 
   "signInGeneralTitle": "Connectez-vous à votre compte",
-  "@signInGeneralTitle": { "description": "Titre générique de connexion (non spécifique à un rôle)" },
+  "@signInGeneralTitle": {
+    "description": "Generic login title (not role-specific)"
+  },
 
-  "signInGeneralSubtitle": "Saisissez vos informations pour continuer",
-  "@signInGeneralSubtitle": { "description": "Sous-titre générique sous le titre" },
+  "errEmailInvalid": "Format d’email invalide",
+  "@errEmailInvalid": {
+    "description": "Validation: invalid email format"
+  },
+
+  "errEmailRequired": "L’email est requis",
+  "@errEmailRequired": {
+    "description": "Validation: empty email"
+  },
+
+  "lblEmail": "Email",
+  "@lblEmail": {
+    "description": "Email label"
+  },
+
+  "hintEmail": "vous@exemple.com",
+
+  "signInGeneralSubtitle": "Entrez vos informations pour continuer",
+  "@signInGeneralSubtitle": {
+    "description": "Generic subtitle under the login title"
+  },
 
   "termsNotice": "En continuant, vous acceptez nos Conditions et notre Politique de confidentialité",
-  "@termsNotice": { "description": "Mention légale sous le formulaire" },
+  "@termsNotice": {
+    "description": "Legal notice under the form"
+  },
 
-  "lblIdentifier": "E-mail / Téléphone / Nom d’utilisateur",
-  "@lblIdentifier": { "description": "Libellé du champ identifiant générique" },
+  "lblIdentifier": "Email / Téléphone / Nom d’utilisateur",
+  "@lblIdentifier": {
+    "description": "Generic identifier label"
+  },
 
-  "hintIdentifier": "you@example.com ou +961xxxxxxxx ou nom d’utilisateur",
-  "@hintIdentifier": { "description": "Exemple d’identifiant" },
+  "hintIdentifier": "vous@exemple.com ou +961xxxxxxxx ou nom d’utilisateur",
+  "@hintIdentifier": {
+    "description": "Generic identifier hint"
+  },
 
   "lblPassword": "Mot de passe",
-  "@lblPassword": { "description": "Libellé du champ mot de passe" },
+  "@lblPassword": {
+    "description": "Password label"
+  },
 
-  "hintPassword": "•••••••••••",
-  "@hintPassword": { "description": "Indication du champ mot de passe" },
+  "hintPassword": "Votre mot de passe",
+  "@hintPassword": {
+    "description": "Password hint text"
+  },
 
   "rememberMe": "Se souvenir de moi",
-  "@rememberMe": { "description": "Case à cocher Se souvenir de moi" },
+  "@rememberMe": {
+    "description": "Remember me checkbox label"
+  },
 
   "forgotPassword": "Mot de passe oublié ?",
-  "@forgotPassword": { "description": "Lien mot de passe oublié" },
+  "@forgotPassword": {
+    "description": "Forgot password action link"
+  },
 
   "btnSignIn": "Se connecter",
-  "@btnSignIn": { "description": "Libellé du bouton de connexion" },
+  "@btnSignIn": {
+    "description": "Primary sign-in button label"
+  },
 
   "noAccount": "Vous n’avez pas de compte ?",
-  "@noAccount": { "description": "Texte précédant le lien d’inscription" },
+  "@noAccount": {
+    "description": "Text before the Sign Up link"
+  },
 
   "signUp": "S’inscrire",
-  "@signUp": { "description": "Lien d’inscription" },
+  "@signUp": {
+    "description": "Sign up action link"
+  },
 
-  "errIdentifierRequired": "L’identifiant est requis",
-  "@errIdentifierRequired": { "description": "Validation : identifiant vide" },
+  "errIdentifierRequired": "Identifiant requis",
+  "@errIdentifierRequired": {
+    "description": "Validation: empty identifier"
+  },
 
-  "errPasswordRequired": "Le mot de passe est requis",
-  "@errPasswordRequired": { "description": "Validation : mot de passe vide" },
+  "errPasswordRequired": "Mot de passe requis",
+  "@errPasswordRequired": {
+    "description": "Validation: empty password"
+  },
 
-  "errPasswordMin": "6 caractères minimum",
-  "@errPasswordMin": { "description": "Validation : mot de passe trop court" },
+  "errPasswordMin": "Le mot de passe doit contenir au moins 6 caractères",
+  "@errPasswordMin": {
+    "description": "Validation: password too short"
+  },
 
   "showPasswordLabel": "Afficher le mot de passe",
-  "@showPasswordLabel": { "description": "Accessibilité : bouton afficher le mot de passe" },
+  "@showPasswordLabel": {
+    "description": "Accessibility label for toggling password visibility (show)"
+  },
 
   "hidePasswordLabel": "Masquer le mot de passe",
-  "@hidePasswordLabel": { "description": "Accessibilité : bouton masquer le mot de passe" },
+  "@hidePasswordLabel": {
+    "description": "Accessibility label for toggling password visibility (hide)"
+  },
+
   "nav_super_admin": "Super Admin",
   "nav_dashboard": "Tableau de bord",
   "nav_themes": "Thèmes",
   "nav_profile": "Profil",
 
-  "dashboard_title": "Tableau de bord administrateur",
+  "dashboard_title": "Tableau de bord Admin",
   "dashboard_welcome": "Bienvenue sur Build4All Manager",
   "dashboard_hint": "Utilisez la navigation à gauche pour gérer les thèmes et votre profil.",
 
@@ -65,16 +119,18 @@
   "themes_add": "Ajouter un thème",
   "themes_name": "Nom du thème",
   "themes_menuType": "Type de menu",
-  "themes_setActive": "Définir comme actif",
+  "themes_setActive": "Définir actif",
   "themes_active": "Actif",
   "themes_deactivate_all": "Désactiver tous les thèmes",
   "themes_empty": "Aucun thème pour le moment. Créez-en un.",
+  "themes_confirm_delete": "Supprimer ce thème ? Cette action est irréversible.",
+  "themes_colors_section": "Couleurs",
 
   "profile_title": "Mon profil",
   "profile_firstName": "Prénom",
   "profile_lastName": "Nom",
-  "profile_username": "Nom d'utilisateur",
-  "profile_email": "E-mail",
+  "profile_username": "Nom d’utilisateur",
+  "profile_email": "Email",
   "profile_updated": "Profil mis à jour avec succès.",
   "profile_changePassword": "Changer le mot de passe",
   "profile_currentPassword": "Mot de passe actuel",
@@ -86,122 +142,158 @@
   "common_edit": "Modifier",
   "common_delete": "Supprimer",
   "common_cancel": "Annuler",
-   "dash_total_projects": "Projets au total",
+  "common_more": "Plus",
+  "common_retry": "Réessayer",
+  "common_security": "Sécurité",
+  "common_sign_out": "Se déconnecter",
+  "common_sign_out_hint": "Terminer votre session actuelle",
+  "common_sign_out_confirm": "Êtes-vous sûr de vouloir vous déconnecter ?",
+  "common_signed_out": "Déconnecté",
+  "common_download": "Télécharger",
+  "common_download_apk": "Télécharger l’APK",
+  "common_remove": "Retirer",
+  "common_loading": "Chargement...",
+  "common_forbidden": "Accès interdit",
+  "common_unauthorized": "Non autorisé",
+  "common_back": "Retour",
+  "common_continue": "Continuer",
+
+  "dash_total_projects": "Total des projets",
   "dash_active_projects": "Projets actifs",
   "dash_inactive_projects": "Projets inactifs",
   "dash_recent_projects": "Projets récents",
   "dash_no_recent": "Aucun projet récent pour le moment.",
-   "themes_confirm_delete": "Supprimer ce thème ? Cette action est irréversible.",
-  "themes_colors_section": "Couleurs",
-  "err_required": "Ce champ est obligatoire",
-  "common_security": "Sécurité",
-  "common_sign_out": "Se déconnecter",
-  "common_sign_out_hint": "Terminer votre session actuelle",
-  "common_sign_out_confirm": "Voulez-vous vraiment vous déconnecter ?",
-  "common_signed_out": "Déconnexion réussie",
+  "dash_welcome": "Bienvenue sur Build4All Manager",
+
+  "err_required": "Ce champ est requis",
+  "err_email": "Veuillez saisir un email valide",
+  "errPasswordMismatch": "Les mots de passe ne correspondent pas",
+  "err_unknown": "Une erreur est survenue",
+
+  "signUpOwnerTitle": "Inscription Propriétaire",
+  "verifyCode": "Vérifier le code",
+  "completeProfile": "Compléter le profil",
+
+  "lblUsername": "Nom d’utilisateur",
+  "hintUsername": "votre.nom.unique",
+  "lblFirstName": "Prénom",
+  "hintFirstName": "Jean",
+  "lblLastName": "Nom",
+  "hintLastName": "Dupont",
+
+  "btnSendCode": "Envoyer le code",
+  "btnVerify": "Vérifier",
+  "btnCreateAccount": "Créer un compte",
+
+  "errCodeSixDigits": "Entrez le code à 6 chiffres",
+  "errUsernameRequired": "Le nom d’utilisateur est requis",
+  "errFirstNameRequired": "Le prénom est requis",
+  "errLastNameRequired": "Le nom est requis",
+
+  "msgCodeSent": "Code de vérification envoyé",
+  "msgWeWillSendCodeEmail": "Nous enverrons un code à 6 chiffres à votre email.",
+  "msgEnterCodeForEmail": "Entrez le code à 6 chiffres envoyé à {email}",
+  "msgOwnerRegistered": "Propriétaire enregistré avec succès",
 
   "owner_nav_title": "Propriétaire",
   "owner_nav_home": "Accueil",
-  "owner_nav_projects": "Projets",
+  "owner_nav_projects": "Mes applis",
   "owner_nav_requests": "Demandes",
   "owner_nav_profile": "Profil",
+  "owner_nav_myapps": "Mes applis",
+
   "owner_home_title": "Accueil Propriétaire",
   "owner_projects_title": "Projets",
   "owner_requests_title": "Demandes",
   "owner_profile_title": "Profil",
-  "owner_home_hello": "👋 Salut, ",
-  "owner_home_subtitle": "Gérez vos apps facilement",
+
+  "owner_home_hello": "👋 Salut,",
+  "owner_home_subtitle": "Prêt à lancer votre prochain build d’app ?",
   "owner_home_requestApp": "Demander mon app",
   "owner_home_myProjects": "Mes projets actifs",
   "owner_home_recentRequests": "Demandes récentes",
   "owner_home_noRecent": "Aucune demande récente",
-  "owner_home_viewAll": "Tout voir",
+  "owner_home_viewAll": "Voir tout",
+  "owner_home_search_hint": "Rechercher des apps, demandes, guides",
+  "owner_home_chooseProject": "Choisissez votre projet",
+
   "tutorial_step1_title": "Demandez votre app",
-  "tutorial_step1_body": "Choisissez un projet, nommez l’app, ajoutez des notes et envoyez.",
+  "tutorial_step1_body": "Choisissez un projet, donnez un nom à votre app, ajoutez des notes, puis soumettez la demande.",
   "tutorial_step2_title": "Suivez l’approbation",
-  "tutorial_step2_body": "Nous vous prévenons dès que c’est approuvé ou s’il faut corriger.",
+  "tutorial_step2_body": "Nous vous informerons lorsque la demande est approuvée ou nécessite des modifications.",
   "tutorial_step3_title": "Téléchargez l’APK",
-  "tutorial_step3_body": "Une fois construit, récupérez l’APK depuis votre tableau de bord.",
-   "owner_nav_title": "Propriétaire",
-  "owner_nav_home": "Accueil",
-  "owner_nav_projects": "Projets",
-  "owner_nav_requests": "Demandes",
-  "owner_nav_profile": "Profil",
-   "owner_projects_title": "Projets",
-  "owner_projects_searchHint": "Rechercher nom ou slug…",
-  "owner_projects_onlyReady": "APK uniquement prête",
+  "tutorial_step3_body": "Une fois construite, récupérez votre APK directement depuis votre tableau de bord.",
+
+  "owner_projects_searchHint": "Rechercher par nom ou slug…",
+  "owner_projects_onlyReady": "Seulement APK prêt",
   "owner_projects_emptyTitle": "Aucun projet",
-  "owner_projects_emptyBody": "Vous n’avez pas encore de projets. Demandez votre première app et nous la construirons pour vous.",
-  "owner_projects_building": "Compilation…",
+  "owner_projects_emptyBody": "Vous n’avez aucun projet. Demandez votre première app et nous la construirons pour vous.",
+  "owner_projects_building": "En construction…",
   "owner_projects_ready": "Prêt",
   "owner_projects_openInBrowser": "Ouvrir",
- "owner_request_title": "Demander votre application",
-  "owner_request_submit_hint": "Choisissez un projet, nommez l’app, ajoutez un logo (optionnel), choisissez un thème, puis envoyez pour construire.",
+  "owner_projects_subtitle": "Gérez vos projets et builds d’app facilement",
+  "owner_projects_test": "TEST",
+
+  "owner_request_title": "Créer une demande d’app",
+  "owner_request_submit_hint": "Choisissez un projet, nommez votre app, ajoutez un logo (optionnel), choisissez un thème, puis soumettez pour lancer le build.",
   "owner_request_project": "Projet",
   "owner_request_appName": "Nom de l’app",
-  "owner_request_appName_hint": "ex. Mon App Propriétaire",
+  "owner_request_appName_hint": "ex: Mon App Propriétaire",
   "owner_request_logo_url": "URL du logo (optionnel)",
-  "owner_request_logo_url_hint": "Collez une URL publique ou utilisez Importer",
-  "owner_request_upload_logo": "Importer le logo",
+  "owner_request_logo_url_hint": "Collez une URL publique ou utilisez Téléverser",
+  "owner_request_upload_logo": "Téléverser le fichier logo",
   "owner_request_theme_pref": "Thème",
   "owner_request_theme_default": "Utiliser le thème par défaut",
   "owner_request_submit": "Envoyer",
   "owner_request_submitting": "Envoi…",
-  "owner_request_submit_and_build": "Envoyer & Construire l’APK",
-  "owner_request_building": "Construction de l’APK…",
-  "owner_request_build_done": "Construction de l’APK terminée.",
+  "owner_request_submit_and_build": "Envoyer & générer l’APK",
+  "owner_request_building": "Génération APK…",
+  "owner_request_build_done": "Build APK terminé.",
   "owner_request_success": "Demande envoyée avec succès.",
-  "owner_request_no_requests_yet": "Aucune demande pour l’instant.",
+  "owner_request_no_requests_yet": "Aucune demande pour le moment.",
   "owner_request_my_requests": "Mes demandes",
   "owner_request_error_choose_project": "Veuillez choisir un projet.",
-  "owner_request_error_app_name": "Veuillez saisir un nom d’application.",
-  "common_download": "Télécharger",
-  "common_download_apk": "Télécharger l’APK",
-  "logout": "Se déconnecter",
-  "logout_confirm": "Voulez-vous vous déconnecter ?",
-  "logged_out": "Déconnexion réussie",
-  "cancel": "Annuler",
-   "owner_profile_title": "Profil du propriétaire",
-  "owner_profile_username": "Nom d'utilisateur",
+  "owner_request_error_app_name": "Veuillez saisir un nom d’app.",
+  "owner_request_requested": "Demandé",
+
+  "menuType": "Type de menu",
+
+  "owner_profile_title": "Profil Propriétaire",
+  "owner_profile_username": "Nom d’utilisateur",
   "owner_profile_name": "Nom",
-  "owner_profile_email": "E-mail",
-  "owner_profile_business_id": "Identifiant de l'entreprise",
-  "owner_profile_notify_items": "Notifier les mises à jour des articles",
-  "owner_profile_notify_feedback": "Notifier les retours des utilisateurs",
+  "owner_profile_email": "Email",
+  "owner_profile_business_id": "ID Business",
+  "owner_profile_notify_items": "Notifier les mises à jour d’items",
+  "owner_profile_notify_feedback": "Notifier les retours utilisateurs",
   "owner_profile_not_set": "Non défini",
-  "owner_profile_tips": "Gardez les informations de votre profil à jour pour personnaliser votre expérience.",
+  "owner_profile_tips": "Gardez vos informations à jour pour personnaliser votre expérience.",
+
   "yes": "Oui",
   "no": "Non",
-  "refresh": "Actualiser",
-   "owner_nav_myapps": "Mes Apps",
-   "common_search_hint": "Rechercher…",
-  "owner_home_search_hint": "Rechercher des apps, demandes, guides",
-  "owner_home_chooseProject": "Choisissez votre projet",
+  "refresh": "Rafraîchir",
+  "logout": "Se déconnecter",
+  "logout_confirm": "Voulez-vous vous déconnecter ?",
+  "logged_out": "Déconnecté",
+  "cancel": "Annuler",
+
+  "common_search_hint": "Rechercher…",
 
   "owner_proj_open": "Ouvrir le projet",
-  "owner_proj_activities_title": "Événements",
-  "owner_proj_activities_desc": "Billetterie, horaires et temps forts, conçus pour les expériences en mobilité.",
+  "owner_proj_activities_title": "Activités",
+  "owner_proj_activities_desc": "Billetterie, plannings et temps forts d’événements, pensés pour le mobile.",
   "owner_proj_ecom_title": "E-commerce",
-  "owner_proj_ecom_desc": "Catalogues produits, paniers et paiement, fidèles à votre boutique.",
+  "owner_proj_ecom_desc": "Catalogues produits, panier et paiement qui reflètent votre boutique.",
   "owner_proj_gym_title": "Salle de sport",
-  "owner_proj_gym_desc": "Plans d’entraînement, créneaux de réservation et avantages membres dans une seule app.",
+  "owner_proj_gym_desc": "Plans d’entraînement, réservations et avantages d’abonnement en une seule app.",
   "owner_proj_services_title": "Services",
   "owner_proj_services_desc": "Devis, rendez-vous et mises à jour clients adaptés à votre marque.",
+  "owner_proj_comingSoon": "Bientôt disponible",
 
   "status_delivered": "Livré",
   "status_in_production": "En production",
   "status_approved": "Approuvé",
   "status_pending": "En attente",
-  "status_rejected": "Refusé",
-
-  "owner_home_recentRequests": "Demandes récentes",
-  "owner_home_viewAll": "Tout voir",
-  "owner_home_noRecent": "Aucune demande récente",
-  "owner_home_hello": "👋Salut, ",
-  "owner_home_subtitle": "Prêt à lancer votre prochain build ?",
-  "owner_home_requestApp": "Demander mon app",
-
-  "owner_request_requested": "Demandé",
+  "status_rejected": "Rejeté",
 
   "timeago_days": "il y a {count} j",
   "@timeago_days": { "placeholders": { "count": { "type": "int" } } },
@@ -210,161 +302,151 @@
   "timeago_minutes": "il y a {count} min",
   "@timeago_minutes": { "placeholders": { "count": { "type": "int" } } },
   "timeago_just_now": "à l’instant",
-   "owner_nav_home": "Accueil",
-  "owner_nav_myapps": "Mes Apps",
-  "owner_nav_profile": "Profil",
 
   "owner_proj_details_highlights": "Points forts",
   "owner_proj_details_screens": "Écrans & parcours",
   "owner_proj_details_modules": "Modules inclus",
-  "owner_proj_details_why": "Pourquoi les équipes adorent",
+  "owner_proj_details_why": "Pourquoi les équipes adorent ce template",
   "owner_proj_details_primaryCta": "Demander cette app",
-  "owner_proj_details_secondaryCta": "Voir la démo",
-  "owner_proj_details_create_title": "Créer mon projet",
+  "owner_proj_details_secondaryCta": "Prévisualiser la démo",
+  "owner_proj_details_create_title": "Créer mon app",
   "owner_proj_details_create_subtitle": "Lancez votre version personnalisée en quelques minutes.",
   "stat_reviews_hint": "avis",
   "stat_active_hint": "déploiements actifs",
-  "stat_days_hint": "jours en moyenne",
+  "stat_days_hint": "jours (moyenne)",
 
-  "owner_proj_details_headline_activities": "Planifiez, réservez et gérez toutes les activités au même endroit.",
-  "owner_proj_details_subhead_activities": "Parfait pour clubs et studios avec réservation & plannings soignés.",
+  "owner_proj_details_headline_activities": "Planifiez, réservez et gérez chaque activité au même endroit.",
+  "owner_proj_details_subhead_activities": "Parfait pour studios, clubs et programmes avec réservation & planning soignés.",
   "owner_proj_details_act_h1": "Plannings avec listes d’attente",
-  "owner_proj_details_act_h2": "Portefeuille et crédits",
-  "owner_proj_details_act_h3": "Rappels push aux participants",
-  "owner_proj_details_act_h4": "Flux communauté intégré",
-  "owner_proj_details_act_s1_title": "Grille des cours",
-  "owner_proj_details_act_s1_sub": "Filtrez par coach & lieu en un geste.",
+  "owner_proj_details_act_h2": "Portefeuille & crédits",
+  "owner_proj_details_act_h3": "Rappels push pour les participants",
+  "owner_proj_details_act_h4": "Fil communautaire intégré",
+  "owner_proj_details_act_s1_title": "Grille de planning",
+  "owner_proj_details_act_s1_sub": "Filtrez par coach et lieu en un tap.",
   "owner_proj_details_act_s2_title": "Parcours de réservation",
   "owner_proj_details_act_s2_sub": "Paiement fluide avec cartes enregistrées.",
-  "owner_proj_details_act_m1": "Plannings multi-sites dynamiques",
-  "owner_proj_details_act_m2": "Bios & notes des coachs",
-  "owner_proj_details_act_m3": "Niveaux d’adhésion et avantages",
-  "owner_proj_details_act_i1": "78% réservent sur mobile dès la première semaine.",
-  "owner_proj_details_act_i2": "La rétention grimpe de 24% avec les rappels.",
+  "owner_proj_details_act_m1": "Plannings dynamiques & multi-sites",
+  "owner_proj_details_act_m2": "Profils et notes des coachs",
+  "owner_proj_details_act_m3": "Abonnements avec avantages",
+  "owner_proj_details_act_i1": "78 % des membres réservent via mobile dès la première semaine.",
+  "owner_proj_details_act_i2": "La rétention augmente de 24 % après activation des rappels push.",
 
-  "owner_proj_details_headline_ecommerce": "Lancez une boutique performante qui inspire confiance.",
-  "owner_proj_details_subhead_ecommerce": "Pour marques DTC : catalogues, bundles, réachats en un clic.",
-  "owner_proj_details_ecom_h1": "Catalogue visuel riche",
-  "owner_proj_details_ecom_h2": "Recommandations d’upsell intelligentes",
-  "owner_proj_details_ecom_h3": "Suivi de commande in-app",
-  "owner_proj_details_ecom_h4": "Moteur de remises & fidélité",
-  "owner_proj_details_ecom_s1_title": "Vitrine produit",
+  "owner_proj_details_headline_ecommerce": "Lancez une boutique performante que vos clients vont adorer.",
+  "owner_proj_details_subhead_ecommerce": "Pour les marques DTC : catalogue, bundles et récommandes en 1 clic.",
+  "owner_proj_details_ecom_h1": "Catalogue visuel riche en médias",
+  "owner_proj_details_ecom_h2": "Upsell intelligent",
+  "owner_proj_details_ecom_h3": "Suivi de commande dans l’app",
+  "owner_proj_details_ecom_h4": "Moteur promos & fidélité",
+  "owner_proj_details_ecom_s1_title": "Vitrine produits",
   "owner_proj_details_ecom_s1_sub": "Images plein écran avec variantes.",
   "owner_proj_details_ecom_s2_title": "Panier & paiement",
   "owner_proj_details_ecom_s2_sub": "Paiement accéléré avec adresses enregistrées.",
-  "owner_proj_details_ecom_m1": "Variantes illimitées & bundles",
-  "owner_proj_details_ecom_m2": "Sync stock avec Shopify/Woo",
+  "owner_proj_details_ecom_m1": "Variantes & bundles illimités",
+  "owner_proj_details_ecom_m2": "Synchronisation stock Shopify/Woo",
   "owner_proj_details_ecom_m3": "Cartes cadeaux & parrainage",
-  "owner_proj_details_ecom_i1": "Le panier moyen augmente de 32% avec les bundles.",
-  "owner_proj_details_ecom_i2": "Les clients rachètent 2,1× plus vite sur mobile.",
+  "owner_proj_details_ecom_i1": "Le panier moyen augmente de 32 % avec les bundles.",
+  "owner_proj_details_ecom_i2": "Les clients recommandent 2,1× plus vite via mobile.",
 
-  "owner_proj_details_headline_gym": "Offrez un coach personnel dans la poche.",
-  "owner_proj_details_subhead_gym": "Entraînement hybride, packs de cours, location d’équipement.",
-  "owner_proj_details_gym_h1": "Onboarding orienté objectifs",
-  "owner_proj_details_gym_h2": "Messagerie entraîneur & programmes",
-  "owner_proj_details_gym_h3": "Bibliothèque vidéo d’exercices",
+  "owner_proj_details_headline_gym": "Offrez à vos membres un coach dans leur poche.",
+  "owner_proj_details_subhead_gym": "Entraînement hybride, packs de cours et location d’équipement.",
+  "owner_proj_details_gym_h1": "Onboarding basé sur des objectifs",
+  "owner_proj_details_gym_h2": "Messagerie coach & programmes",
+  "owner_proj_details_gym_h3": "Bibliothèque vidéos d’exercices",
   "owner_proj_details_gym_h4": "Tableaux de progression",
   "owner_proj_details_gym_s1_title": "Plans d’entraînement",
-  "owner_proj_details_gym_s1_sub": "Plans périodisés avec repos.",
+  "owner_proj_details_gym_s1_sub": "Plans périodisés avec logique de repos.",
   "owner_proj_details_gym_s2_title": "Cours en direct",
   "owner_proj_details_gym_s2_sub": "Réservez en présentiel ou en ligne.",
-  "owner_proj_details_gym_m1": "Place de marché d’entraîneurs",
-  "owner_proj_details_gym_m2": "Journal d’exercices & wearables",
-  "owner_proj_details_gym_m3": "Plans nutritionnels (macros)",
-  "owner_proj_details_gym_i1": "L’onboarding triple le taux de conversion.",
-  "owner_proj_details_gym_i2": "Le churn baisse de 19% avec la messagerie.",
+  "owner_proj_details_gym_m1": "Marketplace de coachs avec disponibilités",
+  "owner_proj_details_gym_m2": "Journal d’entraînement & sync wearables",
+  "owner_proj_details_gym_m3": "Plans nutrition avec macros",
+  "owner_proj_details_gym_i1": "Les membres qui finissent l’onboarding convertissent 3× plus vite.",
+  "owner_proj_details_gym_i2": "Le churn baisse de 19 % quand la messagerie est activée.",
 
-  "owner_proj_details_headline_services": "Offrez une expérience de service haut de gamme.",
-  "owner_proj_details_subhead_services": "Pour agences, cabinets et pros du service.",
-  "owner_proj_details_services_h1": "Créneaux de réservation intelligents",
+  "owner_proj_details_headline_services": "Offrez une expérience de service premium.",
+  "owner_proj_details_subhead_services": "Pour agences, consultants et pros du service.",
+  "owner_proj_details_services_h1": "Créneaux intelligents",
   "owner_proj_details_services_h2": "Espaces clients",
-  "owner_proj_details_services_h3": "Suivi des tâches & jalons",
+  "owner_proj_details_services_h3": "Suivi tâches & jalons",
   "owner_proj_details_services_h4": "Facturation intégrée",
   "owner_proj_details_services_s1_title": "Portail client",
-  "owner_proj_details_services_s1_sub": "Fichiers, notes et validations partagés.",
-  "owner_proj_details_services_s2_title": "Parcours de rendez-vous",
-  "owner_proj_details_services_s2_sub": "Tampons et formulaires d’entrée.",
-  "owner_proj_details_services_m1": "CRM client avec frises partagées",
-  "owner_proj_details_services_m2": "Contrats numériques & e-signature",
-  "owner_proj_details_services_m3": "Factures & reçus automatisés",
-  "owner_proj_details_services_i1": "Les projets se bouclent 27% plus vite.",
-  "owner_proj_details_services_i2": "La facturation auto réduit 43% les retards.",
-  "owner_proj_details_stat_active_hint": "déploiements actifs",
-  "owner_proj_details_stat_days_hint": "jours en moyenne",
+  "owner_proj_details_services_s1_sub": "Fichiers partagés, notes et validations.",
+  "owner_proj_details_services_s2_title": "Parcours rendez-vous",
+  "owner_proj_details_services_s2_sub": "Temps tampons et formulaires d’entrée.",
+  "owner_proj_details_services_m1": "CRM client avec timelines partagées",
+  "owner_proj_details_services_m2": "Contrats digitaux & e-signature",
+  "owner_proj_details_services_m3": "Emails automatiques facture & reçu",
+  "owner_proj_details_services_i1": "Les projets se terminent 27 % plus vite avec des espaces partagés.",
+  "owner_proj_details_services_i2": "La facturation auto réduit les retards de paiement de 43 %.",
+
   "owner_proj_details_stat_reviews_hint": "avis",
-   "copied": "Copié",
-  "logout_confirm": "Voulez-vous vous déconnecter ?",
-  "logged_out": "Déconnecté",
+  "owner_proj_details_stat_active_hint": "déploiements actifs",
+  "owner_proj_details_stat_days_hint": "jours (moyenne)",
+
+  "copied": "Copié",
+
   "settings": "Paramètres",
   "security": "Sécurité",
   "change_password": "Changer le mot de passe",
-  "support": "Assistance",
+  "support": "Support",
   "contact_us": "Contactez-nous",
   "owner_profile_edit": "Compte",
   "edit_profile": "Modifier le profil",
   "billing": "Facturation",
   "copy": "Copier",
-  "owner_proj_comingSoon": "Bientôt disponible"
 
-,
-  "owner_request_title": "Créer une demande d’application",
-  "refresh": "Rafraîchir",
   "submit": "Envoyer",
-  "cancel": "Annuler",
   "use": "Utiliser",
   "preview": "Aperçu",
-
-  "common_remove": "Retirer",
-
-  "err_required": "Obligatoire",
+  "errFixForm": "Veuillez corriger les erreurs du formulaire",
 
   "owner_request_hero_title": "Créer une nouvelle app",
-  "owner_request_hero_subtitle": "Choisis le thème + runtime visuellement. On génère le JSON automatiquement.",
+  "owner_request_hero_subtitle": "Choisissez thème + runtime visuellement. On génère le JSON en arrière-plan.",
 
-  "owner_request_basics_title": "Bases",
-  "owner_request_basics_subtitle": "Infos requises pour générer ton app.",
+  "owner_request_basics_title": "Informations de base",
+  "owner_request_basics_subtitle": "Infos requises pour générer votre app.",
 
-  "owner_request_project_id": "ID du projet",
+  "owner_request_project_id": "ID Projet",
   "owner_request_project_id_hint": "Sélectionné depuis le projet",
 
   "owner_request_app_name": "Nom de l’app",
   "owner_request_app_name_hint": "ex: MyHobbySphereApp",
 
   "owner_request_notes": "Notes",
-  "owner_request_notes_hint": "Description courte / demande spéciale / tout ce qui est important…",
+  "owner_request_notes_hint": "Courte description / demande spéciale / point important…",
 
   "owner_request_settings_title": "Paramètres de l’app",
-  "owner_request_settings_subtitle": "Devise + override API optionnel.",
+  "owner_request_settings_subtitle": "Devise + option d’override API.",
 
-  "owner_request_api_override": "Override de l’URL API (optionnel)",
+  "owner_request_api_override": "Override URL API (optionnel)",
   "owner_request_api_override_hint": "ex: http://192.168.1.7:8080",
 
   "owner_request_palette_title": "Palette",
-  "owner_request_palette_subtitle": "Choisis un preset ou personnalise les couleurs.",
+  "owner_request_palette_subtitle": "Choisissez un preset ou personnalisez les couleurs.",
 
   "owner_request_runtime_title": "Config Runtime",
-  "owner_request_runtime_subtitle": "Navigation + home + features (sans écrire du JSON).",
+  "owner_request_runtime_subtitle": "Navigation + home layout + feature flags (sans taper du JSON).",
 
   "owner_request_branding_title": "Branding",
-  "owner_request_branding_subtitle": "Logo optionnel mais plus pro.",
+  "owner_request_branding_subtitle": "Le logo est optionnel mais rend l’app plus pro.",
 
   "owner_request_err_load_currencies": "Échec du chargement des devises",
   "owner_request_err_valid_number": "Entrez un nombre valide",
-  "owner_request_err_select_currency": "Sélectionnez une devise d’abord",
-  "owner_request_err_fix_fields": "Corrigez les champs en erreur",
+  "owner_request_err_select_currency": "Sélectionnez d’abord une devise",
+  "owner_request_err_fix_fields": "Corrigez les champs en surbrillance",
   "owner_request_err_app_name_required": "Le nom de l’app est requis",
 
   "owner_request_logo_selected": "Logo sélectionné",
   "owner_request_logo_removed": "Logo supprimé",
-  "owner_request_no_logo": "Aucun logo",
+  "owner_request_no_logo": "Aucun logo sélectionné",
   "owner_request_pick_logo": "Choisir",
 
-  "owner_request_select_currency": "Choisir une devise",
+  "owner_request_select_currency": "Sélectionner une devise",
   "owner_request_tap_to_choose": "Appuyez pour choisir",
-  "owner_request_pick_currency": "Choisir la devise",
+  "owner_request_pick_currency": "Choisir une devise",
   "owner_request_currency_search_hint": "Rechercher par libellé / code / id",
 
-  "owner_request_currency_set": "Devise définie : {code}",
+  "owner_request_currency_set": "Devise définie sur {code}",
   "@owner_request_currency_set": {
     "placeholders": {
       "code": { "type": "String" }
@@ -372,8 +454,6 @@
   },
 
   "owner_request_submit_ready": "Prêt à envoyer ?",
-  "owner_request_submit_desc": "Déclenche le CI et génère les builds.",
-  "owner_request_submitting": "Envoi…",
   "owner_request_submit_success": "Demande envoyée ✅ CI lancé. APK bientôt 🚀",
 
   "owner_request_submit_failed": "Échec de l’envoi : {msg}",
@@ -388,15 +468,15 @@
 
   "owner_request_primary": "Primaire",
   "owner_request_secondary": "Secondaire",
-  "owner_request_background": "Fond",
+  "owner_request_background": "Arrière-plan",
   "owner_request_text_on_background": "Texte (onBackground)",
   "owner_request_error": "Erreur",
 
   "owner_request_pick_primary": "Choisir Primaire",
   "owner_request_pick_secondary": "Choisir Secondaire",
-  "owner_request_pick_background": "Choisir Fond",
-  "owner_request_pick_text_color": "Choisir couleur du texte",
-  "owner_request_pick_error": "Choisir Erreur",
+  "owner_request_pick_background": "Choisir Arrière-plan",
+  "owner_request_pick_text_color": "Choisir la couleur du texte",
+  "owner_request_pick_error": "Choisir la couleur d’erreur",
 
   "owner_request_quick_colors": "Couleurs rapides",
   "owner_request_hex_optional": "Hex (optionnel)",
@@ -404,11 +484,11 @@
   "owner_request_err_hex_format": "Utilisez #RRGGBB",
 
   "owner_request_your_app": "Votre app",
-  "owner_request_preview_hello_owner": "Salut propriétaire 👋",
-  "owner_request_preview_desc": "Voilà à quoi ressemble ton thème."
-,
+  "owner_request_preview_hello_owner": "Bonjour propriétaire 👋",
+  "owner_request_preview_desc": "Voici à quoi ressemble votre thème.",
+
   "super_create_project_title": "Créer un projet",
-  "super_create_project_subtitle": "Ajoutez un nouveau modèle de projet que les owners pourront utiliser.",
+  "super_create_project_subtitle": "Ajouter un nouveau template de projet pour les propriétaires.",
   "super_project_name": "Nom du projet",
   "super_project_name_hint": "Exemple : HobbySphere",
   "super_project_description": "Description",
@@ -418,38 +498,137 @@
   "project_type_services": "Services",
   "project_type_activities": "Activités",
   "super_project_active": "Actif",
-  "super_project_active_hint": "Si désactivé, les owners ne peuvent pas l’utiliser tant qu’il n’est pas activé.",
+  "super_project_active_hint": "Si désactivé, les propriétaires ne peuvent pas l’utiliser tant qu’il n’est pas activé.",
   "super_create_project_btn": "Créer le projet",
-  "super_create_another": "Créer un autre",
-  "super_project_name_required": "Le nom du projet est obligatoire",
+  "super_create_another": "En créer un autre",
+  "super_project_name_required": "Le nom du projet est requis",
   "super_project_name_exists": "Ce nom de projet existe déjà",
+
   "super_create_project_created_id": "Créé avec succès (ID : {id})",
   "@super_create_project_created_id": {
     "placeholders": {
       "id": { "type": "String" }
     }
   },
-  "super_create_project_success": "Projet \"{name}\" créé avec succès !",
+
+  "super_create_project_success": "Projet « {name} » créé avec succès !",
   "@super_create_project_success": {
     "placeholders": {
       "name": { "type": "String" }
     }
   },
-  "common_loading": "Chargement...",
-  "common_forbidden": "Accès refusé",
-  "common_unauthorized": "Non autorisé",
-   "retry": "Réessayer",
+
+  "retry": "Réessayer",
   "search_owners_hint": "Rechercher des propriétaires…",
   "search_apps_hint": "Rechercher des apps…",
   "empty_owners": "Aucun propriétaire trouvé",
-  "empty_owner_apps": "Aucune app pour ce propriétaire",
+  "empty_owner_apps": "Aucune app trouvée pour ce propriétaire",
   "unnamed_app": "(App sans nom)",
+
   "toast_app_selected": "App : {slug}",
-  "app_slug_status": "slug : {slug} • {status}",
-  "apps_count": "{count} apps",
-
   "@toast_app_selected": { "placeholders": { "slug": {} } },
-  "@app_slug_status": { "placeholders": { "slug": {}, "status": {} } },
-  "@apps_count": { "placeholders": { "count": {} } }
-}
 
+  "app_slug_status": "slug : {slug} • {status}",
+  "@app_slug_status": { "placeholders": { "slug": {}, "status": {} } },
+
+  "apps_count": "{count} apps",
+  "@apps_count": { "placeholders": { "count": {} } },
+
+  "ordersLabel": "Commandes",
+  "orderLabel": "Commande",
+  "noOrdersTitle": "Aucune commande",
+  "noOrdersSubtitle": "Aucune commande trouvée pour cette app avec les filtres actuels.",
+  "retryLabel": "Réessayer",
+
+  "allTimeLabel": "Tout",
+  "dashboardLabel": "Tableau de bord",
+  "last7DaysLabel": "7 derniers jours",
+  "last30DaysLabel": "30 derniers jours",
+  "clearLabel": "Effacer",
+
+  "grossSalesLabel": "Ventes brutes",
+  "paidLabel": "Payé",
+  "outstandingLabel": "En attente",
+  "avgOrderLabel": "Panier moyen",
+  "fullyPaidRateLabel": "Entièrement payé",
+  "statusBreakdownLabel": "Répartition des statuts",
+  "paidRevenueLast7DaysLabel": "Revenus payés (7 derniers jours)",
+
+  "filterAllLabel": "Tous",
+  "filterPendingLabel": "En attente",
+  "filterCompletedLabel": "Terminé",
+  "filterCanceledLabel": "Annulé",
+  "filterRejectedLabel": "Rejeté",
+  "filterRefundedLabel": "Remboursé",
+
+  "itemsLabel": "Articles",
+  "totalLabel": "Total",
+  "remainingLabel": "Restant",
+  "fullyPaidShortLabel": "Payé",
+
+  "owner_publish_title_play": "Publier sur Google Play Store",
+  "owner_publish_title_appstore": "Publier sur l’App Store",
+  "owner_publish_platform_android": "Android",
+  "owner_publish_platform_ios": "iOS",
+
+  "owner_publish_request_play": "Demander la publication sur le Play Store",
+  "owner_publish_request_appstore": "Demander la publication sur l’App Store",
+
+  "owner_publish_step1_title": "Informations de base",
+  "owner_publish_step1_sub": "Fournissez les informations principales sur votre application",
+  "owner_publish_step2_title": "Catégorie & détails",
+  "owner_publish_step2_sub": "Catégorisez votre app et ajoutez des détails",
+  "owner_publish_step3_title": "Juridique & contact",
+  "owner_publish_step3_sub": "Ces champs sont gérés par le profil éditeur Build4All",
+  "owner_publish_step4_title": "Assets & captures",
+  "owner_publish_step4_sub": "Fournissez l’icône et les URLs des captures d’écran",
+
+  "owner_publish_app_name": "Nom de l’application",
+  "owner_publish_app_name_hint": "ShopSphere",
+
+  "owner_publish_package_name": "Nom du package (lecture seule)",
+  "owner_publish_bundle_id": "Bundle ID (lecture seule)",
+
+  "owner_publish_short_desc": "Description courte",
+  "owner_publish_short_desc_hint": "Brève description (max 80 caractères)",
+
+  "owner_publish_full_desc": "Description complète",
+  "owner_publish_full_desc_hint": "Rédigez la description complète de la fiche…",
+
+  "owner_publish_category": "Catégorie",
+  "owner_publish_category_hint": "Sélectionnez une catégorie",
+
+  "owner_publish_country": "Disponibilité par pays",
+  "owner_publish_pricing": "Tarification",
+  "owner_publish_free": "Gratuite",
+  "owner_publish_paid": "Payante",
+
+  "owner_publish_content_confirm": "Je confirme que cette application respecte les politiques du store et les règles d’âge.",
+
+  "owner_publish_privacy_url": "URL de la politique de confidentialité",
+  "owner_publish_dev_name": "Nom du développeur",
+  "owner_publish_dev_email": "Email du développeur",
+  "owner_publish_managed_by_build4all": "Géré par Build4All",
+
+  "owner_publish_icon_url": "URL de l’icône",
+  "owner_publish_icon_url_hint": "https://.../icon.png",
+  "owner_publish_screenshots_urls": "URLs des captures d’écran",
+  "owner_publish_screenshot": "Capture",
+  "owner_publish_shots_rule": "Requis : min 2, max 8 captures",
+
+  "owner_publish_submit": "Soumettre pour revue",
+  "owner_publish_submitted": "Soumis pour revue",
+
+  "owner_publish_err_appname": "Le nom de l’application est requis",
+  "owner_publish_err_short": "La description courte est requise",
+  "owner_publish_err_short80": "Description courte : max 80 caractères",
+  "owner_publish_err_full": "La description complète est requise",
+  "owner_publish_err_category": "La catégorie est requise",
+  "owner_publish_err_content_confirm": "Vous devez confirmer la conformité du contenu",
+  "owner_publish_err_icon": "L’URL de l’icône est requise",
+  "owner_publish_err_shots2": "Au moins 2 captures sont requises",
+  "owner_publish_err_shots8": "Maximum 8 captures autorisées",
+
+  "msgWelcomeBack": "Bon retour",
+  "msgVerified": "Vérifié"
+}

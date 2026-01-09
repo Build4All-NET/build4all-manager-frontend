@@ -1,14 +1,14 @@
 import 'package:build4all_manager/features/auth/presentation/bloc/register/OwnerRegisterBloc.dart';
 import 'package:build4all_manager/features/auth/presentation/bloc/register/owner_register_event.dart';
 import 'package:build4all_manager/features/auth/presentation/bloc/register/owner_register_state.dart';
-import 'package:build4all_manager/shared/widgets/top_toast.dart';
+import 'package:build4all_manager/shared/widgets/app_toast.dart'; // ✅ common toast
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../../../../l10n/app_localizations.dart';
 import '../../../../../shared/widgets/app_text_field.dart';
 import '../../../../../shared/widgets/app_button.dart';
-
 
 class OwnerRegisterEmailScreen extends StatefulWidget {
   const OwnerRegisterEmailScreen({super.key});
@@ -52,7 +52,17 @@ class _OwnerRegisterEmailScreenState extends State<OwnerRegisterEmailScreen> {
   }
 
   void _submit(AppLocalizations l10n) {
-    if (!(_form.currentState?.validate() ?? false)) return;
+    final form = _form.currentState;
+    if (form == null) return;
+
+    if (!form.validate()) {
+      // optional: warn toast
+      // AppToast.warn(context, l10n.errFixForm);
+      return;
+    }
+
+    FocusScope.of(context).unfocus();
+
     context.read<OwnerRegisterBloc>().add(
           OwnerSendOtp(_email.text.trim(), _password.text),
         );
@@ -64,17 +74,29 @@ class _OwnerRegisterEmailScreenState extends State<OwnerRegisterEmailScreen> {
     final l10n = AppLocalizations.of(context)!;
 
     return BlocConsumer<OwnerRegisterBloc, OwnerRegisterState>(
+      // ✅ react only when error/loading changes
       listenWhen: (p, c) => p.error != c.error || p.loading != c.loading,
       listener: (context, state) {
+        // ✅ show error toast
         if (state.error != null && state.error!.isNotEmpty) {
-          showTopToast(context, state.error!,
-              type: ToastType.error, haptics: true);
-        } else if (!state.loading) {
+          AppToast.error(context, state.error!);
+          return;
+        }
+
+        // ✅ navigate ONLY when request finished successfully:
+        // previous loading=true -> current loading=false AND no error
+        // We don't have previous state here, so use BlocConsumer's listenWhen
+        // with loading changes and check loading=false with no error,
+        // but ONLY after a submit attempt (loading was true at some point).
+        // Best practical approach: check that loading is false AND error is null,
+        // which happens after submit finishes.
+        if (!state.loading) {
+          AppToast.success(context, l10n.msgCodeSent);
+
           context.push('/owner/register/otp', extra: {
             'email': _email.text.trim(),
             'password': _password.text,
           });
-          showTopToast(context, l10n.msgCodeSent, type: ToastType.success);
         }
       },
       builder: (context, state) {

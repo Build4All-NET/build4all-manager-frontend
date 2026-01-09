@@ -3,8 +3,9 @@ import 'package:build4all_manager/features/owner/common/data/services/owner_api.
 import 'package:build4all_manager/features/owner/common/domain/entities/owner_project.dart';
 import 'package:build4all_manager/features/owner/common/domain/usecases/get_my_apps_uc.dart';
 import 'package:build4all_manager/features/owner/ownerprojects/presentation/widgets/project_tile.dart';
+import 'package:build4all_manager/features/owner/publish/data/services/owner_publish_api.dart';
 import 'package:build4all_manager/l10n/app_localizations.dart';
-import 'package:build4all_manager/shared/widgets/top_toast.dart';
+import 'package:build4all_manager/shared/widgets/app_toast.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -12,6 +13,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/owner_projects_bloc.dart';
 import '../bloc/owner_projects_event.dart';
 import '../bloc/owner_projects_state.dart';
+
+enum _PlatformReadyFilter { all, android, ios }
+enum _EnvironmentFilter { all, local, test, production }
 
 class OwnerProjectsScreen extends StatefulWidget {
   final int ownerId;
@@ -31,41 +35,77 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
   static const int _pageSize = 12;
   int _visibleCount = _pageSize;
 
+  _PlatformReadyFilter _platform = _PlatformReadyFilter.all;
+  _EnvironmentFilter _env = _EnvironmentFilter.all;
+
+  bool _showFilters = false;
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final repo = OwnerRepositoryImpl(OwnerApi(widget.dio));
 
-    String _serverRootNoApi(Dio d) {
+    String serverRootNoApi(Dio d) {
       final base = d.options.baseUrl; // http://host:8080/api
       return base.replaceFirst(RegExp(r'/api/?$'), '');
     }
 
-    Future<void> _refresh(BuildContext ctx) async {
+    Future<void> refresh(BuildContext ctx) async {
       ctx.read<OwnerProjectsBloc>().add(OwnerProjectsStarted(widget.ownerId));
       setState(() => _visibleCount = _pageSize);
       await Future.delayed(const Duration(milliseconds: 250));
     }
 
-    Future<void> _rebuildAndRefresh(BuildContext ctx, OwnerProject p) async {
+    Future<void> rebuildAndRefresh(BuildContext ctx, OwnerProject p) async {
       try {
         await repo.rebuildAppLink(ownerId: widget.ownerId, linkId: p.linkId);
+
         if (ctx.mounted) {
-          showTopToast(ctx, 'Rebuild queued', type: ToastType.success);
+          AppToast.success(ctx, 'Rebuild queued');
         }
+
         ctx
             .read<OwnerProjectsBloc>()
             .add(OwnerProjectsRefreshed(widget.ownerId));
       } catch (e) {
         if (ctx.mounted) {
-          showTopToast(
-            ctx,
-            'Rebuild failed: $e',
-            type: ToastType.error,
-            haptics: true,
-          );
+          AppToast.error(ctx, 'Rebuild failed: $e');
         }
       }
+    }
+
+    bool _androidReady(OwnerProject p) {
+      final apk = (p.apkUrl ?? '').trim();
+      final aab = (p.bundleUrl ?? '').trim();
+      return p.isApkReady || apk.isNotEmpty || aab.isNotEmpty;
+    }
+
+    bool _iosReady(OwnerProject p) {
+      final ipa = (p.ipaUrl ?? '').trim();
+      return ipa.isNotEmpty;
+    }
+
+    bool _matchPlatform(OwnerProject p) {
+      switch (_platform) {
+        case _PlatformReadyFilter.all:
+          return true;
+        case _PlatformReadyFilter.android:
+          return _androidReady(p);
+        case _PlatformReadyFilter.ios:
+          return _iosReady(p);
+      }
+    }
+
+    bool _matchEnv(OwnerProject p) {
+      if (_env == _EnvironmentFilter.all) return true;
+
+      final s = (p.status ?? '').toLowerCase();
+      if (_env == _EnvironmentFilter.local) return s.contains('local');
+      if (_env == _EnvironmentFilter.test) return s.contains('test');
+      if (_env == _EnvironmentFilter.production) {
+        return s.contains('prod') || s.contains('production');
+      }
+      return true;
     }
 
     return BlocProvider(
@@ -76,8 +116,7 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
         body: SafeArea(
           child: LayoutBuilder(
             builder: (context, viewport) {
-              final double maxContentWidth =
-                  _maxContentWidth(viewport.maxWidth);
+              final double maxContentWidth = _maxContentWidth(viewport.maxWidth);
               final double hPad = _contentHPad(viewport.maxWidth);
 
               return Align(
@@ -91,33 +130,75 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
                         final l10n = AppLocalizations.of(context)!;
                         final double bottomPad = 16;
 
-                        final int total = state.filtered.length;
+                        final filtered = state.filtered
+                            .where(_matchPlatform)
+                            .where(_matchEnv)
+                            .toList();
+
+                        final int total = filtered.length;
                         final int visible =
                             total == 0 ? 0 : _visibleCount.clamp(0, total);
 
                         return RefreshIndicator(
-                          onRefresh: () => _refresh(context),
+                          onRefresh: () => refresh(context),
                           child: CustomScrollView(
                             physics: const BouncingScrollPhysics(
                               parent: AlwaysScrollableScrollPhysics(),
                             ),
                             slivers: [
-                              SliverToBoxAdapter(child: _Header()),
+                              const SliverToBoxAdapter(child: _Header()),
                               const SliverToBoxAdapter(
-                                  child: SizedBox(height: 12)),
-                              SliverToBoxAdapter(
-                                  child: _SearchField(l10n: l10n)),
-                              const SliverToBoxAdapter(
-                                  child: SizedBox(height: 12)),
+                                child: SizedBox(height: 12),
+                              ),
 
-                              // Loading
+                              SliverToBoxAdapter(
+                                child: _SearchField(
+                                  l10n: l10n,
+                                  showFilters: _showFilters,
+                                  onToggleFilters: () {
+                                    setState(() => _showFilters = !_showFilters);
+                                  },
+                                ),
+                              ),
+
+                              SliverToBoxAdapter(
+                                child: AnimatedSize(
+                                  duration: const Duration(milliseconds: 220),
+                                  curve: Curves.easeOutCubic,
+                                  alignment: Alignment.topCenter,
+                                  child: _showFilters
+                                      ? Padding(
+                                          padding: const EdgeInsets.only(top: 12),
+                                          child: _FiltersBar(
+                                            platform: _platform,
+                                            env: _env,
+                                            onPlatform: (v) {
+                                              setState(() {
+                                                _platform = v;
+                                                _visibleCount = _pageSize;
+                                              });
+                                            },
+                                            onEnv: (v) {
+                                              setState(() {
+                                                _env = v;
+                                                _visibleCount = _pageSize;
+                                              });
+                                            },
+                                          ),
+                                        )
+                                      : const SizedBox(height: 0),
+                                ),
+                              ),
+
+                              const SliverToBoxAdapter(
+                                child: SizedBox(height: 12),
+                              ),
+
                               if (state.loading) ...[
                                 SliverPadding(
                                   padding: EdgeInsets.only(bottom: bottomPad),
                                   sliver: const _ListSkeleton(count: 6),
                                 ),
-
-                                // Error
                               ] else if (state.error != null) ...[
                                 SliverFillRemaining(
                                   hasScrollBody: false,
@@ -127,31 +208,24 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
                                     color: Theme.of(context).colorScheme.error,
                                   ),
                                 ),
-
-                                // Empty
                               ] else if (total == 0) ...[
                                 SliverFillRemaining(
                                   hasScrollBody: false,
                                   child: _EmptyProjects(l10n: l10n),
                                 ),
-
-                                // Data
                               ] else ...[
-                                // ✅ FULL-WIDTH LIST (instead of grid)
                                 SliverPadding(
                                   padding: const EdgeInsets.only(bottom: 12),
                                   sliver: SliverList(
                                     delegate: SliverChildBuilderDelegate(
                                       (context, index) {
-                                        final item = state.filtered[index];
+                                        final item = filtered[index];
                                         return Padding(
-                                          padding:
-                                              const EdgeInsets.only(bottom: 12),
+                                          padding: const EdgeInsets.only(bottom: 12),
                                           child: ProjectTile(
                                             project: item,
-                                            serverRootNoApi:
-                                                _serverRootNoApi(widget.dio),
-                                          
+                                            serverRootNoApi: serverRootNoApi(widget.dio),
+                                            publishApi: OwnerPublishApi(widget.dio),
                                           ),
                                         );
                                       },
@@ -159,26 +233,20 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
                                     ),
                                   ),
                                 ),
-
-                                // Load more
                                 if (visible < total)
                                   SliverToBoxAdapter(
                                     child: Padding(
-                                      padding: EdgeInsets.only(
-                                        bottom: bottomPad,
-                                        top: 4,
-                                      ),
+                                      padding:
+                                          EdgeInsets.only(bottom: bottomPad, top: 4),
                                       child: Center(
                                         child: OutlinedButton.icon(
                                           onPressed: () {
                                             setState(() {
                                               _visibleCount =
-                                                  (_visibleCount + _pageSize)
-                                                      .clamp(0, total);
+                                                  (_visibleCount + _pageSize).clamp(0, total);
                                             });
                                           },
-                                          icon: const Icon(
-                                              Icons.expand_more_rounded),
+                                          icon: const Icon(Icons.expand_more_rounded),
                                           label: const Text('Load more'),
                                         ),
                                       ),
@@ -204,8 +272,6 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
     );
   }
 
-  // ----- Responsive helpers -----
-
   double _maxContentWidth(double viewportWidth) {
     if (viewportWidth >= 1600) return 1400;
     if (viewportWidth >= 1400) return 1280;
@@ -222,6 +288,8 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
 }
 
 class _Header extends StatelessWidget {
+  const _Header();
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -230,76 +298,19 @@ class _Header extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(4, 12, 4, 0),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l10n.owner_projects_title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: tt.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  l10n.owner_projects_searchHint,
-                  style: tt.bodyMedium?.copyWith(
-                    color: cs.onSurface.withOpacity(.65),
-                  ),
-                ),
-              ],
-            ),
+          Text(
+            l10n.owner_projects_title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: tt.headlineSmall?.copyWith(fontWeight: FontWeight.w900),
           ),
-          BlocBuilder<OwnerProjectsBloc, OwnerProjectsState>(
-            buildWhen: (p, c) => p.onlyReady != c.onlyReady,
-            builder: (context, state) {
-              return InkWell(
-                onTap: () => context
-                    .read<OwnerProjectsBloc>()
-                    .add(const OwnerProjectsToggleOnlyReady()),
-                borderRadius: BorderRadius.circular(20),
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: state.onlyReady
-                        ? cs.primary.withOpacity(.12)
-                        : cs.surfaceVariant.withOpacity(.5),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: (state.onlyReady ? cs.primary : cs.outlineVariant)
-                          .withOpacity(.6),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        state.onlyReady
-                            ? Icons.check_circle_rounded
-                            : Icons.radio_button_unchecked,
-                        size: 18,
-                        color:
-                            state.onlyReady ? cs.primary : cs.onSurfaceVariant,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        l10n.owner_projects_onlyReady,
-                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                              fontWeight: FontWeight.w800,
-                              color: state.onlyReady
-                                  ? cs.primary
-                                  : cs.onSurfaceVariant,
-                            ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
+          const SizedBox(height: 4),
+          Text(
+            l10n.owner_projects_searchHint,
+            style: tt.bodyMedium?.copyWith(color: cs.onSurface.withOpacity(.65)),
           ),
         ],
       ),
@@ -307,10 +318,219 @@ class _Header extends StatelessWidget {
   }
 }
 
+class _FiltersBar extends StatelessWidget {
+  final _PlatformReadyFilter platform;
+  final _EnvironmentFilter env;
+  final ValueChanged<_PlatformReadyFilter> onPlatform;
+  final ValueChanged<_EnvironmentFilter> onEnv;
+
+  const _FiltersBar({
+    required this.platform,
+    required this.env,
+    required this.onPlatform,
+    required this.onEnv,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    final w = MediaQuery.of(context).size.width;
+
+    final bool compact = w < 420;
+    final bool ultraCompact = w < 360;
+
+    final double pillHPad = ultraCompact ? 12 : (compact ? 14 : 16);
+    final double pillVPad = ultraCompact ? 10 : (compact ? 11 : 12);
+    final double fontSize = ultraCompact ? 12.5 : (compact ? 13.5 : 14);
+
+    Widget group({
+      required String title,
+      required List<Widget> pills,
+    }) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: tt.labelLarge?.copyWith(
+              fontWeight: FontWeight.w900,
+              color: cs.onSurface.withOpacity(.85),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: pills,
+          ),
+        ],
+      );
+    }
+
+    final platformGroup = group(
+      title: 'Platform Ready',
+      pills: [
+        _PillSeg(
+          text: 'All',
+          selected: platform == _PlatformReadyFilter.all,
+          onTap: () => onPlatform(_PlatformReadyFilter.all),
+          hPad: pillHPad,
+          vPad: pillVPad,
+          fontSize: fontSize,
+        ),
+        _PillSeg(
+          text: 'Android',
+          selected: platform == _PlatformReadyFilter.android,
+          onTap: () => onPlatform(_PlatformReadyFilter.android),
+          hPad: pillHPad,
+          vPad: pillVPad,
+          fontSize: fontSize,
+        ),
+        _PillSeg(
+          text: 'iOS',
+          selected: platform == _PlatformReadyFilter.ios,
+          onTap: () => onPlatform(_PlatformReadyFilter.ios),
+          hPad: pillHPad,
+          vPad: pillVPad,
+          fontSize: fontSize,
+        ),
+      ],
+    );
+
+    final envGroup = group(
+      title: 'Environment',
+      pills: [
+        _PillSeg(
+          text: 'All',
+          selected: env == _EnvironmentFilter.all,
+          onTap: () => onEnv(_EnvironmentFilter.all),
+          hPad: pillHPad,
+          vPad: pillVPad,
+          fontSize: fontSize,
+        ),
+        _PillSeg(
+          text: 'Local',
+          selected: env == _EnvironmentFilter.local,
+          onTap: () => onEnv(_EnvironmentFilter.local),
+          hPad: pillHPad,
+          vPad: pillVPad,
+          fontSize: fontSize,
+        ),
+        _PillSeg(
+          text: 'Test',
+          selected: env == _EnvironmentFilter.test,
+          onTap: () => onEnv(_EnvironmentFilter.test),
+          hPad: pillHPad,
+          vPad: pillVPad,
+          fontSize: fontSize,
+        ),
+        _PillSeg(
+          text: 'Production',
+          selected: env == _EnvironmentFilter.production,
+          onTap: () => onEnv(_EnvironmentFilter.production),
+          hPad: pillHPad,
+          vPad: pillVPad,
+          fontSize: fontSize,
+        ),
+      ],
+    );
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+      decoration: BoxDecoration(
+        color: cs.surface,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: cs.outlineVariant.withOpacity(.6)),
+      ),
+      child: LayoutBuilder(
+        builder: (context, c) {
+          final narrow = c.maxWidth < 820;
+          if (narrow) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                platformGroup,
+                const SizedBox(height: 12),
+                envGroup,
+              ],
+            );
+          }
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: platformGroup),
+              const SizedBox(width: 16),
+              Expanded(child: envGroup),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _PillSeg extends StatelessWidget {
+  final String text;
+  final bool selected;
+  final VoidCallback onTap;
+
+  final double hPad;
+  final double vPad;
+  final double fontSize;
+
+  const _PillSeg({
+    required this.text,
+    required this.selected,
+    required this.onTap,
+    required this.hPad,
+    required this.vPad,
+    required this.fontSize,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    final bg = selected ? cs.primary.withOpacity(.12) : Colors.transparent;
+    final border = selected ? cs.primary : cs.outlineVariant.withOpacity(.8);
+    final fg = selected ? cs.primary : cs.onSurface.withOpacity(.8);
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(999),
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: hPad, vertical: vPad),
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(color: border),
+        ),
+        child: Text(
+          text,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            fontWeight: FontWeight.w900,
+            fontSize: fontSize,
+            color: fg,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _SearchField extends StatelessWidget {
   final AppLocalizations l10n;
+  final bool showFilters;
+  final VoidCallback onToggleFilters;
 
-  const _SearchField({required this.l10n});
+  const _SearchField({
+    required this.l10n,
+    required this.showFilters,
+    required this.onToggleFilters,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -320,22 +540,26 @@ class _SearchField extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4),
       child: TextField(
-        onChanged: (v) => context
-            .read<OwnerProjectsBloc>()
-            .add(OwnerProjectsSearchChanged(v)),
+        onChanged: (v) =>
+            context.read<OwnerProjectsBloc>().add(OwnerProjectsSearchChanged(v)),
         style: tt.bodyMedium,
         decoration: InputDecoration(
           prefixIcon: const Icon(Icons.search_rounded),
-          suffixIcon:
-              Icon(Icons.tune_rounded, color: cs.onSurface.withOpacity(.55)),
           hintText: l10n.owner_projects_searchHint,
           filled: true,
           fillColor: cs.surface,
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
             borderSide: BorderSide(color: cs.outlineVariant),
+          ),
+          suffixIcon: IconButton(
+            onPressed: onToggleFilters,
+            icon: Icon(
+              showFilters ? Icons.close_rounded : Icons.tune_rounded,
+              color: cs.onSurface.withOpacity(.75),
+            ),
+            tooltip: showFilters ? 'Hide filters' : 'Show filters',
           ),
         ),
       ),
@@ -370,9 +594,7 @@ class _CenteredMessage extends StatelessWidget {
             Text(
               label,
               textAlign: TextAlign.center,
-              style: tt.bodyLarge?.copyWith(
-                color: (color ?? cs.onSurface),
-              ),
+              style: tt.bodyLarge?.copyWith(color: (color ?? cs.onSurface)),
             ),
           ],
         ),
@@ -383,7 +605,6 @@ class _CenteredMessage extends StatelessWidget {
 
 class _EmptyProjects extends StatelessWidget {
   final AppLocalizations l10n;
-
   const _EmptyProjects({required this.l10n});
 
   @override
@@ -407,14 +628,11 @@ class _EmptyProjects extends StatelessWidget {
           Text(
             l10n.owner_projects_emptyBody,
             textAlign: TextAlign.center,
-            style: tt.bodyMedium?.copyWith(
-              color: cs.onSurface.withOpacity(.7),
-            ),
+            style: tt.bodyMedium?.copyWith(color: cs.onSurface.withOpacity(.7)),
           ),
           const SizedBox(height: 14),
           FilledButton.icon(
-            onPressed: () =>
-                Navigator.of(context).pushNamed('/owner/request-new'),
+            onPressed: () => Navigator.of(context).pushNamed('/owner/request-new'),
             icon: const Icon(Icons.bolt_rounded),
             label: Text(l10n.owner_home_requestApp),
           ),
@@ -437,7 +655,7 @@ class _ListSkeleton extends StatelessWidget {
         (context, index) => Padding(
           padding: const EdgeInsets.only(bottom: 12),
           child: Container(
-            height: 140,
+            height: 160,
             decoration: BoxDecoration(
               color: cs.surfaceVariant.withOpacity(.5),
               borderRadius: BorderRadius.circular(16),

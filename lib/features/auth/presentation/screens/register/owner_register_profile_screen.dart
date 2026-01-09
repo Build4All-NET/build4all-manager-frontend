@@ -1,19 +1,21 @@
 import 'package:build4all_manager/features/auth/presentation/bloc/register/OwnerRegisterBloc.dart';
 import 'package:build4all_manager/features/auth/presentation/bloc/register/owner_register_event.dart';
 import 'package:build4all_manager/features/auth/presentation/bloc/register/owner_register_state.dart';
-import 'package:build4all_manager/shared/widgets/top_toast.dart';
+import 'package:build4all_manager/shared/widgets/app_toast.dart'; // ✅ common toast
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../../../../l10n/app_localizations.dart';
 import '../../../../../shared/widgets/app_text_field.dart';
 import '../../../../../shared/widgets/app_button.dart';
 
-
 class OwnerRegisterProfileScreen extends StatefulWidget {
   final String registrationToken;
-  const OwnerRegisterProfileScreen(
-      {super.key, required this.registrationToken});
+  const OwnerRegisterProfileScreen({
+    super.key,
+    required this.registrationToken,
+  });
 
   @override
   State<OwnerRegisterProfileScreen> createState() =>
@@ -39,7 +41,12 @@ class _OwnerRegisterProfileScreenState
       (v == null || v.trim().isEmpty) ? msg : null;
 
   void _submit(AppLocalizations l10n) {
-    if (!(_form.currentState?.validate() ?? false)) return;
+    final form = _form.currentState;
+    if (form == null) return;
+    if (!form.validate()) return;
+
+    FocusScope.of(context).unfocus();
+
     context.read<OwnerRegisterBloc>().add(
           OwnerCompleteProfile(
             widget.registrationToken,
@@ -58,12 +65,13 @@ class _OwnerRegisterProfileScreenState
       listenWhen: (p, c) => p.error != c.error || p.completed != c.completed,
       listener: (context, state) {
         if (state.error != null && state.error!.isNotEmpty) {
-          showTopToast(context, state.error!,
-              type: ToastType.error, haptics: true);
-        } else if (state.completed) {
-          showTopToast(context, l10n.msgOwnerRegistered,
-              type: ToastType.success, haptics: true);
-          context.go('/home'); // or an owner dashboard route
+          AppToast.error(context, state.error!);
+          return;
+        }
+
+        if (state.completed) {
+          AppToast.success(context, l10n.msgOwnerRegistered);
+          context.go('/home'); // adjust if needed
         }
       },
       builder: (context, state) {
@@ -84,8 +92,7 @@ class _OwnerRegisterProfileScreenState
                         label: l10n.lblUsername,
                         hint: l10n.hintUsername,
                         prefix: const Icon(Icons.alternate_email),
-                        validator: (v) =>
-                            _required(v, l10n.errUsernameRequired),
+                        validator: (v) => _required(v, l10n.errUsernameRequired),
                       ),
                       const SizedBox(height: 14),
                       AppTextField(
@@ -93,8 +100,7 @@ class _OwnerRegisterProfileScreenState
                         label: l10n.lblFirstName,
                         hint: l10n.hintFirstName,
                         prefix: const Icon(Icons.person_outline),
-                        validator: (v) =>
-                            _required(v, l10n.errFirstNameRequired),
+                        validator: (v) => _required(v, l10n.errFirstNameRequired),
                       ),
                       const SizedBox(height: 14),
                       AppTextField(
@@ -102,8 +108,7 @@ class _OwnerRegisterProfileScreenState
                         label: l10n.lblLastName,
                         hint: l10n.hintLastName,
                         prefix: const Icon(Icons.person_outline),
-                        validator: (v) =>
-                            _required(v, l10n.errLastNameRequired),
+                        validator: (v) => _required(v, l10n.errLastNameRequired),
                       ),
                       const SizedBox(height: 20),
                       AppButton(

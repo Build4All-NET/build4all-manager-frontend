@@ -1,4 +1,5 @@
 import 'dart:ui';
+
 import 'package:build4all_manager/features/auth/data/datasources/jwt_local_datasource.dart';
 import 'package:build4all_manager/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:build4all_manager/features/auth/data/services/auth_api.dart';
@@ -9,14 +10,15 @@ import 'package:build4all_manager/features/auth/domain/usecases/logout_usecase.d
 import 'package:build4all_manager/features/auth/presentation/bloc/login/auth_bloc.dart';
 import 'package:build4all_manager/features/auth/presentation/bloc/login/auth_event.dart';
 import 'package:build4all_manager/features/auth/presentation/bloc/login/auth_state.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/app_text_field.dart';
 import '../../../../shared/widgets/app_button.dart';
+import '../../../../shared/widgets/app_toast.dart'; // ✅ use common toast
 
 class AppLoginScreen extends StatelessWidget {
   const AppLoginScreen({super.key});
@@ -38,130 +40,143 @@ class AppLoginScreen extends StatelessWidget {
         getRoleUseCase: GetStoredRoleUseCase(repo),
       ),
       child: BlocListener<AuthBloc, AuthState>(
-        listenWhen: (p, c) => p.role != c.role || c.error != null,
+        // ✅ react only when role or error changes (prevents toast spam)
+        listenWhen: (p, c) => p.role != c.role || p.error != c.error,
         listener: (context, state) {
           final role = (state.role ?? '').toUpperCase();
+
+          // ✅ show toast error using common widget
+          if (state.error != null && state.error!.isNotEmpty) {
+            AppToast.error(context, state.error!);
+            return;
+          }
+
+          // ✅ navigate when role exists (success)
           if (role == 'SUPER_ADMIN') {
+            AppToast.success(context, l10n.msgWelcomeBack); // optional key
             context.go('/manager');
           } else if (role.isNotEmpty) {
-            // OWNER / BUSINESS / MANAGER… → Owner shell with nav
+            AppToast.success(context, l10n.msgWelcomeBack); // optional key
             context.go('/owner');
-          } else if (state.error != null) {
-            ScaffoldMessenger.of(context)
-                .showSnackBar(SnackBar(content: Text(state.error!)));
           }
         },
         child: Scaffold(
           backgroundColor: cs.surface,
           body: SafeArea(
-            child: LayoutBuilder(builder: (context, cts) {
-              final isWide = cts.maxWidth >= 900;
-              final cardMaxWidth = isWide ? 560.0 : 480.0;
+            child: LayoutBuilder(
+              builder: (context, cts) {
+                final isWide = cts.maxWidth >= 900;
+                final cardMaxWidth = isWide ? 560.0 : 480.0;
 
-              return Stack(children: [
-                _Header(title: l10n.appTitle),
-                Align(
-                  alignment: Alignment.topCenter,
-                  child: SingleChildScrollView(
-                    padding: EdgeInsets.only(
-                      top: isWide ? 120 : 140,
-                      left: 16,
-                      right: 16,
-                      bottom: 24,
-                    ),
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(maxWidth: cardMaxWidth),
-                      child: _FrostedCard(
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(24, 28, 24, 20),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
+                return Stack(
+                  children: [
+                    _Header(title: l10n.appTitle),
+                    Align(
+                      alignment: Alignment.topCenter,
+                      child: SingleChildScrollView(
+                        padding: EdgeInsets.only(
+                          top: isWide ? 120 : 140,
+                          left: 16,
+                          right: 16,
+                          bottom: 24,
+                        ),
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(maxWidth: cardMaxWidth),
+                          child: _FrostedCard(
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.fromLTRB(24, 28, 24, 20),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Hero(
-                                    tag: 'brand',
-                                    child: CircleAvatar(
-                                      radius: 30,
-                                      backgroundColor:
-                                          cs.primary.withOpacity(.12),
-                                      child: Text(
-                                        'B4',
-                                        style: TextStyle(
-                                          color: cs.primary,
-                                          fontWeight: FontWeight.w800,
-                                          fontSize: 18,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 12),
-                              Text(
-                                l10n.signInGeneralTitle,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleLarge
-                                    ?.copyWith(fontWeight: FontWeight.w700),
-                              ),
-                              const SizedBox(height: 6),
-                              Text(
-                                l10n.signInGeneralSubtitle,
-                                textAlign: TextAlign.center,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyMedium
-                                    ?.copyWith(color: cs.outline),
-                              ),
-                              const SizedBox(height: 20),
-                              const Divider(height: 1),
-                              const SizedBox(height: 20),
-                              const _LoginForm(),
-                              const SizedBox(height: 16),
-                              TextButton(
-                                onPressed: () => context.go('/owner/register'),
-                                child: Text.rich(
-                                  TextSpan(
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      TextSpan(
-                                        text: l10n.noAccount,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyMedium
-                                            ?.copyWith(color: cs.outline),
-                                      ),
-                                      TextSpan(
-                                        text: ' ${l10n.signUp}',
-                                        style: TextStyle(
-                                          color: cs.primary,
-                                          fontWeight: FontWeight.w700,
+                                      Hero(
+                                        tag: 'brand',
+                                        child: CircleAvatar(
+                                          radius: 30,
+                                          backgroundColor:
+                                              cs.primary.withOpacity(.12),
+                                          child: Text(
+                                            'B4',
+                                            style: TextStyle(
+                                              color: cs.primary,
+                                              fontWeight: FontWeight.w800,
+                                              fontSize: 18,
+                                            ),
+                                          ),
                                         ),
                                       ),
                                     ],
                                   ),
-                                  textAlign: TextAlign.center,
-                                ),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    l10n.signInGeneralTitle,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleLarge
+                                        ?.copyWith(fontWeight: FontWeight.w700),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    l10n.signInGeneralSubtitle,
+                                    textAlign: TextAlign.center,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(color: cs.outline),
+                                  ),
+                                  const SizedBox(height: 20),
+                                  const Divider(height: 1),
+                                  const SizedBox(height: 20),
+                                  const _LoginForm(),
+                                  const SizedBox(height: 16),
+                                  TextButton(
+                                    onPressed: () =>
+                                        context.go('/owner/register'),
+                                    child: Text.rich(
+                                      TextSpan(
+                                        children: [
+                                          TextSpan(
+                                            text: l10n.noAccount,
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodyMedium
+                                                ?.copyWith(color: cs.outline),
+                                          ),
+                                          TextSpan(
+                                            text: ' ${l10n.signUp}',
+                                            style: TextStyle(
+                                              color: cs.primary,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    l10n.termsNotice,
+                                    textAlign: TextAlign.center,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodySmall
+                                        ?.copyWith(color: cs.outline),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(height: 8),
-                              Text(
-                                l10n.termsNotice,
-                                textAlign: TextAlign.center,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall
-                                    ?.copyWith(color: cs.outline),
-                              ),
-                            ],
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                ),
-              ]);
-            }),
+                  ],
+                );
+              },
+            ),
           ),
         ),
       ),
@@ -210,7 +225,13 @@ class _LoginFormState extends State<_LoginForm> {
   void _submit(BuildContext context, AppLocalizations l10n) {
     final form = _formKey.currentState;
     if (form == null) return;
-    if (!form.validate()) return;
+
+    if (!form.validate()) {
+      // ✅ optional: show warning toast on invalid form
+      AppToast.warn(context, l10n.errFixForm); // optional key
+      return;
+    }
+
     FocusScope.of(context).unfocus();
     context.read<AuthBloc>().add(
           LoginSubmitted(_identifier.text.trim(), _password.text),
@@ -257,6 +278,8 @@ class _LoginFormState extends State<_LoginForm> {
                 trailing: const Icon(Icons.login_rounded),
                 onPressed: state.loading ? null : () => _submit(context, l10n),
               ),
+
+              // ✅ keep inline error if you want (it’s useful)
               const SizedBox(height: 12),
               AnimatedSwitcher(
                 duration: const Duration(milliseconds: 220),
@@ -265,7 +288,9 @@ class _LoginFormState extends State<_LoginForm> {
                         state.error!,
                         key: ValueKey(state.error),
                         style: TextStyle(
-                            color: cs.error, fontWeight: FontWeight.w600),
+                          color: cs.error,
+                          fontWeight: FontWeight.w600,
+                        ),
                       )
                     : const SizedBox.shrink(),
               ),
@@ -301,13 +326,15 @@ class _Header extends StatelessWidget {
             ),
           ),
           Positioned(
-              top: 24,
-              left: -30,
-              child: _Blob(color: Colors.white.withOpacity(.08), size: 120)),
+            top: 24,
+            left: -30,
+            child: _Blob(color: Colors.white.withOpacity(.08), size: 120),
+          ),
           Positioned(
-              top: 0,
-              right: -18,
-              child: _Blob(color: Colors.white.withOpacity(.10), size: 90)),
+            top: 0,
+            right: -18,
+            child: _Blob(color: Colors.white.withOpacity(.10), size: 90),
+          ),
           Positioned.fill(
             top: 18,
             child: Align(
@@ -344,7 +371,10 @@ class _Blob extends StatelessWidget {
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-                color: color.withOpacity(.4), blurRadius: 24, spreadRadius: 2)
+              color: color.withOpacity(.4),
+              blurRadius: 24,
+              spreadRadius: 2,
+            )
           ],
         ),
       );
@@ -366,9 +396,10 @@ class _FrostedCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(22),
             boxShadow: const [
               BoxShadow(
-                  color: Color(0x14000000),
-                  blurRadius: 24,
-                  offset: Offset(0, 10))
+                color: Color(0x14000000),
+                blurRadius: 24,
+                offset: Offset(0, 10),
+              )
             ],
             border: Border.all(color: cs.outlineVariant.withOpacity(.5)),
           ),

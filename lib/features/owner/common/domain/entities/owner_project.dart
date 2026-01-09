@@ -13,6 +13,9 @@ class OwnerProject {
 
   // Optional: shown in grid if present (can be relative or absolute)
   final String? logoUrl;
+  final String? androidPackageName;
+final String? iosBundleId;
+
 
   const OwnerProject({
     required this.projectId,
@@ -25,9 +28,20 @@ class OwnerProject {
     this.ipaUrl,
     this.bundleUrl,
     this.logoUrl,
+    this.androidPackageName,
+    this.iosBundleId,
   });
 
   bool get isApkReady => (apkUrl != null && apkUrl!.isNotEmpty);
   bool get isInProduction => status.toUpperCase().contains('PRODUCTION');
   bool get hasLogo => (logoUrl != null && logoUrl!.trim().isNotEmpty);
+  
+  String? get packageOrBundleId =>
+    (androidPackageName?.trim().isNotEmpty ?? false)
+        ? androidPackageName
+        : (iosBundleId?.trim().isNotEmpty ?? false)
+            ? iosBundleId
+            : null;
+
+
 }

@@ -1,10 +1,11 @@
 import 'package:build4all_manager/core/network/dio_client.dart';
-import 'package:build4all_manager/shared/widgets/top_toast.dart';
+import 'package:build4all_manager/shared/widgets/app_toast.dart'; // ✅ common toast (replace top_toast)
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart'; // 👈 for navigation
+import 'package:go_router/go_router.dart';
 import 'package:build4all_manager/l10n/app_localizations.dart';
+
 import '../../data/repositories/admin_repository_impl.dart';
 import '../../data/services/admin_api.dart';
 import '../../domain/usecases/get_me.dart';
@@ -20,7 +21,7 @@ import '../widgets/notifications_tile.dart';
 import '../widgets/change_password_sheet.dart';
 import 'package:build4all_manager/shared/widgets/app_button.dart';
 
-// 👇 local storage for clearing token on logout
+// local storage for clearing token on logout
 import 'package:build4all_manager/features/auth/data/datasources/jwt_local_datasource.dart';
 
 class SuperAdminProfileScreen extends StatelessWidget {
@@ -54,12 +55,12 @@ class _ProfileView extends StatelessWidget {
     return BlocConsumer<ProfileBloc, ProfileState>(
       listenWhen: (p, c) => p.error != c.error || p.success != c.success,
       listener: (ctx, st) {
+        // ✅ common toast instead of showTopToast
         if (st.error?.isNotEmpty == true) {
-          showTopToast(ctx, st.error!, type: ToastType.error, haptics: true);
+          AppToast.error(ctx, st.error!);
         }
         if (st.success?.isNotEmpty == true) {
-          showTopToast(ctx, st.success!,
-              type: ToastType.success, haptics: true);
+          AppToast.success(ctx, st.success!);
         }
       },
       builder: (context, state) {
@@ -68,6 +69,7 @@ class _ProfileView extends StatelessWidget {
             body: Center(child: CircularProgressIndicator()),
           );
         }
+
         if (state.me == null) {
           // failed initial load
           return Scaffold(
@@ -111,8 +113,10 @@ class _ProfileView extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(l10n.profile_details,
-                            style: Theme.of(context).textTheme.titleMedium),
+                        Text(
+                          l10n.profile_details,
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
                         const SizedBox(height: 12),
                         ProfileForm(
                           me: me,
@@ -194,8 +198,10 @@ class _ProfileView extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(l10n.common_security,
-                            style: Theme.of(context).textTheme.titleMedium),
+                        Text(
+                          l10n.common_security,
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
                         const SizedBox(height: 10),
                         DecoratedBox(
                           decoration: BoxDecoration(
@@ -215,14 +221,14 @@ class _ProfileView extends StatelessWidget {
                                   Icon(Icons.logout_rounded, color: cs.error),
                             ),
                             title: Text(
-                              l10n.common_sign_out, // e.g., "Sign out"
+                              l10n.common_sign_out,
                               style: TextStyle(
                                 color: cs.error,
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
                             subtitle: Text(
-                              l10n.common_sign_out_hint, // e.g., "End your current session"
+                              l10n.common_sign_out_hint,
                               style: TextStyle(color: cs.onSurfaceVariant),
                             ),
                             trailing: TextButton.icon(
@@ -249,8 +255,11 @@ class _ProfileView extends StatelessWidget {
   }
 
   Future<void> _confirmLogout(
-      BuildContext context, AppLocalizations l10n) async {
+    BuildContext context,
+    AppLocalizations l10n,
+  ) async {
     final cs = Theme.of(context).colorScheme;
+
     final ok = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: false,
@@ -259,24 +268,23 @@ class _ProfileView extends StatelessWidget {
       builder: (ctx) => _LogoutConfirmSheet(l10n: l10n, cs: cs),
     );
 
-    if (ok == true) {
-      // 1) clear token from prefs
-      final store = JwtLocalDataSource();
-      await store.clear();
+    if (ok != true) return;
 
-      // 2) remove Authorization header from Dio
-      final dio = DioClient.ensure();
-      dio.options.headers.remove('Authorization');
+    // 1) clear token from prefs
+    final store = JwtLocalDataSource();
+    await store.clear();
 
-      // 3) feedback toast
-      if (context.mounted) {
-        showTopToast(context, l10n.common_signed_out,
-            type: ToastType.info, haptics: true);
+    // 2) remove Authorization header from Dio
+    final dio = DioClient.ensure();
+    dio.options.headers.remove('Authorization');
 
-        // 4) route to /login
-        context.go('/login');
-      }
-    }
+    if (!context.mounted) return;
+
+    // ✅ common toast instead of showTopToast
+    AppToast.info(context, l10n.common_signed_out);
+
+    // 4) route to /login
+    context.go('/login');
   }
 }
 
@@ -319,11 +327,13 @@ class _LogoutConfirmSheet extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(l10n.common_sign_out,
-                          style: Theme.of(context).textTheme.titleMedium),
+                      Text(
+                        l10n.common_sign_out,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
                       const SizedBox(height: 2),
                       Text(
-                        l10n.common_sign_out_confirm, // e.g., "Are you sure you want to sign out?"
+                        l10n.common_sign_out_confirm,
                         style: TextStyle(color: cs.onSurfaceVariant),
                       ),
                     ],

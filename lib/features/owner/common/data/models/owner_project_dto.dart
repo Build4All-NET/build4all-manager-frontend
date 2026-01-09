@@ -17,6 +17,10 @@ class OwnerProjectDto {
   // Optional (future/backward-compatible):
   final String? logoUrl;
 
+  final String? androidPackageName;
+  final String? iosBundleId;
+
+
   OwnerProjectDto({
     required this.projectId,
     required this.projectName,
@@ -28,6 +32,9 @@ class OwnerProjectDto {
     this.ipaUrl,
     this.bundleUrl,
     this.logoUrl,
+    this.androidPackageName,
+    this.iosBundleId,
+    
   });
 
   factory OwnerProjectDto.fromJson(Map<String, dynamic> j) => OwnerProjectDto(
@@ -41,6 +48,9 @@ class OwnerProjectDto {
         ipaUrl: j['ipaUrl']?.toString(),
         bundleUrl: j['bundleUrl']?.toString(),
         logoUrl: j['logoUrl']?.toString(), // safe if backend doesn’t send it
+        androidPackageName: j['androidPackageName']?.toString(),
+iosBundleId: j['iosBundleId']?.toString(),
+
       );
 
   OwnerProject toEntity() => OwnerProject(

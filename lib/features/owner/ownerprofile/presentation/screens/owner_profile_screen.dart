@@ -9,6 +9,7 @@ import 'package:build4all_manager/features/owner/ownerprofile/presentation/bloc/
 import 'package:build4all_manager/features/owner/ownerprofile/presentation/widgets/profile_header.dart';
 import 'package:build4all_manager/features/owner/ownerprofile/presentation/widgets/profile_info_card.dart';
 import 'package:build4all_manager/l10n/app_localizations.dart';
+import 'package:build4all_manager/shared/widgets/app_toast.dart'; // ✅ common toast
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -100,12 +101,13 @@ class _OwnerProfileView extends StatelessWidget {
     final store = JwtLocalDataSource();
     await store.clear();
 
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.logged_out ?? 'Logged out')),
-      );
-      context.go('/login'); // replace stack
-    }
+    if (!context.mounted) return;
+
+    // ✅ common toast instead of SnackBar
+    AppToast.success(context, l10n.logged_out ?? 'Logged out');
+
+    // replace stack
+    context.go('/login');
   }
 
   @override
@@ -124,6 +126,8 @@ class _OwnerProfileView extends StatelessWidget {
         }
 
         if (s.error != null) {
+          // optional: toast once on error instead of only text
+          // (keeping UI text is fine)
           return Scaffold(
             appBar: appBar,
             body: Center(

@@ -577,5 +577,75 @@
   "itemsLabel": "Items",
   "totalLabel": "Total",
   "remainingLabel": "Remaining",
-  "fullyPaidShortLabel": "Fully paid"
+  "fullyPaidShortLabel": "Fully paid",
+  "owner_projects_test": "TEST",
+
+"owner_publish_title_play": "Publish to Google Play Store",
+"owner_publish_title_appstore": "Publish to App Store",
+"owner_publish_platform_android": "Android",
+"owner_publish_platform_ios": "iOS",
+
+"owner_publish_request_play": "Request Publish to Play Store",
+"owner_publish_request_appstore": "Request Publish to App Store",
+
+"owner_publish_step1_title": "Basic Information",
+"owner_publish_step1_sub": "Provide the basic details about your application",
+"owner_publish_step2_title": "Category & Details",
+"owner_publish_step2_sub": "Categorize your app and provide additional details",
+"owner_publish_step3_title": "Legal & Contact",
+"owner_publish_step3_sub": "These fields are managed by Build4All publisher profile",
+"owner_publish_step4_title": "Assets & Screenshots",
+"owner_publish_step4_sub": "Provide your app icon and screenshots URLs",
+
+"owner_publish_app_name": "Application Name",
+"owner_publish_app_name_hint": "ShopSphere",
+
+"owner_publish_package_name": "Package Name (Read-only)",
+"owner_publish_bundle_id": "Bundle ID (Read-only)",
+
+"owner_publish_short_desc": "Short Description",
+"owner_publish_short_desc_hint": "Brief app description (max 80 characters)",
+
+"owner_publish_full_desc": "Full Description",
+"owner_publish_full_desc_hint": "Write a full store listing description…",
+
+"owner_publish_category": "Category",
+"owner_publish_category_hint": "Select a category",
+
+"owner_publish_country": "Country Availability",
+"owner_publish_pricing": "Pricing",
+"owner_publish_free": "Free",
+"owner_publish_paid": "Paid",
+
+"owner_publish_content_confirm": "I confirm that this app complies with store policies and age-appropriate guidelines.",
+
+"owner_publish_privacy_url": "Privacy Policy URL",
+"owner_publish_dev_name": "Developer Name",
+"owner_publish_dev_email": "Developer Email",
+"owner_publish_managed_by_build4all": "Managed by Build4All",
+
+"owner_publish_icon_url": "App Icon URL",
+"owner_publish_icon_url_hint": "https://.../icon.png",
+"owner_publish_screenshots_urls": "Screenshots URLs",
+"owner_publish_screenshot": "Screenshot",
+"owner_publish_shots_rule": "Required: min 2, max 8 screenshots",
+
+"owner_publish_submit": "Submit for Review",
+"owner_publish_submitted": "Submitted for review",
+
+"owner_publish_err_appname": "Application name is required",
+"owner_publish_err_short": "Short description is required",
+"owner_publish_err_short80": "Short description max 80 characters",
+"owner_publish_err_full": "Full description is required",
+"owner_publish_err_category": "Category is required",
+"owner_publish_err_content_confirm": "You must confirm content rating compliance",
+"owner_publish_err_icon": "App icon URL is required",
+"owner_publish_err_shots2": "At least 2 screenshots are required",
+"owner_publish_err_shots8": "Max 8 screenshots allowed",
+"common_back": "Back",
+"common_continue": "Continue",
+"errFixForm": "Please fix the errors in the form",
+"msgWelcomeBack": "Welcome back",
+"msgVerified": "Verified"
+
 }

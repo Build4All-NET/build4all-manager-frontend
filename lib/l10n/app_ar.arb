@@ -1,75 +1,130 @@
 {
   "appTitle": "Build4All",
-  "@appTitle": { "description": "اسم التطبيق الظاهر في ترويسة تسجيل الدخول" },
+  "@appTitle": {
+    "description": "App name shown in the login header"
+  },
 
-  "signInGeneralTitle": "سجّل الدخول إلى حسابك",
-  "@signInGeneralTitle": { "description": "عنوان عام لصفحة تسجيل الدخول (غير مخصص لدور معيّن)" },
+  "signInGeneralTitle": "تسجيل الدخول إلى حسابك",
+  "@signInGeneralTitle": {
+    "description": "Generic login title (not role-specific)"
+  },
+
+  "errEmailInvalid": "صيغة البريد الإلكتروني غير صحيحة",
+  "@errEmailInvalid": {
+    "description": "Validation: invalid email format"
+  },
+
+  "errEmailRequired": "البريد الإلكتروني مطلوب",
+  "@errEmailRequired": {
+    "description": "Validation: empty email"
+  },
+
+  "lblEmail": "البريد الإلكتروني",
+  "@lblEmail": {
+    "description": "Email label"
+  },
+
+  "hintEmail": "you@example.com",
 
   "signInGeneralSubtitle": "أدخل بياناتك للمتابعة",
-  "@signInGeneralSubtitle": { "description": "نص توضيحي تحت العنوان" },
+  "@signInGeneralSubtitle": {
+    "description": "Generic subtitle under the login title"
+  },
 
-  "termsNotice": "بمتابعتك أنت توافق على الشروط وسياسة الخصوصية",
-  "@termsNotice": { "description": "ملاحظة قانونية أسفل النموذج" },
+  "termsNotice": "بالمتابعة، أنت توافق على الشروط وسياسة الخصوصية",
+  "@termsNotice": {
+    "description": "Legal notice under the form"
+  },
 
   "lblIdentifier": "البريد / الهاتف / اسم المستخدم",
-  "@lblIdentifier": { "description": "حقل مُعرّف عام" },
+  "@lblIdentifier": {
+    "description": "Generic identifier label"
+  },
 
-  "hintIdentifier": "you@example.com أو ‎+961xxxxxxxx‎ أو اسم المستخدم",
-  "@hintIdentifier": { "description": "تلميح لحقل المعرّف" },
+  "hintIdentifier": "you@example.com أو +961xxxxxxxx أو اسم المستخدم",
+  "@hintIdentifier": {
+    "description": "Generic identifier hint"
+  },
 
   "lblPassword": "كلمة المرور",
-  "@lblPassword": { "description": "تسمية حقل كلمة المرور" },
+  "@lblPassword": {
+    "description": "Password label"
+  },
 
-  "hintPassword": "•••••••••••",
-  "@hintPassword": { "description": "تلميح لحقل كلمة المرور" },
+  "hintPassword": "كلمة المرور الخاصة بك",
+  "@hintPassword": {
+    "description": "Password hint text"
+  },
 
-  "rememberMe": "تذكّرني",
-  "@rememberMe": { "description": "خانة اختيار تذكّرني" },
+  "rememberMe": "تذكرني",
+  "@rememberMe": {
+    "description": "Remember me checkbox label"
+  },
 
   "forgotPassword": "نسيت كلمة المرور؟",
-  "@forgotPassword": { "description": "رابط استعادة كلمة المرور" },
+  "@forgotPassword": {
+    "description": "Forgot password action link"
+  },
 
   "btnSignIn": "تسجيل الدخول",
-  "@btnSignIn": { "description": "زر تسجيل الدخول الرئيسي" },
+  "@btnSignIn": {
+    "description": "Primary sign-in button label"
+  },
 
   "noAccount": "ليس لديك حساب؟",
-  "@noAccount": { "description": "نص قبل رابط إنشاء الحساب" },
+  "@noAccount": {
+    "description": "Text before the Sign Up link"
+  },
 
   "signUp": "إنشاء حساب",
-  "@signUp": { "description": "رابط إنشاء الحساب" },
+  "@signUp": {
+    "description": "Sign up action link"
+  },
 
-  "errIdentifierRequired": "الرجاء إدخال المُعرّف",
-  "@errIdentifierRequired": { "description": "تحقق: المعرّف فارغ" },
+  "errIdentifierRequired": "المعرف مطلوب",
+  "@errIdentifierRequired": {
+    "description": "Validation: empty identifier"
+  },
 
-  "errPasswordRequired": "الرجاء إدخال كلمة المرور",
-  "@errPasswordRequired": { "description": "تحقق: كلمة المرور فارغة" },
+  "errPasswordRequired": "كلمة المرور مطلوبة",
+  "@errPasswordRequired": {
+    "description": "Validation: empty password"
+  },
 
-  "errPasswordMin": "الحد الأدنى 6 أحرف",
-  "@errPasswordMin": { "description": "تحقق: كلمة المرور قصيرة" },
+  "errPasswordMin": "يجب أن تكون كلمة المرور 6 أحرف على الأقل",
+  "@errPasswordMin": {
+    "description": "Validation: password too short"
+  },
 
   "showPasswordLabel": "إظهار كلمة المرور",
-  "@showPasswordLabel": { "description": "وصف إمكانية الوصول لزر إظهار كلمة المرور" },
+  "@showPasswordLabel": {
+    "description": "Accessibility label for toggling password visibility (show)"
+  },
 
   "hidePasswordLabel": "إخفاء كلمة المرور",
-  "@hidePasswordLabel": { "description": "وصف إمكانية الوصول لزر إخفاء كلمة المرور" },
+  "@hidePasswordLabel": {
+    "description": "Accessibility label for toggling password visibility (hide)"
+  },
 
-  "nav_super_admin": "المشرف العام",
+  "nav_super_admin": "المدير العام",
   "nav_dashboard": "لوحة التحكم",
   "nav_themes": "السمات",
   "nav_profile": "الملف الشخصي",
 
-  "dashboard_title": "لوحة تحكم المشرف",
+  "dashboard_title": "لوحة تحكم المدير",
   "dashboard_welcome": "مرحبًا بك في Build4All Manager",
-  "dashboard_hint": "استخدم التنقل على اليسار لإدارة السمات وملفك.",
+  "dashboard_hint": "استخدم القائمة الجانبية لإدارة السمات والملف الشخصي.",
 
   "themes_title": "إدارة السمات",
   "themes_add": "إضافة سمة",
   "themes_name": "اسم السمة",
   "themes_menuType": "نوع القائمة",
-  "themes_setActive": "تعيين كـ نشطة",
-  "themes_active": "نشطة",
-  "themes_deactivate_all": "تعطيل جميع السمات",
+  "themes_setActive": "تعيين كمفعل",
+  "themes_active": "مفعل",
+  "themes_deactivate_all": "إلغاء تفعيل جميع السمات",
   "themes_empty": "لا توجد سمات بعد. أنشئ واحدة.",
+  "themes_confirm_delete": "حذف هذه السمة؟ لا يمكن التراجع عن ذلك.",
+  "themes_colors_section": "الألوان",
 
   "profile_title": "ملفي الشخصي",
   "profile_firstName": "الاسم الأول",
@@ -87,122 +142,158 @@
   "common_edit": "تعديل",
   "common_delete": "حذف",
   "common_cancel": "إلغاء",
-   "dash_total_projects": "إجمالي المشاريع",
-  "dash_active_projects": "المشاريع النشطة",
-  "dash_inactive_projects": "المشاريع غير النشطة",
-  "dash_recent_projects": "أحدث المشاريع",
-  "dash_no_recent": "لا توجد مشاريع حديثة بعد.",
-   "themes_confirm_delete": "هل تريد حذف هذه السمة؟ لا يمكن التراجع.",
-  "themes_colors_section": "الألوان",
-  "err_required": "هذا الحقل مطلوب",
-   "common_security": "الأمان",
+  "common_more": "المزيد",
+  "common_retry": "إعادة المحاولة",
+  "common_security": "الأمان",
   "common_sign_out": "تسجيل الخروج",
   "common_sign_out_hint": "إنهاء الجلسة الحالية",
   "common_sign_out_confirm": "هل أنت متأكد أنك تريد تسجيل الخروج؟",
   "common_signed_out": "تم تسجيل الخروج",
+  "common_download": "تحميل",
+  "common_download_apk": "تحميل APK",
+  "common_remove": "إزالة",
+  "common_loading": "جاري التحميل...",
+  "common_forbidden": "غير مسموح",
+  "common_unauthorized": "غير مصرح",
+  "common_back": "رجوع",
+  "common_continue": "متابعة",
 
-   "owner_nav_title": "المالك",
+  "dash_total_projects": "إجمالي المشاريع",
+  "dash_active_projects": "المشاريع النشطة",
+  "dash_inactive_projects": "المشاريع غير النشطة",
+  "dash_recent_projects": "المشاريع الأخيرة",
+  "dash_no_recent": "لا توجد مشاريع حديثة بعد.",
+  "dash_welcome": "مرحبًا بك في Build4All Manager",
+
+  "err_required": "هذا الحقل مطلوب",
+  "err_email": "يرجى إدخال بريد إلكتروني صحيح",
+  "errPasswordMismatch": "كلمتا المرور غير متطابقتين",
+  "err_unknown": "حدث خطأ ما",
+
+  "signUpOwnerTitle": "تسجيل مالك",
+  "verifyCode": "تأكيد الرمز",
+  "completeProfile": "إكمال الملف الشخصي",
+
+  "lblUsername": "اسم المستخدم",
+  "hintUsername": "your.unique.name",
+  "lblFirstName": "الاسم الأول",
+  "hintFirstName": "John",
+  "lblLastName": "اسم العائلة",
+  "hintLastName": "Doe",
+
+  "btnSendCode": "إرسال الرمز",
+  "btnVerify": "تحقق",
+  "btnCreateAccount": "إنشاء حساب",
+
+  "errCodeSixDigits": "أدخل الرمز المكوّن من 6 أرقام",
+  "errUsernameRequired": "اسم المستخدم مطلوب",
+  "errFirstNameRequired": "الاسم الأول مطلوب",
+  "errLastNameRequired": "اسم العائلة مطلوب",
+
+  "msgCodeSent": "تم إرسال رمز التحقق",
+  "msgWeWillSendCodeEmail": "سنرسل رمزًا مكوّنًا من 6 أرقام إلى بريدك الإلكتروني.",
+  "msgEnterCodeForEmail": "أدخل الرمز المكوّن من 6 أرقام المرسل إلى {email}",
+  "msgOwnerRegistered": "تم تسجيل المالك بنجاح",
+
+  "owner_nav_title": "المالك",
   "owner_nav_home": "الرئيسية",
-  "owner_nav_projects": "المشاريع",
+  "owner_nav_projects": "تطبيقاتي",
   "owner_nav_requests": "الطلبات",
-  "owner_nav_profile": "الملف",
-  "owner_home_title": "واجهة المالك",
+  "owner_nav_profile": "الملف الشخصي",
+  "owner_nav_myapps": "تطبيقاتي",
+
+  "owner_home_title": "الصفحة الرئيسية للمالك",
   "owner_projects_title": "المشاريع",
   "owner_requests_title": "الطلبات",
   "owner_profile_title": "الملف الشخصي",
-  "owner_home_hello": "👋 أهلاً، ",
-  "owner_home_subtitle": "إدارة تطبيقاتك بسهولة",
-  "owner_home_requestApp": "اطلب تطبيقي",
+
+  "owner_home_hello": "👋 مرحبًا،",
+  "owner_home_subtitle": "جاهز لإطلاق بناء تطبيقك التالي؟",
+  "owner_home_requestApp": "طلب إنشاء تطبيق",
   "owner_home_myProjects": "مشاريعي النشطة",
   "owner_home_recentRequests": "الطلبات الأخيرة",
   "owner_home_noRecent": "لا توجد طلبات حديثة",
   "owner_home_viewAll": "عرض الكل",
-    "tutorial_step1_title": "اطلب تطبيقك",
-  "tutorial_step1_body": "اختر المشروع، سمِّ التطبيق، أضف ملاحظات، ثم أرسل الطلب.",
+  "owner_home_search_hint": "ابحث عن التطبيقات، الطلبات، الأدلة",
+  "owner_home_chooseProject": "اختر مشروعك",
+
+  "tutorial_step1_title": "اطلب تطبيقك",
+  "tutorial_step1_body": "اختر مشروعًا، سمِّ تطبيقك، أضف ملاحظات، ثم أرسل الطلب.",
   "tutorial_step2_title": "تابع الموافقة",
-  "tutorial_step2_body": "سنعلمك عند الموافقة أو إذا كانت هناك تعديلات مطلوبة.",
-  "tutorial_step3_title": "حمّل ملف APK",
-  "tutorial_step3_body": "بعد البناء، نزّل الـ APK مباشرةً من لوحة التحكم.",
-    "owner_nav_title": "المالك",
-  "owner_nav_home": "الرئيسية",
-  "owner_nav_projects": "المشاريع",
-  "owner_nav_requests": "الطلبات",
-  "owner_nav_profile": "الملف الشخصي",
-  "owner_projects_title": "المشاريع",
-  "owner_projects_searchHint": "ابحث بالاسم أو المعرّف…",
-  "owner_projects_onlyReady": "فقط الجاهزة (APK)",
+  "tutorial_step2_body": "سنُعلمك عندما تتم الموافقة على طلبك أو يحتاج لتعديلات.",
+  "tutorial_step3_title": "حمّل الـ APK",
+  "tutorial_step3_body": "بعد اكتمال البناء، حمّل APK مباشرة من لوحة التحكم.",
+
+  "owner_projects_searchHint": "ابحث بالاسم أو الـ slug…",
+  "owner_projects_onlyReady": "APK الجاهز فقط",
   "owner_projects_emptyTitle": "لا توجد مشاريع بعد",
-  "owner_projects_emptyBody": "ليس لديك أي مشاريع حالياً. اطلب تطبيقك الأول وسنقوم ببنائه لك.",
-  "owner_projects_building": "جارٍ الإنشاء…",
+  "owner_projects_emptyBody": "ليس لديك أي مشاريع. اطلب أول تطبيق وسنبنيه لك.",
+  "owner_projects_building": "جارٍ البناء…",
   "owner_projects_ready": "جاهز",
   "owner_projects_openInBrowser": "فتح",
-  "owner_request_title": "طلب تطبيقك",
-  "owner_request_submit_hint": "اختر مشروعًا، أضف اسم التطبيق، حمل الشعار (اختياري)، اختر سمة، ثم أرسل للبناء.",
+  "owner_projects_subtitle": "أدر مشاريعك وبناءات التطبيقات بسهولة",
+  "owner_projects_test": "TEST",
+
+  "owner_request_title": "إنشاء طلب تطبيق",
+  "owner_request_submit_hint": "اختر مشروعًا، سمِّ تطبيقك، أضف شعارًا (اختياري)، اختر سمة، ثم أرسل لبدء البناء.",
   "owner_request_project": "المشروع",
   "owner_request_appName": "اسم التطبيق",
-  "owner_request_appName_hint": "مثال: تطبيقي للمالك",
+  "owner_request_appName_hint": "مثلًا: My Owner App",
   "owner_request_logo_url": "رابط الشعار (اختياري)",
-  "owner_request_logo_url_hint": "ألصق رابطًا عامًا أو استخدم الرفع",
-  "owner_request_upload_logo": "رفع الشعار",
+  "owner_request_logo_url_hint": "ألصق رابطًا عامًا أو استخدم رفع ملف",
+  "owner_request_upload_logo": "رفع ملف الشعار",
   "owner_request_theme_pref": "السمة",
   "owner_request_theme_default": "استخدام السمة الافتراضية",
   "owner_request_submit": "إرسال",
   "owner_request_submitting": "جارٍ الإرسال…",
   "owner_request_submit_and_build": "إرسال وبناء APK",
-  "owner_request_building": "جارٍ بناء ملف APK…",
-  "owner_request_build_done": "تم إنهاء بناء الـ APK.",
+  "owner_request_building": "جارٍ بناء APK…",
+  "owner_request_build_done": "اكتمل بناء APK.",
   "owner_request_success": "تم إرسال الطلب بنجاح.",
   "owner_request_no_requests_yet": "لا توجد طلبات بعد.",
   "owner_request_my_requests": "طلباتي",
   "owner_request_error_choose_project": "يرجى اختيار مشروع.",
   "owner_request_error_app_name": "يرجى إدخال اسم التطبيق.",
-  "common_download": "تنزيل",
-  "common_download_apk": "تنزيل APK",
+  "owner_request_requested": "تم الطلب",
+
+  "menuType": "نوع القائمة",
+
+  "owner_profile_title": "ملف المالك",
+  "owner_profile_username": "اسم المستخدم",
+  "owner_profile_name": "الاسم",
+  "owner_profile_email": "البريد الإلكتروني",
+  "owner_profile_business_id": "معرّف النشاط",
+  "owner_profile_notify_items": "إشعار بتحديثات العناصر",
+  "owner_profile_notify_feedback": "إشعار بملاحظات المستخدمين",
+  "owner_profile_not_set": "غير محدد",
+  "owner_profile_tips": "حافظ على تحديث بياناتك لتخصيص تجربتك.",
+
+  "yes": "نعم",
+  "no": "لا",
+  "refresh": "تحديث",
   "logout": "تسجيل الخروج",
   "logout_confirm": "هل تريد تسجيل الخروج؟",
   "logged_out": "تم تسجيل الخروج",
   "cancel": "إلغاء",
-    "owner_profile_title": "ملف المالك",
-  "owner_profile_username": "اسم المستخدم",
-  "owner_profile_name": "الاسم",
-  "owner_profile_email": "البريد الإلكتروني",
-  "owner_profile_business_id": "معرّف النشاط التجاري",
-  "owner_profile_notify_items": "إشعار بتحديثات العناصر",
-  "owner_profile_notify_feedback": "إشعار بتعليقات المستخدمين",
-  "owner_profile_not_set": "غير محدد",
-  "owner_profile_tips": "احرص على تحديث معلومات ملفك الشخصي لتخصيص تجربتك.",
-  "yes": "نعم",
-  "no": "لا",
-  "refresh": "تحديث",
-   "owner_nav_myapps":" تطبيقاتي",
-     "common_search_hint": "ابحث...",
-  "owner_home_search_hint": "ابحث عن التطبيقات والطلبات والإرشادات",
-  "owner_home_chooseProject": "اختر مشروعك",
 
-  "owner_proj_open": "افتح المشروع",
-  "owner_proj_activities_title": "الفعاليات",
-  "owner_proj_activities_desc": "تذاكر، جداول، وأبرز الأحداث مصمّمة للتجارب أثناء التنقل.",
-  "owner_proj_ecom_title": "التجارة الإلكترونية",
-  "owner_proj_ecom_desc": "كتالوجات المنتجات وسلال الشراء وتدفّقات الدفع المطابقة لمتجرك.",
-  "owner_proj_gym_title": "النادي الرياضي",
-  "owner_proj_gym_desc": "خطط تدريب، حجوزات مواعيد، ومزايا العضوية في تطبيق واحد.",
+  "common_search_hint": "بحث...",
+
+  "owner_proj_open": "فتح المشروع",
+  "owner_proj_activities_title": "الأنشطة",
+  "owner_proj_activities_desc": "تذاكر، جداول، وأبرز الفعاليات بتجربة مناسبة للهاتف.",
+  "owner_proj_ecom_title": "تجارة إلكترونية",
+  "owner_proj_ecom_desc": "كتالوج منتجات، سلة، ودفع يعكس متجرك.",
+  "owner_proj_gym_title": "نادي رياضي",
+  "owner_proj_gym_desc": "خطط تدريب، حجوزات، وميزات اشتراك في تطبيق واحد.",
   "owner_proj_services_title": "الخدمات",
-  "owner_proj_services_desc": "عروض أسعار، مواعيد، وتحديثات للعميل متوافقة مع هويتك.",
+  "owner_proj_services_desc": "عروض أسعار، مواعيد، وتحديثات للعملاء حسب علامتك.",
+  "owner_proj_comingSoon": "قريبًا",
 
   "status_delivered": "تم التسليم",
   "status_in_production": "قيد التنفيذ",
-  "status_approved": "موافق عليه",
+  "status_approved": "مقبول",
   "status_pending": "قيد الانتظار",
   "status_rejected": "مرفوض",
-
-  "owner_home_recentRequests": "الطلبات الأخيرة",
-  "owner_home_viewAll": "عرض الكل",
-  "owner_home_noRecent": "لا توجد طلبات حديثة",
-  "owner_home_hello": "مرحبًا،  👋",
-  "owner_home_subtitle": "جاهز لإطلاق نسختك التالية؟",
-  "owner_home_requestApp": "اطلب تطبيقي",
-
-  "owner_request_requested": "تم الطلب",
 
   "timeago_days": "منذ {count} يوم",
   "@timeago_days": { "placeholders": { "count": { "type": "int" } } },
@@ -211,160 +302,151 @@
   "timeago_minutes": "منذ {count} دقيقة",
   "@timeago_minutes": { "placeholders": { "count": { "type": "int" } } },
   "timeago_just_now": "الآن",
-  "owner_nav_home": "الرئيسية",
-  "owner_nav_myapps": "تطبيقاتي",
-  "owner_nav_profile": "الملف الشخصي",
 
   "owner_proj_details_highlights": "أبرز الميزات",
-  "owner_proj_details_screens": "الشاشات والتدفّقات",
-  "owner_proj_details_modules": "الوحدات المتضمَّنة",
-  "owner_proj_details_why": "لماذا يحبّها الفرق",
+  "owner_proj_details_screens": "الشاشات والمسارات",
+  "owner_proj_details_modules": "الوحدات المتضمنة",
+  "owner_proj_details_why": "لماذا تحب الفرق هذا القالب",
   "owner_proj_details_primaryCta": "اطلب هذا التطبيق",
-  "owner_proj_details_secondaryCta": "عرض النسخة التجريبية",
-  "owner_proj_details_create_title": "أنشئ مشروعي",
-  "owner_proj_details_create_subtitle": "أطلق نسختك المخصّصة خلال دقائق.",
-  "stat_reviews_hint": "تقييم",
-  "stat_active_hint": "نشر فعّال",
-  "stat_days_hint": "أيام متوسّط التنفيذ",
+  "owner_proj_details_secondaryCta": "معاينة التجربة",
+  "owner_proj_details_create_title": "أنشئ تطبيقي",
+  "owner_proj_details_create_subtitle": "أطلق نسختك المخصصة خلال دقائق.",
+  "stat_reviews_hint": "مراجعات",
+  "stat_active_hint": "نُشر بنشاط",
+  "stat_days_hint": "متوسط أيام الإنجاز",
 
-  "owner_proj_details_headline_activities": "نظّم، احجز، وادر كل نشاط من مكان واحد.",
-  "owner_proj_details_subhead_activities": "مثالي للأندية والمراكز بواجهات حجز وجداول مصقولة.",
-  "owner_proj_details_act_h1": "جداول حصص مع لوائح انتظار",
-  "owner_proj_details_act_h2": "محفظة ودعم الرصيد",
-  "owner_proj_details_act_h3": "تذكيرات دفعية للمشاركين",
-  "owner_proj_details_act_h4": "خلاصة تواصل مدمجة",
-  "owner_proj_details_act_s1_title": "شبكة الجداول",
-  "owner_proj_details_act_s1_sub": "تصفية بالمدرب والموقع بضغطة واحدة.",
-  "owner_proj_details_act_s2_title": "تدفّق الحجز",
-  "owner_proj_details_act_s2_sub": "دفع سلس مع بطاقات محفوظة.",
-  "owner_proj_details_act_m1": "جداول ديناميكية ومتعدّدة المواقع",
-  "owner_proj_details_act_m2": "سير ذاتية وتقييمات المدرّبين",
-  "owner_proj_details_act_m3": "عضويات بمستويات ومزايا",
-  "owner_proj_details_act_i1": "78٪ من الأعضاء يحجزون عبر الهاتف خلال الأسبوع الأول.",
-  "owner_proj_details_act_i2": "تزداد الاستمرارية 24٪ بعد تفعيل التذكيرات.",
+  "owner_proj_details_headline_activities": "خطّط، احجز، وأدر كل نشاط في مكان واحد.",
+  "owner_proj_details_subhead_activities": "مثالي للاستوديوهات والنوادي والبرامج مع حجوزات وجداول احترافية.",
+  "owner_proj_details_act_h1": "جداول مع قوائم انتظار",
+  "owner_proj_details_act_h2": "محفظة ودعم أرصدة",
+  "owner_proj_details_act_h3": "تنبيهات للمشاركين",
+  "owner_proj_details_act_h4": "تغذية مجتمع مدمجة",
+  "owner_proj_details_act_s1_title": "شبكة الجدول",
+  "owner_proj_details_act_s1_sub": "فلترة حسب المدرب والموقع بنقرة واحدة.",
+  "owner_proj_details_act_s2_title": "مسار الحجز",
+  "owner_proj_details_act_s2_sub": "دفع سريع مع بطاقات محفوظة.",
+  "owner_proj_details_act_m1": "جداول ديناميكية ومتعددة المواقع",
+  "owner_proj_details_act_m2": "ملفات المدربين وتقييماتهم",
+  "owner_proj_details_act_m3": "اشتراكات بمزايا",
+  "owner_proj_details_act_i1": "78% من الأعضاء يحجزون عبر الهاتف خلال الأسبوع الأول.",
+  "owner_proj_details_act_i2": "يزداد الاحتفاظ 24% بعد تفعيل تنبيهات التذكير.",
 
-  "owner_proj_details_headline_ecommerce": "أطلق متجراً عالي التحويل يثق به عملاؤك.",
-  "owner_proj_details_subhead_ecommerce": "للبيع المباشر: كتالوجات، حِزم، وإعادة شراء بنقرة.",
-  "owner_proj_details_ecom_h1": "كتالوج بصري مع وسائط غنيّة",
-  "owner_proj_details_ecom_h2": "ترشيحات ذكية للبيع الإضافي",
-  "owner_proj_details_ecom_h3": "تتبّع الطلب داخل التطبيق",
-  "owner_proj_details_ecom_h4": "محرك خصومات وولاء",
+  "owner_proj_details_headline_ecommerce": "أطلق متجرًا عالي التحويل يثق به العملاء.",
+  "owner_proj_details_subhead_ecommerce": "للعلامات DTC: كتالوجات، باقات، وإعادة طلب بنقرة واحدة.",
+  "owner_proj_details_ecom_h1": "كتالوج بصري مع وسائط غنية",
+  "owner_proj_details_ecom_h2": "اقتراحات Upsell ذكية",
+  "owner_proj_details_ecom_h3": "تتبع الطلب داخل التطبيق",
+  "owner_proj_details_ecom_h4": "نظام خصومات وولاء",
   "owner_proj_details_ecom_s1_title": "عرض المنتجات",
-  "owner_proj_details_ecom_s1_sub": "صور ممتدّة مع عينات ألوان.",
+  "owner_proj_details_ecom_s1_sub": "صور كبيرة مع خيارات/ألوان.",
   "owner_proj_details_ecom_s2_title": "السلة والدفع",
-  "owner_proj_details_ecom_s2_sub": "دفع سريع مع عناوين محفوظة.",
-  "owner_proj_details_ecom_m1": "متغيرات ومنتجات مجمّعة غير محدودة",
+  "owner_proj_details_ecom_s2_sub": "دفع أسرع مع عناوين محفوظة.",
+  "owner_proj_details_ecom_m1": "متغيرات وباقات غير محدودة",
   "owner_proj_details_ecom_m2": "مزامنة المخزون مع Shopify/Woo",
-  "owner_proj_details_ecom_m3": "بطاقات هدايا وبرامج إحالة",
-  "owner_proj_details_ecom_i1": "يرتفع متوسط قيمة الطلب 32٪ مع الحزم.",
+  "owner_proj_details_ecom_m3": "بطاقات هدايا وإحالات",
+  "owner_proj_details_ecom_i1": "يزداد متوسط قيمة الطلب 32% مع العروض المجمّعة.",
   "owner_proj_details_ecom_i2": "يعيد العملاء الشراء أسرع بـ 2.1× عبر الهاتف.",
 
-  "owner_proj_details_headline_gym": "امنح الأعضاء مدرّباً شخصياً في جيوبهم.",
+  "owner_proj_details_headline_gym": "ضع مدربًا شخصيًا في جيب الأعضاء.",
   "owner_proj_details_subhead_gym": "تدريب هجين، باقات حصص، وتأجير معدات.",
   "owner_proj_details_gym_h1": "تهيئة حسب الأهداف",
-  "owner_proj_details_gym_h2": "مراسلة المدرّب والبرامج",
-  "owner_proj_details_gym_h3": "مكتبة فيديوهات للتمارين",
-  "owner_proj_details_gym_h4": "لوحات تقدّم وتتبع",
+  "owner_proj_details_gym_h2": "مراسلة المدرب والبرامج",
+  "owner_proj_details_gym_h3": "مكتبة فيديو للتمارين",
+  "owner_proj_details_gym_h4": "لوحات تقدم",
   "owner_proj_details_gym_s1_title": "خطط التدريب",
-  "owner_proj_details_gym_s1_sub": "خطط مُمرحلة بمنطق الاستراحة.",
+  "owner_proj_details_gym_s1_sub": "خطط دورية مع منطق الراحة.",
   "owner_proj_details_gym_s2_title": "حصص مباشرة",
-  "owner_proj_details_gym_s2_sub": "احجز حضورياً أو عبر الإنترنت.",
-  "owner_proj_details_gym_m1": "سوق مدرّبين مع التوفّر",
-  "owner_proj_details_gym_m2": "تسجيل التمارين ومزامنة الأجهزة",
-  "owner_proj_details_gym_m3": "خطط تغذية مع أهداف الماكروز",
-  "owner_proj_details_gym_i1": "المنضمون يكملون التهيئة يتحولون أسرع بـ3×.",
-  "owner_proj_details_gym_i2": "ينخفض التسرّب 19٪ عند تفعيل الرسائل.",
+  "owner_proj_details_gym_s2_sub": "احجز حضوريًا أو عن بُعد.",
+  "owner_proj_details_gym_m1": "سوق مدربين مع توافر",
+  "owner_proj_details_gym_m2": "تسجيل تمارين ومزامنة أجهزة",
+  "owner_proj_details_gym_m3": "خطط تغذية مع أهداف ماكروز",
+  "owner_proj_details_gym_i1": "الأعضاء الذين يُكملون التهيئة يتحولون أسرع بـ 3×.",
+  "owner_proj_details_gym_i2": "ينخفض التسرب 19% عند تفعيل المراسلة.",
 
-  "owner_proj_details_headline_services": "قدّم تجربة خِدمة بمستوى كونسيرج.",
-  "owner_proj_details_subhead_services": "للوكالات والاستشارات ومقدمي الخدمات.",
+  "owner_proj_details_headline_services": "قدّم تجربة خدمة بمستوى كونسيرج.",
+  "owner_proj_details_subhead_services": "للوكالات والاستشاريين ومقدمي الخدمات.",
   "owner_proj_details_services_h1": "نوافذ حجز ذكية",
-  "owner_proj_details_services_h2": "مساحات عمل للعميل",
-  "owner_proj_details_services_h3": "تتبّع المهام والمعالم",
+  "owner_proj_details_services_h2": "مساحات عمل للعملاء",
+  "owner_proj_details_services_h3": "متابعة المهام والمراحل",
   "owner_proj_details_services_h4": "فواتير مدمجة",
   "owner_proj_details_services_s1_title": "بوابة العميل",
-  "owner_proj_details_services_s1_sub": "ملفات مشتركة، ملاحظات، وموافقات.",
-  "owner_proj_details_services_s2_title": "تدفّق المواعيد",
-  "owner_proj_details_services_s2_sub": "فواصل ونماذج معلومات مسبقة.",
-  "owner_proj_details_services_m1": "CRM للعميل بخطوط زمنية مشتركة",
+  "owner_proj_details_services_s1_sub": "ملفات وملاحظات وموافقات مشتركة.",
+  "owner_proj_details_services_s2_title": "مسار المواعيد",
+  "owner_proj_details_services_s2_sub": "فواصل زمنية ونماذج إدخال.",
+  "owner_proj_details_services_m1": "CRM مع جداول زمنية مشتركة",
   "owner_proj_details_services_m2": "عقود رقمية وتوقيع إلكتروني",
-  "owner_proj_details_services_m3": "فواتير وإيصالات تلقائية",
-  "owner_proj_details_services_i1": "تُغلق المشاريع أسرع بـ 27٪ مع المساحات المشتركة.",
-  "owner_proj_details_services_i2": "الفوترة التلقائية تقلّل التأخير 43٪.",
-  "owner_proj_details_stat_reviews_hint": "المراجعات",
-  "owner_proj_details_stat_active_hint": "النشطات",
-  "owner_proj_details_stat_days_hint": "الأيام",
-   "copied": "تم النسخ",
-  "logout_confirm": "هل تريد تسجيل الخروج؟",
-  "logged_out": "تم تسجيل الخروج",
+  "owner_proj_details_services_m3": "رسائل فواتير وإيصالات تلقائية",
+  "owner_proj_details_services_i1": "تُغلق المشاريع أسرع 27% مع مساحات عمل مشتركة.",
+  "owner_proj_details_services_i2": "الفوترة التلقائية تقلل التأخير 43%.",
+
+  "owner_proj_details_stat_reviews_hint": "مراجعات",
+  "owner_proj_details_stat_active_hint": "نشر نشط",
+  "owner_proj_details_stat_days_hint": "متوسط أيام الإنجاز",
+
+  "copied": "تم النسخ",
+
   "settings": "الإعدادات",
   "security": "الأمان",
-  "change_password": "تغيير كلمة السر",
+  "change_password": "تغيير كلمة المرور",
   "support": "الدعم",
   "contact_us": "تواصل معنا",
   "owner_profile_edit": "الحساب",
   "edit_profile": "تعديل الملف",
   "billing": "الفوترة",
   "copy": "نسخ",
-  "owner_proj_comingSoon": "قريباً"
-,
-  "owner_request_title": "إنشاء طلب تطبيق",
-  "refresh": "تحديث",
+
   "submit": "إرسال",
-  "cancel": "إلغاء",
   "use": "استخدام",
   "preview": "معاينة",
+  "errFixForm": "يرجى إصلاح الأخطاء في النموذج",
 
-  "common_remove": "إزالة",
-
-  "err_required": "مطلوب",
-
-  "owner_request_hero_title": "أنشئ تطبيق جديد",
-  "owner_request_hero_subtitle": "اختر الثيم والـ runtime بشكل بصري. نحن ننشئ JSON تلقائياً.",
+  "owner_request_hero_title": "إنشاء تطبيق جديد",
+  "owner_request_hero_subtitle": "اختر السمة والـ runtime بصريًا. نحن ننشئ JSON خلف الكواليس.",
 
   "owner_request_basics_title": "الأساسيات",
   "owner_request_basics_subtitle": "معلومات مطلوبة لإنشاء تطبيقك.",
 
-  "owner_request_project_id": "رقم المشروع",
-  "owner_request_project_id_hint": "محدد من المشروع",
+  "owner_request_project_id": "معرّف المشروع",
+  "owner_request_project_id_hint": "يتم اختياره من المشروع",
 
   "owner_request_app_name": "اسم التطبيق",
   "owner_request_app_name_hint": "مثال: MyHobbySphereApp",
 
   "owner_request_notes": "ملاحظات",
-  "owner_request_notes_hint": "وصف مختصر / طلب خاص / أي شيء مهم…",
+  "owner_request_notes_hint": "وصف قصير / طلب خاص / أي شيء مهم…",
 
   "owner_request_settings_title": "إعدادات التطبيق",
   "owner_request_settings_subtitle": "العملة + رابط API اختياري.",
 
-  "owner_request_api_override": "تغيير رابط API (اختياري)",
+  "owner_request_api_override": "تجاوز رابط API (اختياري)",
   "owner_request_api_override_hint": "مثال: http://192.168.1.7:8080",
 
-  "owner_request_palette_title": "الألوان",
-  "owner_request_palette_subtitle": "اختر قالب جاهز أو عدّل الألوان.",
+  "owner_request_palette_title": "لوحة الألوان",
+  "owner_request_palette_subtitle": "اختر إعدادًا مسبقًا أو خصص الألوان.",
 
   "owner_request_runtime_title": "إعدادات Runtime",
-  "owner_request_runtime_subtitle": "التنقّل + الصفحة الرئيسية + الميزات (بدون كتابة JSON).",
+  "owner_request_runtime_subtitle": "التنقل + الصفحة الرئيسية + ميزات (بدون كتابة JSON).",
 
   "owner_request_branding_title": "الهوية",
-  "owner_request_branding_subtitle": "الشعار اختياري لكنه يعطي شكل احترافي.",
+  "owner_request_branding_subtitle": "الشعار اختياري لكنه يجعل التطبيق أكثر احترافًا.",
 
   "owner_request_err_load_currencies": "فشل تحميل العملات",
-  "owner_request_err_valid_number": "أدخل رقم صحيح",
+  "owner_request_err_valid_number": "أدخل رقمًا صحيحًا",
   "owner_request_err_select_currency": "اختر عملة أولاً",
-  "owner_request_err_fix_fields": "عدّل الحقول المظللة",
+  "owner_request_err_fix_fields": "صحّح الحقول المظللة",
   "owner_request_err_app_name_required": "اسم التطبيق مطلوب",
 
   "owner_request_logo_selected": "تم اختيار الشعار",
-  "owner_request_logo_removed": "تم حذف الشعار",
-  "owner_request_no_logo": "لا يوجد شعار",
+  "owner_request_logo_removed": "تمت إزالة الشعار",
+  "owner_request_no_logo": "لا يوجد شعار محدد",
   "owner_request_pick_logo": "اختيار",
 
   "owner_request_select_currency": "اختر العملة",
   "owner_request_tap_to_choose": "اضغط للاختيار",
-  "owner_request_pick_currency": "اختيار العملة",
-  "owner_request_currency_search_hint": "ابحث بالاسم / الكود / المعرف",
+  "owner_request_pick_currency": "اختيار عملة",
+  "owner_request_currency_search_hint": "ابحث بالاسم / الرمز / المعرف",
 
-  "owner_request_currency_set": "تم اختيار العملة {code}",
+  "owner_request_currency_set": "تم ضبط العملة على {code}",
   "@owner_request_currency_set": {
     "placeholders": {
       "code": { "type": "String" }
@@ -372,9 +454,7 @@
   },
 
   "owner_request_submit_ready": "جاهز للإرسال؟",
-  "owner_request_submit_desc": "سيبدأ CI لإنشاء ملفات البناء.",
-  "owner_request_submitting": "جاري الإرسال…",
-  "owner_request_submit_success": "تم إرسال الطلب ✅ بدأ CI. قريباً APK 🚀",
+  "owner_request_submit_success": "تم إرسال الطلب ✅ بدأ CI. APK قريبًا 🚀",
 
   "owner_request_submit_failed": "فشل الإرسال: {msg}",
   "@owner_request_submit_failed": {
@@ -383,18 +463,18 @@
     }
   },
 
-  "owner_request_selected": "محدد",
+  "owner_request_selected": "تم الاختيار",
   "owner_request_tap_to_apply": "اضغط للتطبيق",
 
   "owner_request_primary": "أساسي",
   "owner_request_secondary": "ثانوي",
   "owner_request_background": "الخلفية",
-  "owner_request_text_on_background": "نص (على الخلفية)",
+  "owner_request_text_on_background": "النص (onBackground)",
   "owner_request_error": "خطأ",
 
   "owner_request_pick_primary": "اختر اللون الأساسي",
   "owner_request_pick_secondary": "اختر اللون الثانوي",
-  "owner_request_pick_background": "اختر لون الخلفية",
+  "owner_request_pick_background": "اختر الخلفية",
   "owner_request_pick_text_color": "اختر لون النص",
   "owner_request_pick_error": "اختر لون الخطأ",
 
@@ -404,53 +484,151 @@
   "owner_request_err_hex_format": "استخدم #RRGGBB",
 
   "owner_request_your_app": "تطبيقك",
-  "owner_request_preview_hello_owner": "مرحباً يا مالك 👋",
-  "owner_request_preview_desc": "هكذا سيظهر الثيم في تطبيقك."
+  "owner_request_preview_hello_owner": "مرحبًا يا مالك 👋",
+  "owner_request_preview_desc": "هكذا سيبدو الثيم الخاص بك.",
 
-,
   "super_create_project_title": "إنشاء مشروع",
-  "super_create_project_subtitle": "أضف قالب مشروع جديد ليستخدمه الـ Owners.",
+  "super_create_project_subtitle": "أضف قالب مشروع جديد ليستخدمه الملاك.",
   "super_project_name": "اسم المشروع",
   "super_project_name_hint": "مثال: HobbySphere",
   "super_project_description": "الوصف",
-  "super_project_description_hint": "وصف مختصر (اختياري)",
+  "super_project_description_hint": "وصف قصير (اختياري)",
   "super_project_type": "نوع المشروع",
-  "project_type_ecommerce": "متجر إلكتروني",
+  "project_type_ecommerce": "تجارة إلكترونية",
   "project_type_services": "خدمات",
   "project_type_activities": "أنشطة",
-  "super_project_active": "مفعّل",
-  "super_project_active_hint": "إذا كان غير مفعّل، لن يتمكن الـ Owners من استخدامه حتى يتم تفعيله.",
-  "super_create_project_btn": "إنشاء المشروع",
-  "super_create_another": "إنشاء واحد آخر",
+  "super_project_active": "مفعل",
+  "super_project_active_hint": "إذا تم تعطيله، لن يستطيع الملاك استخدامه حتى يتم تفعيله.",
+  "super_create_project_btn": "إنشاء مشروع",
+  "super_create_another": "إنشاء آخر",
   "super_project_name_required": "اسم المشروع مطلوب",
-  "super_project_name_exists": "اسم المشروع موجود مسبقاً",
+  "super_project_name_exists": "اسم المشروع موجود مسبقًا",
+
   "super_create_project_created_id": "تم الإنشاء بنجاح (المعرف: {id})",
   "@super_create_project_created_id": {
     "placeholders": {
       "id": { "type": "String" }
     }
   },
+
   "super_create_project_success": "تم إنشاء المشروع \"{name}\" بنجاح!",
   "@super_create_project_success": {
     "placeholders": {
       "name": { "type": "String" }
     }
   },
-  "common_loading": "جارٍ التحميل...",
-  "common_forbidden": "ممنوع",
-  "common_unauthorized": "غير مصرح",
-    "retry": "إعادة المحاولة",
-  "search_owners_hint": "ابحث عن المالكين…",
+
+  "retry": "إعادة المحاولة",
+  "search_owners_hint": "ابحث عن الملاك…",
   "search_apps_hint": "ابحث عن التطبيقات…",
-  "empty_owners": "لا يوجد مالكون",
-  "empty_owner_apps": "لا يوجد تطبيقات لهذا المالك",
+  "empty_owners": "لا يوجد ملاك",
+  "empty_owner_apps": "لا توجد تطبيقات لهذا المالك",
   "unnamed_app": "(تطبيق بدون اسم)",
+
   "toast_app_selected": "التطبيق: {slug}",
-  "app_slug_status": "المعرف: {slug} • {status}",
-  "apps_count": "{count} تطبيق",
-
   "@toast_app_selected": { "placeholders": { "slug": {} } },
-  "@app_slug_status": { "placeholders": { "slug": {}, "status": {} } },
-  "@apps_count": { "placeholders": { "count": {} } }
-}
 
+  "app_slug_status": "slug: {slug} • {status}",
+  "@app_slug_status": { "placeholders": { "slug": {}, "status": {} } },
+
+  "apps_count": "{count} تطبيق",
+  "@apps_count": { "placeholders": { "count": {} } },
+
+  "ordersLabel": "الطلبات",
+  "orderLabel": "طلب",
+  "noOrdersTitle": "لا توجد طلبات",
+  "noOrdersSubtitle": "لم يتم العثور على طلبات لهذا التطبيق وفق الفلاتر الحالية.",
+  "retryLabel": "إعادة المحاولة",
+
+  "allTimeLabel": "كل الوقت",
+  "dashboardLabel": "لوحة التحكم",
+  "last7DaysLabel": "آخر 7 أيام",
+  "last30DaysLabel": "آخر 30 يومًا",
+  "clearLabel": "مسح",
+
+  "grossSalesLabel": "إجمالي المبيعات",
+  "paidLabel": "مدفوع",
+  "outstandingLabel": "غير مكتمل",
+  "avgOrderLabel": "متوسط قيمة الطلب",
+  "fullyPaidRateLabel": "مدفوع بالكامل",
+  "statusBreakdownLabel": "توزيع الحالات",
+  "paidRevenueLast7DaysLabel": "الإيراد المدفوع (آخر 7 أيام)",
+
+  "filterAllLabel": "الكل",
+  "filterPendingLabel": "قيد الانتظار",
+  "filterCompletedLabel": "مكتمل",
+  "filterCanceledLabel": "ملغي",
+  "filterRejectedLabel": "مرفوض",
+  "filterRefundedLabel": "مسترجع",
+
+  "itemsLabel": "العناصر",
+  "totalLabel": "الإجمالي",
+  "remainingLabel": "المتبقي",
+  "fullyPaidShortLabel": "مدفوع",
+
+  "owner_publish_title_play": "النشر على متجر Google Play",
+  "owner_publish_title_appstore": "النشر على App Store",
+  "owner_publish_platform_android": "Android",
+  "owner_publish_platform_ios": "iOS",
+
+  "owner_publish_request_play": "طلب نشر على Play Store",
+  "owner_publish_request_appstore": "طلب نشر على App Store",
+
+  "owner_publish_step1_title": "المعلومات الأساسية",
+  "owner_publish_step1_sub": "قدّم المعلومات الأساسية عن تطبيقك",
+  "owner_publish_step2_title": "الفئة والتفاصيل",
+  "owner_publish_step2_sub": "اختر الفئة وأضف تفاصيل إضافية",
+  "owner_publish_step3_title": "القانوني والتواصل",
+  "owner_publish_step3_sub": "هذه الحقول تُدار بواسطة ملف الناشر في Build4All",
+  "owner_publish_step4_title": "الملفات ولقطات الشاشة",
+  "owner_publish_step4_sub": "قدّم رابط أيقونة التطبيق وروابط لقطات الشاشة",
+
+  "owner_publish_app_name": "اسم التطبيق",
+  "owner_publish_app_name_hint": "ShopSphere",
+
+  "owner_publish_package_name": "اسم الحزمة (للقراءة فقط)",
+  "owner_publish_bundle_id": "Bundle ID (للقراءة فقط)",
+
+  "owner_publish_short_desc": "وصف قصير",
+  "owner_publish_short_desc_hint": "وصف مختصر (بحد أقصى 80 حرفًا)",
+
+  "owner_publish_full_desc": "وصف كامل",
+  "owner_publish_full_desc_hint": "اكتب وصفًا كاملاً لصفحة المتجر…",
+
+  "owner_publish_category": "الفئة",
+  "owner_publish_category_hint": "اختر فئة",
+
+  "owner_publish_country": "توفر الدول",
+  "owner_publish_pricing": "التسعير",
+  "owner_publish_free": "مجاني",
+  "owner_publish_paid": "مدفوع",
+
+  "owner_publish_content_confirm": "أؤكد أن هذا التطبيق يلتزم بسياسات المتجر وإرشادات العمر.",
+
+  "owner_publish_privacy_url": "رابط سياسة الخصوصية",
+  "owner_publish_dev_name": "اسم المطور",
+  "owner_publish_dev_email": "بريد المطور",
+  "owner_publish_managed_by_build4all": "تتم إدارته بواسطة Build4All",
+
+  "owner_publish_icon_url": "رابط أيقونة التطبيق",
+  "owner_publish_icon_url_hint": "https://.../icon.png",
+  "owner_publish_screenshots_urls": "روابط لقطات الشاشة",
+  "owner_publish_screenshot": "لقطة شاشة",
+  "owner_publish_shots_rule": "مطلوب: حد أدنى 2 وحد أقصى 8 لقطات",
+
+  "owner_publish_submit": "إرسال للمراجعة",
+  "owner_publish_submitted": "تم الإرسال للمراجعة",
+
+  "owner_publish_err_appname": "اسم التطبيق مطلوب",
+  "owner_publish_err_short": "الوصف القصير مطلوب",
+  "owner_publish_err_short80": "الوصف القصير: الحد الأقصى 80 حرفًا",
+  "owner_publish_err_full": "الوصف الكامل مطلوب",
+  "owner_publish_err_category": "الفئة مطلوبة",
+  "owner_publish_err_content_confirm": "يجب تأكيد توافق تقييم المحتوى",
+  "owner_publish_err_icon": "رابط أيقونة التطبيق مطلوب",
+  "owner_publish_err_shots2": "مطلوب على الأقل لقطتان",
+  "owner_publish_err_shots8": "الحد الأقصى 8 لقطات",
+
+  "msgWelcomeBack": "مرحبًا بعودتك",
+  "msgVerified": "تم التحقق"
+}

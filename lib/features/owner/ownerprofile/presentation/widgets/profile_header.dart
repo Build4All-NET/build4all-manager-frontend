@@ -1,7 +1,7 @@
 // lib/features/owner/ownerprofile/presentation/widgets/profile_header.dart
 import 'package:build4all_manager/features/owner/ownerprofile/domain/entities/owner_profile.dart';
 import 'package:build4all_manager/l10n/app_localizations.dart';
-import 'package:build4all_manager/shared/widgets/top_toast.dart';
+import 'package:build4all_manager/shared/widgets/app_toast.dart'; // ✅ common toast
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -25,7 +25,6 @@ class ProfileHeader extends StatelessWidget {
         side: BorderSide(color: cs.outlineVariant.withOpacity(.6)),
       ),
       child: Container(
-        // small gradient, not tall
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
@@ -42,13 +41,10 @@ class ProfileHeader extends StatelessWidget {
           email: email,
           onCopyEmail: () async {
             await Clipboard.setData(ClipboardData(text: email));
-            if (context.mounted) {
-              showTopToast(
-                context,
-                l10n.copied ?? 'Copied',
-                type: ToastType.success,
-              );
-            }
+            if (!context.mounted) return;
+
+            // ✅ common toast instead of top_toast
+            AppToast.success(context, l10n.copied ?? 'Copied');
           },
         ),
       ),
@@ -81,7 +77,6 @@ class _AvatarStrip extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
 
-    // compact avatar
     final avatar = Container(
       width: 54,
       height: 54,

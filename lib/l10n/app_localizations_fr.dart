@@ -1241,4 +1241,169 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get fullyPaidShortLabel => 'Fully paid';
+
+  @override
+  String get owner_projects_test => 'TEST';
+
+  @override
+  String get owner_publish_title_play => 'Publish to Google Play Store';
+
+  @override
+  String get owner_publish_title_appstore => 'Publish to App Store';
+
+  @override
+  String get owner_publish_platform_android => 'Android';
+
+  @override
+  String get owner_publish_platform_ios => 'iOS';
+
+  @override
+  String get owner_publish_request_play => 'Request Publish to Play Store';
+
+  @override
+  String get owner_publish_request_appstore => 'Request Publish to App Store';
+
+  @override
+  String get owner_publish_step1_title => 'Basic Information';
+
+  @override
+  String get owner_publish_step1_sub => 'Provide the basic details about your application';
+
+  @override
+  String get owner_publish_step2_title => 'Category & Details';
+
+  @override
+  String get owner_publish_step2_sub => 'Categorize your app and provide additional details';
+
+  @override
+  String get owner_publish_step3_title => 'Legal & Contact';
+
+  @override
+  String get owner_publish_step3_sub => 'These fields are managed by Build4All publisher profile';
+
+  @override
+  String get owner_publish_step4_title => 'Assets & Screenshots';
+
+  @override
+  String get owner_publish_step4_sub => 'Provide your app icon and screenshots URLs';
+
+  @override
+  String get owner_publish_app_name => 'Application Name';
+
+  @override
+  String get owner_publish_app_name_hint => 'ShopSphere';
+
+  @override
+  String get owner_publish_package_name => 'Package Name (Read-only)';
+
+  @override
+  String get owner_publish_bundle_id => 'Bundle ID (Read-only)';
+
+  @override
+  String get owner_publish_short_desc => 'Short Description';
+
+  @override
+  String get owner_publish_short_desc_hint => 'Brief app description (max 80 characters)';
+
+  @override
+  String get owner_publish_full_desc => 'Full Description';
+
+  @override
+  String get owner_publish_full_desc_hint => 'Write a full store listing description…';
+
+  @override
+  String get owner_publish_category => 'Category';
+
+  @override
+  String get owner_publish_category_hint => 'Select a category';
+
+  @override
+  String get owner_publish_country => 'Country Availability';
+
+  @override
+  String get owner_publish_pricing => 'Pricing';
+
+  @override
+  String get owner_publish_free => 'Free';
+
+  @override
+  String get owner_publish_paid => 'Paid';
+
+  @override
+  String get owner_publish_content_confirm => 'I confirm that this app complies with store policies and age-appropriate guidelines.';
+
+  @override
+  String get owner_publish_privacy_url => 'Privacy Policy URL';
+
+  @override
+  String get owner_publish_dev_name => 'Developer Name';
+
+  @override
+  String get owner_publish_dev_email => 'Developer Email';
+
+  @override
+  String get owner_publish_managed_by_build4all => 'Managed by Build4All';
+
+  @override
+  String get owner_publish_icon_url => 'App Icon URL';
+
+  @override
+  String get owner_publish_icon_url_hint => 'https://.../icon.png';
+
+  @override
+  String get owner_publish_screenshots_urls => 'Screenshots URLs';
+
+  @override
+  String get owner_publish_screenshot => 'Screenshot';
+
+  @override
+  String get owner_publish_shots_rule => 'Required: min 2, max 8 screenshots';
+
+  @override
+  String get owner_publish_submit => 'Submit for Review';
+
+  @override
+  String get owner_publish_submitted => 'Submitted for review';
+
+  @override
+  String get owner_publish_err_appname => 'Application name is required';
+
+  @override
+  String get owner_publish_err_short => 'Short description is required';
+
+  @override
+  String get owner_publish_err_short80 => 'Short description max 80 characters';
+
+  @override
+  String get owner_publish_err_full => 'Full description is required';
+
+  @override
+  String get owner_publish_err_category => 'Category is required';
+
+  @override
+  String get owner_publish_err_content_confirm => 'You must confirm content rating compliance';
+
+  @override
+  String get owner_publish_err_icon => 'App icon URL is required';
+
+  @override
+  String get owner_publish_err_shots2 => 'At least 2 screenshots are required';
+
+  @override
+  String get owner_publish_err_shots8 => 'Max 8 screenshots allowed';
+
+  @override
+  String get common_back => 'Back';
+
+  @override
+  String get common_continue => 'Continue';
+
+  @override
+  String get errFixForm => 'Please fix the errors in the form';
+
+  @override
+  String get msgWelcomeBack => 'Welcome back';
+
+  @override
+  String get msgVerified => 'Verified';
 }
