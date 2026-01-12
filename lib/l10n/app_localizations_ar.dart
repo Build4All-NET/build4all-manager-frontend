@@ -12,16 +12,16 @@ class AppLocalizationsAr extends AppLocalizations {
   String get appTitle => 'Build4All';
 
   @override
-  String get signInGeneralTitle => 'سجّل الدخول إلى حسابك';
+  String get signInGeneralTitle => 'تسجيل الدخول إلى حسابك';
 
   @override
-  String get errEmailInvalid => 'Invalid email';
+  String get errEmailInvalid => 'صيغة البريد الإلكتروني غير صحيحة';
 
   @override
-  String get errEmailRequired => 'Email is required';
+  String get errEmailRequired => 'البريد الإلكتروني مطلوب';
 
   @override
-  String get lblEmail => 'Email';
+  String get lblEmail => 'البريد الإلكتروني';
 
   @override
   String get hintEmail => 'you@example.com';
@@ -30,22 +30,22 @@ class AppLocalizationsAr extends AppLocalizations {
   String get signInGeneralSubtitle => 'أدخل بياناتك للمتابعة';
 
   @override
-  String get termsNotice => 'بمتابعتك أنت توافق على الشروط وسياسة الخصوصية';
+  String get termsNotice => 'بالمتابعة، أنت توافق على الشروط وسياسة الخصوصية';
 
   @override
   String get lblIdentifier => 'البريد / الهاتف / اسم المستخدم';
 
   @override
-  String get hintIdentifier => 'you@example.com أو ‎+961xxxxxxxx‎ أو اسم المستخدم';
+  String get hintIdentifier => 'you@example.com أو +961xxxxxxxx أو اسم المستخدم';
 
   @override
   String get lblPassword => 'كلمة المرور';
 
   @override
-  String get hintPassword => '•••••••••••';
+  String get hintPassword => 'كلمة المرور الخاصة بك';
 
   @override
-  String get rememberMe => 'تذكّرني';
+  String get rememberMe => 'تذكرني';
 
   @override
   String get forgotPassword => 'نسيت كلمة المرور؟';
@@ -60,13 +60,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get signUp => 'إنشاء حساب';
 
   @override
-  String get errIdentifierRequired => 'الرجاء إدخال المُعرّف';
+  String get errIdentifierRequired => 'المعرف مطلوب';
 
   @override
-  String get errPasswordRequired => 'الرجاء إدخال كلمة المرور';
+  String get errPasswordRequired => 'كلمة المرور مطلوبة';
 
   @override
-  String get errPasswordMin => 'الحد الأدنى 6 أحرف';
+  String get errPasswordMin => 'يجب أن تكون كلمة المرور 6 أحرف على الأقل';
 
   @override
   String get showPasswordLabel => 'إظهار كلمة المرور';
@@ -75,7 +75,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get hidePasswordLabel => 'إخفاء كلمة المرور';
 
   @override
-  String get nav_super_admin => 'المشرف العام';
+  String get nav_super_admin => 'المدير العام';
 
   @override
   String get nav_dashboard => 'لوحة التحكم';
@@ -87,13 +87,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get nav_profile => 'الملف الشخصي';
 
   @override
-  String get dashboard_title => 'لوحة تحكم المشرف';
+  String get dashboard_title => 'لوحة تحكم المدير';
 
   @override
   String get dashboard_welcome => 'مرحبًا بك في Build4All Manager';
 
   @override
-  String get dashboard_hint => 'استخدم التنقل على اليسار لإدارة السمات وملفك.';
+  String get dashboard_hint => 'استخدم القائمة الجانبية لإدارة السمات والملف الشخصي.';
 
   @override
   String get themes_title => 'إدارة السمات';
@@ -108,13 +108,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get themes_menuType => 'نوع القائمة';
 
   @override
-  String get themes_setActive => 'تعيين كـ نشطة';
+  String get themes_setActive => 'تعيين كمفعل';
 
   @override
-  String get themes_active => 'نشطة';
+  String get themes_active => 'مفعل';
 
   @override
-  String get themes_deactivate_all => 'تعطيل جميع السمات';
+  String get themes_deactivate_all => 'إلغاء تفعيل جميع السمات';
 
   @override
   String get themes_empty => 'لا توجد سمات بعد. أنشئ واحدة.';
@@ -174,28 +174,28 @@ class AppLocalizationsAr extends AppLocalizations {
   String get dash_inactive_projects => 'المشاريع غير النشطة';
 
   @override
-  String get dash_recent_projects => 'أحدث المشاريع';
+  String get dash_recent_projects => 'المشاريع الأخيرة';
 
   @override
   String get dash_no_recent => 'لا توجد مشاريع حديثة بعد.';
 
   @override
-  String get dash_welcome => 'Welcome to Build4All Manager';
+  String get dash_welcome => 'مرحبًا بك في Build4All Manager';
 
   @override
-  String get themes_confirm_delete => 'هل تريد حذف هذه السمة؟ لا يمكن التراجع.';
+  String get themes_confirm_delete => 'حذف هذه السمة؟ لا يمكن التراجع عن ذلك.';
 
   @override
   String get themes_colors_section => 'الألوان';
 
   @override
-  String get err_required => 'مطلوب';
+  String get err_required => 'هذا الحقل مطلوب';
 
   @override
-  String get common_more => 'More';
+  String get common_more => 'المزيد';
 
   @override
-  String get common_retry => 'Retry';
+  String get common_retry => 'إعادة المحاولة';
 
   @override
   String get profile_details => 'Profile details';
@@ -273,75 +273,75 @@ class AppLocalizationsAr extends AppLocalizations {
   String get common_signed_out => 'تم تسجيل الخروج';
 
   @override
-  String get err_email => 'Please enter a valid email';
+  String get err_email => 'يرجى إدخال بريد إلكتروني صحيح';
 
   @override
-  String get errPasswordMismatch => 'Passwords do not match';
+  String get errPasswordMismatch => 'كلمتا المرور غير متطابقتين';
 
   @override
-  String get err_unknown => 'Something went wrong';
+  String get err_unknown => 'حدث خطأ ما';
 
   @override
-  String get signUpOwnerTitle => 'Owner Sign Up';
+  String get signUpOwnerTitle => 'تسجيل مالك';
 
   @override
-  String get verifyCode => 'Verify Code';
+  String get verifyCode => 'تأكيد الرمز';
 
   @override
-  String get completeProfile => 'Complete Profile';
+  String get completeProfile => 'إكمال الملف الشخصي';
 
   @override
-  String get lblUsername => 'Username';
+  String get lblUsername => 'اسم المستخدم';
 
   @override
   String get hintUsername => 'your.unique.name';
 
   @override
-  String get lblFirstName => 'First name';
+  String get lblFirstName => 'الاسم الأول';
 
   @override
   String get hintFirstName => 'John';
 
   @override
-  String get lblLastName => 'Last name';
+  String get lblLastName => 'اسم العائلة';
 
   @override
   String get hintLastName => 'Doe';
 
   @override
-  String get btnSendCode => 'Send Code';
+  String get btnSendCode => 'إرسال الرمز';
 
   @override
-  String get btnVerify => 'Verify';
+  String get btnVerify => 'تحقق';
 
   @override
-  String get btnCreateAccount => 'Create account';
+  String get btnCreateAccount => 'إنشاء حساب';
 
   @override
-  String get errCodeSixDigits => 'Enter the 6-digit code';
+  String get errCodeSixDigits => 'أدخل الرمز المكوّن من 6 أرقام';
 
   @override
-  String get errUsernameRequired => 'Username is required';
+  String get errUsernameRequired => 'اسم المستخدم مطلوب';
 
   @override
-  String get errFirstNameRequired => 'First name is required';
+  String get errFirstNameRequired => 'الاسم الأول مطلوب';
 
   @override
-  String get errLastNameRequired => 'Last name is required';
+  String get errLastNameRequired => 'اسم العائلة مطلوب';
 
   @override
-  String get msgCodeSent => 'Verification code sent';
+  String get msgCodeSent => 'تم إرسال رمز التحقق';
 
   @override
-  String get msgWeWillSendCodeEmail => 'We will send a 6-digit code to your email.';
+  String get msgWeWillSendCodeEmail => 'سنرسل رمزًا مكوّنًا من 6 أرقام إلى بريدك الإلكتروني.';
 
   @override
   String msgEnterCodeForEmail(Object email) {
-    return 'Enter the 6-digit code sent to $email';
+    return 'أدخل الرمز المكوّن من 6 أرقام المرسل إلى $email';
   }
 
   @override
-  String get msgOwnerRegistered => 'Owner registered successfully';
+  String get msgOwnerRegistered => 'تم تسجيل المالك بنجاح';
 
   @override
   String get owner_nav_title => 'المالك';
@@ -350,7 +350,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get owner_nav_home => 'الرئيسية';
 
   @override
-  String get owner_nav_projects => 'المشاريع';
+  String get owner_nav_projects => 'تطبيقاتي';
 
   @override
   String get owner_nav_requests => 'الطلبات';
@@ -359,7 +359,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get owner_nav_profile => 'الملف الشخصي';
 
   @override
-  String get owner_home_title => 'واجهة المالك';
+  String get owner_home_title => 'الصفحة الرئيسية للمالك';
 
   @override
   String get owner_projects_title => 'المشاريع';
@@ -371,13 +371,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get owner_profile_title => 'ملف المالك';
 
   @override
-  String get owner_home_hello => 'مرحبًا،  👋';
+  String get owner_home_hello => '👋 مرحبًا،';
 
   @override
-  String get owner_home_subtitle => 'جاهز لإطلاق نسختك التالية؟';
+  String get owner_home_subtitle => 'جاهز لإطلاق بناء تطبيقك التالي؟';
 
   @override
-  String get owner_home_requestApp => 'اطلب تطبيقي';
+  String get owner_home_requestApp => 'طلب إنشاء تطبيق';
 
   @override
   String get owner_home_myProjects => 'مشاريعي النشطة';
@@ -395,34 +395,34 @@ class AppLocalizationsAr extends AppLocalizations {
   String get tutorial_step1_title => 'اطلب تطبيقك';
 
   @override
-  String get tutorial_step1_body => 'اختر المشروع، سمِّ التطبيق، أضف ملاحظات، ثم أرسل الطلب.';
+  String get tutorial_step1_body => 'اختر مشروعًا، سمِّ تطبيقك، أضف ملاحظات، ثم أرسل الطلب.';
 
   @override
   String get tutorial_step2_title => 'تابع الموافقة';
 
   @override
-  String get tutorial_step2_body => 'سنعلمك عند الموافقة أو إذا كانت هناك تعديلات مطلوبة.';
+  String get tutorial_step2_body => 'سنُعلمك عندما تتم الموافقة على طلبك أو يحتاج لتعديلات.';
 
   @override
-  String get tutorial_step3_title => 'حمّل ملف APK';
+  String get tutorial_step3_title => 'حمّل الـ APK';
 
   @override
-  String get tutorial_step3_body => 'بعد البناء، نزّل الـ APK مباشرةً من لوحة التحكم.';
+  String get tutorial_step3_body => 'بعد اكتمال البناء، حمّل APK مباشرة من لوحة التحكم.';
 
   @override
-  String get owner_projects_searchHint => 'ابحث بالاسم أو المعرّف…';
+  String get owner_projects_searchHint => 'ابحث بالاسم أو الـ slug…';
 
   @override
-  String get owner_projects_onlyReady => 'فقط الجاهزة (APK)';
+  String get owner_projects_onlyReady => 'APK الجاهز فقط';
 
   @override
   String get owner_projects_emptyTitle => 'لا توجد مشاريع بعد';
 
   @override
-  String get owner_projects_emptyBody => 'ليس لديك أي مشاريع حالياً. اطلب تطبيقك الأول وسنقوم ببنائه لك.';
+  String get owner_projects_emptyBody => 'ليس لديك أي مشاريع. اطلب أول تطبيق وسنبنيه لك.';
 
   @override
-  String get owner_projects_building => 'جارٍ الإنشاء…';
+  String get owner_projects_building => 'جارٍ البناء…';
 
   @override
   String get owner_projects_ready => 'جاهز';
@@ -434,7 +434,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get owner_request_title => 'إنشاء طلب تطبيق';
 
   @override
-  String get owner_request_submit_hint => 'اختر مشروعًا، أضف اسم التطبيق، حمل الشعار (اختياري)، اختر سمة، ثم أرسل للبناء.';
+  String get owner_request_submit_hint => 'اختر مشروعًا، سمِّ تطبيقك، أضف شعارًا (اختياري)، اختر سمة، ثم أرسل لبدء البناء.';
 
   @override
   String get owner_request_project => 'المشروع';
@@ -443,16 +443,16 @@ class AppLocalizationsAr extends AppLocalizations {
   String get owner_request_appName => 'اسم التطبيق';
 
   @override
-  String get owner_request_appName_hint => 'مثال: تطبيقي للمالك';
+  String get owner_request_appName_hint => 'مثلًا: My Owner App';
 
   @override
   String get owner_request_logo_url => 'رابط الشعار (اختياري)';
 
   @override
-  String get owner_request_logo_url_hint => 'ألصق رابطًا عامًا أو استخدم الرفع';
+  String get owner_request_logo_url_hint => 'ألصق رابطًا عامًا أو استخدم رفع ملف';
 
   @override
-  String get owner_request_upload_logo => 'رفع الشعار';
+  String get owner_request_upload_logo => 'رفع ملف الشعار';
 
   @override
   String get owner_request_theme_pref => 'السمة';
@@ -464,16 +464,16 @@ class AppLocalizationsAr extends AppLocalizations {
   String get owner_request_submit => 'إرسال';
 
   @override
-  String get owner_request_submitting => 'جاري الإرسال…';
+  String get owner_request_submitting => 'جارٍ الإرسال…';
 
   @override
   String get owner_request_submit_and_build => 'إرسال وبناء APK';
 
   @override
-  String get owner_request_building => 'جارٍ بناء ملف APK…';
+  String get owner_request_building => 'جارٍ بناء APK…';
 
   @override
-  String get owner_request_build_done => 'تم إنهاء بناء الـ APK.';
+  String get owner_request_build_done => 'اكتمل بناء APK.';
 
   @override
   String get owner_request_success => 'تم إرسال الطلب بنجاح.';
@@ -491,13 +491,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get owner_request_error_app_name => 'يرجى إدخال اسم التطبيق.';
 
   @override
-  String get common_download => 'تنزيل';
+  String get common_download => 'تحميل';
 
   @override
-  String get common_download_apk => 'تنزيل APK';
+  String get common_download_apk => 'تحميل APK';
 
   @override
-  String get menuType => 'Menu Type';
+  String get menuType => 'نوع القائمة';
 
   @override
   String get owner_profile_username => 'اسم المستخدم';
@@ -509,19 +509,19 @@ class AppLocalizationsAr extends AppLocalizations {
   String get owner_profile_email => 'البريد الإلكتروني';
 
   @override
-  String get owner_profile_business_id => 'معرّف النشاط التجاري';
+  String get owner_profile_business_id => 'معرّف النشاط';
 
   @override
   String get owner_profile_notify_items => 'إشعار بتحديثات العناصر';
 
   @override
-  String get owner_profile_notify_feedback => 'إشعار بتعليقات المستخدمين';
+  String get owner_profile_notify_feedback => 'إشعار بملاحظات المستخدمين';
 
   @override
   String get owner_profile_not_set => 'غير محدد';
 
   @override
-  String get owner_profile_tips => 'احرص على تحديث معلومات ملفك الشخصي لتخصيص تجربتك.';
+  String get owner_profile_tips => 'حافظ على تحديث بياناتك لتخصيص تجربتك.';
 
   @override
   String get yes => 'نعم';
@@ -548,40 +548,40 @@ class AppLocalizationsAr extends AppLocalizations {
   String get owner_nav_myapps => 'تطبيقاتي';
 
   @override
-  String get common_search_hint => 'ابحث...';
+  String get common_search_hint => 'بحث...';
 
   @override
-  String get owner_home_search_hint => 'ابحث عن التطبيقات والطلبات والإرشادات';
+  String get owner_home_search_hint => 'ابحث عن التطبيقات، الطلبات، الأدلة';
 
   @override
   String get owner_home_chooseProject => 'اختر مشروعك';
 
   @override
-  String get owner_proj_open => 'افتح المشروع';
+  String get owner_proj_open => 'فتح المشروع';
 
   @override
-  String get owner_proj_activities_title => 'الفعاليات';
+  String get owner_proj_activities_title => 'الأنشطة';
 
   @override
-  String get owner_proj_activities_desc => 'تذاكر، جداول، وأبرز الأحداث مصمّمة للتجارب أثناء التنقل.';
+  String get owner_proj_activities_desc => 'تذاكر، جداول، وأبرز الفعاليات بتجربة مناسبة للهاتف.';
 
   @override
-  String get owner_proj_ecom_title => 'التجارة الإلكترونية';
+  String get owner_proj_ecom_title => 'تجارة إلكترونية';
 
   @override
-  String get owner_proj_ecom_desc => 'كتالوجات المنتجات وسلال الشراء وتدفّقات الدفع المطابقة لمتجرك.';
+  String get owner_proj_ecom_desc => 'كتالوج منتجات، سلة، ودفع يعكس متجرك.';
 
   @override
-  String get owner_proj_gym_title => 'النادي الرياضي';
+  String get owner_proj_gym_title => 'نادي رياضي';
 
   @override
-  String get owner_proj_gym_desc => 'خطط تدريب، حجوزات مواعيد، ومزايا العضوية في تطبيق واحد.';
+  String get owner_proj_gym_desc => 'خطط تدريب، حجوزات، وميزات اشتراك في تطبيق واحد.';
 
   @override
   String get owner_proj_services_title => 'الخدمات';
 
   @override
-  String get owner_proj_services_desc => 'عروض أسعار، مواعيد، وتحديثات للعميل متوافقة مع هويتك.';
+  String get owner_proj_services_desc => 'عروض أسعار، مواعيد، وتحديثات للعملاء حسب علامتك.';
 
   @override
   String get status_delivered => 'تم التسليم';
@@ -590,7 +590,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get status_in_production => 'قيد التنفيذ';
 
   @override
-  String get status_approved => 'موافق عليه';
+  String get status_approved => 'مقبول';
 
   @override
   String get status_pending => 'قيد الانتظار';
@@ -623,127 +623,127 @@ class AppLocalizationsAr extends AppLocalizations {
   String get owner_proj_details_highlights => 'أبرز الميزات';
 
   @override
-  String get owner_proj_details_screens => 'الشاشات والتدفّقات';
+  String get owner_proj_details_screens => 'الشاشات والمسارات';
 
   @override
-  String get owner_proj_details_modules => 'الوحدات المتضمَّنة';
+  String get owner_proj_details_modules => 'الوحدات المتضمنة';
 
   @override
-  String get owner_proj_details_why => 'لماذا يحبّها الفرق';
+  String get owner_proj_details_why => 'لماذا تحب الفرق هذا القالب';
 
   @override
   String get owner_proj_details_primaryCta => 'اطلب هذا التطبيق';
 
   @override
-  String get owner_proj_details_secondaryCta => 'عرض النسخة التجريبية';
+  String get owner_proj_details_secondaryCta => 'معاينة التجربة';
 
   @override
-  String get owner_proj_details_create_title => 'أنشئ مشروعي';
+  String get owner_proj_details_create_title => 'أنشئ تطبيقي';
 
   @override
-  String get owner_proj_details_create_subtitle => 'أطلق نسختك المخصّصة خلال دقائق.';
+  String get owner_proj_details_create_subtitle => 'أطلق نسختك المخصصة خلال دقائق.';
 
   @override
-  String get stat_reviews_hint => 'تقييم';
+  String get stat_reviews_hint => 'مراجعات';
 
   @override
-  String get stat_active_hint => 'نشر فعّال';
+  String get stat_active_hint => 'نُشر بنشاط';
 
   @override
-  String get stat_days_hint => 'أيام متوسّط التنفيذ';
+  String get stat_days_hint => 'متوسط أيام الإنجاز';
 
   @override
-  String get owner_proj_details_headline_activities => 'نظّم، احجز، وادر كل نشاط من مكان واحد.';
+  String get owner_proj_details_headline_activities => 'خطّط، احجز، وأدر كل نشاط في مكان واحد.';
 
   @override
-  String get owner_proj_details_subhead_activities => 'مثالي للأندية والمراكز بواجهات حجز وجداول مصقولة.';
+  String get owner_proj_details_subhead_activities => 'مثالي للاستوديوهات والنوادي والبرامج مع حجوزات وجداول احترافية.';
 
   @override
-  String get owner_proj_details_act_h1 => 'جداول حصص مع لوائح انتظار';
+  String get owner_proj_details_act_h1 => 'جداول مع قوائم انتظار';
 
   @override
-  String get owner_proj_details_act_h2 => 'محفظة ودعم الرصيد';
+  String get owner_proj_details_act_h2 => 'محفظة ودعم أرصدة';
 
   @override
-  String get owner_proj_details_act_h3 => 'تذكيرات دفعية للمشاركين';
+  String get owner_proj_details_act_h3 => 'تنبيهات للمشاركين';
 
   @override
-  String get owner_proj_details_act_h4 => 'خلاصة تواصل مدمجة';
+  String get owner_proj_details_act_h4 => 'تغذية مجتمع مدمجة';
 
   @override
-  String get owner_proj_details_act_s1_title => 'شبكة الجداول';
+  String get owner_proj_details_act_s1_title => 'شبكة الجدول';
 
   @override
-  String get owner_proj_details_act_s1_sub => 'تصفية بالمدرب والموقع بضغطة واحدة.';
+  String get owner_proj_details_act_s1_sub => 'فلترة حسب المدرب والموقع بنقرة واحدة.';
 
   @override
-  String get owner_proj_details_act_s2_title => 'تدفّق الحجز';
+  String get owner_proj_details_act_s2_title => 'مسار الحجز';
 
   @override
-  String get owner_proj_details_act_s2_sub => 'دفع سلس مع بطاقات محفوظة.';
+  String get owner_proj_details_act_s2_sub => 'دفع سريع مع بطاقات محفوظة.';
 
   @override
-  String get owner_proj_details_act_m1 => 'جداول ديناميكية ومتعدّدة المواقع';
+  String get owner_proj_details_act_m1 => 'جداول ديناميكية ومتعددة المواقع';
 
   @override
-  String get owner_proj_details_act_m2 => 'سير ذاتية وتقييمات المدرّبين';
+  String get owner_proj_details_act_m2 => 'ملفات المدربين وتقييماتهم';
 
   @override
-  String get owner_proj_details_act_m3 => 'عضويات بمستويات ومزايا';
+  String get owner_proj_details_act_m3 => 'اشتراكات بمزايا';
 
   @override
-  String get owner_proj_details_act_i1 => '78٪ من الأعضاء يحجزون عبر الهاتف خلال الأسبوع الأول.';
+  String get owner_proj_details_act_i1 => '78% من الأعضاء يحجزون عبر الهاتف خلال الأسبوع الأول.';
 
   @override
-  String get owner_proj_details_act_i2 => 'تزداد الاستمرارية 24٪ بعد تفعيل التذكيرات.';
+  String get owner_proj_details_act_i2 => 'يزداد الاحتفاظ 24% بعد تفعيل تنبيهات التذكير.';
 
   @override
-  String get owner_proj_details_headline_ecommerce => 'أطلق متجراً عالي التحويل يثق به عملاؤك.';
+  String get owner_proj_details_headline_ecommerce => 'أطلق متجرًا عالي التحويل يثق به العملاء.';
 
   @override
-  String get owner_proj_details_subhead_ecommerce => 'للبيع المباشر: كتالوجات، حِزم، وإعادة شراء بنقرة.';
+  String get owner_proj_details_subhead_ecommerce => 'للعلامات DTC: كتالوجات، باقات، وإعادة طلب بنقرة واحدة.';
 
   @override
-  String get owner_proj_details_ecom_h1 => 'كتالوج بصري مع وسائط غنيّة';
+  String get owner_proj_details_ecom_h1 => 'كتالوج بصري مع وسائط غنية';
 
   @override
-  String get owner_proj_details_ecom_h2 => 'ترشيحات ذكية للبيع الإضافي';
+  String get owner_proj_details_ecom_h2 => 'اقتراحات Upsell ذكية';
 
   @override
-  String get owner_proj_details_ecom_h3 => 'تتبّع الطلب داخل التطبيق';
+  String get owner_proj_details_ecom_h3 => 'تتبع الطلب داخل التطبيق';
 
   @override
-  String get owner_proj_details_ecom_h4 => 'محرك خصومات وولاء';
+  String get owner_proj_details_ecom_h4 => 'نظام خصومات وولاء';
 
   @override
   String get owner_proj_details_ecom_s1_title => 'عرض المنتجات';
 
   @override
-  String get owner_proj_details_ecom_s1_sub => 'صور ممتدّة مع عينات ألوان.';
+  String get owner_proj_details_ecom_s1_sub => 'صور كبيرة مع خيارات/ألوان.';
 
   @override
   String get owner_proj_details_ecom_s2_title => 'السلة والدفع';
 
   @override
-  String get owner_proj_details_ecom_s2_sub => 'دفع سريع مع عناوين محفوظة.';
+  String get owner_proj_details_ecom_s2_sub => 'دفع أسرع مع عناوين محفوظة.';
 
   @override
-  String get owner_proj_details_ecom_m1 => 'متغيرات ومنتجات مجمّعة غير محدودة';
+  String get owner_proj_details_ecom_m1 => 'متغيرات وباقات غير محدودة';
 
   @override
   String get owner_proj_details_ecom_m2 => 'مزامنة المخزون مع Shopify/Woo';
 
   @override
-  String get owner_proj_details_ecom_m3 => 'بطاقات هدايا وبرامج إحالة';
+  String get owner_proj_details_ecom_m3 => 'بطاقات هدايا وإحالات';
 
   @override
-  String get owner_proj_details_ecom_i1 => 'يرتفع متوسط قيمة الطلب 32٪ مع الحزم.';
+  String get owner_proj_details_ecom_i1 => 'يزداد متوسط قيمة الطلب 32% مع العروض المجمّعة.';
 
   @override
   String get owner_proj_details_ecom_i2 => 'يعيد العملاء الشراء أسرع بـ 2.1× عبر الهاتف.';
 
   @override
-  String get owner_proj_details_headline_gym => 'امنح الأعضاء مدرّباً شخصياً في جيوبهم.';
+  String get owner_proj_details_headline_gym => 'ضع مدربًا شخصيًا في جيب الأعضاء.';
 
   @override
   String get owner_proj_details_subhead_gym => 'تدريب هجين، باقات حصص، وتأجير معدات.';
@@ -752,55 +752,55 @@ class AppLocalizationsAr extends AppLocalizations {
   String get owner_proj_details_gym_h1 => 'تهيئة حسب الأهداف';
 
   @override
-  String get owner_proj_details_gym_h2 => 'مراسلة المدرّب والبرامج';
+  String get owner_proj_details_gym_h2 => 'مراسلة المدرب والبرامج';
 
   @override
-  String get owner_proj_details_gym_h3 => 'مكتبة فيديوهات للتمارين';
+  String get owner_proj_details_gym_h3 => 'مكتبة فيديو للتمارين';
 
   @override
-  String get owner_proj_details_gym_h4 => 'لوحات تقدّم وتتبع';
+  String get owner_proj_details_gym_h4 => 'لوحات تقدم';
 
   @override
   String get owner_proj_details_gym_s1_title => 'خطط التدريب';
 
   @override
-  String get owner_proj_details_gym_s1_sub => 'خطط مُمرحلة بمنطق الاستراحة.';
+  String get owner_proj_details_gym_s1_sub => 'خطط دورية مع منطق الراحة.';
 
   @override
   String get owner_proj_details_gym_s2_title => 'حصص مباشرة';
 
   @override
-  String get owner_proj_details_gym_s2_sub => 'احجز حضورياً أو عبر الإنترنت.';
+  String get owner_proj_details_gym_s2_sub => 'احجز حضوريًا أو عن بُعد.';
 
   @override
-  String get owner_proj_details_gym_m1 => 'سوق مدرّبين مع التوفّر';
+  String get owner_proj_details_gym_m1 => 'سوق مدربين مع توافر';
 
   @override
-  String get owner_proj_details_gym_m2 => 'تسجيل التمارين ومزامنة الأجهزة';
+  String get owner_proj_details_gym_m2 => 'تسجيل تمارين ومزامنة أجهزة';
 
   @override
-  String get owner_proj_details_gym_m3 => 'خطط تغذية مع أهداف الماكروز';
+  String get owner_proj_details_gym_m3 => 'خطط تغذية مع أهداف ماكروز';
 
   @override
-  String get owner_proj_details_gym_i1 => 'المنضمون يكملون التهيئة يتحولون أسرع بـ3×.';
+  String get owner_proj_details_gym_i1 => 'الأعضاء الذين يُكملون التهيئة يتحولون أسرع بـ 3×.';
 
   @override
-  String get owner_proj_details_gym_i2 => 'ينخفض التسرّب 19٪ عند تفعيل الرسائل.';
+  String get owner_proj_details_gym_i2 => 'ينخفض التسرب 19% عند تفعيل المراسلة.';
 
   @override
-  String get owner_proj_details_headline_services => 'قدّم تجربة خِدمة بمستوى كونسيرج.';
+  String get owner_proj_details_headline_services => 'قدّم تجربة خدمة بمستوى كونسيرج.';
 
   @override
-  String get owner_proj_details_subhead_services => 'للوكالات والاستشارات ومقدمي الخدمات.';
+  String get owner_proj_details_subhead_services => 'للوكالات والاستشاريين ومقدمي الخدمات.';
 
   @override
   String get owner_proj_details_services_h1 => 'نوافذ حجز ذكية';
 
   @override
-  String get owner_proj_details_services_h2 => 'مساحات عمل للعميل';
+  String get owner_proj_details_services_h2 => 'مساحات عمل للعملاء';
 
   @override
-  String get owner_proj_details_services_h3 => 'تتبّع المهام والمعالم';
+  String get owner_proj_details_services_h3 => 'متابعة المهام والمراحل';
 
   @override
   String get owner_proj_details_services_h4 => 'فواتير مدمجة';
@@ -809,40 +809,40 @@ class AppLocalizationsAr extends AppLocalizations {
   String get owner_proj_details_services_s1_title => 'بوابة العميل';
 
   @override
-  String get owner_proj_details_services_s1_sub => 'ملفات مشتركة، ملاحظات، وموافقات.';
+  String get owner_proj_details_services_s1_sub => 'ملفات وملاحظات وموافقات مشتركة.';
 
   @override
-  String get owner_proj_details_services_s2_title => 'تدفّق المواعيد';
+  String get owner_proj_details_services_s2_title => 'مسار المواعيد';
 
   @override
-  String get owner_proj_details_services_s2_sub => 'فواصل ونماذج معلومات مسبقة.';
+  String get owner_proj_details_services_s2_sub => 'فواصل زمنية ونماذج إدخال.';
 
   @override
-  String get owner_proj_details_services_m1 => 'CRM للعميل بخطوط زمنية مشتركة';
+  String get owner_proj_details_services_m1 => 'CRM مع جداول زمنية مشتركة';
 
   @override
   String get owner_proj_details_services_m2 => 'عقود رقمية وتوقيع إلكتروني';
 
   @override
-  String get owner_proj_details_services_m3 => 'فواتير وإيصالات تلقائية';
+  String get owner_proj_details_services_m3 => 'رسائل فواتير وإيصالات تلقائية';
 
   @override
-  String get owner_proj_details_services_i1 => 'تُغلق المشاريع أسرع بـ 27٪ مع المساحات المشتركة.';
+  String get owner_proj_details_services_i1 => 'تُغلق المشاريع أسرع 27% مع مساحات عمل مشتركة.';
 
   @override
-  String get owner_proj_details_services_i2 => 'الفوترة التلقائية تقلّل التأخير 43٪.';
+  String get owner_proj_details_services_i2 => 'الفوترة التلقائية تقلل التأخير 43%.';
 
   @override
-  String get owner_proj_details_stat_reviews_hint => 'المراجعات';
+  String get owner_proj_details_stat_reviews_hint => 'مراجعات';
 
   @override
-  String get owner_proj_details_stat_active_hint => 'النشطات';
+  String get owner_proj_details_stat_active_hint => 'نشر نشط';
 
   @override
-  String get owner_proj_details_stat_days_hint => 'الأيام';
+  String get owner_proj_details_stat_days_hint => 'متوسط أيام الإنجاز';
 
   @override
-  String get owner_projects_subtitle => 'Manage your projects and app builds seamlessly';
+  String get owner_projects_subtitle => 'أدر مشاريعك وبناءات التطبيقات بسهولة';
 
   @override
   String get copied => 'تم النسخ';
@@ -854,7 +854,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get security => 'الأمان';
 
   @override
-  String get change_password => 'تغيير كلمة السر';
+  String get change_password => 'تغيير كلمة المرور';
 
   @override
   String get support => 'الدعم';
@@ -875,7 +875,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get copy => 'نسخ';
 
   @override
-  String get owner_proj_comingSoon => 'قريباً';
+  String get owner_proj_comingSoon => 'قريبًا';
 
   @override
   String get submit => 'إرسال';
@@ -890,10 +890,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get common_remove => 'إزالة';
 
   @override
-  String get owner_request_hero_title => 'أنشئ تطبيق جديد';
+  String get owner_request_hero_title => 'إنشاء تطبيق جديد';
 
   @override
-  String get owner_request_hero_subtitle => 'اختر الثيم والـ runtime بشكل بصري. نحن ننشئ JSON تلقائياً.';
+  String get owner_request_hero_subtitle => 'اختر السمة والـ runtime بصريًا. نحن ننشئ JSON خلف الكواليس.';
 
   @override
   String get owner_request_basics_title => 'الأساسيات';
@@ -902,10 +902,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get owner_request_basics_subtitle => 'معلومات مطلوبة لإنشاء تطبيقك.';
 
   @override
-  String get owner_request_project_id => 'رقم المشروع';
+  String get owner_request_project_id => 'معرّف المشروع';
 
   @override
-  String get owner_request_project_id_hint => 'محدد من المشروع';
+  String get owner_request_project_id_hint => 'يتم اختياره من المشروع';
 
   @override
   String get owner_request_app_name => 'اسم التطبيق';
@@ -917,7 +917,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get owner_request_notes => 'ملاحظات';
 
   @override
-  String get owner_request_notes_hint => 'وصف مختصر / طلب خاص / أي شيء مهم…';
+  String get owner_request_notes_hint => 'وصف قصير / طلب خاص / أي شيء مهم…';
 
   @override
   String get owner_request_settings_title => 'إعدادات التطبيق';
@@ -926,40 +926,40 @@ class AppLocalizationsAr extends AppLocalizations {
   String get owner_request_settings_subtitle => 'العملة + رابط API اختياري.';
 
   @override
-  String get owner_request_api_override => 'تغيير رابط API (اختياري)';
+  String get owner_request_api_override => 'تجاوز رابط API (اختياري)';
 
   @override
   String get owner_request_api_override_hint => 'مثال: http://192.168.1.7:8080';
 
   @override
-  String get owner_request_palette_title => 'الألوان';
+  String get owner_request_palette_title => 'لوحة الألوان';
 
   @override
-  String get owner_request_palette_subtitle => 'اختر قالب جاهز أو عدّل الألوان.';
+  String get owner_request_palette_subtitle => 'اختر إعدادًا مسبقًا أو خصص الألوان.';
 
   @override
   String get owner_request_runtime_title => 'إعدادات Runtime';
 
   @override
-  String get owner_request_runtime_subtitle => 'التنقّل + الصفحة الرئيسية + الميزات (بدون كتابة JSON).';
+  String get owner_request_runtime_subtitle => 'التنقل + الصفحة الرئيسية + ميزات (بدون كتابة JSON).';
 
   @override
   String get owner_request_branding_title => 'الهوية';
 
   @override
-  String get owner_request_branding_subtitle => 'الشعار اختياري لكنه يعطي شكل احترافي.';
+  String get owner_request_branding_subtitle => 'الشعار اختياري لكنه يجعل التطبيق أكثر احترافًا.';
 
   @override
   String get owner_request_err_load_currencies => 'فشل تحميل العملات';
 
   @override
-  String get owner_request_err_valid_number => 'أدخل رقم صحيح';
+  String get owner_request_err_valid_number => 'أدخل رقمًا صحيحًا';
 
   @override
   String get owner_request_err_select_currency => 'اختر عملة أولاً';
 
   @override
-  String get owner_request_err_fix_fields => 'عدّل الحقول المظللة';
+  String get owner_request_err_fix_fields => 'صحّح الحقول المظللة';
 
   @override
   String get owner_request_err_app_name_required => 'اسم التطبيق مطلوب';
@@ -968,10 +968,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get owner_request_logo_selected => 'تم اختيار الشعار';
 
   @override
-  String get owner_request_logo_removed => 'تم حذف الشعار';
+  String get owner_request_logo_removed => 'تمت إزالة الشعار';
 
   @override
-  String get owner_request_no_logo => 'لا يوجد شعار';
+  String get owner_request_no_logo => 'لا يوجد شعار محدد';
 
   @override
   String get owner_request_pick_logo => 'اختيار';
@@ -983,21 +983,21 @@ class AppLocalizationsAr extends AppLocalizations {
   String get owner_request_tap_to_choose => 'اضغط للاختيار';
 
   @override
-  String get owner_request_pick_currency => 'اختيار العملة';
+  String get owner_request_pick_currency => 'اختيار عملة';
 
   @override
-  String get owner_request_currency_search_hint => 'ابحث بالاسم / الكود / المعرف';
+  String get owner_request_currency_search_hint => 'ابحث بالاسم / الرمز / المعرف';
 
   @override
   String owner_request_currency_set(String code) {
-    return 'تم اختيار العملة $code';
+    return 'تم ضبط العملة على $code';
   }
 
   @override
   String get owner_request_submit_ready => 'جاهز للإرسال؟';
 
   @override
-  String get owner_request_submit_success => 'تم إرسال الطلب ✅ بدأ CI. قريباً APK 🚀';
+  String get owner_request_submit_success => 'تم إرسال الطلب ✅ بدأ CI. APK قريبًا 🚀';
 
   @override
   String owner_request_submit_failed(String msg) {
@@ -1005,7 +1005,7 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get owner_request_selected => 'محدد';
+  String get owner_request_selected => 'تم الاختيار';
 
   @override
   String get owner_request_tap_to_apply => 'اضغط للتطبيق';
@@ -1020,7 +1020,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get owner_request_background => 'الخلفية';
 
   @override
-  String get owner_request_text_on_background => 'نص (على الخلفية)';
+  String get owner_request_text_on_background => 'النص (onBackground)';
 
   @override
   String get owner_request_error => 'خطأ';
@@ -1032,7 +1032,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get owner_request_pick_secondary => 'اختر اللون الثانوي';
 
   @override
-  String get owner_request_pick_background => 'اختر لون الخلفية';
+  String get owner_request_pick_background => 'اختر الخلفية';
 
   @override
   String get owner_request_pick_text_color => 'اختر لون النص';
@@ -1056,16 +1056,16 @@ class AppLocalizationsAr extends AppLocalizations {
   String get owner_request_your_app => 'تطبيقك';
 
   @override
-  String get owner_request_preview_hello_owner => 'مرحباً يا مالك 👋';
+  String get owner_request_preview_hello_owner => 'مرحبًا يا مالك 👋';
 
   @override
-  String get owner_request_preview_desc => 'هكذا سيظهر الثيم في تطبيقك.';
+  String get owner_request_preview_desc => 'هكذا سيبدو الثيم الخاص بك.';
 
   @override
   String get super_create_project_title => 'إنشاء مشروع';
 
   @override
-  String get super_create_project_subtitle => 'أضف قالب مشروع جديد ليستخدمه الـ Owners.';
+  String get super_create_project_subtitle => 'أضف قالب مشروع جديد ليستخدمه الملاك.';
 
   @override
   String get super_project_name => 'اسم المشروع';
@@ -1077,13 +1077,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get super_project_description => 'الوصف';
 
   @override
-  String get super_project_description_hint => 'وصف مختصر (اختياري)';
+  String get super_project_description_hint => 'وصف قصير (اختياري)';
 
   @override
   String get super_project_type => 'نوع المشروع';
 
   @override
-  String get project_type_ecommerce => 'متجر إلكتروني';
+  String get project_type_ecommerce => 'تجارة إلكترونية';
 
   @override
   String get project_type_services => 'خدمات';
@@ -1092,22 +1092,22 @@ class AppLocalizationsAr extends AppLocalizations {
   String get project_type_activities => 'أنشطة';
 
   @override
-  String get super_project_active => 'مفعّل';
+  String get super_project_active => 'مفعل';
 
   @override
-  String get super_project_active_hint => 'إذا كان غير مفعّل، لن يتمكن الـ Owners من استخدامه حتى يتم تفعيله.';
+  String get super_project_active_hint => 'إذا تم تعطيله، لن يستطيع الملاك استخدامه حتى يتم تفعيله.';
 
   @override
-  String get super_create_project_btn => 'إنشاء المشروع';
+  String get super_create_project_btn => 'إنشاء مشروع';
 
   @override
-  String get super_create_another => 'إنشاء واحد آخر';
+  String get super_create_another => 'إنشاء آخر';
 
   @override
   String get super_project_name_required => 'اسم المشروع مطلوب';
 
   @override
-  String get super_project_name_exists => 'اسم المشروع موجود مسبقاً';
+  String get super_project_name_exists => 'اسم المشروع موجود مسبقًا';
 
   @override
   String super_create_project_created_id(String id) {
@@ -1120,10 +1120,10 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get common_loading => 'جارٍ التحميل...';
+  String get common_loading => 'جاري التحميل...';
 
   @override
-  String get common_forbidden => 'ممنوع';
+  String get common_forbidden => 'غير مسموح';
 
   @override
   String get common_unauthorized => 'غير مصرح';
@@ -1132,16 +1132,16 @@ class AppLocalizationsAr extends AppLocalizations {
   String get retry => 'إعادة المحاولة';
 
   @override
-  String get search_owners_hint => 'ابحث عن المالكين…';
+  String get search_owners_hint => 'ابحث عن الملاك…';
 
   @override
   String get search_apps_hint => 'ابحث عن التطبيقات…';
 
   @override
-  String get empty_owners => 'لا يوجد مالكون';
+  String get empty_owners => 'لا يوجد ملاك';
 
   @override
-  String get empty_owner_apps => 'لا يوجد تطبيقات لهذا المالك';
+  String get empty_owner_apps => 'لا توجد تطبيقات لهذا المالك';
 
   @override
   String get unnamed_app => '(تطبيق بدون اسم)';
@@ -1153,7 +1153,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String app_slug_status(Object slug, Object status) {
-    return 'المعرف: $slug • $status';
+    return 'slug: $slug • $status';
   }
 
   @override
@@ -1162,94 +1162,94 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get ordersLabel => 'Orders';
+  String get ordersLabel => 'الطلبات';
 
   @override
-  String get orderLabel => 'Order';
+  String get orderLabel => 'طلب';
 
   @override
-  String get noOrdersTitle => 'No orders';
+  String get noOrdersTitle => 'لا توجد طلبات';
 
   @override
-  String get noOrdersSubtitle => 'No orders found for this app with the current filters.';
+  String get noOrdersSubtitle => 'لم يتم العثور على طلبات لهذا التطبيق وفق الفلاتر الحالية.';
 
   @override
-  String get retryLabel => 'Retry';
+  String get retryLabel => 'إعادة المحاولة';
 
   @override
-  String get allTimeLabel => 'All time';
+  String get allTimeLabel => 'كل الوقت';
 
   @override
-  String get dashboardLabel => 'Dashboard';
+  String get dashboardLabel => 'لوحة التحكم';
 
   @override
-  String get last7DaysLabel => 'Last 7 days';
+  String get last7DaysLabel => 'آخر 7 أيام';
 
   @override
-  String get last30DaysLabel => 'Last 30 days';
+  String get last30DaysLabel => 'آخر 30 يومًا';
 
   @override
-  String get clearLabel => 'Clear';
+  String get clearLabel => 'مسح';
 
   @override
-  String get grossSalesLabel => 'Gross sales';
+  String get grossSalesLabel => 'إجمالي المبيعات';
 
   @override
-  String get paidLabel => 'Paid';
+  String get paidLabel => 'مدفوع';
 
   @override
-  String get outstandingLabel => 'Outstanding';
+  String get outstandingLabel => 'غير مكتمل';
 
   @override
-  String get avgOrderLabel => 'Average order value';
+  String get avgOrderLabel => 'متوسط قيمة الطلب';
 
   @override
-  String get fullyPaidRateLabel => 'Fully paid';
+  String get fullyPaidRateLabel => 'مدفوع بالكامل';
 
   @override
-  String get statusBreakdownLabel => 'Status breakdown';
+  String get statusBreakdownLabel => 'توزيع الحالات';
 
   @override
-  String get paidRevenueLast7DaysLabel => 'Paid revenue (last 7 days)';
+  String get paidRevenueLast7DaysLabel => 'الإيراد المدفوع (آخر 7 أيام)';
 
   @override
-  String get filterAllLabel => 'All';
+  String get filterAllLabel => 'الكل';
 
   @override
-  String get filterPendingLabel => 'Pending';
+  String get filterPendingLabel => 'قيد الانتظار';
 
   @override
-  String get filterCompletedLabel => 'Completed';
+  String get filterCompletedLabel => 'مكتمل';
 
   @override
-  String get filterCanceledLabel => 'Canceled';
+  String get filterCanceledLabel => 'ملغي';
 
   @override
-  String get filterRejectedLabel => 'Rejected';
+  String get filterRejectedLabel => 'مرفوض';
 
   @override
-  String get filterRefundedLabel => 'Refunded';
+  String get filterRefundedLabel => 'مسترجع';
 
   @override
-  String get itemsLabel => 'Items';
+  String get itemsLabel => 'العناصر';
 
   @override
-  String get totalLabel => 'Total';
+  String get totalLabel => 'الإجمالي';
 
   @override
-  String get remainingLabel => 'Remaining';
+  String get remainingLabel => 'المتبقي';
 
   @override
-  String get fullyPaidShortLabel => 'Fully paid';
+  String get fullyPaidShortLabel => 'مدفوع';
 
   @override
   String get owner_projects_test => 'TEST';
 
   @override
-  String get owner_publish_title_play => 'Publish to Google Play Store';
+  String get owner_publish_title_play => 'النشر على متجر Google Play';
 
   @override
-  String get owner_publish_title_appstore => 'Publish to App Store';
+  String get owner_publish_title_appstore => 'النشر على App Store';
 
   @override
   String get owner_publish_platform_android => 'Android';
@@ -1258,152 +1258,272 @@ class AppLocalizationsAr extends AppLocalizations {
   String get owner_publish_platform_ios => 'iOS';
 
   @override
-  String get owner_publish_request_play => 'Request Publish to Play Store';
+  String get owner_publish_request_play => 'طلب نشر على Play Store';
 
   @override
-  String get owner_publish_request_appstore => 'Request Publish to App Store';
+  String get owner_publish_request_appstore => 'طلب نشر على App Store';
 
   @override
-  String get owner_publish_step1_title => 'Basic Information';
+  String get owner_publish_step1_title => 'المعلومات الأساسية';
 
   @override
-  String get owner_publish_step1_sub => 'Provide the basic details about your application';
+  String get owner_publish_step1_sub => 'قدّم المعلومات الأساسية عن تطبيقك';
 
   @override
-  String get owner_publish_step2_title => 'Category & Details';
+  String get owner_publish_step2_title => 'الفئة والتفاصيل';
 
   @override
-  String get owner_publish_step2_sub => 'Categorize your app and provide additional details';
+  String get owner_publish_step2_sub => 'اختر الفئة وأضف تفاصيل إضافية';
 
   @override
-  String get owner_publish_step3_title => 'Legal & Contact';
+  String get owner_publish_step3_title => 'القانوني والتواصل';
 
   @override
-  String get owner_publish_step3_sub => 'These fields are managed by Build4All publisher profile';
+  String get owner_publish_step3_sub => 'هذه الحقول تُدار بواسطة ملف الناشر في Build4All';
 
   @override
-  String get owner_publish_step4_title => 'Assets & Screenshots';
+  String get owner_publish_step4_title => 'الملفات ولقطات الشاشة';
 
   @override
-  String get owner_publish_step4_sub => 'Provide your app icon and screenshots URLs';
+  String get owner_publish_step4_sub => 'قدّم رابط أيقونة التطبيق وروابط لقطات الشاشة';
 
   @override
-  String get owner_publish_app_name => 'Application Name';
+  String get owner_publish_app_name => 'اسم التطبيق';
 
   @override
   String get owner_publish_app_name_hint => 'ShopSphere';
 
   @override
-  String get owner_publish_package_name => 'Package Name (Read-only)';
+  String get owner_publish_package_name => 'اسم الحزمة (للقراءة فقط)';
 
   @override
-  String get owner_publish_bundle_id => 'Bundle ID (Read-only)';
+  String get owner_publish_bundle_id => 'Bundle ID (للقراءة فقط)';
 
   @override
-  String get owner_publish_short_desc => 'Short Description';
+  String get owner_publish_short_desc => 'وصف قصير';
 
   @override
-  String get owner_publish_short_desc_hint => 'Brief app description (max 80 characters)';
+  String get owner_publish_short_desc_hint => 'وصف مختصر (بحد أقصى 80 حرفًا)';
 
   @override
-  String get owner_publish_full_desc => 'Full Description';
+  String get owner_publish_full_desc => 'وصف كامل';
 
   @override
-  String get owner_publish_full_desc_hint => 'Write a full store listing description…';
+  String get owner_publish_full_desc_hint => 'اكتب وصفًا كاملاً لصفحة المتجر…';
 
   @override
-  String get owner_publish_category => 'Category';
+  String get owner_publish_category => 'الفئة';
 
   @override
-  String get owner_publish_category_hint => 'Select a category';
+  String get owner_publish_category_hint => 'اختر فئة';
 
   @override
-  String get owner_publish_country => 'Country Availability';
+  String get owner_publish_country => 'توفر الدول';
 
   @override
-  String get owner_publish_pricing => 'Pricing';
+  String get owner_publish_pricing => 'التسعير';
 
   @override
-  String get owner_publish_free => 'Free';
+  String get owner_publish_free => 'مجاني';
 
   @override
-  String get owner_publish_paid => 'Paid';
+  String get owner_publish_paid => 'مدفوع';
 
   @override
-  String get owner_publish_content_confirm => 'I confirm that this app complies with store policies and age-appropriate guidelines.';
+  String get owner_publish_content_confirm => 'أؤكد أن هذا التطبيق يلتزم بسياسات المتجر وإرشادات العمر.';
 
   @override
-  String get owner_publish_privacy_url => 'Privacy Policy URL';
+  String get owner_publish_privacy_url => 'رابط سياسة الخصوصية';
 
   @override
-  String get owner_publish_dev_name => 'Developer Name';
+  String get owner_publish_dev_name => 'اسم المطور';
 
   @override
-  String get owner_publish_dev_email => 'Developer Email';
+  String get owner_publish_dev_email => 'بريد المطور';
 
   @override
-  String get owner_publish_managed_by_build4all => 'Managed by Build4All';
+  String get owner_publish_managed_by_build4all => 'تتم إدارته بواسطة Build4All';
 
   @override
-  String get owner_publish_icon_url => 'App Icon URL';
+  String get owner_publish_icon_url => 'رابط أيقونة التطبيق';
 
   @override
   String get owner_publish_icon_url_hint => 'https://.../icon.png';
 
   @override
-  String get owner_publish_screenshots_urls => 'Screenshots URLs';
+  String get owner_publish_screenshots_urls => 'روابط لقطات الشاشة';
 
   @override
-  String get owner_publish_screenshot => 'Screenshot';
+  String get owner_publish_screenshot => 'لقطة شاشة';
 
   @override
-  String get owner_publish_shots_rule => 'Required: min 2, max 8 screenshots';
+  String get owner_publish_shots_rule => 'مطلوب: حد أدنى 2 وحد أقصى 8 لقطات';
 
   @override
-  String get owner_publish_submit => 'Submit for Review';
+  String get owner_publish_submit => 'إرسال للمراجعة';
 
   @override
-  String get owner_publish_submitted => 'Submitted for review';
+  String get owner_publish_submitted => 'تم الإرسال للمراجعة';
 
   @override
-  String get owner_publish_err_appname => 'Application name is required';
+  String get owner_publish_err_appname => 'اسم التطبيق مطلوب';
 
   @override
-  String get owner_publish_err_short => 'Short description is required';
+  String get owner_publish_err_short => 'الوصف القصير مطلوب';
 
   @override
-  String get owner_publish_err_short80 => 'Short description max 80 characters';
+  String get owner_publish_err_short80 => 'الوصف القصير: الحد الأقصى 80 حرفًا';
 
   @override
-  String get owner_publish_err_full => 'Full description is required';
+  String get owner_publish_err_full => 'الوصف الكامل مطلوب';
 
   @override
-  String get owner_publish_err_category => 'Category is required';
+  String get owner_publish_err_category => 'الفئة مطلوبة';
 
   @override
-  String get owner_publish_err_content_confirm => 'You must confirm content rating compliance';
+  String get owner_publish_err_content_confirm => 'يجب تأكيد توافق تقييم المحتوى';
 
   @override
-  String get owner_publish_err_icon => 'App icon URL is required';
+  String get owner_publish_err_icon => 'رابط أيقونة التطبيق مطلوب';
 
   @override
-  String get owner_publish_err_shots2 => 'At least 2 screenshots are required';
+  String get owner_publish_err_shots2 => 'مطلوب على الأقل لقطتان';
 
   @override
-  String get owner_publish_err_shots8 => 'Max 8 screenshots allowed';
+  String get owner_publish_err_shots8 => 'الحد الأقصى 8 لقطات';
 
   @override
-  String get common_back => 'Back';
+  String get common_back => 'رجوع';
 
   @override
-  String get common_continue => 'Continue';
+  String get common_continue => 'متابعة';
 
   @override
-  String get errFixForm => 'Please fix the errors in the form';
+  String get errFixForm => 'يرجى إصلاح الأخطاء في النموذج';
 
   @override
-  String get msgWelcomeBack => 'Welcome back';
+  String get msgWelcomeBack => 'مرحبًا بعودتك';
 
   @override
-  String get msgVerified => 'Verified';
+  String get msgVerified => 'تم التحقق';
+
+  @override
+  String get nav_publish_requests => 'Publish Requests';
+
+  @override
+  String get publish_search_hint => 'Search by app name, AUP id…';
+
+  @override
+  String get publish_no_requests => 'No requests found.';
+
+  @override
+  String get common_refresh => 'Refresh';
+
+  @override
+  String get publish_status_submitted => 'Submitted';
+
+  @override
+  String get publish_status_in_review => 'In review';
+
+  @override
+  String get publish_status_approved => 'Approved';
+
+  @override
+  String get publish_status_rejected => 'Rejected';
+
+  @override
+  String get publish_status_published => 'Published';
+
+  @override
+  String get publish_status_draft => 'Draft';
+
+  @override
+  String get publish_details_title => 'Publish Request';
+
+  @override
+  String get publish_section_basic => 'Basic';
+
+  @override
+  String get publish_section_descriptions => 'Descriptions';
+
+  @override
+  String get publish_section_assets => 'Assets';
+
+  @override
+  String get publish_section_admin_notes => 'Admin Notes';
+
+  @override
+  String get publish_label_platform => 'Platform';
+
+  @override
+  String get publish_label_store => 'Store';
+
+  @override
+  String get publish_label_status => 'Status';
+
+  @override
+  String get publish_label_aup => 'AUP';
+
+  @override
+  String get publish_label_package => 'Package';
+
+  @override
+  String get publish_label_bundle => 'Bundle ID';
+
+  @override
+  String get publish_label_pricing => 'Pricing';
+
+  @override
+  String get publish_label_category => 'Category';
+
+  @override
+  String get publish_label_content_rating_confirmed => 'Content rating confirmed';
+
+  @override
+  String get publish_label_short => 'Short';
+
+  @override
+  String get publish_label_full => 'Full';
+
+  @override
+  String get publish_label_icon => 'App Icon';
+
+  @override
+  String get publish_label_screenshots => 'Screenshots';
+
+  @override
+  String get publish_label_no_screenshots => 'No screenshots';
+
+  @override
+  String get publish_action_reject => 'Reject';
+
+  @override
+  String get publish_action_approve => 'Approve';
+
+  @override
+  String get publish_sheet_reject_title => 'Reject request';
+
+  @override
+  String get publish_sheet_approve_title => 'Approve request';
+
+  @override
+  String get publish_sheet_notes_hint => 'Optional notes…';
+
+  @override
+  String get toast_publish_approved => 'Request approved';
+
+  @override
+  String get toast_publish_rejected => 'Request rejected';
+
+  @override
+  String get super_nav_dashboard => 'Dashboard';
+
+  @override
+  String get super_nav_publish_requests => 'Publish Requests';
+
+  @override
+  String get super_nav_profile => 'Profile';
+
+  @override
+  String get err_unauthorized => 'Unauthorized';
 }

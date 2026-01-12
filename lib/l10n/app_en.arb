@@ -646,6 +646,60 @@
 "common_continue": "Continue",
 "errFixForm": "Please fix the errors in the form",
 "msgWelcomeBack": "Welcome back",
-"msgVerified": "Verified"
+"msgVerified": "Verified",
 
+  "nav_publish_requests": "Publish Requests",
+  "publish_search_hint": "Search by app name, AUP id…",
+  "publish_no_requests": "No requests found.",
+  "common_refresh": "Refresh",
+
+  "publish_status_submitted": "Submitted",
+  "publish_status_in_review": "In review",
+  "publish_status_approved": "Approved",
+  "publish_status_rejected": "Rejected",
+  "publish_status_published": "Published",
+  "publish_status_draft": "Draft",
+
+  "publish_details_title": "Publish Request",
+  "publish_section_basic": "Basic",
+  "publish_section_descriptions": "Descriptions",
+  "publish_section_assets": "Assets",
+  "publish_section_admin_notes": "Admin Notes",
+
+  "publish_label_platform": "Platform",
+  "publish_label_store": "Store",
+  "publish_label_status": "Status",
+  "publish_label_aup": "AUP",
+  "publish_label_package": "Package",
+  "publish_label_bundle": "Bundle ID",
+  "publish_label_pricing": "Pricing",
+  "publish_label_category": "Category",
+  "publish_label_content_rating_confirmed": "Content rating confirmed",
+
+  "publish_label_short": "Short",
+  "publish_label_full": "Full",
+  "publish_label_icon": "App Icon",
+  "publish_label_screenshots": "Screenshots",
+  "publish_label_no_screenshots": "No screenshots",
+
+  "publish_action_reject": "Reject",
+  "publish_action_approve": "Approve",
+  "common_cancel": "Cancel",
+
+  "publish_sheet_reject_title": "Reject request",
+  "publish_sheet_approve_title": "Approve request",
+  "publish_sheet_notes_hint": "Optional notes…",
+
+  "toast_publish_approved": "Request approved",
+  "toast_publish_rejected": "Request rejected",
+  "err_unknown": "Something went wrong",
+  "common_retry": "Retry",
+    "nav_super_admin": "Super Admin",
+  "nav_dashboard": "Dashboard",
+  "super_nav_dashboard": "Dashboard",
+  "super_nav_publish_requests": "Publish Requests",
+  "super_nav_profile": "Profile",
+  "err_unauthorized": "Unauthorized"
 }
+
+

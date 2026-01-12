@@ -1406,4 +1406,124 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get msgVerified => 'Verified';
+
+  @override
+  String get nav_publish_requests => 'Publish Requests';
+
+  @override
+  String get publish_search_hint => 'Search by app name, AUP id…';
+
+  @override
+  String get publish_no_requests => 'No requests found.';
+
+  @override
+  String get common_refresh => 'Refresh';
+
+  @override
+  String get publish_status_submitted => 'Submitted';
+
+  @override
+  String get publish_status_in_review => 'In review';
+
+  @override
+  String get publish_status_approved => 'Approved';
+
+  @override
+  String get publish_status_rejected => 'Rejected';
+
+  @override
+  String get publish_status_published => 'Published';
+
+  @override
+  String get publish_status_draft => 'Draft';
+
+  @override
+  String get publish_details_title => 'Publish Request';
+
+  @override
+  String get publish_section_basic => 'Basic';
+
+  @override
+  String get publish_section_descriptions => 'Descriptions';
+
+  @override
+  String get publish_section_assets => 'Assets';
+
+  @override
+  String get publish_section_admin_notes => 'Admin Notes';
+
+  @override
+  String get publish_label_platform => 'Platform';
+
+  @override
+  String get publish_label_store => 'Store';
+
+  @override
+  String get publish_label_status => 'Status';
+
+  @override
+  String get publish_label_aup => 'AUP';
+
+  @override
+  String get publish_label_package => 'Package';
+
+  @override
+  String get publish_label_bundle => 'Bundle ID';
+
+  @override
+  String get publish_label_pricing => 'Pricing';
+
+  @override
+  String get publish_label_category => 'Category';
+
+  @override
+  String get publish_label_content_rating_confirmed => 'Content rating confirmed';
+
+  @override
+  String get publish_label_short => 'Short';
+
+  @override
+  String get publish_label_full => 'Full';
+
+  @override
+  String get publish_label_icon => 'App Icon';
+
+  @override
+  String get publish_label_screenshots => 'Screenshots';
+
+  @override
+  String get publish_label_no_screenshots => 'No screenshots';
+
+  @override
+  String get publish_action_reject => 'Reject';
+
+  @override
+  String get publish_action_approve => 'Approve';
+
+  @override
+  String get publish_sheet_reject_title => 'Reject request';
+
+  @override
+  String get publish_sheet_approve_title => 'Approve request';
+
+  @override
+  String get publish_sheet_notes_hint => 'Optional notes…';
+
+  @override
+  String get toast_publish_approved => 'Request approved';
+
+  @override
+  String get toast_publish_rejected => 'Request rejected';
+
+  @override
+  String get super_nav_dashboard => 'Dashboard';
+
+  @override
+  String get super_nav_publish_requests => 'Publish Requests';
+
+  @override
+  String get super_nav_profile => 'Profile';
+
+  @override
+  String get err_unauthorized => 'Unauthorized';
 }

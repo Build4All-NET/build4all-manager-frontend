@@ -30,15 +30,17 @@ class SuperAdminDestination {
 }
 
 class SuperAdminNavShell extends StatefulWidget {
-  final String? backendMenuType; // "top" | "bottom" | "drawer"
-  final SuperMenuType? override; // set this to force a mode locally
+  final String? backendMenuType;
+  final SuperMenuType? override;
   final List<SuperAdminDestination> destinations;
+  final int initialIndex;
 
   const SuperAdminNavShell({
     super.key,
     required this.destinations,
     this.backendMenuType,
     this.override,
+    this.initialIndex = 0,
   });
 
 
@@ -47,7 +49,7 @@ class SuperAdminNavShell extends StatefulWidget {
 
 class _SuperAdminNavShellState extends State<SuperAdminNavShell>
     with TickerProviderStateMixin {
-  int _index = 0;
+  late int _index;
   TabController? _tab;
 
   SuperMenuType get _mode =>
@@ -56,6 +58,7 @@ class _SuperAdminNavShellState extends State<SuperAdminNavShell>
   @override
   void initState() {
     super.initState();
+    _index = widget.initialIndex;
     _maybeAttachTabController();
     _clampIndex();
   }
@@ -86,12 +89,9 @@ class _SuperAdminNavShellState extends State<SuperAdminNavShell>
       setState(() => _index = 0);
     }
 
-    // keep TabController in sync if mode is top
     if (_mode == SuperMenuType.top && _tab != null) {
       final safe = _index.clamp(0, widget.destinations.length - 1);
-      if (_tab!.index != safe) {
-        _tab!.index = safe;
-      }
+      if (_tab!.index != safe) _tab!.index = safe;
     }
   }
 
@@ -101,7 +101,6 @@ class _SuperAdminNavShellState extends State<SuperAdminNavShell>
     if (_mode == SuperMenuType.top && widget.destinations.isNotEmpty) {
       _tab = TabController(length: widget.destinations.length, vsync: this);
 
-      // keep _index updated when user taps tab
       _tab!.addListener(() {
         if (_tab!.indexIsChanging) return;
         if (mounted) setState(() => _index = _tab!.index);
@@ -195,6 +194,11 @@ class _SuperAdminNavShellState extends State<SuperAdminNavShell>
       );
     }
 
+    Widget bodyStack = IndexedStack(
+      index: _index,
+      children: [for (final d in pages) d.page],
+    );
+
     switch (_mode) {
       case SuperMenuType.top:
         return Scaffold(
@@ -211,11 +215,7 @@ class _SuperAdminNavShellState extends State<SuperAdminNavShell>
           drawer: _buildDrawer(context, pages),
           body: AnimatedSwitcher(
             duration: const Duration(milliseconds: 220),
-            child: IndexedStack(
-              key: ValueKey(_index),
-              index: _index,
-              children: [for (final d in pages) d.page],
-            ),
+            child: bodyStack,
           ),
         );
 
@@ -225,11 +225,7 @@ class _SuperAdminNavShellState extends State<SuperAdminNavShell>
           appBar: _appBar(context),
           body: AnimatedSwitcher(
             duration: const Duration(milliseconds: 220),
-            child: IndexedStack(
-              key: ValueKey(_index),
-              index: _index,
-              children: [for (final d in pages) d.page],
-            ),
+            child: bodyStack,
           ),
           bottomNavigationBar: NavigationBar(
             height: 72,

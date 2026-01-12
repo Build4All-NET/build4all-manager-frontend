@@ -24,13 +24,14 @@ class DashboardScreen extends StatelessWidget {
     return BlocProvider(
       create: (_) => DashboardBloc(DashboardRepositoryImpl(ProjectApi(dio)))
         ..add(LoadDashboard()),
-      child: const _DashboardView(),
+      child: const _DashboardContent(),
     );
   }
 }
 
-class _DashboardView extends StatelessWidget {
-  const _DashboardView();
+/// ✅ CONTENT ONLY (NO Scaffold, NO AppBar, NO SliverAppBar)
+class _DashboardContent extends StatelessWidget {
+  const _DashboardContent();
 
   @override
   Widget build(BuildContext context) {
@@ -38,142 +39,105 @@ class _DashboardView extends StatelessWidget {
 
     return BlocBuilder<DashboardBloc, DashboardState>(
       builder: (context, state) {
-        // guard first frame
         if (state.overview == null) {
           return const _SkeletonLoader();
         }
 
         final ov = state.overview!;
 
-        return RefreshIndicator(
+        return RefreshIndicator.adaptive(
           onRefresh: () async =>
               context.read<DashboardBloc>().add(RefreshDashboard()),
-          child: CustomScrollView(
-            slivers: [
-              SliverAppBar(
-                pinned: true,
-                stretch: true,
-                elevation: 0,
-                expandedHeight: 180,
-                flexibleSpace: FlexibleSpaceBar(
-                  stretchModes: const [
-                    StretchMode.zoomBackground,
-                    StretchMode.fadeTitle
-                  ],
-                  background: const HeaderHero(),
-                  titlePadding:
-                      const EdgeInsetsDirectional.only(start: 16, bottom: 12),
-                  title: Text(
-                    l10n.dash_welcome,
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w800,
-                        ),
-                  ),
-                ),
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+            children: [
+              // hero (instead of SliverAppBar)
+              const HeaderHero(),
+              const SizedBox(height: 14),
+
+              // KPIs (responsive layout)
+              LayoutBuilder(
+                builder: (ctx, c) {
+                  final w = c.maxWidth;
+                  final cols = w > 980 ? 3 : (w > 620 ? 2 : 1);
+
+                  final cards = [
+                    ProKpiCard(
+                      icon: Icons.folder_copy_rounded,
+                      label: l10n.dash_total_projects,
+                      value: ov.totalProjects,
+                      gradient: _g(context).primary,
+                      delayMs: 0,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const ProjectsScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                    ProKpiCard(
+                      icon: Icons.check_circle_rounded,
+                      label: l10n.dash_active_projects,
+                      value: ov.activeProjects,
+                      gradient: _g(context).success,
+                      delayMs: 70,
+                    ),
+                    ProKpiCard(
+                      icon: Icons.pause_circle_filled_rounded,
+                      label: l10n.dash_inactive_projects,
+                      value: ov.inactiveProjects,
+                      gradient: _g(context).warning,
+                      delayMs: 140,
+                    ),
+                  ];
+
+                  return GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: cards.length,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: cols,
+                      mainAxisExtent: 120,
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
+                    ),
+                    itemBuilder: (_, i) => cards[i],
+                  );
+                },
               ),
 
-              // KPIs
-              SliverPadding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                sliver: SliverLayoutBuilder(
-                  builder: (ctx, constraints) {
-                    final w = constraints.crossAxisExtent;
-                    final cols = w > 980 ? 3 : (w > 620 ? 2 : 1);
-                    final children = [
-                      ProKpiCard(
-                        icon: Icons.folder_copy_rounded,
-                        label: l10n.dash_total_projects,
-                        value: ov.totalProjects,
-                        gradient: _g(context).primary,
-                        delayMs: 0,
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => const ProjectsScreen()),
-                          );
-                        },
-                      ),
-                      ProKpiCard(
-                        icon: Icons.check_circle_rounded,
-                        label: l10n.dash_active_projects,
-                        value: ov.activeProjects,
-                        gradient: _g(context).success,
-                        delayMs: 70,
-                      ),
-                      ProKpiCard(
-                        icon: Icons.pause_circle_filled_rounded,
-                        label: l10n.dash_inactive_projects,
-                        value: ov.inactiveProjects,
-                        gradient: _g(context).warning,
-                        delayMs: 140,
-                      ),
-                    ];
-
-                    return SliverGrid(
-                      delegate: SliverChildBuilderDelegate(
-                        (ctx, i) => children[i],
-                        childCount: children.length,
-                      ),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: cols,
-                        mainAxisExtent: 120,
-                        crossAxisSpacing: 12,
-                        mainAxisSpacing: 12,
-                      ),
-                    );
-                  },
-                ),
-              ),
-
-              // Recent
-              SliverPadding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                sliver: SliverToBoxAdapter(
-                  child: SectionHeader(
-                    title: l10n.dash_recent_projects,
-                  ),
-                ),
-              ),
+              const SizedBox(height: 14),
+              SectionHeader(title: l10n.dash_recent_projects),
+              const SizedBox(height: 10),
 
               if (state.error != null && state.recent.isEmpty)
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  sliver: SliverToBoxAdapter(
-                    child: _InlineError(
-                      message: state.error!,
-                      onRetry: () =>
-                          context.read<DashboardBloc>().add(LoadDashboard()),
-                    ),
-                  ),
+                _InlineError(
+                  message: state.error!,
+                  onRetry: () =>
+                      context.read<DashboardBloc>().add(LoadDashboard()),
                 ),
 
-              SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                sliver: SliverToBoxAdapter(
-                  child: Card(
-                    elevation: 0,
-                    clipBehavior: Clip.antiAlias,
-                    child: state.recent.isEmpty
-                        ? Padding(
-                            padding: const EdgeInsets.all(20),
-                            child: Text(l10n.dash_no_recent),
-                          )
-                        : ListView.separated(
-                            padding: EdgeInsets.zero,
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: state.recent.length,
-                            separatorBuilder: (_, __) =>
-                                const Divider(height: 1, thickness: .5),
-                            itemBuilder: (_, i) =>
-                                ProProjectTile(project: state.recent[i]),
-                          ),
-                  ),
-                ),
+              Card(
+                elevation: 0,
+                clipBehavior: Clip.antiAlias,
+                child: state.recent.isEmpty
+                    ? Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Text(l10n.dash_no_recent),
+                      )
+                    : ListView.separated(
+                        padding: EdgeInsets.zero,
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: state.recent.length,
+                        separatorBuilder: (_, __) =>
+                            const Divider(height: 1, thickness: .5),
+                        itemBuilder: (_, i) =>
+                            ProProjectTile(project: state.recent[i]),
+                      ),
               ),
-
-              const SliverToBoxAdapter(child: SizedBox(height: 24)),
             ],
           ),
         );
@@ -190,7 +154,10 @@ class _InlineError extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
+
     return Container(
+      margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: cs.error.withOpacity(.06),
@@ -209,7 +176,7 @@ class _InlineError extends StatelessWidget {
               style: TextStyle(color: cs.error),
             ),
           ),
-          TextButton(onPressed: onRetry, child: const Text('Retry')),
+          TextButton(onPressed: onRetry, child: Text(l10n.common_retry)),
         ],
       ),
     );
@@ -222,26 +189,18 @@ class _SkeletonLoader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return CustomScrollView(
-      slivers: [
-        SliverAppBar(
-          pinned: true,
-          stretch: true,
-          expandedHeight: 180,
-          flexibleSpace: const FlexibleSpaceBar(background: HeaderHero()),
-        ),
-        SliverPadding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-          sliver: SliverList.separated(
-            itemCount: 3,
-            separatorBuilder: (_, __) => const SizedBox(height: 12),
-            itemBuilder: (_, __) => _shimmerBox(cs),
-          ),
-        ),
-        SliverPadding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          sliver: SliverToBoxAdapter(child: _shimmerList(cs)),
-        ),
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+      children: [
+        const HeaderHero(),
+        const SizedBox(height: 14),
+        _shimmerBox(cs),
+        const SizedBox(height: 12),
+        _shimmerBox(cs),
+        const SizedBox(height: 12),
+        _shimmerBox(cs),
+        const SizedBox(height: 14),
+        _shimmerList(cs),
       ],
     );
   }

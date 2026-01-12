@@ -2850,6 +2850,246 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Verified'**
   String get msgVerified;
+
+  /// No description provided for @nav_publish_requests.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish Requests'**
+  String get nav_publish_requests;
+
+  /// No description provided for @publish_search_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by app name, AUP id…'**
+  String get publish_search_hint;
+
+  /// No description provided for @publish_no_requests.
+  ///
+  /// In en, this message translates to:
+  /// **'No requests found.'**
+  String get publish_no_requests;
+
+  /// No description provided for @common_refresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get common_refresh;
+
+  /// No description provided for @publish_status_submitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted'**
+  String get publish_status_submitted;
+
+  /// No description provided for @publish_status_in_review.
+  ///
+  /// In en, this message translates to:
+  /// **'In review'**
+  String get publish_status_in_review;
+
+  /// No description provided for @publish_status_approved.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved'**
+  String get publish_status_approved;
+
+  /// No description provided for @publish_status_rejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected'**
+  String get publish_status_rejected;
+
+  /// No description provided for @publish_status_published.
+  ///
+  /// In en, this message translates to:
+  /// **'Published'**
+  String get publish_status_published;
+
+  /// No description provided for @publish_status_draft.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft'**
+  String get publish_status_draft;
+
+  /// No description provided for @publish_details_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish Request'**
+  String get publish_details_title;
+
+  /// No description provided for @publish_section_basic.
+  ///
+  /// In en, this message translates to:
+  /// **'Basic'**
+  String get publish_section_basic;
+
+  /// No description provided for @publish_section_descriptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Descriptions'**
+  String get publish_section_descriptions;
+
+  /// No description provided for @publish_section_assets.
+  ///
+  /// In en, this message translates to:
+  /// **'Assets'**
+  String get publish_section_assets;
+
+  /// No description provided for @publish_section_admin_notes.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin Notes'**
+  String get publish_section_admin_notes;
+
+  /// No description provided for @publish_label_platform.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform'**
+  String get publish_label_platform;
+
+  /// No description provided for @publish_label_store.
+  ///
+  /// In en, this message translates to:
+  /// **'Store'**
+  String get publish_label_store;
+
+  /// No description provided for @publish_label_status.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get publish_label_status;
+
+  /// No description provided for @publish_label_aup.
+  ///
+  /// In en, this message translates to:
+  /// **'AUP'**
+  String get publish_label_aup;
+
+  /// No description provided for @publish_label_package.
+  ///
+  /// In en, this message translates to:
+  /// **'Package'**
+  String get publish_label_package;
+
+  /// No description provided for @publish_label_bundle.
+  ///
+  /// In en, this message translates to:
+  /// **'Bundle ID'**
+  String get publish_label_bundle;
+
+  /// No description provided for @publish_label_pricing.
+  ///
+  /// In en, this message translates to:
+  /// **'Pricing'**
+  String get publish_label_pricing;
+
+  /// No description provided for @publish_label_category.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get publish_label_category;
+
+  /// No description provided for @publish_label_content_rating_confirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Content rating confirmed'**
+  String get publish_label_content_rating_confirmed;
+
+  /// No description provided for @publish_label_short.
+  ///
+  /// In en, this message translates to:
+  /// **'Short'**
+  String get publish_label_short;
+
+  /// No description provided for @publish_label_full.
+  ///
+  /// In en, this message translates to:
+  /// **'Full'**
+  String get publish_label_full;
+
+  /// No description provided for @publish_label_icon.
+  ///
+  /// In en, this message translates to:
+  /// **'App Icon'**
+  String get publish_label_icon;
+
+  /// No description provided for @publish_label_screenshots.
+  ///
+  /// In en, this message translates to:
+  /// **'Screenshots'**
+  String get publish_label_screenshots;
+
+  /// No description provided for @publish_label_no_screenshots.
+  ///
+  /// In en, this message translates to:
+  /// **'No screenshots'**
+  String get publish_label_no_screenshots;
+
+  /// No description provided for @publish_action_reject.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject'**
+  String get publish_action_reject;
+
+  /// No description provided for @publish_action_approve.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve'**
+  String get publish_action_approve;
+
+  /// No description provided for @publish_sheet_reject_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject request'**
+  String get publish_sheet_reject_title;
+
+  /// No description provided for @publish_sheet_approve_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve request'**
+  String get publish_sheet_approve_title;
+
+  /// No description provided for @publish_sheet_notes_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional notes…'**
+  String get publish_sheet_notes_hint;
+
+  /// No description provided for @toast_publish_approved.
+  ///
+  /// In en, this message translates to:
+  /// **'Request approved'**
+  String get toast_publish_approved;
+
+  /// No description provided for @toast_publish_rejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Request rejected'**
+  String get toast_publish_rejected;
+
+  /// No description provided for @super_nav_dashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Dashboard'**
+  String get super_nav_dashboard;
+
+  /// No description provided for @super_nav_publish_requests.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish Requests'**
+  String get super_nav_publish_requests;
+
+  /// No description provided for @super_nav_profile.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get super_nav_profile;
+
+  /// No description provided for @err_unauthorized.
+  ///
+  /// In en, this message translates to:
+  /// **'Unauthorized'**
+  String get err_unauthorized;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

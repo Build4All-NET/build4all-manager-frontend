@@ -15,34 +15,34 @@ class AppLocalizationsFr extends AppLocalizations {
   String get signInGeneralTitle => 'Connectez-vous à votre compte';
 
   @override
-  String get errEmailInvalid => 'Invalid email';
+  String get errEmailInvalid => 'Format d’email invalide';
 
   @override
-  String get errEmailRequired => 'Email is required';
+  String get errEmailRequired => 'L’email est requis';
 
   @override
   String get lblEmail => 'Email';
 
   @override
-  String get hintEmail => 'you@example.com';
+  String get hintEmail => 'vous@exemple.com';
 
   @override
-  String get signInGeneralSubtitle => 'Saisissez vos informations pour continuer';
+  String get signInGeneralSubtitle => 'Entrez vos informations pour continuer';
 
   @override
   String get termsNotice => 'En continuant, vous acceptez nos Conditions et notre Politique de confidentialité';
 
   @override
-  String get lblIdentifier => 'E-mail / Téléphone / Nom d’utilisateur';
+  String get lblIdentifier => 'Email / Téléphone / Nom d’utilisateur';
 
   @override
-  String get hintIdentifier => 'you@example.com ou +961xxxxxxxx ou nom d’utilisateur';
+  String get hintIdentifier => 'vous@exemple.com ou +961xxxxxxxx ou nom d’utilisateur';
 
   @override
   String get lblPassword => 'Mot de passe';
 
   @override
-  String get hintPassword => '•••••••••••';
+  String get hintPassword => 'Votre mot de passe';
 
   @override
   String get rememberMe => 'Se souvenir de moi';
@@ -60,13 +60,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get signUp => 'S’inscrire';
 
   @override
-  String get errIdentifierRequired => 'L’identifiant est requis';
+  String get errIdentifierRequired => 'Identifiant requis';
 
   @override
-  String get errPasswordRequired => 'Le mot de passe est requis';
+  String get errPasswordRequired => 'Mot de passe requis';
 
   @override
-  String get errPasswordMin => '6 caractères minimum';
+  String get errPasswordMin => 'Le mot de passe doit contenir au moins 6 caractères';
 
   @override
   String get showPasswordLabel => 'Afficher le mot de passe';
@@ -87,7 +87,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get nav_profile => 'Profil';
 
   @override
-  String get dashboard_title => 'Tableau de bord administrateur';
+  String get dashboard_title => 'Tableau de bord Admin';
 
   @override
   String get dashboard_welcome => 'Bienvenue sur Build4All Manager';
@@ -108,7 +108,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get themes_menuType => 'Type de menu';
 
   @override
-  String get themes_setActive => 'Définir comme actif';
+  String get themes_setActive => 'Définir actif';
 
   @override
   String get themes_active => 'Actif';
@@ -129,10 +129,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get profile_lastName => 'Nom';
 
   @override
-  String get profile_username => 'Nom d\'utilisateur';
+  String get profile_username => 'Nom d’utilisateur';
 
   @override
-  String get profile_email => 'E-mail';
+  String get profile_email => 'Email';
 
   @override
   String get profile_updated => 'Profil mis à jour avec succès.';
@@ -165,7 +165,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get common_cancel => 'Annuler';
 
   @override
-  String get dash_total_projects => 'Projets au total';
+  String get dash_total_projects => 'Total des projets';
 
   @override
   String get dash_active_projects => 'Projets actifs';
@@ -180,7 +180,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get dash_no_recent => 'Aucun projet récent pour le moment.';
 
   @override
-  String get dash_welcome => 'Welcome to Build4All Manager';
+  String get dash_welcome => 'Bienvenue sur Build4All Manager';
 
   @override
   String get themes_confirm_delete => 'Supprimer ce thème ? Cette action est irréversible.';
@@ -189,13 +189,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get themes_colors_section => 'Couleurs';
 
   @override
-  String get err_required => 'Obligatoire';
+  String get err_required => 'Ce champ est requis';
 
   @override
-  String get common_more => 'More';
+  String get common_more => 'Plus';
 
   @override
-  String get common_retry => 'Retry';
+  String get common_retry => 'Réessayer';
 
   @override
   String get profile_details => 'Profile details';
@@ -267,81 +267,81 @@ class AppLocalizationsFr extends AppLocalizations {
   String get common_sign_out_hint => 'Terminer votre session actuelle';
 
   @override
-  String get common_sign_out_confirm => 'Voulez-vous vraiment vous déconnecter ?';
+  String get common_sign_out_confirm => 'Êtes-vous sûr de vouloir vous déconnecter ?';
 
   @override
-  String get common_signed_out => 'Déconnexion réussie';
+  String get common_signed_out => 'Déconnecté';
 
   @override
-  String get err_email => 'Please enter a valid email';
+  String get err_email => 'Veuillez saisir un email valide';
 
   @override
-  String get errPasswordMismatch => 'Passwords do not match';
+  String get errPasswordMismatch => 'Les mots de passe ne correspondent pas';
 
   @override
-  String get err_unknown => 'Something went wrong';
+  String get err_unknown => 'Une erreur est survenue';
 
   @override
-  String get signUpOwnerTitle => 'Owner Sign Up';
+  String get signUpOwnerTitle => 'Inscription Propriétaire';
 
   @override
-  String get verifyCode => 'Verify Code';
+  String get verifyCode => 'Vérifier le code';
 
   @override
-  String get completeProfile => 'Complete Profile';
+  String get completeProfile => 'Compléter le profil';
 
   @override
-  String get lblUsername => 'Username';
+  String get lblUsername => 'Nom d’utilisateur';
 
   @override
-  String get hintUsername => 'your.unique.name';
+  String get hintUsername => 'votre.nom.unique';
 
   @override
-  String get lblFirstName => 'First name';
+  String get lblFirstName => 'Prénom';
 
   @override
-  String get hintFirstName => 'John';
+  String get hintFirstName => 'Jean';
 
   @override
-  String get lblLastName => 'Last name';
+  String get lblLastName => 'Nom';
 
   @override
-  String get hintLastName => 'Doe';
+  String get hintLastName => 'Dupont';
 
   @override
-  String get btnSendCode => 'Send Code';
+  String get btnSendCode => 'Envoyer le code';
 
   @override
-  String get btnVerify => 'Verify';
+  String get btnVerify => 'Vérifier';
 
   @override
-  String get btnCreateAccount => 'Create account';
+  String get btnCreateAccount => 'Créer un compte';
 
   @override
-  String get errCodeSixDigits => 'Enter the 6-digit code';
+  String get errCodeSixDigits => 'Entrez le code à 6 chiffres';
 
   @override
-  String get errUsernameRequired => 'Username is required';
+  String get errUsernameRequired => 'Le nom d’utilisateur est requis';
 
   @override
-  String get errFirstNameRequired => 'First name is required';
+  String get errFirstNameRequired => 'Le prénom est requis';
 
   @override
-  String get errLastNameRequired => 'Last name is required';
+  String get errLastNameRequired => 'Le nom est requis';
 
   @override
-  String get msgCodeSent => 'Verification code sent';
+  String get msgCodeSent => 'Code de vérification envoyé';
 
   @override
-  String get msgWeWillSendCodeEmail => 'We will send a 6-digit code to your email.';
+  String get msgWeWillSendCodeEmail => 'Nous enverrons un code à 6 chiffres à votre email.';
 
   @override
   String msgEnterCodeForEmail(Object email) {
-    return 'Enter the 6-digit code sent to $email';
+    return 'Entrez le code à 6 chiffres envoyé à $email';
   }
 
   @override
-  String get msgOwnerRegistered => 'Owner registered successfully';
+  String get msgOwnerRegistered => 'Propriétaire enregistré avec succès';
 
   @override
   String get owner_nav_title => 'Propriétaire';
@@ -350,7 +350,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get owner_nav_home => 'Accueil';
 
   @override
-  String get owner_nav_projects => 'Projets';
+  String get owner_nav_projects => 'Mes applis';
 
   @override
   String get owner_nav_requests => 'Demandes';
@@ -368,13 +368,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get owner_requests_title => 'Demandes';
 
   @override
-  String get owner_profile_title => 'Profil du propriétaire';
+  String get owner_profile_title => 'Profil Propriétaire';
 
   @override
-  String get owner_home_hello => '👋Salut, ';
+  String get owner_home_hello => '👋 Salut,';
 
   @override
-  String get owner_home_subtitle => 'Prêt à lancer votre prochain build ?';
+  String get owner_home_subtitle => 'Prêt à lancer votre prochain build d’app ?';
 
   @override
   String get owner_home_requestApp => 'Demander mon app';
@@ -389,40 +389,40 @@ class AppLocalizationsFr extends AppLocalizations {
   String get owner_home_noRecent => 'Aucune demande récente';
 
   @override
-  String get owner_home_viewAll => 'Tout voir';
+  String get owner_home_viewAll => 'Voir tout';
 
   @override
   String get tutorial_step1_title => 'Demandez votre app';
 
   @override
-  String get tutorial_step1_body => 'Choisissez un projet, nommez l’app, ajoutez des notes et envoyez.';
+  String get tutorial_step1_body => 'Choisissez un projet, donnez un nom à votre app, ajoutez des notes, puis soumettez la demande.';
 
   @override
   String get tutorial_step2_title => 'Suivez l’approbation';
 
   @override
-  String get tutorial_step2_body => 'Nous vous prévenons dès que c’est approuvé ou s’il faut corriger.';
+  String get tutorial_step2_body => 'Nous vous informerons lorsque la demande est approuvée ou nécessite des modifications.';
 
   @override
   String get tutorial_step3_title => 'Téléchargez l’APK';
 
   @override
-  String get tutorial_step3_body => 'Une fois construit, récupérez l’APK depuis votre tableau de bord.';
+  String get tutorial_step3_body => 'Une fois construite, récupérez votre APK directement depuis votre tableau de bord.';
 
   @override
-  String get owner_projects_searchHint => 'Rechercher nom ou slug…';
+  String get owner_projects_searchHint => 'Rechercher par nom ou slug…';
 
   @override
-  String get owner_projects_onlyReady => 'APK uniquement prête';
+  String get owner_projects_onlyReady => 'Seulement APK prêt';
 
   @override
   String get owner_projects_emptyTitle => 'Aucun projet';
 
   @override
-  String get owner_projects_emptyBody => 'Vous n’avez pas encore de projets. Demandez votre première app et nous la construirons pour vous.';
+  String get owner_projects_emptyBody => 'Vous n’avez aucun projet. Demandez votre première app et nous la construirons pour vous.';
 
   @override
-  String get owner_projects_building => 'Compilation…';
+  String get owner_projects_building => 'En construction…';
 
   @override
   String get owner_projects_ready => 'Prêt';
@@ -431,10 +431,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get owner_projects_openInBrowser => 'Ouvrir';
 
   @override
-  String get owner_request_title => 'Créer une demande d’application';
+  String get owner_request_title => 'Créer une demande d’app';
 
   @override
-  String get owner_request_submit_hint => 'Choisissez un projet, nommez l’app, ajoutez un logo (optionnel), choisissez un thème, puis envoyez pour construire.';
+  String get owner_request_submit_hint => 'Choisissez un projet, nommez votre app, ajoutez un logo (optionnel), choisissez un thème, puis soumettez pour lancer le build.';
 
   @override
   String get owner_request_project => 'Projet';
@@ -443,16 +443,16 @@ class AppLocalizationsFr extends AppLocalizations {
   String get owner_request_appName => 'Nom de l’app';
 
   @override
-  String get owner_request_appName_hint => 'ex. Mon App Propriétaire';
+  String get owner_request_appName_hint => 'ex: Mon App Propriétaire';
 
   @override
   String get owner_request_logo_url => 'URL du logo (optionnel)';
 
   @override
-  String get owner_request_logo_url_hint => 'Collez une URL publique ou utilisez Importer';
+  String get owner_request_logo_url_hint => 'Collez une URL publique ou utilisez Téléverser';
 
   @override
-  String get owner_request_upload_logo => 'Importer le logo';
+  String get owner_request_upload_logo => 'Téléverser le fichier logo';
 
   @override
   String get owner_request_theme_pref => 'Thème';
@@ -467,19 +467,19 @@ class AppLocalizationsFr extends AppLocalizations {
   String get owner_request_submitting => 'Envoi…';
 
   @override
-  String get owner_request_submit_and_build => 'Envoyer & Construire l’APK';
+  String get owner_request_submit_and_build => 'Envoyer & générer l’APK';
 
   @override
-  String get owner_request_building => 'Construction de l’APK…';
+  String get owner_request_building => 'Génération APK…';
 
   @override
-  String get owner_request_build_done => 'Construction de l’APK terminée.';
+  String get owner_request_build_done => 'Build APK terminé.';
 
   @override
   String get owner_request_success => 'Demande envoyée avec succès.';
 
   @override
-  String get owner_request_no_requests_yet => 'Aucune demande pour l’instant.';
+  String get owner_request_no_requests_yet => 'Aucune demande pour le moment.';
 
   @override
   String get owner_request_my_requests => 'Mes demandes';
@@ -488,7 +488,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get owner_request_error_choose_project => 'Veuillez choisir un projet.';
 
   @override
-  String get owner_request_error_app_name => 'Veuillez saisir un nom d’application.';
+  String get owner_request_error_app_name => 'Veuillez saisir un nom d’app.';
 
   @override
   String get common_download => 'Télécharger';
@@ -497,31 +497,31 @@ class AppLocalizationsFr extends AppLocalizations {
   String get common_download_apk => 'Télécharger l’APK';
 
   @override
-  String get menuType => 'Menu Type';
+  String get menuType => 'Type de menu';
 
   @override
-  String get owner_profile_username => 'Nom d\'utilisateur';
+  String get owner_profile_username => 'Nom d’utilisateur';
 
   @override
   String get owner_profile_name => 'Nom';
 
   @override
-  String get owner_profile_email => 'E-mail';
+  String get owner_profile_email => 'Email';
 
   @override
-  String get owner_profile_business_id => 'Identifiant de l\'entreprise';
+  String get owner_profile_business_id => 'ID Business';
 
   @override
-  String get owner_profile_notify_items => 'Notifier les mises à jour des articles';
+  String get owner_profile_notify_items => 'Notifier les mises à jour d’items';
 
   @override
-  String get owner_profile_notify_feedback => 'Notifier les retours des utilisateurs';
+  String get owner_profile_notify_feedback => 'Notifier les retours utilisateurs';
 
   @override
   String get owner_profile_not_set => 'Non défini';
 
   @override
-  String get owner_profile_tips => 'Gardez les informations de votre profil à jour pour personnaliser votre expérience.';
+  String get owner_profile_tips => 'Gardez vos informations à jour pour personnaliser votre expérience.';
 
   @override
   String get yes => 'Oui';
@@ -545,7 +545,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get cancel => 'Annuler';
 
   @override
-  String get owner_nav_myapps => 'Mes Apps';
+  String get owner_nav_myapps => 'Mes applis';
 
   @override
   String get common_search_hint => 'Rechercher…';
@@ -560,22 +560,22 @@ class AppLocalizationsFr extends AppLocalizations {
   String get owner_proj_open => 'Ouvrir le projet';
 
   @override
-  String get owner_proj_activities_title => 'Événements';
+  String get owner_proj_activities_title => 'Activités';
 
   @override
-  String get owner_proj_activities_desc => 'Billetterie, horaires et temps forts, conçus pour les expériences en mobilité.';
+  String get owner_proj_activities_desc => 'Billetterie, plannings et temps forts d’événements, pensés pour le mobile.';
 
   @override
   String get owner_proj_ecom_title => 'E-commerce';
 
   @override
-  String get owner_proj_ecom_desc => 'Catalogues produits, paniers et paiement, fidèles à votre boutique.';
+  String get owner_proj_ecom_desc => 'Catalogues produits, panier et paiement qui reflètent votre boutique.';
 
   @override
   String get owner_proj_gym_title => 'Salle de sport';
 
   @override
-  String get owner_proj_gym_desc => 'Plans d’entraînement, créneaux de réservation et avantages membres dans une seule app.';
+  String get owner_proj_gym_desc => 'Plans d’entraînement, réservations et avantages d’abonnement en une seule app.';
 
   @override
   String get owner_proj_services_title => 'Services';
@@ -596,7 +596,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get status_pending => 'En attente';
 
   @override
-  String get status_rejected => 'Refusé';
+  String get status_rejected => 'Rejeté';
 
   @override
   String get owner_request_requested => 'Demandé';
@@ -629,16 +629,16 @@ class AppLocalizationsFr extends AppLocalizations {
   String get owner_proj_details_modules => 'Modules inclus';
 
   @override
-  String get owner_proj_details_why => 'Pourquoi les équipes adorent';
+  String get owner_proj_details_why => 'Pourquoi les équipes adorent ce template';
 
   @override
   String get owner_proj_details_primaryCta => 'Demander cette app';
 
   @override
-  String get owner_proj_details_secondaryCta => 'Voir la démo';
+  String get owner_proj_details_secondaryCta => 'Prévisualiser la démo';
 
   @override
-  String get owner_proj_details_create_title => 'Créer mon projet';
+  String get owner_proj_details_create_title => 'Créer mon app';
 
   @override
   String get owner_proj_details_create_subtitle => 'Lancez votre version personnalisée en quelques minutes.';
@@ -650,31 +650,31 @@ class AppLocalizationsFr extends AppLocalizations {
   String get stat_active_hint => 'déploiements actifs';
 
   @override
-  String get stat_days_hint => 'jours en moyenne';
+  String get stat_days_hint => 'jours (moyenne)';
 
   @override
-  String get owner_proj_details_headline_activities => 'Planifiez, réservez et gérez toutes les activités au même endroit.';
+  String get owner_proj_details_headline_activities => 'Planifiez, réservez et gérez chaque activité au même endroit.';
 
   @override
-  String get owner_proj_details_subhead_activities => 'Parfait pour clubs et studios avec réservation & plannings soignés.';
+  String get owner_proj_details_subhead_activities => 'Parfait pour studios, clubs et programmes avec réservation & planning soignés.';
 
   @override
   String get owner_proj_details_act_h1 => 'Plannings avec listes d’attente';
 
   @override
-  String get owner_proj_details_act_h2 => 'Portefeuille et crédits';
+  String get owner_proj_details_act_h2 => 'Portefeuille & crédits';
 
   @override
-  String get owner_proj_details_act_h3 => 'Rappels push aux participants';
+  String get owner_proj_details_act_h3 => 'Rappels push pour les participants';
 
   @override
-  String get owner_proj_details_act_h4 => 'Flux communauté intégré';
+  String get owner_proj_details_act_h4 => 'Fil communautaire intégré';
 
   @override
-  String get owner_proj_details_act_s1_title => 'Grille des cours';
+  String get owner_proj_details_act_s1_title => 'Grille de planning';
 
   @override
-  String get owner_proj_details_act_s1_sub => 'Filtrez par coach & lieu en un geste.';
+  String get owner_proj_details_act_s1_sub => 'Filtrez par coach et lieu en un tap.';
 
   @override
   String get owner_proj_details_act_s2_title => 'Parcours de réservation';
@@ -683,40 +683,40 @@ class AppLocalizationsFr extends AppLocalizations {
   String get owner_proj_details_act_s2_sub => 'Paiement fluide avec cartes enregistrées.';
 
   @override
-  String get owner_proj_details_act_m1 => 'Plannings multi-sites dynamiques';
+  String get owner_proj_details_act_m1 => 'Plannings dynamiques & multi-sites';
 
   @override
-  String get owner_proj_details_act_m2 => 'Bios & notes des coachs';
+  String get owner_proj_details_act_m2 => 'Profils et notes des coachs';
 
   @override
-  String get owner_proj_details_act_m3 => 'Niveaux d’adhésion et avantages';
+  String get owner_proj_details_act_m3 => 'Abonnements avec avantages';
 
   @override
-  String get owner_proj_details_act_i1 => '78% réservent sur mobile dès la première semaine.';
+  String get owner_proj_details_act_i1 => '78 % des membres réservent via mobile dès la première semaine.';
 
   @override
-  String get owner_proj_details_act_i2 => 'La rétention grimpe de 24% avec les rappels.';
+  String get owner_proj_details_act_i2 => 'La rétention augmente de 24 % après activation des rappels push.';
 
   @override
-  String get owner_proj_details_headline_ecommerce => 'Lancez une boutique performante qui inspire confiance.';
+  String get owner_proj_details_headline_ecommerce => 'Lancez une boutique performante que vos clients vont adorer.';
 
   @override
-  String get owner_proj_details_subhead_ecommerce => 'Pour marques DTC : catalogues, bundles, réachats en un clic.';
+  String get owner_proj_details_subhead_ecommerce => 'Pour les marques DTC : catalogue, bundles et récommandes en 1 clic.';
 
   @override
-  String get owner_proj_details_ecom_h1 => 'Catalogue visuel riche';
+  String get owner_proj_details_ecom_h1 => 'Catalogue visuel riche en médias';
 
   @override
-  String get owner_proj_details_ecom_h2 => 'Recommandations d’upsell intelligentes';
+  String get owner_proj_details_ecom_h2 => 'Upsell intelligent';
 
   @override
-  String get owner_proj_details_ecom_h3 => 'Suivi de commande in-app';
+  String get owner_proj_details_ecom_h3 => 'Suivi de commande dans l’app';
 
   @override
-  String get owner_proj_details_ecom_h4 => 'Moteur de remises & fidélité';
+  String get owner_proj_details_ecom_h4 => 'Moteur promos & fidélité';
 
   @override
-  String get owner_proj_details_ecom_s1_title => 'Vitrine produit';
+  String get owner_proj_details_ecom_s1_title => 'Vitrine produits';
 
   @override
   String get owner_proj_details_ecom_s1_sub => 'Images plein écran avec variantes.';
@@ -728,34 +728,34 @@ class AppLocalizationsFr extends AppLocalizations {
   String get owner_proj_details_ecom_s2_sub => 'Paiement accéléré avec adresses enregistrées.';
 
   @override
-  String get owner_proj_details_ecom_m1 => 'Variantes illimitées & bundles';
+  String get owner_proj_details_ecom_m1 => 'Variantes & bundles illimités';
 
   @override
-  String get owner_proj_details_ecom_m2 => 'Sync stock avec Shopify/Woo';
+  String get owner_proj_details_ecom_m2 => 'Synchronisation stock Shopify/Woo';
 
   @override
   String get owner_proj_details_ecom_m3 => 'Cartes cadeaux & parrainage';
 
   @override
-  String get owner_proj_details_ecom_i1 => 'Le panier moyen augmente de 32% avec les bundles.';
+  String get owner_proj_details_ecom_i1 => 'Le panier moyen augmente de 32 % avec les bundles.';
 
   @override
-  String get owner_proj_details_ecom_i2 => 'Les clients rachètent 2,1× plus vite sur mobile.';
+  String get owner_proj_details_ecom_i2 => 'Les clients recommandent 2,1× plus vite via mobile.';
 
   @override
-  String get owner_proj_details_headline_gym => 'Offrez un coach personnel dans la poche.';
+  String get owner_proj_details_headline_gym => 'Offrez à vos membres un coach dans leur poche.';
 
   @override
-  String get owner_proj_details_subhead_gym => 'Entraînement hybride, packs de cours, location d’équipement.';
+  String get owner_proj_details_subhead_gym => 'Entraînement hybride, packs de cours et location d’équipement.';
 
   @override
-  String get owner_proj_details_gym_h1 => 'Onboarding orienté objectifs';
+  String get owner_proj_details_gym_h1 => 'Onboarding basé sur des objectifs';
 
   @override
-  String get owner_proj_details_gym_h2 => 'Messagerie entraîneur & programmes';
+  String get owner_proj_details_gym_h2 => 'Messagerie coach & programmes';
 
   @override
-  String get owner_proj_details_gym_h3 => 'Bibliothèque vidéo d’exercices';
+  String get owner_proj_details_gym_h3 => 'Bibliothèque vidéos d’exercices';
 
   @override
   String get owner_proj_details_gym_h4 => 'Tableaux de progression';
@@ -764,7 +764,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get owner_proj_details_gym_s1_title => 'Plans d’entraînement';
 
   @override
-  String get owner_proj_details_gym_s1_sub => 'Plans périodisés avec repos.';
+  String get owner_proj_details_gym_s1_sub => 'Plans périodisés avec logique de repos.';
 
   @override
   String get owner_proj_details_gym_s2_title => 'Cours en direct';
@@ -773,34 +773,34 @@ class AppLocalizationsFr extends AppLocalizations {
   String get owner_proj_details_gym_s2_sub => 'Réservez en présentiel ou en ligne.';
 
   @override
-  String get owner_proj_details_gym_m1 => 'Place de marché d’entraîneurs';
+  String get owner_proj_details_gym_m1 => 'Marketplace de coachs avec disponibilités';
 
   @override
-  String get owner_proj_details_gym_m2 => 'Journal d’exercices & wearables';
+  String get owner_proj_details_gym_m2 => 'Journal d’entraînement & sync wearables';
 
   @override
-  String get owner_proj_details_gym_m3 => 'Plans nutritionnels (macros)';
+  String get owner_proj_details_gym_m3 => 'Plans nutrition avec macros';
 
   @override
-  String get owner_proj_details_gym_i1 => 'L’onboarding triple le taux de conversion.';
+  String get owner_proj_details_gym_i1 => 'Les membres qui finissent l’onboarding convertissent 3× plus vite.';
 
   @override
-  String get owner_proj_details_gym_i2 => 'Le churn baisse de 19% avec la messagerie.';
+  String get owner_proj_details_gym_i2 => 'Le churn baisse de 19 % quand la messagerie est activée.';
 
   @override
-  String get owner_proj_details_headline_services => 'Offrez une expérience de service haut de gamme.';
+  String get owner_proj_details_headline_services => 'Offrez une expérience de service premium.';
 
   @override
-  String get owner_proj_details_subhead_services => 'Pour agences, cabinets et pros du service.';
+  String get owner_proj_details_subhead_services => 'Pour agences, consultants et pros du service.';
 
   @override
-  String get owner_proj_details_services_h1 => 'Créneaux de réservation intelligents';
+  String get owner_proj_details_services_h1 => 'Créneaux intelligents';
 
   @override
   String get owner_proj_details_services_h2 => 'Espaces clients';
 
   @override
-  String get owner_proj_details_services_h3 => 'Suivi des tâches & jalons';
+  String get owner_proj_details_services_h3 => 'Suivi tâches & jalons';
 
   @override
   String get owner_proj_details_services_h4 => 'Facturation intégrée';
@@ -809,28 +809,28 @@ class AppLocalizationsFr extends AppLocalizations {
   String get owner_proj_details_services_s1_title => 'Portail client';
 
   @override
-  String get owner_proj_details_services_s1_sub => 'Fichiers, notes et validations partagés.';
+  String get owner_proj_details_services_s1_sub => 'Fichiers partagés, notes et validations.';
 
   @override
-  String get owner_proj_details_services_s2_title => 'Parcours de rendez-vous';
+  String get owner_proj_details_services_s2_title => 'Parcours rendez-vous';
 
   @override
-  String get owner_proj_details_services_s2_sub => 'Tampons et formulaires d’entrée.';
+  String get owner_proj_details_services_s2_sub => 'Temps tampons et formulaires d’entrée.';
 
   @override
-  String get owner_proj_details_services_m1 => 'CRM client avec frises partagées';
+  String get owner_proj_details_services_m1 => 'CRM client avec timelines partagées';
 
   @override
-  String get owner_proj_details_services_m2 => 'Contrats numériques & e-signature';
+  String get owner_proj_details_services_m2 => 'Contrats digitaux & e-signature';
 
   @override
-  String get owner_proj_details_services_m3 => 'Factures & reçus automatisés';
+  String get owner_proj_details_services_m3 => 'Emails automatiques facture & reçu';
 
   @override
-  String get owner_proj_details_services_i1 => 'Les projets se bouclent 27% plus vite.';
+  String get owner_proj_details_services_i1 => 'Les projets se terminent 27 % plus vite avec des espaces partagés.';
 
   @override
-  String get owner_proj_details_services_i2 => 'La facturation auto réduit 43% les retards.';
+  String get owner_proj_details_services_i2 => 'La facturation auto réduit les retards de paiement de 43 %.';
 
   @override
   String get owner_proj_details_stat_reviews_hint => 'avis';
@@ -839,10 +839,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get owner_proj_details_stat_active_hint => 'déploiements actifs';
 
   @override
-  String get owner_proj_details_stat_days_hint => 'jours en moyenne';
+  String get owner_proj_details_stat_days_hint => 'jours (moyenne)';
 
   @override
-  String get owner_projects_subtitle => 'Manage your projects and app builds seamlessly';
+  String get owner_projects_subtitle => 'Gérez vos projets et builds d’app facilement';
 
   @override
   String get copied => 'Copié';
@@ -857,7 +857,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get change_password => 'Changer le mot de passe';
 
   @override
-  String get support => 'Assistance';
+  String get support => 'Support';
 
   @override
   String get contact_us => 'Contactez-nous';
@@ -893,16 +893,16 @@ class AppLocalizationsFr extends AppLocalizations {
   String get owner_request_hero_title => 'Créer une nouvelle app';
 
   @override
-  String get owner_request_hero_subtitle => 'Choisis le thème + runtime visuellement. On génère le JSON automatiquement.';
+  String get owner_request_hero_subtitle => 'Choisissez thème + runtime visuellement. On génère le JSON en arrière-plan.';
 
   @override
-  String get owner_request_basics_title => 'Bases';
+  String get owner_request_basics_title => 'Informations de base';
 
   @override
-  String get owner_request_basics_subtitle => 'Infos requises pour générer ton app.';
+  String get owner_request_basics_subtitle => 'Infos requises pour générer votre app.';
 
   @override
-  String get owner_request_project_id => 'ID du projet';
+  String get owner_request_project_id => 'ID Projet';
 
   @override
   String get owner_request_project_id_hint => 'Sélectionné depuis le projet';
@@ -917,16 +917,16 @@ class AppLocalizationsFr extends AppLocalizations {
   String get owner_request_notes => 'Notes';
 
   @override
-  String get owner_request_notes_hint => 'Description courte / demande spéciale / tout ce qui est important…';
+  String get owner_request_notes_hint => 'Courte description / demande spéciale / point important…';
 
   @override
   String get owner_request_settings_title => 'Paramètres de l’app';
 
   @override
-  String get owner_request_settings_subtitle => 'Devise + override API optionnel.';
+  String get owner_request_settings_subtitle => 'Devise + option d’override API.';
 
   @override
-  String get owner_request_api_override => 'Override de l’URL API (optionnel)';
+  String get owner_request_api_override => 'Override URL API (optionnel)';
 
   @override
   String get owner_request_api_override_hint => 'ex: http://192.168.1.7:8080';
@@ -935,19 +935,19 @@ class AppLocalizationsFr extends AppLocalizations {
   String get owner_request_palette_title => 'Palette';
 
   @override
-  String get owner_request_palette_subtitle => 'Choisis un preset ou personnalise les couleurs.';
+  String get owner_request_palette_subtitle => 'Choisissez un preset ou personnalisez les couleurs.';
 
   @override
   String get owner_request_runtime_title => 'Config Runtime';
 
   @override
-  String get owner_request_runtime_subtitle => 'Navigation + home + features (sans écrire du JSON).';
+  String get owner_request_runtime_subtitle => 'Navigation + home layout + feature flags (sans taper du JSON).';
 
   @override
   String get owner_request_branding_title => 'Branding';
 
   @override
-  String get owner_request_branding_subtitle => 'Logo optionnel mais plus pro.';
+  String get owner_request_branding_subtitle => 'Le logo est optionnel mais rend l’app plus pro.';
 
   @override
   String get owner_request_err_load_currencies => 'Échec du chargement des devises';
@@ -956,10 +956,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get owner_request_err_valid_number => 'Entrez un nombre valide';
 
   @override
-  String get owner_request_err_select_currency => 'Sélectionnez une devise d’abord';
+  String get owner_request_err_select_currency => 'Sélectionnez d’abord une devise';
 
   @override
-  String get owner_request_err_fix_fields => 'Corrigez les champs en erreur';
+  String get owner_request_err_fix_fields => 'Corrigez les champs en surbrillance';
 
   @override
   String get owner_request_err_app_name_required => 'Le nom de l’app est requis';
@@ -971,26 +971,26 @@ class AppLocalizationsFr extends AppLocalizations {
   String get owner_request_logo_removed => 'Logo supprimé';
 
   @override
-  String get owner_request_no_logo => 'Aucun logo';
+  String get owner_request_no_logo => 'Aucun logo sélectionné';
 
   @override
   String get owner_request_pick_logo => 'Choisir';
 
   @override
-  String get owner_request_select_currency => 'Choisir une devise';
+  String get owner_request_select_currency => 'Sélectionner une devise';
 
   @override
   String get owner_request_tap_to_choose => 'Appuyez pour choisir';
 
   @override
-  String get owner_request_pick_currency => 'Choisir la devise';
+  String get owner_request_pick_currency => 'Choisir une devise';
 
   @override
   String get owner_request_currency_search_hint => 'Rechercher par libellé / code / id';
 
   @override
   String owner_request_currency_set(String code) {
-    return 'Devise définie : $code';
+    return 'Devise définie sur $code';
   }
 
   @override
@@ -1017,7 +1017,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get owner_request_secondary => 'Secondaire';
 
   @override
-  String get owner_request_background => 'Fond';
+  String get owner_request_background => 'Arrière-plan';
 
   @override
   String get owner_request_text_on_background => 'Texte (onBackground)';
@@ -1032,13 +1032,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get owner_request_pick_secondary => 'Choisir Secondaire';
 
   @override
-  String get owner_request_pick_background => 'Choisir Fond';
+  String get owner_request_pick_background => 'Choisir Arrière-plan';
 
   @override
-  String get owner_request_pick_text_color => 'Choisir couleur du texte';
+  String get owner_request_pick_text_color => 'Choisir la couleur du texte';
 
   @override
-  String get owner_request_pick_error => 'Choisir Erreur';
+  String get owner_request_pick_error => 'Choisir la couleur d’erreur';
 
   @override
   String get owner_request_quick_colors => 'Couleurs rapides';
@@ -1056,16 +1056,16 @@ class AppLocalizationsFr extends AppLocalizations {
   String get owner_request_your_app => 'Votre app';
 
   @override
-  String get owner_request_preview_hello_owner => 'Salut propriétaire 👋';
+  String get owner_request_preview_hello_owner => 'Bonjour propriétaire 👋';
 
   @override
-  String get owner_request_preview_desc => 'Voilà à quoi ressemble ton thème.';
+  String get owner_request_preview_desc => 'Voici à quoi ressemble votre thème.';
 
   @override
   String get super_create_project_title => 'Créer un projet';
 
   @override
-  String get super_create_project_subtitle => 'Ajoutez un nouveau modèle de projet que les owners pourront utiliser.';
+  String get super_create_project_subtitle => 'Ajouter un nouveau template de projet pour les propriétaires.';
 
   @override
   String get super_project_name => 'Nom du projet';
@@ -1095,16 +1095,16 @@ class AppLocalizationsFr extends AppLocalizations {
   String get super_project_active => 'Actif';
 
   @override
-  String get super_project_active_hint => 'Si désactivé, les owners ne peuvent pas l’utiliser tant qu’il n’est pas activé.';
+  String get super_project_active_hint => 'Si désactivé, les propriétaires ne peuvent pas l’utiliser tant qu’il n’est pas activé.';
 
   @override
   String get super_create_project_btn => 'Créer le projet';
 
   @override
-  String get super_create_another => 'Créer un autre';
+  String get super_create_another => 'En créer un autre';
 
   @override
-  String get super_project_name_required => 'Le nom du projet est obligatoire';
+  String get super_project_name_required => 'Le nom du projet est requis';
 
   @override
   String get super_project_name_exists => 'Ce nom de projet existe déjà';
@@ -1116,14 +1116,14 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String super_create_project_success(String name) {
-    return 'Projet \"$name\" créé avec succès !';
+    return 'Projet « $name » créé avec succès !';
   }
 
   @override
   String get common_loading => 'Chargement...';
 
   @override
-  String get common_forbidden => 'Accès refusé';
+  String get common_forbidden => 'Accès interdit';
 
   @override
   String get common_unauthorized => 'Non autorisé';
@@ -1141,7 +1141,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get empty_owners => 'Aucun propriétaire trouvé';
 
   @override
-  String get empty_owner_apps => 'Aucune app pour ce propriétaire';
+  String get empty_owner_apps => 'Aucune app trouvée pour ce propriétaire';
 
   @override
   String get unnamed_app => '(App sans nom)';
@@ -1162,94 +1162,94 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get ordersLabel => 'Orders';
+  String get ordersLabel => 'Commandes';
 
   @override
-  String get orderLabel => 'Order';
+  String get orderLabel => 'Commande';
 
   @override
-  String get noOrdersTitle => 'No orders';
+  String get noOrdersTitle => 'Aucune commande';
 
   @override
-  String get noOrdersSubtitle => 'No orders found for this app with the current filters.';
+  String get noOrdersSubtitle => 'Aucune commande trouvée pour cette app avec les filtres actuels.';
 
   @override
-  String get retryLabel => 'Retry';
+  String get retryLabel => 'Réessayer';
 
   @override
-  String get allTimeLabel => 'All time';
+  String get allTimeLabel => 'Tout';
 
   @override
-  String get dashboardLabel => 'Dashboard';
+  String get dashboardLabel => 'Tableau de bord';
 
   @override
-  String get last7DaysLabel => 'Last 7 days';
+  String get last7DaysLabel => '7 derniers jours';
 
   @override
-  String get last30DaysLabel => 'Last 30 days';
+  String get last30DaysLabel => '30 derniers jours';
 
   @override
-  String get clearLabel => 'Clear';
+  String get clearLabel => 'Effacer';
 
   @override
-  String get grossSalesLabel => 'Gross sales';
+  String get grossSalesLabel => 'Ventes brutes';
 
   @override
-  String get paidLabel => 'Paid';
+  String get paidLabel => 'Payé';
 
   @override
-  String get outstandingLabel => 'Outstanding';
+  String get outstandingLabel => 'En attente';
 
   @override
-  String get avgOrderLabel => 'Average order value';
+  String get avgOrderLabel => 'Panier moyen';
 
   @override
-  String get fullyPaidRateLabel => 'Fully paid';
+  String get fullyPaidRateLabel => 'Entièrement payé';
 
   @override
-  String get statusBreakdownLabel => 'Status breakdown';
+  String get statusBreakdownLabel => 'Répartition des statuts';
 
   @override
-  String get paidRevenueLast7DaysLabel => 'Paid revenue (last 7 days)';
+  String get paidRevenueLast7DaysLabel => 'Revenus payés (7 derniers jours)';
 
   @override
-  String get filterAllLabel => 'All';
+  String get filterAllLabel => 'Tous';
 
   @override
-  String get filterPendingLabel => 'Pending';
+  String get filterPendingLabel => 'En attente';
 
   @override
-  String get filterCompletedLabel => 'Completed';
+  String get filterCompletedLabel => 'Terminé';
 
   @override
-  String get filterCanceledLabel => 'Canceled';
+  String get filterCanceledLabel => 'Annulé';
 
   @override
-  String get filterRejectedLabel => 'Rejected';
+  String get filterRejectedLabel => 'Rejeté';
 
   @override
-  String get filterRefundedLabel => 'Refunded';
+  String get filterRefundedLabel => 'Remboursé';
 
   @override
-  String get itemsLabel => 'Items';
+  String get itemsLabel => 'Articles';
 
   @override
   String get totalLabel => 'Total';
 
   @override
-  String get remainingLabel => 'Remaining';
+  String get remainingLabel => 'Restant';
 
   @override
-  String get fullyPaidShortLabel => 'Fully paid';
+  String get fullyPaidShortLabel => 'Payé';
 
   @override
   String get owner_projects_test => 'TEST';
 
   @override
-  String get owner_publish_title_play => 'Publish to Google Play Store';
+  String get owner_publish_title_play => 'Publier sur Google Play Store';
 
   @override
-  String get owner_publish_title_appstore => 'Publish to App Store';
+  String get owner_publish_title_appstore => 'Publier sur l’App Store';
 
   @override
   String get owner_publish_platform_android => 'Android';
@@ -1258,152 +1258,272 @@ class AppLocalizationsFr extends AppLocalizations {
   String get owner_publish_platform_ios => 'iOS';
 
   @override
-  String get owner_publish_request_play => 'Request Publish to Play Store';
+  String get owner_publish_request_play => 'Demander la publication sur le Play Store';
 
   @override
-  String get owner_publish_request_appstore => 'Request Publish to App Store';
+  String get owner_publish_request_appstore => 'Demander la publication sur l’App Store';
 
   @override
-  String get owner_publish_step1_title => 'Basic Information';
+  String get owner_publish_step1_title => 'Informations de base';
 
   @override
-  String get owner_publish_step1_sub => 'Provide the basic details about your application';
+  String get owner_publish_step1_sub => 'Fournissez les informations principales sur votre application';
 
   @override
-  String get owner_publish_step2_title => 'Category & Details';
+  String get owner_publish_step2_title => 'Catégorie & détails';
 
   @override
-  String get owner_publish_step2_sub => 'Categorize your app and provide additional details';
+  String get owner_publish_step2_sub => 'Catégorisez votre app et ajoutez des détails';
 
   @override
-  String get owner_publish_step3_title => 'Legal & Contact';
+  String get owner_publish_step3_title => 'Juridique & contact';
 
   @override
-  String get owner_publish_step3_sub => 'These fields are managed by Build4All publisher profile';
+  String get owner_publish_step3_sub => 'Ces champs sont gérés par le profil éditeur Build4All';
 
   @override
-  String get owner_publish_step4_title => 'Assets & Screenshots';
+  String get owner_publish_step4_title => 'Assets & captures';
 
   @override
-  String get owner_publish_step4_sub => 'Provide your app icon and screenshots URLs';
+  String get owner_publish_step4_sub => 'Fournissez l’icône et les URLs des captures d’écran';
 
   @override
-  String get owner_publish_app_name => 'Application Name';
+  String get owner_publish_app_name => 'Nom de l’application';
 
   @override
   String get owner_publish_app_name_hint => 'ShopSphere';
 
   @override
-  String get owner_publish_package_name => 'Package Name (Read-only)';
+  String get owner_publish_package_name => 'Nom du package (lecture seule)';
 
   @override
-  String get owner_publish_bundle_id => 'Bundle ID (Read-only)';
+  String get owner_publish_bundle_id => 'Bundle ID (lecture seule)';
 
   @override
-  String get owner_publish_short_desc => 'Short Description';
+  String get owner_publish_short_desc => 'Description courte';
 
   @override
-  String get owner_publish_short_desc_hint => 'Brief app description (max 80 characters)';
+  String get owner_publish_short_desc_hint => 'Brève description (max 80 caractères)';
 
   @override
-  String get owner_publish_full_desc => 'Full Description';
+  String get owner_publish_full_desc => 'Description complète';
 
   @override
-  String get owner_publish_full_desc_hint => 'Write a full store listing description…';
+  String get owner_publish_full_desc_hint => 'Rédigez la description complète de la fiche…';
 
   @override
-  String get owner_publish_category => 'Category';
+  String get owner_publish_category => 'Catégorie';
 
   @override
-  String get owner_publish_category_hint => 'Select a category';
+  String get owner_publish_category_hint => 'Sélectionnez une catégorie';
 
   @override
-  String get owner_publish_country => 'Country Availability';
+  String get owner_publish_country => 'Disponibilité par pays';
 
   @override
-  String get owner_publish_pricing => 'Pricing';
+  String get owner_publish_pricing => 'Tarification';
 
   @override
-  String get owner_publish_free => 'Free';
+  String get owner_publish_free => 'Gratuite';
 
   @override
-  String get owner_publish_paid => 'Paid';
+  String get owner_publish_paid => 'Payante';
 
   @override
-  String get owner_publish_content_confirm => 'I confirm that this app complies with store policies and age-appropriate guidelines.';
+  String get owner_publish_content_confirm => 'Je confirme que cette application respecte les politiques du store et les règles d’âge.';
 
   @override
-  String get owner_publish_privacy_url => 'Privacy Policy URL';
+  String get owner_publish_privacy_url => 'URL de la politique de confidentialité';
 
   @override
-  String get owner_publish_dev_name => 'Developer Name';
+  String get owner_publish_dev_name => 'Nom du développeur';
 
   @override
-  String get owner_publish_dev_email => 'Developer Email';
+  String get owner_publish_dev_email => 'Email du développeur';
 
   @override
-  String get owner_publish_managed_by_build4all => 'Managed by Build4All';
+  String get owner_publish_managed_by_build4all => 'Géré par Build4All';
 
   @override
-  String get owner_publish_icon_url => 'App Icon URL';
+  String get owner_publish_icon_url => 'URL de l’icône';
 
   @override
   String get owner_publish_icon_url_hint => 'https://.../icon.png';
 
   @override
-  String get owner_publish_screenshots_urls => 'Screenshots URLs';
+  String get owner_publish_screenshots_urls => 'URLs des captures d’écran';
 
   @override
-  String get owner_publish_screenshot => 'Screenshot';
+  String get owner_publish_screenshot => 'Capture';
 
   @override
-  String get owner_publish_shots_rule => 'Required: min 2, max 8 screenshots';
+  String get owner_publish_shots_rule => 'Requis : min 2, max 8 captures';
 
   @override
-  String get owner_publish_submit => 'Submit for Review';
+  String get owner_publish_submit => 'Soumettre pour revue';
 
   @override
-  String get owner_publish_submitted => 'Submitted for review';
+  String get owner_publish_submitted => 'Soumis pour revue';
 
   @override
-  String get owner_publish_err_appname => 'Application name is required';
+  String get owner_publish_err_appname => 'Le nom de l’application est requis';
 
   @override
-  String get owner_publish_err_short => 'Short description is required';
+  String get owner_publish_err_short => 'La description courte est requise';
 
   @override
-  String get owner_publish_err_short80 => 'Short description max 80 characters';
+  String get owner_publish_err_short80 => 'Description courte : max 80 caractères';
 
   @override
-  String get owner_publish_err_full => 'Full description is required';
+  String get owner_publish_err_full => 'La description complète est requise';
 
   @override
-  String get owner_publish_err_category => 'Category is required';
+  String get owner_publish_err_category => 'La catégorie est requise';
 
   @override
-  String get owner_publish_err_content_confirm => 'You must confirm content rating compliance';
+  String get owner_publish_err_content_confirm => 'Vous devez confirmer la conformité du contenu';
 
   @override
-  String get owner_publish_err_icon => 'App icon URL is required';
+  String get owner_publish_err_icon => 'L’URL de l’icône est requise';
 
   @override
-  String get owner_publish_err_shots2 => 'At least 2 screenshots are required';
+  String get owner_publish_err_shots2 => 'Au moins 2 captures sont requises';
 
   @override
-  String get owner_publish_err_shots8 => 'Max 8 screenshots allowed';
+  String get owner_publish_err_shots8 => 'Maximum 8 captures autorisées';
 
   @override
-  String get common_back => 'Back';
+  String get common_back => 'Retour';
 
   @override
-  String get common_continue => 'Continue';
+  String get common_continue => 'Continuer';
 
   @override
-  String get errFixForm => 'Please fix the errors in the form';
+  String get errFixForm => 'Veuillez corriger les erreurs du formulaire';
 
   @override
-  String get msgWelcomeBack => 'Welcome back';
+  String get msgWelcomeBack => 'Bon retour';
 
   @override
-  String get msgVerified => 'Verified';
+  String get msgVerified => 'Vérifié';
+
+  @override
+  String get nav_publish_requests => 'Publish Requests';
+
+  @override
+  String get publish_search_hint => 'Search by app name, AUP id…';
+
+  @override
+  String get publish_no_requests => 'No requests found.';
+
+  @override
+  String get common_refresh => 'Refresh';
+
+  @override
+  String get publish_status_submitted => 'Submitted';
+
+  @override
+  String get publish_status_in_review => 'In review';
+
+  @override
+  String get publish_status_approved => 'Approved';
+
+  @override
+  String get publish_status_rejected => 'Rejected';
+
+  @override
+  String get publish_status_published => 'Published';
+
+  @override
+  String get publish_status_draft => 'Draft';
+
+  @override
+  String get publish_details_title => 'Publish Request';
+
+  @override
+  String get publish_section_basic => 'Basic';
+
+  @override
+  String get publish_section_descriptions => 'Descriptions';
+
+  @override
+  String get publish_section_assets => 'Assets';
+
+  @override
+  String get publish_section_admin_notes => 'Admin Notes';
+
+  @override
+  String get publish_label_platform => 'Platform';
+
+  @override
+  String get publish_label_store => 'Store';
+
+  @override
+  String get publish_label_status => 'Status';
+
+  @override
+  String get publish_label_aup => 'AUP';
+
+  @override
+  String get publish_label_package => 'Package';
+
+  @override
+  String get publish_label_bundle => 'Bundle ID';
+
+  @override
+  String get publish_label_pricing => 'Pricing';
+
+  @override
+  String get publish_label_category => 'Category';
+
+  @override
+  String get publish_label_content_rating_confirmed => 'Content rating confirmed';
+
+  @override
+  String get publish_label_short => 'Short';
+
+  @override
+  String get publish_label_full => 'Full';
+
+  @override
+  String get publish_label_icon => 'App Icon';
+
+  @override
+  String get publish_label_screenshots => 'Screenshots';
+
+  @override
+  String get publish_label_no_screenshots => 'No screenshots';
+
+  @override
+  String get publish_action_reject => 'Reject';
+
+  @override
+  String get publish_action_approve => 'Approve';
+
+  @override
+  String get publish_sheet_reject_title => 'Reject request';
+
+  @override
+  String get publish_sheet_approve_title => 'Approve request';
+
+  @override
+  String get publish_sheet_notes_hint => 'Optional notes…';
+
+  @override
+  String get toast_publish_approved => 'Request approved';
+
+  @override
+  String get toast_publish_rejected => 'Request rejected';
+
+  @override
+  String get super_nav_dashboard => 'Dashboard';
+
+  @override
+  String get super_nav_publish_requests => 'Publish Requests';
+
+  @override
+  String get super_nav_profile => 'Profile';
+
+  @override
+  String get err_unauthorized => 'Unauthorized';
 }

@@ -8,7 +8,6 @@ import 'package:build4all_manager/features/superadmin/nav/super_admin_nav_shell.
 import 'package:build4all_manager/features/superadmin/profile/presentation/screens/profile_screen.dart';
 import 'package:build4all_manager/features/superadmin/projectCreate/presentation/screens/create_project_screen.dart';
 
-
 import 'package:build4all_manager/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
@@ -31,32 +30,26 @@ class SuperAdminHomeScreen extends StatelessWidget {
     final Dio dio = DioClient.ensure();
     final l10n = AppLocalizations.of(context)!;
 
-    // ✅ read baseUrl from globals (already: http://host:8080/api)
-    final String baseUrl = g.appServerRoot;
+    // ✅ IMPORTANT:
+    // g.appServerRoot is usually "http://host:8080/api"
+    // CreateProjectScreen normally wants "http://host:8080"
+    final String baseUrl = g.serverRootNoApi();
 
     // ✅ token provider from the same local datasource used by interceptor
     final jwt = JwtLocalDataSource();
     Future<String?> tokenProvider() async {
-      // ⚠️ adjust the method name here to match your datasource exactly.
-      // Common names: readToken(), getToken(), getJwt(), token()
-      // Try these in order, keep the one that exists:
-      //
-      // return await jwt.readToken();
-      // return await jwt.getToken();
-      // return await jwt.token();
-      //
-      return await jwt.read().then((v) => v.$1.isNotEmpty ? v.$1 : null);
+      final (token, _) = await jwt.read();
+      return token.trim().isNotEmpty ? token.trim() : null;
     }
 
-    final destinations = [
+    final destinations = <SuperAdminDestination>[
       SuperAdminDestination(
         icon: Icons.dashboard_outlined,
         selectedIcon: Icons.dashboard,
         label: l10n.nav_dashboard,
-        page: DashboardScreen(),
+        page:
+            const DashboardScreen(), // ✅ content-only screen (no nested appbar)
       ),
-
-      // ✅ Theme removed, Create Project added
       SuperAdminDestination(
         icon: Icons.add_box_outlined,
         selectedIcon: Icons.add_box,
@@ -67,12 +60,11 @@ class SuperAdminHomeScreen extends StatelessWidget {
           tokenProvider: tokenProvider,
         ),
       ),
-
       SuperAdminDestination(
         icon: Icons.person_outline,
         selectedIcon: Icons.person,
         label: l10n.nav_profile,
-        page: SuperAdminProfileScreen(),
+        page: const SuperAdminProfileScreen(),
       ),
     ];
 

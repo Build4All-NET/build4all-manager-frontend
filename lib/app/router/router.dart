@@ -1,4 +1,5 @@
 import 'package:build4all_manager/app/nav_key.dart';
+import 'package:build4all_manager/app/router/super_admin_entry_loader.dart';
 import 'package:build4all_manager/features/owner/ownerhome/data/static_project_models.dart';
 import 'package:build4all_manager/features/owner/ownerhome/presentation/screens/owner_project_details_screen.dart';
 import 'package:build4all_manager/features/owner/ownernav/presentation/controllers/owner_nav_cubit.dart';
@@ -73,7 +74,10 @@ final router = GoRouter(
     GoRoute(path: '/', builder: (_, __) => const SplashGate()),
     GoRoute(path: '/login', builder: (_, __) => const AppLoginScreen()),
     GoRoute(path: '/loginScreen', builder: (_, __) => const AppLoginScreen()),
-    GoRoute(path: '/manager', builder: (_, __) => const SuperAdminHomeScreen()),
+    GoRoute(
+      path: '/manager',
+      builder: (_, __) => const SuperAdminEntryLoader(),
+    ),
     GoRoute(path: '/owner', builder: (_, __) => const _OwnerEntryLoader()),
     GoRoute(
       path: '/owner/projects',

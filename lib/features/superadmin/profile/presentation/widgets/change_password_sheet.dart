@@ -5,7 +5,7 @@ import 'package:build4all_manager/shared/widgets/app_button.dart';
 import 'package:build4all_manager/shared/widgets/app_text_field.dart';
 import '../../presentation/bloc/profile_bloc.dart';
 import '../../presentation/bloc/profile_state.dart';
-import 'package:build4all_manager/shared/widgets/top_toast.dart';
+
 
 class ChangePasswordSheet extends StatefulWidget {
   final bool busy; // from parent state
@@ -58,7 +58,7 @@ class _ChangePasswordSheetState extends State<ChangePasswordSheet> {
       listener: (ctx, st) {
         // Show any backend error as toast (keeps sheet open)
         if (st.error?.isNotEmpty == true) {
-          showTopToast(ctx, st.error!, type: ToastType.error, haptics: true);
+          
         }
         // Close only on success
         if (!st.savingPassword && st.success?.isNotEmpty == true) {

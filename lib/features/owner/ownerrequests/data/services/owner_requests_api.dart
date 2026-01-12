@@ -67,7 +67,7 @@ class OwnerRequestApi {
     _ensureValidJson(enabledFeaturesJson, 'enabledFeaturesJson');
     _ensureValidJson(brandingJson, 'brandingJson');
 
-    final url = '${_apiRoot()}/owner/app-requests/auto';
+    final url = '${_apiRoot()}/owner/app-requests/auto/both';
 
     final form = FormData();
     form.fields.addAll([
