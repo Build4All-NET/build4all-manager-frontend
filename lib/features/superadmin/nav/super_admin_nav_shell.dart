@@ -59,7 +59,7 @@ class _SuperAdminNavShellState extends State<SuperAdminNavShell>
   void initState() {
     super.initState();
     _index = widget.initialIndex;
-    _maybeAttachTabController();
+    _syncTabController();
     _clampIndex();
   }
 
@@ -74,7 +74,7 @@ class _SuperAdminNavShellState extends State<SuperAdminNavShell>
         oldWidget.destinations.length != widget.destinations.length;
 
     if (menuChanged || lenChanged) {
-      _maybeAttachTabController();
+      _syncTabController();
       _clampIndex();
     }
   }
@@ -85,28 +85,32 @@ class _SuperAdminNavShellState extends State<SuperAdminNavShell>
       return;
     }
 
-    if (_index < 0 || _index >= widget.destinations.length) {
-      setState(() => _index = 0);
-    }
+    final max = widget.destinations.length - 1;
+    final safe = _index.clamp(0, max);
 
-    if (_mode == SuperMenuType.top && _tab != null) {
-      final safe = _index.clamp(0, widget.destinations.length - 1);
-      if (_tab!.index != safe) _tab!.index = safe;
+    if (safe != _index) setState(() => _index = safe);
+
+    if (_mode == SuperMenuType.top && _tab != null && _tab!.index != safe) {
+      _tab!.index = safe;
     }
   }
 
-  void _maybeAttachTabController() {
+  void _syncTabController() {
     _tab?.dispose();
+    _tab = null;
 
     if (_mode == SuperMenuType.top && widget.destinations.isNotEmpty) {
       _tab = TabController(length: widget.destinations.length, vsync: this);
 
       _tab!.addListener(() {
         if (_tab!.indexIsChanging) return;
-        if (mounted) setState(() => _index = _tab!.index);
+        if (!mounted) return;
+        final safe = _tab!.index.clamp(0, widget.destinations.length - 1);
+        if (safe != _index) setState(() => _index = safe);
       });
-    } else {
-      _tab = null;
+
+      final safe = _index.clamp(0, widget.destinations.length - 1);
+      _tab!.index = safe;
     }
   }
 
@@ -120,6 +124,8 @@ class _SuperAdminNavShellState extends State<SuperAdminNavShell>
     if (widget.destinations.isEmpty) return;
 
     final safe = i.clamp(0, widget.destinations.length - 1);
+    if (safe == _index) return;
+
     setState(() => _index = safe);
 
     if (_mode == SuperMenuType.top && _tab != null && _tab!.index != safe) {
@@ -127,17 +133,18 @@ class _SuperAdminNavShellState extends State<SuperAdminNavShell>
     }
   }
 
-  PreferredSizeWidget _appBar(BuildContext context) {
+  String _title(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    if (widget.destinations.isEmpty) return l10n.nav_super_admin;
+    return widget
+        .destinations[_index.clamp(0, widget.destinations.length - 1)].label;
+  }
+
+  PreferredSizeWidget _buildAppBar(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
 
-    final titleText = widget.destinations.isEmpty
-        ? l10n.nav_super_admin
-        : widget.destinations[_index.clamp(0, widget.destinations.length - 1)]
-            .label;
-
     return AppBar(
-      titleSpacing: 12,
+      titleSpacing: 14,
       title: Row(
         children: [
           Container(
@@ -151,7 +158,7 @@ class _SuperAdminNavShellState extends State<SuperAdminNavShell>
           ),
           Expanded(
             child: Text(
-              titleText,
+              _title(context),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -161,25 +168,61 @@ class _SuperAdminNavShellState extends State<SuperAdminNavShell>
           ),
         ],
       ),
-      actions: [
-        IconButton(
-          tooltip: l10n.nav_dashboard,
-          onPressed: () => _goTo(0),
-          icon: const Icon(Icons.dashboard_customize_rounded),
-        ),
-        const SizedBox(width: 6),
-      ],
+
+      // ✅ top tabs only when mode=top
       bottom: (_mode == SuperMenuType.top && _tab != null)
-          ? TabBar(
-              controller: _tab,
-              isScrollable: true,
-              tabAlignment: TabAlignment.start,
-              tabs: [
-                for (final d in widget.destinations)
-                  Tab(text: d.label, icon: Icon(d.icon)),
-              ],
+          ? PreferredSize(
+              preferredSize: const Size.fromHeight(54),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: TabBar(
+                  controller: _tab,
+                  isScrollable: true,
+                  tabAlignment: TabAlignment.start,
+                  dividerHeight: 0,
+                  labelStyle: const TextStyle(fontWeight: FontWeight.w800),
+                  tabs: [
+                    for (final d in widget.destinations)
+                      Tab(
+                        text: d.label,
+                        icon: Icon(d.icon),
+                      ),
+                  ],
+                ),
+              ),
             )
           : null,
+    );
+  }
+
+  /// ✅ Pro transitions + keep state
+  Widget _buildBodyStack(List<SuperAdminDestination> pages) {
+    return Stack(
+      children: [
+        IndexedStack(
+          index: _index,
+          children: [
+            for (final d in pages)
+              KeyedSubtree(
+                key: ValueKey(d.label),
+                child: d.page,
+              ),
+          ],
+        ),
+
+        // ✨ subtle fade between tabs (doesn't rebuild pages)
+        IgnorePointer(
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 180),
+            switchInCurve: Curves.easeOut,
+            switchOutCurve: Curves.easeIn,
+            child: Container(
+              key: ValueKey(_index),
+              color: Colors.transparent,
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -189,20 +232,15 @@ class _SuperAdminNavShellState extends State<SuperAdminNavShell>
 
     if (pages.isEmpty) {
       return Scaffold(
-        appBar: _appBar(context),
+        appBar: _buildAppBar(context),
         body: const Center(child: Text("No destinations configured")),
       );
     }
 
-    Widget bodyStack = IndexedStack(
-      index: _index,
-      children: [for (final d in pages) d.page],
-    );
-
     switch (_mode) {
       case SuperMenuType.top:
         return Scaffold(
-          appBar: _appBar(context),
+          appBar: _buildAppBar(context),
           body: TabBarView(
             controller: _tab,
             children: [for (final d in pages) d.page],
@@ -211,34 +249,22 @@ class _SuperAdminNavShellState extends State<SuperAdminNavShell>
 
       case SuperMenuType.drawer:
         return Scaffold(
-          appBar: _appBar(context),
+          appBar: _buildAppBar(context),
           drawer: _buildDrawer(context, pages),
-          body: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 220),
-            child: bodyStack,
-          ),
+          body: _buildBodyStack(pages),
         );
 
       case SuperMenuType.bottom:
       default:
         return Scaffold(
-          appBar: _appBar(context),
-          body: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 220),
-            child: bodyStack,
-          ),
-          bottomNavigationBar: NavigationBar(
-            height: 72,
-            selectedIndex: _index,
-            onDestinationSelected: _goTo,
-            destinations: [
-              for (final d in pages)
-                NavigationDestination(
-                  icon: Icon(d.icon),
-                  selectedIcon: Icon(d.selectedIcon),
-                  label: d.label,
-                ),
-            ],
+          appBar: _buildAppBar(context),
+          body: _buildBodyStack(pages),
+
+          // ✅ Pro bottom bar wrapper (floating look)
+          bottomNavigationBar: _ProBottomBar(
+            index: _index,
+            onTap: _goTo,
+            destinations: pages,
           ),
         );
     }
@@ -255,7 +281,8 @@ class _SuperAdminNavShellState extends State<SuperAdminNavShell>
         Navigator.of(context).maybePop();
       },
       children: [
-        DrawerHeader(
+        Container(
+          padding: const EdgeInsets.fromLTRB(16, 22, 16, 16),
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [cs.primary, cs.secondary],
@@ -263,24 +290,104 @@ class _SuperAdminNavShellState extends State<SuperAdminNavShell>
               end: Alignment.bottomRight,
             ),
           ),
-          child: Align(
-            alignment: Alignment.bottomLeft,
-            child: Text(
-              l10n.nav_super_admin,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    color: cs.onPrimary,
-                    fontWeight: FontWeight.w800,
-                  ),
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 18),
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: cs.onPrimary.withOpacity(.16),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Icon(Icons.admin_panel_settings_rounded,
+                    color: cs.onPrimary),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                l10n.nav_super_admin,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      color: cs.onPrimary,
+                      fontWeight: FontWeight.w900,
+                    ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Manage everything in one place',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: cs.onPrimary.withOpacity(.85),
+                      height: 1.2,
+                    ),
+              ),
+            ],
           ),
         ),
+        const SizedBox(height: 10),
         for (final d in pages)
           NavigationDrawerDestination(
             icon: Icon(d.icon),
             selectedIcon: Icon(d.selectedIcon),
             label: Text(d.label),
           ),
+        const SizedBox(height: 12),
       ],
+    );
+  }
+}
+
+/// ✅ Clean, “pro” looking bottom bar (floating container + shadow)
+class _ProBottomBar extends StatelessWidget {
+  final int index;
+  final ValueChanged<int> onTap;
+  final List<SuperAdminDestination> destinations;
+
+  const _ProBottomBar({
+    required this.index,
+    required this.onTap,
+    required this.destinations,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
+        child: Container(
+          decoration: BoxDecoration(
+            color: cs.surface,
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(color: cs.outlineVariant.withOpacity(.35)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(.10),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(22),
+            child: NavigationBar(
+              height: 68,
+              selectedIndex: index,
+              onDestinationSelected: onTap,
+              labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+              destinations: [
+                for (final d in destinations)
+                  NavigationDestination(
+                    icon: Icon(d.icon),
+                    selectedIcon: Icon(d.selectedIcon),
+                    label: d.label,
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

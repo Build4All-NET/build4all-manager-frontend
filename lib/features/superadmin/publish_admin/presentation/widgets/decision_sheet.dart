@@ -12,7 +12,7 @@ class DecisionSheet {
   }) async {
     final ctrl = TextEditingController();
 
-    return showModalBottomSheet<String?>(
+    final future = showModalBottomSheet<String?>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
@@ -42,31 +42,39 @@ class DecisionSheet {
                 filled: true,
               ),
               const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: AppButton(
-                      type: AppButtonType.outline,
-                      label: cancelLabel,
-                      expand: true,
-                      onPressed: () => Navigator.pop(ctx, null),
+
+              // ✅ lock height to avoid flex going crazy
+              SizedBox(
+                height: 52,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: AppButton(
+                        type: AppButtonType.outline,
+                        label: cancelLabel,
+                        expand: true,
+                        onPressed: () => Navigator.pop(ctx, null),
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: AppButton(
-                      type: AppButtonType.primary,
-                      label: confirmLabel,
-                      expand: true,
-                      onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: AppButton(
+                        type: AppButtonType.primary,
+                        label: confirmLabel,
+                        expand: true,
+                        onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
           ),
         );
       },
     );
+
+    // ✅ dispose AFTER the sheet is completely gone
+    return future.whenComplete(ctrl.dispose);
   }
 }

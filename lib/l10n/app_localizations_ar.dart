@@ -1526,4 +1526,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get err_unauthorized => 'Unauthorized';
+
+  @override
+  String get super_nav_create_project => 'Create Project';
 }

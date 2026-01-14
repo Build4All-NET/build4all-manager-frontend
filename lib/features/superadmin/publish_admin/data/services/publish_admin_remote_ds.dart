@@ -29,21 +29,26 @@ class PublishAdminRemoteDs {
   }
 
   Future<void> approve(int requestId, String? notes) async {
-    await dio.post(
-      '/superadmin/publish/$requestId/approve',
-      data:
-          notes == null || notes.trim().isEmpty ? {} : {'notes': notes.trim()},
-    );
-  }
+  await dio.post(
+    '/superadmin/publish/$requestId/approve',
+    data: {
+      'requestId': requestId,
+      if (notes != null && notes.trim().isNotEmpty) 'notes': notes.trim(),
+    },
+  );
+}
 
-  Future<void> reject(int requestId, String? notes) async {
-    await dio.post(
-      '/superadmin/publish/$requestId/reject',
-      data:
-          notes == null || notes.trim().isEmpty ? {} : {'notes': notes.trim()},
-    );
-  }
+Future<void> reject(int requestId, String? notes) async {
+  await dio.post(
+    '/superadmin/publish/$requestId/reject',
+    data: {
+      'requestId': requestId,
+      if (notes != null && notes.trim().isNotEmpty) 'notes': notes.trim(),
+    },
+  );
+}
 
+  
   Future<List<PublisherProfileModel>> getProfiles() async {
     final res = await dio.get('/superadmin/publisher-profiles');
     final data = res.data;

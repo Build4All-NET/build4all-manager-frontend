@@ -699,7 +699,8 @@
   "super_nav_dashboard": "Dashboard",
   "super_nav_publish_requests": "Publish Requests",
   "super_nav_profile": "Profile",
-  "err_unauthorized": "Unauthorized"
+  "err_unauthorized": "Unauthorized",
+  "super_nav_create_project": "Create Project"
 }
 
 

@@ -3090,6 +3090,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unauthorized'**
   String get err_unauthorized;
+
+  /// No description provided for @super_nav_create_project.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Project'**
+  String get super_nav_create_project;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

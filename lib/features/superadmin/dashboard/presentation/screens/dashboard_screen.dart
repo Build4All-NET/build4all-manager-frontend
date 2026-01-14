@@ -29,7 +29,7 @@ class DashboardScreen extends StatelessWidget {
   }
 }
 
-/// ✅ CONTENT ONLY (NO Scaffold, NO AppBar, NO SliverAppBar)
+/// ✅ CONTENT ONLY
 class _DashboardContent extends StatelessWidget {
   const _DashboardContent();
 
@@ -39,7 +39,14 @@ class _DashboardContent extends StatelessWidget {
 
     return BlocBuilder<DashboardBloc, DashboardState>(
       builder: (context, state) {
+        // ✅ if error + no overview => show message instead of infinite skeleton
         if (state.overview == null) {
+          if (state.error != null) {
+            return _FullPageError(
+              message: state.error!,
+              onRetry: () => context.read<DashboardBloc>().add(LoadDashboard()),
+            );
+          }
           return const _SkeletonLoader();
         }
 
@@ -51,11 +58,10 @@ class _DashboardContent extends StatelessWidget {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
             children: [
-              // hero (instead of SliverAppBar)
-              const HeaderHero(),
+              // ✅ FIX: HeaderHero must have a finite height
+              const _HeroBox(),
               const SizedBox(height: 14),
 
-              // KPIs (responsive layout)
               LayoutBuilder(
                 builder: (ctx, c) {
                   final w = c.maxWidth;
@@ -146,6 +152,68 @@ class _DashboardContent extends StatelessWidget {
   }
 }
 
+class _HeroBox extends StatelessWidget {
+  const _HeroBox();
+
+  @override
+  Widget build(BuildContext context) {
+    final w = MediaQuery.sizeOf(context).width;
+    final h = w < 380 ? 150.0 : 180.0;
+
+    return SizedBox(
+      height: h,
+      width: double.infinity,
+      child: const HeaderHero(),
+    );
+  }
+}
+
+class _FullPageError extends StatelessWidget {
+  final String message;
+  final VoidCallback onRetry;
+
+  const _FullPageError({required this.message, required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.error_outline_rounded, color: cs.error, size: 46),
+            const SizedBox(height: 10),
+            Text(
+              "",
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w900,
+                  ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: cs.onSurfaceVariant,
+                  ),
+            ),
+            const SizedBox(height: 14),
+            FilledButton.icon(
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh_rounded),
+              label: Text(l10n.common_retry),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _InlineError extends StatelessWidget {
   final String message;
   final VoidCallback onRetry;
@@ -192,7 +260,8 @@ class _SkeletonLoader extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
       children: [
-        const HeaderHero(),
+        // ✅ FIX: also wrap in finite height
+        const _HeroBox(),
         const SizedBox(height: 14),
         _shimmerBox(cs),
         const SizedBox(height: 12),
@@ -249,7 +318,7 @@ class _g {
     final cs = Theme.of(context).colorScheme;
     return _g._(
       LinearGradient(colors: [cs.primary, cs.secondary]),
-      LinearGradient(colors: [cs.primary, cs.tertiary ?? cs.secondary]),
+      LinearGradient(colors: [cs.primary, cs.tertiary]),
       LinearGradient(colors: [cs.secondary, cs.error]),
     );
   }

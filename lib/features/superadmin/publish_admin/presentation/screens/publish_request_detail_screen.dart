@@ -1,11 +1,9 @@
-import 'package:build4all_manager/core/network/url_utils.dart';
 import 'package:build4all_manager/core/network/url_utils.dart' as g;
 import 'package:build4all_manager/features/superadmin/publish_admin/data/services/publish_admin_remote_ds.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:build4all_manager/core/network/dio_client.dart';
-import 'package:build4all_manager/core/network/globals.dart' as g;
 import 'package:build4all_manager/shared/widgets/app_button.dart';
 import 'package:build4all_manager/shared/widgets/app_toast.dart';
 import 'package:build4all_manager/l10n/app_localizations.dart';
@@ -53,7 +51,6 @@ class _View extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final cs = Theme.of(context).colorScheme;
 
     return BlocConsumer<PublishRequestDetailBloc, PublishRequestDetailState>(
       listenWhen: (p, c) => p.error != c.error || p.success != c.success,
@@ -77,11 +74,14 @@ class _View extends StatelessWidget {
           appBar: AppBar(
             title: Text(item.appName ?? l10n.publish_details_title),
           ),
+
+          // ✅ leave space so list doesn’t hide under bottom buttons
           body: ListView(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 120),
             children: [
               _Header(item: item, abs: _abs),
               const SizedBox(height: 14),
+
               _Section(
                 title: l10n.publish_section_basic,
                 child: Column(
@@ -92,8 +92,7 @@ class _View extends StatelessWidget {
                     _kv(l10n.publish_label_status, item.status),
                     _kv(l10n.publish_label_aup, '${item.aupId ?? "-"}'),
                     if ((item.packageNameSnapshot ?? '').isNotEmpty)
-                      _kv(l10n.publish_label_package,
-                          item.packageNameSnapshot!),
+                      _kv(l10n.publish_label_package, item.packageNameSnapshot!),
                     if ((item.bundleIdSnapshot ?? '').isNotEmpty)
                       _kv(l10n.publish_label_bundle, item.bundleIdSnapshot!),
                     _kv(l10n.publish_label_pricing, item.pricing),
@@ -105,7 +104,9 @@ class _View extends StatelessWidget {
                   ],
                 ),
               ),
+
               const SizedBox(height: 12),
+
               _Section(
                 title: l10n.publish_section_descriptions,
                 child: Column(
@@ -119,7 +120,9 @@ class _View extends StatelessWidget {
                   ],
                 ),
               ),
+
               const SizedBox(height: 12),
+
               _Section(
                 title: l10n.publish_section_assets,
                 child: Column(
@@ -137,13 +140,13 @@ class _View extends StatelessWidget {
                       Wrap(
                         spacing: 10,
                         runSpacing: 10,
-                        children: item.screenshotsUrls
-                            .map((u) => _thumb(_abs(u)))
-                            .toList(),
+                        children:
+                            item.screenshotsUrls.map((u) => _thumb(_abs(u))).toList(),
                       ),
                   ],
                 ),
               ),
+
               if ((item.adminNotes ?? '').trim().isNotEmpty) ...[
                 const SizedBox(height: 12),
                 _Section(
@@ -153,57 +156,62 @@ class _View extends StatelessWidget {
               ],
             ],
           ),
+
+          // ✅ FIX: lock the height so AppButton can’t “expand vertically”
           bottomNavigationBar: SafeArea(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: AppButton(
-                      label: l10n.publish_action_reject,
-                      type: AppButtonType.secondary,
-                      expand: true,
-                      isBusy: state.acting,
-                      onPressed: (!item.isSubmitted || state.acting)
-                          ? null
-                          : () async {
-                              final notes = await DecisionSheet.open(
-                                context,
-                                title: l10n.publish_sheet_reject_title,
-                                confirmLabel: l10n.publish_action_reject,
-                                hint: l10n.publish_sheet_notes_hint,
-                                cancelLabel: l10n.common_cancel,
-                              );
-                              context
-                                  .read<PublishRequestDetailBloc>()
-                                  .add(PublishRequestReject(notes));
-                            },
+              child: SizedBox(
+                height: 52, // ✅ key fix
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: AppButton(
+                        label: l10n.publish_action_reject,
+                        type: AppButtonType.secondary,
+                        expand: true,
+                        isBusy: state.acting,
+                        onPressed: (!item.isSubmitted || state.acting)
+                            ? null
+                            : () async {
+                                final notes = await DecisionSheet.open(
+                                  context,
+                                  title: l10n.publish_sheet_reject_title,
+                                  confirmLabel: l10n.publish_action_reject,
+                                  hint: l10n.publish_sheet_notes_hint,
+                                  cancelLabel: l10n.common_cancel,
+                                );
+                                context
+                                    .read<PublishRequestDetailBloc>()
+                                    .add(PublishRequestReject(notes));
+                              },
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: AppButton(
-                      label: l10n.publish_action_approve,
-                      type: AppButtonType.primary,
-                      expand: true,
-                      isBusy: state.acting,
-                      onPressed: (!item.isSubmitted || state.acting)
-                          ? null
-                          : () async {
-                              final notes = await DecisionSheet.open(
-                                context,
-                                title: l10n.publish_sheet_approve_title,
-                                confirmLabel: l10n.publish_action_approve,
-                                hint: l10n.publish_sheet_notes_hint,
-                                cancelLabel: l10n.common_cancel,
-                              );
-                              context
-                                  .read<PublishRequestDetailBloc>()
-                                  .add(PublishRequestApprove(notes));
-                            },
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: AppButton(
+                        label: l10n.publish_action_approve,
+                        type: AppButtonType.primary,
+                        expand: true,
+                        isBusy: state.acting,
+                        onPressed: (!item.isSubmitted || state.acting)
+                            ? null
+                            : () async {
+                                final notes = await DecisionSheet.open(
+                                  context,
+                                  title: l10n.publish_sheet_approve_title,
+                                  confirmLabel: l10n.publish_action_approve,
+                                  hint: l10n.publish_sheet_notes_hint,
+                                  cancelLabel: l10n.common_cancel,
+                                );
+                                context
+                                    .read<PublishRequestDetailBloc>()
+                                    .add(PublishRequestApprove(notes));
+                              },
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -296,8 +304,7 @@ class _Header extends StatelessWidget {
                     color: cs.surfaceContainerHighest,
                     child: Icon(Icons.apps_rounded, color: cs.primary),
                   )
-                : Image.network(iconUrl,
-                    width: 58, height: 58, fit: BoxFit.cover),
+                : Image.network(iconUrl, width: 58, height: 58, fit: BoxFit.cover),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -368,10 +375,12 @@ class _Section extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w900,
-                  )),
+          Text(
+            title,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w900,
+                ),
+          ),
           const SizedBox(height: 10),
           child,
         ],
