@@ -3096,6 +3096,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Create Project'**
   String get super_nav_create_project;
+
+  /// No description provided for @publish_manage_publisher_profiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Publisher Profiles'**
+  String get publish_manage_publisher_profiles;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -1,4 +1,3 @@
-import 'package:build4all_manager/features/superadmin/publish_admin/data/services/publish_admin_remote_ds.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,13 +8,15 @@ import 'package:build4all_manager/l10n/app_localizations.dart';
 
 import '../../data/repositories/publish_admin_repo_impl.dart';
 import '../../domain/usecases/get_publish_requests.dart';
+import '../../data/services/publish_admin_remote_ds.dart';
 
 import '../bloc/publish_requests_bloc.dart';
 import '../bloc/publish_requests_event.dart';
 import '../bloc/publish_requests_state.dart';
 
-import '../widgets/publish_status_chips.dart';
-import '../widgets/publish_request_card.dart';
+import '../widgets/publish_status_filter_button.dart';
+import '../widgets/requested_apps_table_header.dart';
+import '../widgets/requested_app_row.dart';
 import 'publish_request_detail_screen.dart';
 
 class PublishRequestsScreen extends StatelessWidget {
@@ -28,7 +29,6 @@ class PublishRequestsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // ✅ USE the injected dio (no shadowing)
     final repo = PublishAdminRepoImpl(PublishAdminRemoteDs(dio: dio));
 
     return BlocProvider(
@@ -57,24 +57,58 @@ class _View extends StatelessWidget {
       },
       builder: (context, state) {
         return Scaffold(
-          appBar: AppBar(title: Text(l10n.nav_publish_requests)),
+          appBar: AppBar(
+            titleSpacing: 16,
+            title: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.nav_publish_requests,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w900,
+                      ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  // matches design vibe
+                  'Review and publish mobile apps to Google Play and Apple App Store',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: cs.onSurface.withOpacity(.65),
+                        height: 1.25,
+                      ),
+                ),
+              ],
+            ),
+            toolbarHeight: 82,
+          ),
           body: Column(
             children: [
-              PublishStatusChips(
-                value: state.status,
-                labelOf: (status) => _statusLabel(l10n, status),
-                onChanged: (s) => context
-                    .read<PublishRequestsBloc>()
-                    .add(PublishRequestsLoad(s)),
+              // Search + filter row (like screenshot)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: AppSearchBar(
+                        hint: 'Search by app name, owner, or request ID...',
+                        onQueryChanged: (q) => context
+                            .read<PublishRequestsBloc>()
+                            .add(PublishRequestsSearchChanged(q)),
+                        margin: EdgeInsets.zero,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    PublishStatusFilterButton(
+                      value: state.status,
+                      labelOf: (s) => _statusLabel(l10n, s),
+                      onChanged: (s) => context
+                          .read<PublishRequestsBloc>()
+                          .add(PublishRequestsLoad(s)),
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 10),
-              AppSearchBar(
-                hint: l10n.publish_search_hint,
-                onQueryChanged: (q) => context
-                    .read<PublishRequestsBloc>()
-                    .add(PublishRequestsSearchChanged(q)),
-                margin: const EdgeInsets.fromLTRB(12, 0, 12, 10),
-              ),
+
               Expanded(
                 child: Builder(
                   builder: (_) {
@@ -88,23 +122,23 @@ class _View extends StatelessWidget {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(Icons.inbox_rounded,
-                                color: cs.onSurfaceVariant, size: 42),
-                            const SizedBox(height: 8),
+                                color: cs.onSurfaceVariant, size: 44),
+                            const SizedBox(height: 10),
                             Text(
                               l10n.publish_no_requests,
                               style: Theme.of(context)
                                   .textTheme
                                   .titleMedium
                                   ?.copyWith(
-                                    fontWeight: FontWeight.w700,
-                                    color: cs.onSurface.withOpacity(.65),
+                                    fontWeight: FontWeight.w800,
+                                    color: cs.onSurface.withOpacity(.70),
                                   ),
                             ),
                             const SizedBox(height: 12),
                             FilledButton(
                               onPressed: () => context
                                   .read<PublishRequestsBloc>()
-                                  .add(PublishRequestsLoad('SUBMITTED')),
+                                  .add(PublishRequestsLoad(state.status)),
                               child: Text(l10n.common_refresh),
                             ),
                           ],
@@ -112,35 +146,79 @@ class _View extends StatelessWidget {
                       );
                     }
 
-                    return RefreshIndicator.adaptive(
-                      onRefresh: () async => context
-                          .read<PublishRequestsBloc>()
-                          .add(PublishRequestsRefresh()),
-                      child: ListView.builder(
-                        padding: const EdgeInsets.only(bottom: 16),
-                        itemCount: state.filtered.length,
-                        itemBuilder: (_, i) {
-                          final item = state.filtered[i];
-                          return PublishRequestCard(
-                            item: item,
-                            onTap: () async {
-                              final changed = await Navigator.push<bool>(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) =>
-                                      PublishRequestDetailScreen(item: item),
-                                ),
-                              );
+                    return LayoutBuilder(
+                      builder: (ctx, c) {
+                        final w = c.maxWidth;
 
-                              if (changed == true && context.mounted) {
-                                context
-                                    .read<PublishRequestsBloc>()
-                                    .add(PublishRequestsLoad(state.status));
-                              }
-                            },
-                          );
-                        },
-                      ),
+                        // responsive “table”: on small screens we hide some columns
+                        final showVersion = w >= 760;
+                        final showRequested = w >= 640;
+
+                        return Container(
+                          margin: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                          decoration: BoxDecoration(
+                            color: cs.surface,
+                            borderRadius: BorderRadius.circular(18),
+                            border: Border.all(
+                              color: cs.outlineVariant.withOpacity(.35),
+                            ),
+                          ),
+                          child: Column(
+                            children: [
+                              RequestedAppsTableHeader(
+                                showVersion: showVersion,
+                                showRequested: showRequested,
+                              ),
+                              Divider(
+                                  height: 1,
+                                  color: cs.outlineVariant.withOpacity(.35)),
+                              Expanded(
+                                child: RefreshIndicator.adaptive(
+                                  onRefresh: () async => context
+                                      .read<PublishRequestsBloc>()
+                                      .add(PublishRequestsRefresh()),
+                                  child: ListView.separated(
+                                    padding: const EdgeInsets.only(bottom: 8),
+                                    itemCount: state.filtered.length,
+                                    separatorBuilder: (_, __) => Divider(
+                                      height: 1,
+                                      color: cs.outlineVariant.withOpacity(.22),
+                                    ),
+                                    itemBuilder: (_, i) {
+                                      final item = state.filtered[i];
+                                      return RequestedAppRow(
+                                        item: item,
+                                        showVersion: showVersion,
+                                        showRequested: showRequested,
+                                        onViewPublish: () async {
+                                          final changed =
+                                              await Navigator.push<bool>(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) =>
+                                                  PublishRequestDetailScreen(
+                                                item: item,
+                                              ),
+                                            ),
+                                          );
+
+                                          if (changed == true &&
+                                              context.mounted) {
+                                            context
+                                                .read<PublishRequestsBloc>()
+                                                .add(PublishRequestsLoad(
+                                                    state.status));
+                                          }
+                                        },
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
                     );
                   },
                 ),

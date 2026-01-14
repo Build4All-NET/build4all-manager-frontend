@@ -630,5 +630,6 @@
   "owner_publish_err_shots8": "الحد الأقصى 8 لقطات",
 
   "msgWelcomeBack": "مرحبًا بعودتك",
-  "msgVerified": "تم التحقق"
+  "msgVerified": "تم التحقق",
+  "publish_manage_publisher_profiles": "إدارة ملفات الناشرين"
 }

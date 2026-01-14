@@ -31,6 +31,16 @@ class AppPublishRequestAdminModel {
   final String? adminNotes;
   final PublisherProfileModel? publisherProfile;
 
+  // NEW: versions from AdminUserProject
+  final int? androidVersionCode;
+  final String? androidVersionName;
+  final int? iosBuildNumber;
+  final String? iosVersionName;
+  final String? apkUrl;
+  final String? bundleUrl;
+  final String? ipaUrl;
+  final String? logoUrl;
+
   const AppPublishRequestAdminModel({
     required this.id,
     required this.aupId,
@@ -51,6 +61,18 @@ class AppPublishRequestAdminModel {
     required this.screenshotsUrls,
     required this.adminNotes,
     required this.publisherProfile,
+    
+
+    // NEW
+    required this.androidVersionCode,
+    required this.androidVersionName,
+    required this.iosBuildNumber,
+    required this.iosVersionName,
+    required this.apkUrl,
+    required this.bundleUrl,
+    required this.ipaUrl,
+    required this.logoUrl,
+
   });
 
   static DateTime? _dt(dynamic v) {
@@ -58,6 +80,12 @@ class AppPublishRequestAdminModel {
     final s = v.toString();
     if (s.isEmpty) return null;
     return DateTime.tryParse(s);
+  }
+
+  static int? _int(dynamic v) {
+    if (v == null) return null;
+    if (v is num) return v.toInt();
+    return int.tryParse(v.toString());
   }
 
   static List<String> _parseShots(dynamic v) {
@@ -98,11 +126,23 @@ class AppPublishRequestAdminModel {
       appIconUrl: j['appIconUrl']?.toString(),
       screenshotsUrls: _parseShots(j['screenshotsUrlsJson']),
       adminNotes: j['adminNotes']?.toString(),
+
       publisherProfile: j['publisherProfile'] == null
           ? null
           : PublisherProfileModel.fromJson(
               Map<String, dynamic>.from(j['publisherProfile'] as Map),
             ),
+
+      // NEW: read from response
+      androidVersionCode: _int(j['androidVersionCode']),
+      androidVersionName: j['androidVersionName']?.toString(),
+      iosBuildNumber: _int(j['iosBuildNumber']),
+      iosVersionName: j['iosVersionName']?.toString(),
+
+         apkUrl: j['apkUrl']?.toString(),
+      bundleUrl: j['bundleUrl']?.toString(),
+      ipaUrl: j['ipaUrl']?.toString(),
+      logoUrl: j['logoUrl']?.toString(),
     );
   }
 
@@ -134,5 +174,15 @@ class AppPublishRequestAdminModel {
                 developerEmail: publisherProfile!.developerEmail,
                 privacyPolicyUrl: publisherProfile!.privacyPolicyUrl,
               ),
+
+        //  NEW: pass to entity
+        androidVersionCode: androidVersionCode,
+        androidVersionName: androidVersionName,
+        iosBuildNumber: iosBuildNumber,
+        iosVersionName: iosVersionName,
+         apkUrl: apkUrl,
+        bundleUrl: bundleUrl,
+        ipaUrl: ipaUrl,
+        logoUrl: logoUrl,
       );
 }

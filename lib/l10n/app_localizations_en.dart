@@ -1529,4 +1529,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get super_nav_create_project => 'Create Project';
+
+  @override
+  String get publish_manage_publisher_profiles => 'Manage Publisher Profiles';
 }

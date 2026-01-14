@@ -29,6 +29,16 @@ class AppPublishRequestAdmin {
   final String? adminNotes;
 
   final PublisherProfile? publisherProfile;
+  final int? androidVersionCode;
+  final String? androidVersionName;
+  final int? iosBuildNumber;
+  final String? iosVersionName;
+
+  final String? apkUrl;
+  final String? bundleUrl; // AAB
+  final String? ipaUrl;
+  final String? logoUrl;
+
 
   const AppPublishRequestAdmin({
     required this.id,
@@ -50,6 +60,14 @@ class AppPublishRequestAdmin {
     required this.screenshotsUrls,
     required this.adminNotes,
     required this.publisherProfile,
+    this.androidVersionCode,
+    this.androidVersionName,
+    this.iosBuildNumber,
+    this.iosVersionName,
+    this.apkUrl,
+    this.bundleUrl,
+    this.ipaUrl,
+    this.logoUrl,
   });
 
   bool get isSubmitted => status.toUpperCase() == 'SUBMITTED';

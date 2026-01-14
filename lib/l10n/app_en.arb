@@ -700,7 +700,9 @@
   "super_nav_publish_requests": "Publish Requests",
   "super_nav_profile": "Profile",
   "err_unauthorized": "Unauthorized",
-  "super_nav_create_project": "Create Project"
+  "super_nav_create_project": "Create Project",
+ 
+  "publish_manage_publisher_profiles": "Manage Publisher Profiles"
 }
 
 

@@ -630,5 +630,6 @@
   "owner_publish_err_shots8": "Maximum 8 captures autorisées",
 
   "msgWelcomeBack": "Bon retour",
-  "msgVerified": "Vérifié"
+  "msgVerified": "Vérifié",
+  "publish_manage_publisher_profiles": "Gérer les profils éditeurs"
 }
