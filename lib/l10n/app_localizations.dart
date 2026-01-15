@@ -3102,6 +3102,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Manage Publisher Profiles'**
   String get publish_manage_publisher_profiles;
+
+  /// No description provided for @common_seed.
+  ///
+  /// In en, this message translates to:
+  /// **'Seed'**
+  String get common_seed;
+
+  /// No description provided for @common_saving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving...'**
+  String get common_saving;
+
+  /// No description provided for @common_saved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved ✅'**
+  String get common_saved;
+
+  /// No description provided for @common_save_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Save failed'**
+  String get common_save_failed;
+
+  /// No description provided for @common_open.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get common_open;
+
+  /// No description provided for @common_unknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get common_unknown;
+
+  /// No description provided for @common_status.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get common_status;
+
+  /// No description provided for @common_fill_all_fields.
+  ///
+  /// In en, this message translates to:
+  /// **'Please fill all fields'**
+  String get common_fill_all_fields;
+
+  /// No description provided for @publish_store_play.
+  ///
+  /// In en, this message translates to:
+  /// **'PLAY_STORE'**
+  String get publish_store_play;
+
+  /// No description provided for @publish_store_app.
+  ///
+  /// In en, this message translates to:
+  /// **'APP_STORE'**
+  String get publish_store_app;
+
+  /// No description provided for @publish_store_publisher_profile.
+  ///
+  /// In en, this message translates to:
+  /// **'Store Publisher Profile'**
+  String get publish_store_publisher_profile;
+
+  /// No description provided for @publish_developer_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Developer name'**
+  String get publish_developer_name;
+
+  /// No description provided for @publish_developer_email.
+  ///
+  /// In en, this message translates to:
+  /// **'Developer email'**
+  String get publish_developer_email;
+
+  /// No description provided for @publish_privacy_policy_url.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy policy URL'**
+  String get publish_privacy_policy_url;
+
+  /// No description provided for @publish_profiles_required_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Owners can’t submit publish requests unless this is configured.'**
+  String get publish_profiles_required_hint;
+
+  /// No description provided for @publish_seeded_success.
+  ///
+  /// In en, this message translates to:
+  /// **'Seeded '**
+  String get publish_seeded_success;
+
+  /// No description provided for @publish_seed_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Seed failed'**
+  String get publish_seed_failed;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

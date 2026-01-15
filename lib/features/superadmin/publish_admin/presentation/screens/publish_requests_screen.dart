@@ -2,13 +2,14 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:build4all_manager/shared/widgets/app_toast.dart';
-import 'package:build4all_manager/shared/widgets/app_search_bar.dart';
 import 'package:build4all_manager/l10n/app_localizations.dart';
+import 'package:build4all_manager/shared/themes/app_theme.dart'; // UiTokens
+import 'package:build4all_manager/shared/widgets/app_search_bar.dart';
+import 'package:build4all_manager/shared/widgets/app_toast.dart';
 
 import '../../data/repositories/publish_admin_repo_impl.dart';
-import '../../domain/usecases/get_publish_requests.dart';
 import '../../data/services/publish_admin_remote_ds.dart';
+import '../../domain/usecases/get_publish_requests.dart';
 
 import '../bloc/publish_requests_bloc.dart';
 import '../bloc/publish_requests_event.dart';
@@ -17,7 +18,9 @@ import '../bloc/publish_requests_state.dart';
 import '../widgets/publish_status_filter_button.dart';
 import '../widgets/requested_apps_table_header.dart';
 import '../widgets/requested_app_row.dart';
+
 import 'publish_request_detail_screen.dart';
+import 'publisher_profiles_screen.dart';
 
 class PublishRequestsScreen extends StatelessWidget {
   final Dio dio;
@@ -35,18 +38,24 @@ class PublishRequestsScreen extends StatelessWidget {
       create: (_) => PublishRequestsBloc(
         getRequests: GetPublishRequests(repo),
       )..add(PublishRequestsLoad('SUBMITTED')),
-      child: const _View(),
+      child: _View(dio: dio),
     );
   }
 }
 
 class _View extends StatelessWidget {
-  const _View();
+  final Dio dio;
+  const _View({required this.dio});
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
+    final tokens = Theme.of(context).extension<UiTokens>();
+
+    final pad = tokens?.pagePad ?? const EdgeInsets.all(16);
+    final rLg = tokens?.radiusLg ?? 18;
+    final shadow = tokens?.cardShadow ?? const <BoxShadow>[];
 
     return BlocConsumer<PublishRequestsBloc, PublishRequestsState>(
       listenWhen: (p, c) => p.error != c.error,
@@ -58,135 +67,121 @@ class _View extends StatelessWidget {
       builder: (context, state) {
         return Scaffold(
           appBar: AppBar(
-            titleSpacing: 16,
-            title: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l10n.nav_publish_requests,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w900,
-                      ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  // matches design vibe
-                  'Review and publish mobile apps to Google Play and Apple App Store',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: cs.onSurface.withOpacity(.65),
-                        height: 1.25,
-                      ),
-                ),
-              ],
+            titleSpacing: pad.left,
+            title: Text(
+              l10n.nav_publish_requests,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-            toolbarHeight: 82,
           ),
-          body: Column(
-            children: [
-              // Search + filter row (like screenshot)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: AppSearchBar(
-                        hint: 'Search by app name, owner, or request ID...',
-                        onQueryChanged: (q) => context
-                            .read<PublishRequestsBloc>()
-                            .add(PublishRequestsSearchChanged(q)),
-                        margin: EdgeInsets.zero,
-                      ),
+
+          // ✅ ONE scroll for the whole page
+          body: RefreshIndicator.adaptive(
+            onRefresh: () async {
+              context.read<PublishRequestsBloc>().add(PublishRequestsRefresh());
+            },
+            child: CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              slivers: [
+                // top padding
+                SliverPadding(
+                  padding: EdgeInsets.fromLTRB(pad.left, 12, pad.right, 0),
+                  sliver: SliverToBoxAdapter(
+                    child: _PublisherProfilesProCard(
+                      title: l10n.publish_manage_publisher_profiles,
+                      subtitle: l10n.publish_profiles_required_hint,
+                      onOpen: () => _openProfiles(context),
                     ),
-                    const SizedBox(width: 10),
-                    PublishStatusFilterButton(
-                      value: state.status,
-                      labelOf: (s) => _statusLabel(l10n, s),
-                      onChanged: (s) => context
-                          .read<PublishRequestsBloc>()
-                          .add(PublishRequestsLoad(s)),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
 
-              Expanded(
-                child: Builder(
-                  builder: (_) {
-                    if (state.loading) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-
-                    if (state.filtered.isEmpty) {
-                      return Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.inbox_rounded,
-                                color: cs.onSurfaceVariant, size: 44),
-                            const SizedBox(height: 10),
-                            Text(
-                              l10n.publish_no_requests,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.w800,
-                                    color: cs.onSurface.withOpacity(.70),
-                                  ),
-                            ),
-                            const SizedBox(height: 12),
-                            FilledButton(
-                              onPressed: () => context
-                                  .read<PublishRequestsBloc>()
-                                  .add(PublishRequestsLoad(state.status)),
-                              child: Text(l10n.common_refresh),
-                            ),
-                          ],
-                        ),
-                      );
-                    }
-
-                    return LayoutBuilder(
-                      builder: (ctx, c) {
-                        final w = c.maxWidth;
-
-                        // responsive “table”: on small screens we hide some columns
-                        final showVersion = w >= 760;
-                        final showRequested = w >= 640;
-
-                        return Container(
-                          margin: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-                          decoration: BoxDecoration(
-                            color: cs.surface,
-                            borderRadius: BorderRadius.circular(18),
-                            border: Border.all(
-                              color: cs.outlineVariant.withOpacity(.35),
-                            ),
+                // search + filter row
+                SliverPadding(
+                  padding: EdgeInsets.fromLTRB(pad.left, 10, pad.right, 12),
+                  sliver: SliverToBoxAdapter(
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: AppSearchBar(
+                            hint: l10n.publish_search_hint,
+                            onQueryChanged: (q) => context
+                                .read<PublishRequestsBloc>()
+                                .add(PublishRequestsSearchChanged(q)),
+                            margin: EdgeInsets.zero,
                           ),
-                          child: Column(
-                            children: [
-                              RequestedAppsTableHeader(
-                                showVersion: showVersion,
-                                showRequested: showRequested,
+                        ),
+                        const SizedBox(width: 10),
+                        PublishStatusFilterButton(
+                          value: state.status,
+                          labelOf: (s) => _statusLabel(l10n, s),
+                          onChanged: (s) => context
+                              .read<PublishRequestsBloc>()
+                              .add(PublishRequestsLoad(s)),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // content
+                if (state.loading)
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: const Center(child: CircularProgressIndicator()),
+                  )
+                else if (state.filtered.isEmpty)
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: _EmptyState(
+                      title: l10n.publish_no_requests,
+                      buttonLabel: l10n.common_refresh,
+                      onRetry: () => context
+                          .read<PublishRequestsBloc>()
+                          .add(PublishRequestsLoad(state.status)),
+                    ),
+                  )
+                else
+                  // ✅ responsive width awareness INSIDE sliver
+                  SliverLayoutBuilder(
+                    builder: (ctx, constraints) {
+                      final w = constraints.crossAxisExtent;
+                      final showVersion = w >= 760;
+                      final showRequested = w >= 640;
+
+                      return SliverPadding(
+                        padding:
+                            EdgeInsets.fromLTRB(pad.left, 0, pad.right, 12),
+                        sliver: SliverToBoxAdapter(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: cs.surface,
+                              borderRadius: BorderRadius.circular(rLg),
+                              border: Border.all(
+                                color: cs.outlineVariant.withOpacity(.35),
                               ),
-                              Divider(
+                              boxShadow: shadow,
+                            ),
+                            clipBehavior: Clip.antiAlias,
+                            child: Column(
+                              children: [
+                                RequestedAppsTableHeader(
+                                  showVersion: showVersion,
+                                  showRequested: showRequested,
+                                ),
+                                Divider(
                                   height: 1,
-                                  color: cs.outlineVariant.withOpacity(.35)),
-                              Expanded(
-                                child: RefreshIndicator.adaptive(
-                                  onRefresh: () async => context
-                                      .read<PublishRequestsBloc>()
-                                      .add(PublishRequestsRefresh()),
-                                  child: ListView.separated(
-                                    padding: const EdgeInsets.only(bottom: 8),
-                                    itemCount: state.filtered.length,
-                                    separatorBuilder: (_, __) => Divider(
-                                      height: 1,
-                                      color: cs.outlineVariant.withOpacity(.22),
-                                    ),
-                                    itemBuilder: (_, i) {
-                                      final item = state.filtered[i];
-                                      return RequestedAppRow(
+                                  color: cs.outlineVariant.withOpacity(.35),
+                                ),
+
+                                // ✅ IMPORTANT:
+                                // No ListView here. We render rows directly so the WHOLE page scrolls.
+                                ...List.generate(state.filtered.length, (i) {
+                                  final item = state.filtered[i];
+                                  final isLast = i == state.filtered.length - 1;
+
+                                  return Column(
+                                    children: [
+                                      RequestedAppRow(
                                         item: item,
                                         showVersion: showVersion,
                                         showRequested: showRequested,
@@ -210,23 +205,41 @@ class _View extends StatelessWidget {
                                                     state.status));
                                           }
                                         },
-                                      );
-                                    },
-                                  ),
-                                ),
-                              ),
-                            ],
+                                      ),
+                                      if (!isLast)
+                                        Divider(
+                                          height: 1,
+                                          color: cs.outlineVariant
+                                              .withOpacity(.22),
+                                        ),
+                                    ],
+                                  );
+                                }),
+                                const SizedBox(height: 8),
+                              ],
+                            ),
                           ),
-                        );
-                      },
-                    );
-                  },
-                ),
-              ),
-            ],
+                        ),
+                      );
+                    },
+                  ),
+
+                // bottom breathing room (so last row doesn’t stick to bottom)
+                const SliverToBoxAdapter(child: SizedBox(height: 10)),
+              ],
+            ),
           ),
         );
       },
+    );
+  }
+
+  void _openProfiles(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => PublisherProfilesScreen(),
+      ),
     );
   }
 
@@ -247,5 +260,137 @@ class _View extends StatelessWidget {
       default:
         return status;
     }
+  }
+}
+
+class _PublisherProfilesProCard extends StatelessWidget {
+  final VoidCallback onOpen;
+  final String title;
+  final String subtitle;
+
+  const _PublisherProfilesProCard({
+    required this.onOpen,
+    required this.title,
+    required this.subtitle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tokens = Theme.of(context).extension<UiTokens>();
+
+    final rLg = tokens?.radiusLg ?? 18;
+    final shadow = tokens?.cardShadow ?? const <BoxShadow>[];
+
+    return Material(
+      color: cs.surface,
+      borderRadius: BorderRadius.circular(rLg),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(rLg),
+        onTap: onOpen,
+        child: Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(rLg),
+            border: Border.all(color: cs.outlineVariant.withOpacity(.35)),
+            boxShadow: shadow,
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: cs.primary.withOpacity(.12),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Icon(Icons.storefront_rounded, color: cs.primary),
+              ),
+              const SizedBox(width: 12),
+
+              // ✅ no overflow (ellipsis)
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w900,
+                          ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      subtitle,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: cs.onSurface.withOpacity(.65),
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(width: 10),
+
+              // ✅ safe + responsive action (no big button overflow)
+              Tooltip(
+                message: 'Open',
+                child: IconButton(
+                  onPressed: onOpen,
+                  icon: const Icon(Icons.settings_rounded),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _EmptyState extends StatelessWidget {
+  final String title;
+  final String buttonLabel;
+  final VoidCallback onRetry;
+
+  const _EmptyState({
+    required this.title,
+    required this.buttonLabel,
+    required this.onRetry,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.inbox_rounded, color: cs.onSurfaceVariant, size: 44),
+            const SizedBox(height: 10),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: cs.onSurface.withOpacity(.70),
+                  ),
+            ),
+            const SizedBox(height: 12),
+            FilledButton(
+              onPressed: onRetry,
+              child: Text(buttonLabel),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

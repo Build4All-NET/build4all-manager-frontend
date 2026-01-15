@@ -1,10 +1,15 @@
+import 'package:build4all_manager/core/network/dio_client.dart';
+import 'package:build4all_manager/shared/themes/app_theme.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+
 import 'package:build4all_manager/l10n/app_localizations.dart';
+import 'package:build4all_manager/shared/widgets/app_toast.dart';
+import 'package:build4all_manager/shared/widgets/app_button.dart';
+import 'package:build4all_manager/shared/widgets/app_text_field.dart';
 
 class PublisherProfilesScreen extends StatefulWidget {
-  final Dio dio;
-  const PublisherProfilesScreen({super.key, required this.dio});
+  const PublisherProfilesScreen({super.key});
 
   @override
   State<PublisherProfilesScreen> createState() =>
@@ -12,6 +17,8 @@ class PublisherProfilesScreen extends StatefulWidget {
 }
 
 class _PublisherProfilesScreenState extends State<PublisherProfilesScreen> {
+  final Dio dio = DioClient.ensure();
+
   bool loading = true;
   bool saving = false;
 
@@ -22,7 +29,6 @@ class _PublisherProfilesScreenState extends State<PublisherProfilesScreen> {
   final emailCtrl = TextEditingController();
   final ppCtrl = TextEditingController();
 
-  // store -> {developerName, developerEmail, privacyPolicyUrl}
   final Map<String, Map<String, String>> cache = {};
 
   @override
@@ -42,7 +48,7 @@ class _PublisherProfilesScreenState extends State<PublisherProfilesScreen> {
   Future<void> _load() async {
     setState(() => loading = true);
     try {
-      final res = await widget.dio.get('/superadmin/publisher-profiles');
+      final res = await dio.get('/superadmin/publisher-profiles');
       final data = res.data;
       final list = (data is Map ? data['data'] : null);
 
@@ -61,17 +67,15 @@ class _PublisherProfilesScreenState extends State<PublisherProfilesScreen> {
         }
       }
 
-      // pick a safe store to show
       if (!cache.containsKey(selectedStore) && cache.isNotEmpty) {
         selectedStore = cache.keys.first;
       }
 
       _applySelectedToFields();
-    } catch (e) {
+    } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to load profiles: $e')),
-        );
+        final l10n = AppLocalizations.of(context)!;
+        AppToast.error(context, l10n.err_unknown);
       }
     } finally {
       if (mounted) setState(() => loading = false);
@@ -86,20 +90,20 @@ class _PublisherProfilesScreenState extends State<PublisherProfilesScreen> {
   }
 
   Future<void> _save() async {
+    final l10n = AppLocalizations.of(context)!;
+
     final name = nameCtrl.text.trim();
     final email = emailCtrl.text.trim();
     final pp = ppCtrl.text.trim();
 
     if (name.isEmpty || email.isEmpty || pp.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill all fields')),
-      );
+      AppToast.warn(context, l10n.common_fill_all_fields);
       return;
     }
 
     setState(() => saving = true);
     try {
-      await widget.dio.post(
+      await dio.post(
         '/superadmin/publisher-profiles/upsert',
         data: {
           'store': selectedStore,
@@ -115,26 +119,20 @@ class _PublisherProfilesScreenState extends State<PublisherProfilesScreen> {
         'privacyPolicyUrl': pp,
       };
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Saved ✅')),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Save failed: $e')),
-        );
-      }
+      if (mounted) AppToast.success(context, l10n.common_saved);
+    } catch (_) {
+      if (mounted) AppToast.error(context, l10n.common_save_failed);
     } finally {
       if (mounted) setState(() => saving = false);
     }
   }
 
   Future<void> _seed() async {
+    final l10n = AppLocalizations.of(context)!;
+
     setState(() => saving = true);
     try {
-      await widget.dio.post(
+      await dio.post(
         '/superadmin/publisher-profiles/seed',
         data: {
           'developerName': 'Build4All',
@@ -145,17 +143,9 @@ class _PublisherProfilesScreenState extends State<PublisherProfilesScreen> {
 
       await _load();
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Seeded ✅')),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Seed failed: $e')),
-        );
-      }
+      if (mounted) AppToast.success(context, l10n.publish_seeded_success);
+    } catch (_) {
+      if (mounted) AppToast.error(context, l10n.publish_seed_failed);
     } finally {
       if (mounted) setState(() => saving = false);
     }
@@ -165,158 +155,175 @@ class _PublisherProfilesScreenState extends State<PublisherProfilesScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
+    final tokens = Theme.of(context).extension<UiTokens>();
+
+    final pad = tokens?.pagePad ?? const EdgeInsets.all(16);
+    final rLg = tokens?.radiusLg ?? 18.0;
+    final shadow = tokens?.cardShadow ?? const <BoxShadow>[];
+
+    // ✅ fixed bottom height so button NEVER takes screen
+    const bottomBarHeight = 72.0;
+
+    // ✅ push content above button (also safe with keyboard)
+    final keyboard = MediaQuery.of(context).viewInsets.bottom;
+    final bottomPadding = bottomBarHeight + 16 + keyboard;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_title(l10n)),
+        title: Text(l10n.publish_manage_publisher_profiles),
         actions: [
-          TextButton.icon(
+          AppButton(
             onPressed: saving ? null : _seed,
-            icon: const Icon(Icons.auto_fix_high_rounded),
-            label: const Text('Seed'),
+            type: AppButtonType.text,
+            leading: const Icon(Icons.auto_fix_high_rounded),
+            label: l10n.common_seed,
           ),
           const SizedBox(width: 8),
         ],
       ),
       body: loading
           ? const Center(child: CircularProgressIndicator())
-          : ListView(
-              padding: const EdgeInsets.fromLTRB(16, 14, 16, 100),
-              children: [
-                // store selector
-                Wrap(
-                  spacing: 10,
-                  runSpacing: 10,
-                  children: stores.map((s) {
-                    final selected = selectedStore == s;
-                    return ChoiceChip(
-                      label: Text(s),
-                      selected: selected,
-                      onSelected: (_) {
-                        setState(() => selectedStore = s);
-                        _applySelectedToFields();
-                      },
-                      selectedColor: cs.primary.withOpacity(.14),
-                      labelStyle: TextStyle(
-                        fontWeight: FontWeight.w900,
-                        color: selected ? cs.primary : cs.onSurface,
-                      ),
-                      side:
-                          BorderSide(color: cs.outlineVariant.withOpacity(.6)),
-                    );
-                  }).toList(),
+          : ScrollConfiguration(
+              behavior: const _NoGlowScroll(),
+              child: ListView(
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
+                padding: EdgeInsets.fromLTRB(
+                  pad.left,
+                  pad.top,
+                  pad.right,
+                  bottomPadding,
                 ),
-                const SizedBox(height: 14),
-
-                _Card(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Store Publisher Profile',
-                        style:
-                            Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w900,
+                children: [
+                  Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 720),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Wrap(
+                            spacing: 10,
+                            runSpacing: 10,
+                            children: stores.map((s) {
+                              final selected = selectedStore == s;
+                              return ChoiceChip(
+                                label: Text(
+                                  s == 'PLAY_STORE'
+                                      ? l10n.publish_store_play
+                                      : l10n.publish_store_app,
                                 ),
-                      ),
-                      const SizedBox(height: 12),
-                      _Field(label: 'Developer name', controller: nameCtrl),
-                      const SizedBox(height: 10),
-                      _Field(
-                        label: 'Developer email',
-                        controller: emailCtrl,
-                        keyboardType: TextInputType.emailAddress,
-                      ),
-                      const SizedBox(height: 10),
-                      _Field(
-                        label: 'Privacy policy URL',
-                        controller: ppCtrl,
-                        keyboardType: TextInputType.url,
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        'Owners can’t submit publish requests unless this is configured.',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: cs.onSurface.withOpacity(.65),
+                                selected: selected,
+                                onSelected: (_) {
+                                  setState(() => selectedStore = s);
+                                  _applySelectedToFields();
+                                },
+                                selectedColor: cs.primary.withOpacity(.14),
+                                labelStyle: TextStyle(
+                                  fontWeight: FontWeight.w900,
+                                  color: selected ? cs.primary : cs.onSurface,
+                                ),
+                                side: BorderSide(
+                                  color: cs.outlineVariant.withOpacity(.6),
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                          const SizedBox(height: 14),
+                          Container(
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: cs.surface,
+                              borderRadius: BorderRadius.circular(rLg),
+                              border: Border.all(
+                                color: cs.outlineVariant.withOpacity(.35),
+                              ),
+                              boxShadow: shadow,
                             ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  l10n.publish_store_publisher_profile,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium
+                                      ?.copyWith(fontWeight: FontWeight.w900),
+                                ),
+                                const SizedBox(height: 12),
+                                AppTextField(
+                                  controller: nameCtrl,
+                                  label: l10n.publish_developer_name,
+                                  filled: true,
+                                ),
+                                const SizedBox(height: 10),
+                                AppTextField(
+                                  controller: emailCtrl,
+                                  label: l10n.publish_developer_email,
+                                  keyboardType: TextInputType.emailAddress,
+                                  filled: true,
+                                ),
+                                const SizedBox(height: 10),
+                                AppTextField(
+                                  controller: ppCtrl,
+                                  label: l10n.publish_privacy_policy_url,
+                                  keyboardType: TextInputType.url,
+                                  filled: true,
+                                ),
+                                const SizedBox(height: 10),
+                                Text(
+                                  l10n.publish_profiles_required_hint,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodySmall
+                                      ?.copyWith(
+                                        color: cs.onSurface.withOpacity(.65),
+                                      ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
+
+      // ✅ FORCE bottom bar height + block AppButton from expanding vertically
       bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-          child: SizedBox(
-            height: 52,
-            child: FilledButton.icon(
-              icon: saving
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.save_rounded),
-              label: Text(saving ? 'Saving...' : 'Save'),
-              onPressed: saving ? null : _save,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints.tightFor(height: bottomBarHeight),
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(pad.left, 8, pad.right, 12),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 720),
+                child: AppButton(
+                  expand: true,
+                  isBusy: saving,
+                  onPressed: saving ? null : _save,
+                  leading: const Icon(Icons.save_rounded),
+                  label: saving ? l10n.common_saving : l10n.common_save,
+                ),
+              ),
             ),
           ),
         ),
       ),
     );
   }
-
-  String _title(AppLocalizations l10n) {
-    try {
-      return l10n.publish_manage_publisher_profiles;
-    } catch (_) {
-      return 'Publisher Profiles';
-    }
-  }
 }
 
-class _Card extends StatelessWidget {
-  final Widget child;
-  const _Card({required this.child});
+class _NoGlowScroll extends ScrollBehavior {
+  const _NoGlowScroll();
 
   @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: cs.surface,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: cs.outlineVariant.withOpacity(.35)),
-      ),
-      child: child,
-    );
-  }
-}
-
-class _Field extends StatelessWidget {
-  final String label;
-  final TextEditingController controller;
-  final TextInputType? keyboardType;
-
-  const _Field({
-    required this.label,
-    required this.controller,
-    this.keyboardType,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return TextField(
-      controller: controller,
-      keyboardType: keyboardType,
-      decoration: InputDecoration(
-        labelText: label,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-        ),
-      ),
-    );
+  Widget buildOverscrollIndicator(
+    BuildContext context,
+    Widget child,
+    ScrollableDetails details,
+  ) {
+    return child;
   }
 }

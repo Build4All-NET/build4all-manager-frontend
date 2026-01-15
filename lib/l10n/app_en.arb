@@ -702,7 +702,25 @@
   "err_unauthorized": "Unauthorized",
   "super_nav_create_project": "Create Project",
  
-  "publish_manage_publisher_profiles": "Manage Publisher Profiles"
+  "publish_manage_publisher_profiles": "Manage Publisher Profiles",
+   "common_seed": "Seed",
+  "common_saving": "Saving...",
+  "common_saved": "Saved ✅",
+  "common_save_failed": "Save failed",
+  "common_open": "Open",
+  "common_unknown": "Unknown",
+  "common_status": "Status",
+  "common_fill_all_fields": "Please fill all fields",
+
+  "publish_store_play": "PLAY_STORE",
+  "publish_store_app": "APP_STORE",
+  "publish_store_publisher_profile": "Store Publisher Profile",
+  "publish_developer_name": "Developer name",
+  "publish_developer_email": "Developer email",
+  "publish_privacy_policy_url": "Privacy policy URL",
+  "publish_profiles_required_hint": "Owners can’t submit publish requests unless this is configured.",
+  "publish_seeded_success": "Seeded ",
+  "publish_seed_failed": "Seed failed"
 }
 
 

@@ -1532,4 +1532,55 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get publish_manage_publisher_profiles => 'إدارة ملفات الناشرين';
+
+  @override
+  String get common_seed => 'Seed';
+
+  @override
+  String get common_saving => 'Saving...';
+
+  @override
+  String get common_saved => 'Saved ✅';
+
+  @override
+  String get common_save_failed => 'Save failed';
+
+  @override
+  String get common_open => 'Open';
+
+  @override
+  String get common_unknown => 'Unknown';
+
+  @override
+  String get common_status => 'Status';
+
+  @override
+  String get common_fill_all_fields => 'Please fill all fields';
+
+  @override
+  String get publish_store_play => 'PLAY_STORE';
+
+  @override
+  String get publish_store_app => 'APP_STORE';
+
+  @override
+  String get publish_store_publisher_profile => 'Store Publisher Profile';
+
+  @override
+  String get publish_developer_name => 'Developer name';
+
+  @override
+  String get publish_developer_email => 'Developer email';
+
+  @override
+  String get publish_privacy_policy_url => 'Privacy policy URL';
+
+  @override
+  String get publish_profiles_required_hint => 'Owners can’t submit publish requests unless this is configured.';
+
+  @override
+  String get publish_seeded_success => 'Seeded ';
+
+  @override
+  String get publish_seed_failed => 'Seed failed';
 }

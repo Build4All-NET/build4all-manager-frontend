@@ -1,5 +1,5 @@
 {
-  "serverURI": "http://192.168.1.5:8080",
+  "serverURI": "http://192.168.1.3:8080",
   "role": "both",
   "locationIq": {
     "autocomplete": "https://api.locationiq.com/v1/autocomplete?key=pk.14ea0e02d4685f88a3ec5ea23dd898b9",
