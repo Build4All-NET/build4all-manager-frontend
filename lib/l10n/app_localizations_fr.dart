@@ -237,7 +237,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get profile_password_updated => 'Password updated successfully';
 
   @override
-  String get profile_password_hint => 'For your security, use a strong unique password.';
+  String get profile_password_hint => 'Update your password to keep your account secure.';
 
   @override
   String get profile_update_password => 'Update password';
@@ -1583,4 +1583,69 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get publish_seed_failed => 'Seed failed';
+
+  @override
+  String get ai_label => 'AI';
+
+  @override
+  String get ai_enabled => 'Enabled';
+
+  @override
+  String get ai_disabled => 'Disabled';
+
+  @override
+  String get ai_owner_setting_title => 'Owner AI';
+
+  @override
+  String get ai_owner_setting_subtitle => 'Enable or disable AI for this owner.';
+
+  @override
+  String get ai_loading => 'Loading AI status…';
+
+  @override
+  String get ai_update_success => 'AI updated';
+
+  @override
+  String get ai_update_failed => 'Failed to update AI';
+
+  @override
+  String get ai_load_failed => 'Failed to load AI status';
+
+  @override
+  String get ownerAppsSearchHint => 'Search apps…';
+
+  @override
+  String get ownerAppsEmpty => 'No apps found for this owner';
+
+  @override
+  String get ownerAppsUnnamed => '(Unnamed App)';
+
+  @override
+  String get commonRetry => 'Retry';
+
+  @override
+  String ownerAppsSlugStatus(String slug, String status) {
+    return 'slug: $slug  •  $status';
+  }
+
+  @override
+  String get projectsSearchHint => 'Search projects…';
+
+  @override
+  String get projectsEmpty => 'No projects found';
+
+  @override
+  String get common_language => 'Langue';
+
+  @override
+  String get common_system_language => 'Système';
+
+  @override
+  String get lang_english => 'Anglais';
+
+  @override
+  String get lang_arabic => 'Arabe';
+
+  @override
+  String get lang_french => 'Français';
 }

@@ -237,7 +237,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get profile_password_updated => 'Password updated successfully';
 
   @override
-  String get profile_password_hint => 'For your security, use a strong unique password.';
+  String get profile_password_hint => 'Update your password to keep your account secure.';
 
   @override
   String get profile_update_password => 'Update password';
@@ -1583,4 +1583,69 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get publish_seed_failed => 'Seed failed';
+
+  @override
+  String get ai_label => 'الذكاء';
+
+  @override
+  String get ai_enabled => 'مفعّل';
+
+  @override
+  String get ai_disabled => 'غير مفعّل';
+
+  @override
+  String get ai_owner_setting_title => 'ذكاء المالك';
+
+  @override
+  String get ai_owner_setting_subtitle => 'فعّل أو عطّل الذكاء لهذا المالك.';
+
+  @override
+  String get ai_loading => 'جاري تحميل حالة الذكاء…';
+
+  @override
+  String get ai_update_success => 'تم تحديث الذكاء';
+
+  @override
+  String get ai_update_failed => 'فشل تحديث الذكاء';
+
+  @override
+  String get ai_load_failed => 'فشل تحميل حالة الذكاء';
+
+  @override
+  String get ownerAppsSearchHint => 'ابحث عن التطبيقات…';
+
+  @override
+  String get ownerAppsEmpty => 'لا توجد تطبيقات لهذا المالك';
+
+  @override
+  String get ownerAppsUnnamed => '(تطبيق بدون اسم)';
+
+  @override
+  String get commonRetry => 'إعادة المحاولة';
+
+  @override
+  String ownerAppsSlugStatus(String slug, String status) {
+    return 'المعرّف: $slug  •  $status';
+  }
+
+  @override
+  String get projectsSearchHint => 'ابحث عن المشاريع…';
+
+  @override
+  String get projectsEmpty => 'لا توجد مشاريع';
+
+  @override
+  String get common_language => 'اللغة';
+
+  @override
+  String get common_system_language => 'لغة الجهاز';
+
+  @override
+  String get lang_english => 'الإنجليزية';
+
+  @override
+  String get lang_arabic => 'العربية';
+
+  @override
+  String get lang_french => 'الفرنسية';
 }

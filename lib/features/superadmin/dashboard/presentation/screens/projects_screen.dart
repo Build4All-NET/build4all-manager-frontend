@@ -4,11 +4,14 @@ import 'package:build4all_manager/features/superadmin/dashboard/data/services/pr
 import 'package:build4all_manager/features/superadmin/dashboard/domain/entities/project_summary.dart';
 import 'package:build4all_manager/features/superadmin/dashboard/presentation/screens/OwnersByProjectScreen.dart';
 import 'package:build4all_manager/features/superadmin/dashboard/presentation/widgets/pro_project_tile.dart';
+import 'package:build4all_manager/l10n/app_localizations.dart';
 import 'package:build4all_manager/shared/utils/search_match.dart';
 import 'package:build4all_manager/shared/widgets/app_search_bar.dart';
 import 'package:build4all_manager/shared/widgets/app_toast.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+
+
 
 class ProjectsScreen extends StatefulWidget {
   const ProjectsScreen({super.key});
@@ -71,9 +74,11 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
+
     return Scaffold(
       appBar: AppSearchAppBar(
-        hint: 'Search projects…',
+        hint: t.projectsSearchHint,
         showBack: true,
         onQueryChanged: (q) => setState(() => _q = q),
         onClear: () => setState(() => _q = ''),
@@ -86,9 +91,9 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                 ? _InlineError(message: _error!, onRetry: _load)
                 : _projects.isEmpty
                     ? ListView(
-                        children: const [
-                          SizedBox(height: 24),
-                          Center(child: Text('No projects found')),
+                        children: [
+                          const SizedBox(height: 24),
+                          Center(child: Text(t.projectsEmpty)),
                         ],
                       )
                     : ListView(
@@ -137,6 +142,8 @@ class _InlineError extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final t = AppLocalizations.of(context)!;
+
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
@@ -159,7 +166,10 @@ class _InlineError extends StatelessWidget {
                   style: TextStyle(color: cs.error),
                 ),
               ),
-              TextButton(onPressed: onRetry, child: const Text('Retry')),
+              TextButton(
+                onPressed: onRetry,
+                child: Text(t.commonRetry),
+              ),
             ],
           ),
         ),

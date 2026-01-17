@@ -1,9 +1,12 @@
+import 'package:build4all_manager/core/localization/locale_cubit.dart';
 import 'package:build4all_manager/core/network/dio_client.dart';
-import 'package:build4all_manager/shared/widgets/app_toast.dart'; // ✅ common toast (replace top_toast)
+import 'package:build4all_manager/shared/widgets/app_toast.dart'; 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+
+//  keep YOUR l10n import (since your main.dart uses it)
 import 'package:build4all_manager/l10n/app_localizations.dart';
 
 import '../../data/repositories/admin_repository_impl.dart';
@@ -55,7 +58,6 @@ class _ProfileView extends StatelessWidget {
     return BlocConsumer<ProfileBloc, ProfileState>(
       listenWhen: (p, c) => p.error != c.error || p.success != c.success,
       listener: (ctx, st) {
-        // ✅ common toast instead of showTopToast
         if (st.error?.isNotEmpty == true) {
           AppToast.error(ctx, st.error!);
         }
@@ -71,7 +73,6 @@ class _ProfileView extends StatelessWidget {
         }
 
         if (state.me == null) {
-          // failed initial load
           return Scaffold(
             body: Center(
               child: Column(
@@ -103,6 +104,10 @@ class _ProfileView extends StatelessWidget {
               children: [
                 ProfileHeader(me: me),
                 const SizedBox(height: 14),
+
+                // ✅ Language switcher (this is what was missing)
+                _LanguageTile(l10n: l10n),
+                const SizedBox(height: 12),
 
                 // Profile form
                 Card(
@@ -280,11 +285,72 @@ class _ProfileView extends StatelessWidget {
 
     if (!context.mounted) return;
 
-    // ✅ common toast instead of showTopToast
     AppToast.info(context, l10n.common_signed_out);
 
-    // 4) route to /login
+    // 3) route to /login
     context.go('/login');
+  }
+}
+
+class _LanguageTile extends StatelessWidget {
+  final AppLocalizations l10n;
+  const _LanguageTile({required this.l10n});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 0,
+      clipBehavior: Clip.antiAlias,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+        child: Row(
+          children: [
+            const Icon(Icons.language_rounded),
+            const SizedBox(width: 12),
+            Expanded(child: Text(l10n.common_language)),
+            const SizedBox(width: 8),
+            BlocBuilder<LocaleCubit, Locale?>(
+              builder: (context, locale) {
+                final value = locale?.languageCode ?? 'system';
+
+                return DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    value: value,
+                    items: [
+                      DropdownMenuItem(
+                        value: 'system',
+                        child: Text(l10n.common_system_language),
+                      ),
+                      DropdownMenuItem(
+                        value: 'en',
+                        child: Text(l10n.lang_english),
+                      ),
+                      DropdownMenuItem(
+                        value: 'ar',
+                        child: Text(l10n.lang_arabic),
+                      ),
+                      DropdownMenuItem(
+                        value: 'fr',
+                        child: Text(l10n.lang_french),
+                      ),
+                    ],
+                    onChanged: (v) {
+                      if (v == null) return;
+                      final cubit = context.read<LocaleCubit>();
+                      if (v == 'system') {
+                        cubit.setLocale(null);
+                      } else {
+                        cubit.setLocale(Locale(v));
+                      }
+                    },
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 

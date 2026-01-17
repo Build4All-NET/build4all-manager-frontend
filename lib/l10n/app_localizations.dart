@@ -556,7 +556,7 @@ abstract class AppLocalizations {
   /// No description provided for @profile_password_hint.
   ///
   /// In en, this message translates to:
-  /// **'For your security, use a strong unique password.'**
+  /// **'Update your password to keep your account secure.'**
   String get profile_password_hint;
 
   /// No description provided for @profile_update_password.
@@ -610,7 +610,7 @@ abstract class AppLocalizations {
   /// No description provided for @common_sign_out_hint.
   ///
   /// In en, this message translates to:
-  /// **'End your current session'**
+  /// **'You’ll need to sign in again to access the dashboard.'**
   String get common_sign_out_hint;
 
   /// No description provided for @common_sign_out_confirm.
@@ -622,7 +622,7 @@ abstract class AppLocalizations {
   /// No description provided for @common_signed_out.
   ///
   /// In en, this message translates to:
-  /// **'Signed out'**
+  /// **'Signed out successfully.'**
   String get common_signed_out;
 
   /// No description provided for @err_email.
@@ -640,7 +640,7 @@ abstract class AppLocalizations {
   /// No description provided for @err_unknown.
   ///
   /// In en, this message translates to:
-  /// **'Something went wrong'**
+  /// **'Something went wrong.'**
   String get err_unknown;
 
   /// No description provided for @signUpOwnerTitle.
@@ -3204,6 +3204,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Seed failed'**
   String get publish_seed_failed;
+
+  /// No description provided for @ai_label.
+  ///
+  /// In en, this message translates to:
+  /// **'AI'**
+  String get ai_label;
+
+  /// No description provided for @ai_enabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Enabled'**
+  String get ai_enabled;
+
+  /// No description provided for @ai_disabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Disabled'**
+  String get ai_disabled;
+
+  /// No description provided for @ai_owner_setting_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner AI'**
+  String get ai_owner_setting_title;
+
+  /// No description provided for @ai_owner_setting_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable or disable AI for this owner.'**
+  String get ai_owner_setting_subtitle;
+
+  /// No description provided for @ai_loading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading AI status…'**
+  String get ai_loading;
+
+  /// No description provided for @ai_update_success.
+  ///
+  /// In en, this message translates to:
+  /// **'AI updated'**
+  String get ai_update_success;
+
+  /// No description provided for @ai_update_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update AI'**
+  String get ai_update_failed;
+
+  /// No description provided for @ai_load_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load AI status'**
+  String get ai_load_failed;
+
+  /// No description provided for @ownerAppsSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search apps…'**
+  String get ownerAppsSearchHint;
+
+  /// No description provided for @ownerAppsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No apps found for this owner'**
+  String get ownerAppsEmpty;
+
+  /// No description provided for @ownerAppsUnnamed.
+  ///
+  /// In en, this message translates to:
+  /// **'(Unnamed App)'**
+  String get ownerAppsUnnamed;
+
+  /// No description provided for @commonRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get commonRetry;
+
+  /// No description provided for @ownerAppsSlugStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'slug: {slug}  •  {status}'**
+  String ownerAppsSlugStatus(String slug, String status);
+
+  /// No description provided for @projectsSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search projects…'**
+  String get projectsSearchHint;
+
+  /// No description provided for @projectsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No projects found'**
+  String get projectsEmpty;
+
+  /// No description provided for @common_language.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get common_language;
+
+  /// No description provided for @common_system_language.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get common_system_language;
+
+  /// No description provided for @lang_english.
+  ///
+  /// In en, this message translates to:
+  /// **'English'**
+  String get lang_english;
+
+  /// No description provided for @lang_arabic.
+  ///
+  /// In en, this message translates to:
+  /// **'Arabic'**
+  String get lang_arabic;
+
+  /// No description provided for @lang_french.
+  ///
+  /// In en, this message translates to:
+  /// **'French'**
+  String get lang_french;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

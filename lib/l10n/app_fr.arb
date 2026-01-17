@@ -631,5 +631,10 @@
 
   "msgWelcomeBack": "Bon retour",
   "msgVerified": "Vérifié",
-  "publish_manage_publisher_profiles": "Gérer les profils éditeurs"
+  "publish_manage_publisher_profiles": "Gérer les profils éditeurs",
+   "common_language": "Langue",
+  "common_system_language": "Système",
+  "lang_english": "Anglais",
+  "lang_arabic": "Arabe",
+  "lang_french": "Français"
 }

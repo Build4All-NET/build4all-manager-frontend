@@ -720,7 +720,53 @@
   "publish_privacy_policy_url": "Privacy policy URL",
   "publish_profiles_required_hint": "Owners can’t submit publish requests unless this is configured.",
   "publish_seeded_success": "Seeded ",
-  "publish_seed_failed": "Seed failed"
+  "publish_seed_failed": "Seed failed",
+   "ai_label": "AI",
+  "ai_enabled": "Enabled",
+  "ai_disabled": "Disabled",
+  "ai_owner_setting_title": "Owner AI",
+  "ai_owner_setting_subtitle": "Enable or disable AI for this owner.",
+  "ai_loading": "Loading AI status…",
+  "ai_update_success": "AI updated",
+  "ai_update_failed": "Failed to update AI",
+  "ai_load_failed": "Failed to load AI status",
+  "retry": "Retry",
+  "cancel": "Cancel",
+  "ownerAppsSearchHint": "Search apps…",
+  "ownerAppsEmpty": "No apps found for this owner",
+  "ownerAppsUnnamed": "(Unnamed App)",
+  "commonRetry": "Retry",
+  "ownerAppsSlugStatus": "slug: {slug}  •  {status}",
+  "@ownerAppsSlugStatus": {
+    "placeholders": {
+      "slug": { "type": "String" },
+      "status": { "type": "String" }
+    }
+  },
+   "projectsSearchHint": "Search projects…",
+  "projectsEmpty": "No projects found",
+  "commonRetry": "Retry",
+    "err_unknown": "Something went wrong.",
+  "common_retry": "Retry",
+  "nav_profile": "Profile",
+
+  "profile_details": "Profile details",
+  "profile_password_hint": "Update your password to keep your account secure.",
+  "profile_change_password": "Change password",
+
+  "common_security": "Security",
+  "common_sign_out": "Sign out",
+  "common_sign_out_hint": "You’ll need to sign in again to access the dashboard.",
+  "common_signed_out": "Signed out successfully.",
+  "common_sign_out_confirm": "Are you sure you want to sign out?",
+  "common_cancel": "Cancel",
+    "common_language": "Language",
+  "common_system_language": "System",
+  "lang_english": "English",
+  "lang_arabic": "Arabic",
+  "lang_french": "French"
+
+
 }
 
 

@@ -631,5 +631,36 @@
 
   "msgWelcomeBack": "مرحبًا بعودتك",
   "msgVerified": "تم التحقق",
-  "publish_manage_publisher_profiles": "إدارة ملفات الناشرين"
+  "publish_manage_publisher_profiles": "إدارة ملفات الناشرين",
+    "ai_label": "الذكاء",
+  "ai_enabled": "مفعّل",
+  "ai_disabled": "غير مفعّل",
+  "ai_owner_setting_title": "ذكاء المالك",
+  "ai_owner_setting_subtitle": "فعّل أو عطّل الذكاء لهذا المالك.",
+  "ai_loading": "جاري تحميل حالة الذكاء…",
+  "ai_update_success": "تم تحديث الذكاء",
+  "ai_update_failed": "فشل تحديث الذكاء",
+  "ai_load_failed": "فشل تحميل حالة الذكاء",
+  "retry": "إعادة المحاولة",
+  "cancel": "إلغاء",
+  "ownerAppsSearchHint": "ابحث عن التطبيقات…",
+  "ownerAppsEmpty": "لا توجد تطبيقات لهذا المالك",
+  "ownerAppsUnnamed": "(تطبيق بدون اسم)",
+  "commonRetry": "إعادة المحاولة",
+  "ownerAppsSlugStatus": "المعرّف: {slug}  •  {status}",
+  "@ownerAppsSlugStatus": {
+    "placeholders": {
+      "slug": { "type": "String" },
+      "status": { "type": "String" }
+    }
+  },
+   "projectsSearchHint": "ابحث عن المشاريع…",
+  "projectsEmpty": "لا توجد مشاريع",
+  "commonRetry": "إعادة المحاولة",
+   "common_language": "اللغة",
+  "common_system_language": "لغة الجهاز",
+  "lang_english": "الإنجليزية",
+  "lang_arabic": "العربية",
+  "lang_french": "الفرنسية"
+  
 }
