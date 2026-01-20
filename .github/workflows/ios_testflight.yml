@@ -1,4 +1,4 @@
-name: iOS - Build IPA + Upload TestFlight
+name: iOS - Build IPA + Upload TestFlight (NO dart-define)
 
 on:
   workflow_dispatch:
@@ -19,8 +19,6 @@ jobs:
       ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
       ASC_KEY_P8_B64: ${{ secrets.ASC_KEY_P8_B64 }}
 
-      IOS_SERVER_URI: ${{ secrets.IOS_SERVER_URI }}
-
       COCOAPODS_DISABLE_STATS: "true"
       FASTLANE_OPT_OUT_USAGE: "true"
       LANG: en_US.UTF-8
@@ -29,12 +27,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Select Xcode
-        run: |
-          set -euo pipefail
-          xcodebuild -version
-          echo "iOS SDK: $(xcrun --sdk iphoneos --show-sdk-version)"
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -45,17 +37,6 @@ jobs:
 
       - name: Flutter pub get
         run: flutter pub get
-
-      # Optional: overwrite hostIp.json for prod API (because your app prefers it)
-      - name: Write production hostIp.json (optional)
-        if: ${{ env.IOS_SERVER_URI != '' }}
-        run: |
-          set -euo pipefail
-          mkdir -p lib/config
-          cat > lib/config/hostIp.json << EOF
-          { "serverURI": "${IOS_SERVER_URI}" }
-          EOF
-          echo "✅ hostIp.json written"
 
       - name: Install signing cert + provisioning profile
         shell: bash
@@ -81,8 +62,8 @@ jobs:
           echo "$IOS_MOBILEPROVISION_B64" | tr -d '\n\r ' | base64 --decode \
             > "$HOME/Library/MobileDevice/Provisioning Profiles/profile.mobileprovision"
 
-          echo "✅ Installed cert + profile"
           security find-identity -v -p codesigning || true
+          echo "✅ Installed cert + profile"
 
       - name: Install CocoaPods
         run: |
@@ -128,6 +109,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+
           IPA_PATH="$(ls -1 build/ios/ipa/*.ipa | head -n 1)"
           [ -f "$IPA_PATH" ] || { echo "❌ IPA not found"; exit 1; }
 
@@ -136,11 +118,11 @@ jobs:
           APP_PATH="$(find "$TMP_DIR/Payload" -maxdepth 1 -type d -name "*.app" | head -n 1)"
           BUNDLE_ID=$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$APP_PATH/Info.plist")
 
-          echo "✅ Uploading bundle: $BUNDLE_ID"
+          echo "✅ Uploading: $BUNDLE_ID"
           fastlane pilot upload \
             --ipa "$IPA_PATH" \
             --api_key_path ".private/api_key.json" \
             --app_identifier "$BUNDLE_ID" \
             --skip_waiting_for_build_processing true
 
-          echo "✅ Uploaded. Check TestFlight in 15-60 min."
+          echo "✅ Done. TestFlight build appears in 15-60 min."
