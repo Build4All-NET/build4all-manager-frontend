@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="build4all_manager"
+        android:label="Build4All"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
