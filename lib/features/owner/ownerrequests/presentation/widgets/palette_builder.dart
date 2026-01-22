@@ -69,7 +69,7 @@ class ThemePresets {
       label: 'Ocean Blue',
       draft: ThemeDraft(
         primary: Color(0xFF2563EB),
-        secondary: Color(0xFF0F172A),
+        secondary: Color.fromARGB(255, 51, 80, 147),
         background: Color(0xFFF8FAFC),
         onBackground: Color(0xFF0F172A),
         error: Color(0xFFDC2626),
@@ -102,9 +102,9 @@ class ThemePresets {
       label: 'Midnight',
       draft: ThemeDraft(
         primary: Color(0xFF8B5CF6),
-        secondary: Color(0xFFE5E7EB),
-        background: Color(0xFF0B0F14),
-        onBackground: Color(0xFFE5E7EB),
+        secondary: Color.fromARGB(255, 97, 64, 174),
+        background: Color(0xFFFFFBEB),
+        onBackground: Color.fromARGB(255, 94, 25, 255),
         error: Color(0xFFEF4444),
       ),
     ),

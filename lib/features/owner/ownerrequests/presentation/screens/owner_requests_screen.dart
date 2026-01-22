@@ -90,6 +90,16 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
   // UI panel selection (tabs)
   _Panel _panel = _Panel.identity;
 
+  void _ensureUsdSelected() {
+    if (_selectedCurrency != null) return;
+    if (_currencies.isEmpty) return;
+
+    final usd =
+        _currencies.where((c) => c.code.toUpperCase() == 'USD').toList();
+    _selectedCurrency = usd.isNotEmpty ? usd.first : _currencies.first;
+  }
+
+
   @override
   void initState() {
     super.initState();
@@ -119,14 +129,22 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
     try {
       final list = await api.fetchCurrencies();
       if (!mounted) return;
-      setState(() {
+     setState(() {
         _currencies = list;
 
-        // Prefer EUR by default (existing behavior)
+        // ✅ Prefer USD by default
+        final usd = list.where((c) => c.code.toUpperCase() == 'USD').toList();
+        if (usd.isNotEmpty) {
+          _selectedCurrency = usd.first;
+          return;
+        }
+
+        // fallback: EUR if USD not found
         final eur = list.where((c) => c.code.toUpperCase() == 'EUR').toList();
         _selectedCurrency =
             eur.isNotEmpty ? eur.first : (list.isNotEmpty ? list.first : null);
       });
+
     } catch (_) {
       if (!mounted) return;
       AppToast.error(context, l.owner_request_err_load_currencies);
@@ -183,10 +201,20 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
     FocusScope.of(context).unfocus();
     final l = AppLocalizations.of(context)!;
 
+//  ensure currencies are loaded before submit
+    if (_currencies.isEmpty) {
+      await _loadCurrencies();
+    }
+
+// Auto-pick USD if owner didn’t choose
+    _ensureUsdSelected();
+
     if (_selectedCurrency == null) {
       AppToast.error(context, l.owner_request_err_select_currency);
       return;
     }
+
+
 
     if (!_formKey.currentState!.validate()) {
       AppToast.error(context, l.owner_request_err_fix_fields);
