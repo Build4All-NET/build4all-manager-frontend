@@ -46,19 +46,19 @@ jobs:
 
       - name: Set minimum iOS deployment target
         run: |
-          # Set platform in Podfile to iOS 12.0 (minimum supported)
+          # Set platform in Podfile to iOS 13.0 (required for google_maps_flutter_ios)
           if grep -q "# platform :ios" ios/Podfile; then
-            sed -i '' "s/# platform :ios, '.*'/platform :ios, '12.0'/" ios/Podfile
+            sed -i '' "s/# platform :ios, '.*'/platform :ios, '13.0'/" ios/Podfile
           elif ! grep -q "platform :ios" ios/Podfile; then
-            sed -i '' "1s/^/platform :ios, '12.0'\n/" ios/Podfile
+            sed -i '' "1s/^/platform :ios, '13.0'\n/" ios/Podfile
           else
-            sed -i '' "s/platform :ios, '.*'/platform :ios, '12.0'/" ios/Podfile
+            sed -i '' "s/platform :ios, '.*'/platform :ios, '13.0'/" ios/Podfile
           fi
           
           # Update Xcode project deployment target
-          sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = [0-9.]*;/IPHONEOS_DEPLOYMENT_TARGET = 12.0;/g' ios/Runner.xcodeproj/project.pbxproj
+          sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = [0-9.]*;/IPHONEOS_DEPLOYMENT_TARGET = 13.0;/g' ios/Runner.xcodeproj/project.pbxproj
           
-          echo "✅ iOS deployment target set to 12.0"
+          echo "✅ iOS deployment target set to 13.0"
 
       - name: Check Podfile exists
         run: |
