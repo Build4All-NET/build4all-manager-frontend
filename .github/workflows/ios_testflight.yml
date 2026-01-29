@@ -41,10 +41,29 @@ jobs:
           flutter create --platforms=ios .
           flutter pub get
 
+      - name: Set minimum iOS deployment target
+        run: |
+          # Uncomment and set platform in Podfile to iOS 14.0
+          if grep -q "# platform :ios" ios/Podfile; then
+            sed -i '' "s/# platform :ios, '.*'/platform :ios, '14.0'/" ios/Podfile
+          elif ! grep -q "platform :ios" ios/Podfile; then
+            sed -i '' "1s/^/platform :ios, '14.0'\n/" ios/Podfile
+          else
+            sed -i '' "s/platform :ios, '.*'/platform :ios, '14.0'/" ios/Podfile
+          fi
+          
+          # Update Xcode project deployment target
+          sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = [0-9.]*;/IPHONEOS_DEPLOYMENT_TARGET = 14.0;/g' ios/Runner.xcodeproj/project.pbxproj
+          
+          echo "✅ iOS deployment target set to 14.0"
+
       - name: Check Podfile exists
         run: |
           ls -la ios
+          echo "--- Podfile content (first 20 lines) ---"
+          cat ios/Podfile | head -20
           test -f ios/Podfile && echo "✅ Podfile found" || (echo "❌ Podfile missing" && exit 1)
+
       - name: Debug P12 decode
         shell: bash
         run: |
