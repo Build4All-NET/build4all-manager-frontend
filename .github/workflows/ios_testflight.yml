@@ -35,8 +35,16 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Flutter pub get
-        run: flutter pub get
+      - name: Ensure iOS platform exists (generate ios/)
+        run: |
+          flutter clean
+          flutter create --platforms=ios .
+          flutter pub get
+
+      - name: Check Podfile exists
+        run: |
+          ls -la ios
+          test -f ios/Podfile && echo "✅ Podfile found" || (echo "❌ Podfile missing" && exit 1)
 
       - name: Install signing cert + provisioning profile
         shell: bash
@@ -68,11 +76,12 @@ jobs:
       - name: Install CocoaPods
         run: |
           cd ios
+          pod repo update
           pod install --repo-update
           cd ..
 
       - name: Build IPA (release)
-        run: flutter build ipa --release
+        run: flutter build ipa --release --export-method "$IOS_EXPORT_METHOD"
 
       - name: Upload IPA artifact
         uses: actions/upload-artifact@v4
@@ -125,4 +134,4 @@ jobs:
             --app_identifier "$BUNDLE_ID" \
             --skip_waiting_for_build_processing true
 
-          echo "✅ Done. TestFlight build appears in 15-60 min."
+          echo "✅ Uploaded. Check App Store Connect → TestFlight."
