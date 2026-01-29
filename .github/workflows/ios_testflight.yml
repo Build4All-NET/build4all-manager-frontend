@@ -60,11 +60,11 @@ jobs:
             installer.pods_project.targets.each do |target|
               target.build_configurations.each do |config|
                 config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '14.0'
+                end
               end
             end
-          end
-          EOF
-                    fi
+            EOF
+                      fi
           
           # Update Xcode project deployment target
           sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = [0-9.]*;/IPHONEOS_DEPLOYMENT_TARGET = 14.0;/g' ios/Runner.xcodeproj/project.pbxproj
@@ -196,50 +196,51 @@ jobs:
           echo "=== Modifying project.pbxproj ==="
           
           # CRITICAL: Change ProvisioningStyle from Automatic to Manual in TargetAttributes
-          # This is what tells Xcode not to use automatic provisioning
           sed -i '' 's/ProvisioningStyle = Automatic;/ProvisioningStyle = Manual;/g' "$PBXPROJ"
           
-          # Also remove any DevelopmentTeam from TargetAttributes that might override
+          # Remove any DevelopmentTeam from TargetAttributes that might override
           sed -i '' '/DevelopmentTeam = .*;/d' "$PBXPROJ"
           
-          # Find all XCBuildConfiguration sections and identify which ones belong to Runner target
-          # We'll use Python for more precise editing
-          python3 <<'PYTHON_SCRIPT'
+          # Create Python script to modify the pbxproj file
+          cat > /tmp/modify_pbxproj.py << 'ENDOFPYTHON'
           import re
           import sys
+          import os
           
           pbxproj_path = "ios/Runner.xcodeproj/project.pbxproj"
           
           with open(pbxproj_path, 'r') as f:
               content = f.read()
           
-          # Find the Runner target configurations (Debug, Release, Profile)
-          # These are typically named with comments like "/* Debug */ ="
-          runner_config_pattern = r'(/\* (Debug|Release|Profile) \*/ = \{[^}]*?buildSettings = \{)(.*?)(\};)'
-          
-          def add_signing_settings(match):
-          prefix = match.group(1)
-          config_name = match.group(2)
-          build_settings = match.group(3)
-          suffix = match.group(4)
-          
-          # Check if this is likely a Runner target config (not Pods)
-          # Runner configs usually have ASSETCATALOG_COMPILER or INFOPLIST_FILE
-          if 'ASSETCATALOG_COMPILER' in build_settings or 'INFOPLIST_FILE' in build_settings or 'Runner/Info.plist' in build_settings:
-          # Remove existing signing settings to avoid duplicates
-          build_settings = re.sub(r'\s*CODE_SIGN_IDENTITY.*?;', '', build_settings)
-          build_settings = re.sub(r'\s*CODE_SIGN_STYLE.*?;', '', build_settings)
-          build_settings = re.sub(r'\s*DEVELOPMENT_TEAM.*?;', '', build_settings)
-          build_settings = re.sub(r'\s*PROVISIONING_PROFILE_SPECIFIER.*?;', '', build_settings)
-          build_settings = re.sub(r'\s*PROVISIONING_PROFILE[^_].*?;', '', build_settings)
-          
-          # Add our signing settings - use environment variables
-          import os
+          # Get values from environment
           team_id = os.environ.get('IOS_TEAM_ID', '')
           pp_uuid = os.environ.get('PP_UUID', '')
           identity = os.environ.get('IOS_CODE_SIGN_IDENTITY', '')
           
-          new_settings = f'''
+          print(f"Using Team ID: {team_id}", file=sys.stderr)
+          print(f"Using Profile UUID: {pp_uuid}", file=sys.stderr)
+          print(f"Using Identity: {identity}", file=sys.stderr)
+          
+          # Pattern to find Runner target build configurations
+          runner_config_pattern = r'(/\* (Debug|Release|Profile) \*/ = \{[^}]*?buildSettings = \{)(.*?)(\};)'
+          
+          def add_signing_settings(match):
+              prefix = match.group(1)
+              config_name = match.group(2)
+              build_settings = match.group(3)
+              suffix = match.group(4)
+              
+              # Check if this is a Runner target config (not Pods)
+              if 'ASSETCATALOG_COMPILER' in build_settings or 'INFOPLIST_FILE' in build_settings or 'Runner/Info.plist' in build_settings:
+                  # Remove existing signing settings
+                  build_settings = re.sub(r'\s*CODE_SIGN_IDENTITY[^;]*;', '', build_settings)
+                  build_settings = re.sub(r'\s*CODE_SIGN_STYLE[^;]*;', '', build_settings)
+                  build_settings = re.sub(r'\s*DEVELOPMENT_TEAM[^;]*;', '', build_settings)
+                  build_settings = re.sub(r'\s*PROVISIONING_PROFILE_SPECIFIER[^;]*;', '', build_settings)
+                  build_settings = re.sub(r'\s*PROVISIONING_PROFILE\s*=[^;]*;', '', build_settings)
+                  
+                  # Add new signing settings
+                  new_settings = f'''
           \t\t\t\tCODE_SIGN_IDENTITY = "{identity}";
           \t\t\t\t"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "{identity}";
           \t\t\t\tCODE_SIGN_STYLE = Manual;
@@ -247,21 +248,23 @@ jobs:
           \t\t\t\tPROVISIONING_PROFILE_SPECIFIER = "{pp_uuid}";'''
                   
                   build_settings = new_settings + build_settings
-                  
                   print(f"✅ Modified {config_name} configuration", file=sys.stderr)
               
               return prefix + build_settings + suffix
           
-          # Apply the modifications
+          # Apply modifications
           content = re.sub(runner_config_pattern, add_signing_settings, content, flags=re.DOTALL)
           
           with open(pbxproj_path, 'w') as f:
               f.write(content)
           
           print("✅ Python modifications complete", file=sys.stderr)
-          PYTHON_SCRIPT
-                    
-                    echo "✅ Modified project.pbxproj"
+          ENDOFPYTHON
+          
+          # Run the Python script
+          python3 /tmp/modify_pbxproj.py
+          
+          echo "✅ Modified project.pbxproj"
           
           # Verify the changes
           echo ""
