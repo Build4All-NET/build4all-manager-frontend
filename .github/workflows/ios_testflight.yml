@@ -52,6 +52,20 @@ jobs:
             sed -i '' "s/platform :ios, '.*'/platform :ios, '14.0'/" ios/Podfile
           fi
           
+          # Add post_install hook to set deployment target for all pods
+          if ! grep -q "post_install do" ios/Podfile; then
+            cat >> ios/Podfile <<'EOF'
+
+          post_install do |installer|
+            installer.pods_project.targets.each do |target|
+              target.build_configurations.each do |config|
+                config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '14.0'
+              end
+            end
+          end
+          EOF
+                    fi
+          
           # Update Xcode project deployment target
           sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = [0-9.]*;/IPHONEOS_DEPLOYMENT_TARGET = 14.0;/g' ios/Runner.xcodeproj/project.pbxproj
           
@@ -60,8 +74,8 @@ jobs:
       - name: Check Podfile exists
         run: |
           ls -la ios
-          echo "--- Podfile content (first 20 lines) ---"
-          cat ios/Podfile | head -20
+          echo "--- Podfile content (first 30 lines) ---"
+          cat ios/Podfile | head -30
           test -f ios/Podfile && echo "✅ Podfile found" || (echo "❌ Podfile missing" && exit 1)
 
       - name: Debug P12 decode
@@ -138,17 +152,62 @@ jobs:
           
           # Read the stored values
           PP_UUID=$(cat "$RUNNER_TEMP/pp_uuid.txt")
+          PP_NAME=$(cat "$RUNNER_TEMP/pp_name.txt")
+          
+          # Get bundle ID from Info.plist
+          BUNDLE_ID=$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" ios/Runner/Info.plist)
           
           # Update project.pbxproj to use manual signing
           PBXPROJ="ios/Runner.xcodeproj/project.pbxproj"
           
+          # Backup original file
+          cp "$PBXPROJ" "$PBXPROJ.bak"
+          
           # Disable automatic signing and set manual signing attributes
+          # This uses a more comprehensive approach to ensure all build configurations are updated
+          
+          # First, set ProvisioningStyle to Manual
           sed -i '' 's/ProvisioningStyle = Automatic;/ProvisioningStyle = Manual;/g' "$PBXPROJ"
+          
+          # Add or update DEVELOPMENT_TEAM
+          if ! grep -q "DEVELOPMENT_TEAM = $IOS_TEAM_ID;" "$PBXPROJ"; then
+            # Add DEVELOPMENT_TEAM after each ASSETCATALOG_COMPILER line (common anchor point)
+            sed -i '' "/ASSETCATALOG_COMPILER_APPICON_NAME/a\\
+          DEVELOPMENT_TEAM = $IOS_TEAM_ID;
+          " "$PBXPROJ"
+          fi
+          
+          # Add PROVISIONING_PROFILE_SPECIFIER using UUID
+          if ! grep -q "PROVISIONING_PROFILE_SPECIFIER" "$PBXPROJ"; then
+            sed -i '' "/DEVELOPMENT_TEAM/a\\
+          PROVISIONING_PROFILE_SPECIFIER = \"$PP_UUID\";
+          " "$PBXPROJ"
+          else
+            sed -i '' "s/PROVISIONING_PROFILE_SPECIFIER = .*;/PROVISIONING_PROFILE_SPECIFIER = \"$PP_UUID\";/g" "$PBXPROJ"
+          fi
+          
+          # Add CODE_SIGN_IDENTITY
+          if ! grep -q "CODE_SIGN_IDENTITY\[sdk=iphoneos\*\]" "$PBXPROJ"; then
+            sed -i '' "/PROVISIONING_PROFILE_SPECIFIER/a\\
+          \"CODE_SIGN_IDENTITY[sdk=iphoneos*]\" = \"$IOS_CODE_SIGN_IDENTITY\";
+          " "$PBXPROJ"
+          else
+            sed -i '' "s/\"CODE_SIGN_IDENTITY\[sdk=iphoneos\*\]\" = .*/\"CODE_SIGN_IDENTITY[sdk=iphoneos*]\" = \"$IOS_CODE_SIGN_IDENTITY\";/g" "$PBXPROJ"
+          fi
+          
+          # Add CODE_SIGN_STYLE
+          if ! grep -q "CODE_SIGN_STYLE = Manual;" "$PBXPROJ"; then
+            sed -i '' "/CODE_SIGN_IDENTITY/a\\
+          CODE_SIGN_STYLE = Manual;
+          " "$PBXPROJ"
+          fi
           
           echo "✅ Configured manual code signing"
           echo "Team ID: $IOS_TEAM_ID"
           echo "Profile UUID: $PP_UUID"
+          echo "Profile Name: $PP_NAME"
           echo "Code Sign Identity: $IOS_CODE_SIGN_IDENTITY"
+          echo "Bundle ID: $BUNDLE_ID"
 
       - name: Update ExportOptions.plist
         shell: bash
@@ -205,6 +264,9 @@ jobs:
         run: |
           set -euo pipefail
           
+          # Read provisioning profile UUID
+          PP_UUID=$(cat "$RUNNER_TEMP/pp_uuid.txt")
+          
           # Build the archive using xcodebuild directly for better control
           cd ios
           
@@ -216,7 +278,7 @@ jobs:
             archive \
             CODE_SIGN_IDENTITY="$IOS_CODE_SIGN_IDENTITY" \
             DEVELOPMENT_TEAM="$IOS_TEAM_ID" \
-            PROVISIONING_PROFILE_SPECIFIER="" \
+            PROVISIONING_PROFILE_SPECIFIER="$PP_UUID" \
             CODE_SIGN_STYLE=Manual
           
           echo "✅ Archive created"
