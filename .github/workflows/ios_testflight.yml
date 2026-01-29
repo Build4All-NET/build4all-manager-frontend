@@ -132,6 +132,8 @@ jobs:
           # Extract UUID from the plist
           PP_UUID=$(/usr/libexec/PlistBuddy -c "Print :UUID" "$RUNNER_TEMP/profile.plist")
           PP_NAME=$(/usr/libexec/PlistBuddy -c "Print :Name" "$RUNNER_TEMP/profile.plist")
+          APP_ID=$(/usr/libexec/PlistBuddy -c "Print :Entitlements:application-identifier" "$RUNNER_TEMP/profile.plist" 2>/dev/null || echo "N/A")
+          TEAM_ID=$(/usr/libexec/PlistBuddy -c "Print :TeamIdentifier:0" "$RUNNER_TEMP/profile.plist" 2>/dev/null || echo "N/A")
           
           # Copy to the correct location with UUID as filename
           cp "$RUNNER_TEMP/profile.mobileprovision" "$PP_DIR/$PP_UUID.mobileprovision"
@@ -140,10 +142,22 @@ jobs:
           echo "$PP_UUID" > "$RUNNER_TEMP/pp_uuid.txt"
           echo "$PP_NAME" > "$RUNNER_TEMP/pp_name.txt"
 
-          echo "✅ Provisioning Profile UUID: $PP_UUID"
-          echo "✅ Provisioning Profile Name: $PP_NAME"
-          security find-identity -v -p codesigning || true
-          echo "✅ Installed cert + profile"
+          echo "✅ Provisioning Profile installed"
+          echo "  UUID: $PP_UUID"
+          echo "  Name: $PP_NAME"
+          echo "  App ID: $APP_ID"
+          echo "  Team ID: $TEAM_ID"
+          
+          echo ""
+          echo "=== Installed Provisioning Profiles ==="
+          ls -la "$PP_DIR"
+          
+          echo ""
+          echo "=== Available Code Signing Identities ==="
+          security find-identity -v -p codesigning "$KEYCHAIN_PATH"
+          
+          echo ""
+          echo "✅ Setup complete"
 
       - name: Configure Xcode project for manual signing
         shell: bash
@@ -157,6 +171,13 @@ jobs:
           # Get bundle ID from Info.plist
           BUNDLE_ID=$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" ios/Runner/Info.plist)
           
+          echo "=== Configuration Values ==="
+          echo "Team ID: $IOS_TEAM_ID"
+          echo "Profile UUID: $PP_UUID"
+          echo "Profile Name: $PP_NAME"
+          echo "Code Sign Identity: $IOS_CODE_SIGN_IDENTITY"
+          echo "Bundle ID: $BUNDLE_ID"
+          
           # Create a Ruby script to properly modify the Xcode project
           cat > /tmp/fix_signing.rb <<'RUBY_SCRIPT'
           require 'xcodeproj'
@@ -166,6 +187,7 @@ jobs:
           profile_uuid = ARGV[2]
           code_sign_identity = ARGV[3]
           
+          puts "Opening project: #{project_path}"
           project = Xcodeproj::Project.open(project_path)
           
           # Find the Runner target
@@ -176,20 +198,31 @@ jobs:
             exit 1
           end
           
+          puts "Found target: #{target.name}"
+          
           # Configure signing for all configurations (Debug, Release, Profile)
           target.build_configurations.each do |config|
+            puts "\n=== Configuring #{config.name} ==="
+            
+            # Remove any automatic provisioning settings
+            config.build_settings.delete('PROVISIONING_PROFILE')
+            config.build_settings.delete('CODE_SIGN_IDENTITY[sdk=iphoneos*]') if config.build_settings['CODE_SIGN_IDENTITY[sdk=iphoneos*]'] == 'iPhone Developer'
+            
+            # Set manual signing
             config.build_settings['CODE_SIGN_STYLE'] = 'Manual'
             config.build_settings['DEVELOPMENT_TEAM'] = team_id
             config.build_settings['PROVISIONING_PROFILE_SPECIFIER'] = profile_uuid
             config.build_settings['CODE_SIGN_IDENTITY'] = code_sign_identity
             config.build_settings['CODE_SIGN_IDENTITY[sdk=iphoneos*]'] = code_sign_identity
             
-            puts "✅ Updated #{config.name} configuration"
+            puts "  CODE_SIGN_STYLE: #{config.build_settings['CODE_SIGN_STYLE']}"
+            puts "  DEVELOPMENT_TEAM: #{config.build_settings['DEVELOPMENT_TEAM']}"
+            puts "  PROVISIONING_PROFILE_SPECIFIER: #{config.build_settings['PROVISIONING_PROFILE_SPECIFIER']}"
+            puts "  CODE_SIGN_IDENTITY: #{config.build_settings['CODE_SIGN_IDENTITY']}"
           end
           
-          # Also update project-level settings
+          # Update project-level settings
           project.build_configurations.each do |config|
-            # Only set team at project level, not provisioning profile
             config.build_settings['DEVELOPMENT_TEAM'] = team_id
           end
           
@@ -197,28 +230,38 @@ jobs:
           project.root_object.attributes['TargetAttributes'] ||= {}
           project.root_object.attributes['TargetAttributes'][target.uuid] ||= {}
           project.root_object.attributes['TargetAttributes'][target.uuid]['ProvisioningStyle'] = 'Manual'
+          # Remove DevelopmentTeam from TargetAttributes as it can override our settings
+          project.root_object.attributes['TargetAttributes'][target.uuid].delete('DevelopmentTeam')
+          project.root_object.attributes['TargetAttributes'][target.uuid]['DevelopmentTeam'] = team_id
+          
+          puts "\n=== Target Attributes ==="
+          puts project.root_object.attributes['TargetAttributes'][target.uuid].inspect
           
           project.save
           
-          puts "✅ Project configuration saved"
+          puts "\n✅ Project configuration saved successfully"
           RUBY_SCRIPT
 
           # Install xcodeproj gem if not present
+          echo "Installing xcodeproj gem..."
           gem list -i xcodeproj || gem install xcodeproj --no-document
           
           # Run the Ruby script
+          echo "Running Ruby configuration script..."
           ruby /tmp/fix_signing.rb \
             "ios/Runner.xcodeproj" \
             "$IOS_TEAM_ID" \
             "$PP_UUID" \
             "$IOS_CODE_SIGN_IDENTITY"
           
-          echo "✅ Configured manual code signing"
-          echo "Team ID: $IOS_TEAM_ID"
-          echo "Profile UUID: $PP_UUID"
-          echo "Profile Name: $PP_NAME"
-          echo "Code Sign Identity: $IOS_CODE_SIGN_IDENTITY"
-          echo "Bundle ID: $BUNDLE_ID"
+          echo ""
+          echo "✅ Manual code signing configured"
+          
+          # Verify the changes
+          echo ""
+          echo "=== Verifying project.pbxproj changes ==="
+          grep -A2 "PROVISIONING_PROFILE_SPECIFIER" ios/Runner.xcodeproj/project.pbxproj | head -20 || echo "PROVISIONING_PROFILE_SPECIFIER not found"
+          grep -A2 "CODE_SIGN_STYLE" ios/Runner.xcodeproj/project.pbxproj | head -20 || echo "CODE_SIGN_STYLE not found"
 
       - name: Update ExportOptions.plist
         shell: bash
