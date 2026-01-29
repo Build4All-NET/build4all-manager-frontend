@@ -3,6 +3,9 @@ name: iOS - Build IPA + Upload TestFlight (NO dart-define)
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   ios:
     runs-on: macos-14
@@ -63,6 +66,40 @@ jobs:
           echo "--- Podfile content (first 20 lines) ---"
           cat ios/Podfile | head -20
           test -f ios/Podfile && echo "✅ Podfile found" || (echo "❌ Podfile missing" && exit 1)
+
+      # ✅ NEW: Add required privacy strings to Info.plist
+      - name: Add privacy strings to Info.plist
+        shell: bash
+        run: |
+          set -euo pipefail
+          
+          INFO_PLIST="ios/Runner/Info.plist"
+          
+          if [ ! -f "$INFO_PLIST" ]; then
+            echo "❌ Info.plist not found at $INFO_PLIST"
+            exit 1
+          fi
+          
+          echo "✅ Adding privacy usage descriptions to Info.plist..."
+          
+          # Add NSPhotoLibraryUsageDescription
+          /usr/libexec/PlistBuddy -c "Add :NSPhotoLibraryUsageDescription string 'This app needs access to your photo library to allow you to select and upload images.'" "$INFO_PLIST" 2>/dev/null || \
+          /usr/libexec/PlistBuddy -c "Set :NSPhotoLibraryUsageDescription 'This app needs access to your photo library to allow you to select and upload images.'" "$INFO_PLIST"
+          
+          # Add NSCameraUsageDescription
+          /usr/libexec/PlistBuddy -c "Add :NSCameraUsageDescription string 'This app needs access to your camera to allow you to take and upload photos.'" "$INFO_PLIST" 2>/dev/null || \
+          /usr/libexec/PlistBuddy -c "Set :NSCameraUsageDescription 'This app needs access to your camera to allow you to take and upload photos.'" "$INFO_PLIST"
+          
+          # Optional but recommended: Add other common privacy strings
+          /usr/libexec/PlistBuddy -c "Add :NSPhotoLibraryAddUsageDescription string 'This app needs permission to save images to your photo library.'" "$INFO_PLIST" 2>/dev/null || \
+          /usr/libexec/PlistBuddy -c "Set :NSPhotoLibraryAddUsageDescription 'This app needs permission to save images to your photo library.'" "$INFO_PLIST"
+          
+          echo "✅ Privacy strings added successfully!"
+          echo ""
+          echo "Verifying additions:"
+          /usr/libexec/PlistBuddy -c "Print :NSPhotoLibraryUsageDescription" "$INFO_PLIST" || true
+          /usr/libexec/PlistBuddy -c "Print :NSCameraUsageDescription" "$INFO_PLIST" || true
+          /usr/libexec/PlistBuddy -c "Print :NSPhotoLibraryAddUsageDescription" "$INFO_PLIST" || true
 
       - name: Debug P12 decode
         shell: bash
@@ -128,7 +165,12 @@ jobs:
 
           echo "✅ Provisioning Profile UUID: $PP_UUID"
           echo "✅ Provisioning Profile Name: $PP_NAME"
-          security find-identity -v -p codesigning || true
+          
+          # Verify certificate was installed
+          echo ""
+          echo "Installed signing identities:"
+          security find-identity -v -p codesigning "$KEYCHAIN_PATH" || true
+          
           echo "✅ Installed cert + profile"
 
       - name: Configure Xcode project for manual signing
@@ -138,6 +180,7 @@ jobs:
           
           # Read the stored values
           PP_UUID=$(cat "$RUNNER_TEMP/pp_uuid.txt")
+          PP_NAME=$(cat "$RUNNER_TEMP/pp_name.txt")
           
           # Update project.pbxproj to use manual signing
           PBXPROJ="ios/Runner.xcodeproj/project.pbxproj"
@@ -148,6 +191,7 @@ jobs:
           echo "✅ Configured manual code signing"
           echo "Team ID: $IOS_TEAM_ID"
           echo "Profile UUID: $PP_UUID"
+          echo "Profile Name: $PP_NAME"
           echo "Code Sign Identity: $IOS_CODE_SIGN_IDENTITY"
 
       - name: Update ExportOptions.plist
@@ -191,6 +235,8 @@ jobs:
           echo "✅ Created ExportOptions.plist"
           echo "Bundle ID: $BUNDLE_ID"
           echo "Provisioning Profile Name: $PP_NAME"
+          echo ""
+          echo "--- ExportOptions.plist content ---"
           cat ios/ExportOptions.plist
 
       - name: Install CocoaPods
@@ -205,6 +251,17 @@ jobs:
         run: |
           set -euo pipefail
           
+          KEYCHAIN_PATH="$RUNNER_TEMP/build.keychain"
+          KEYCHAIN_PWD="ci_pwd_123"
+          
+          # Unlock keychain before building
+          security unlock-keychain -p "$KEYCHAIN_PWD" "$KEYCHAIN_PATH"
+          security default-keychain -s "$KEYCHAIN_PATH"
+          
+          # Get bundle ID and provisioning profile name
+          BUNDLE_ID=$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" ios/Runner/Info.plist)
+          PP_NAME=$(cat "$RUNNER_TEMP/pp_name.txt")
+          
           # Build the archive using xcodebuild directly for better control
           cd ios
           
@@ -213,18 +270,25 @@ jobs:
             -configuration Release \
             -archivePath "$RUNNER_TEMP/Runner.xcarchive" \
             -destination 'generic/platform=iOS' \
-            archive \
             CODE_SIGN_IDENTITY="$IOS_CODE_SIGN_IDENTITY" \
             DEVELOPMENT_TEAM="$IOS_TEAM_ID" \
-            PROVISIONING_PROFILE_SPECIFIER="" \
-            CODE_SIGN_STYLE=Manual
+            PROVISIONING_PROFILE_SPECIFIER="$PP_NAME" \
+            CODE_SIGN_STYLE=Manual \
+            OTHER_CODE_SIGN_FLAGS="--keychain $KEYCHAIN_PATH" \
+            archive
           
-          echo "✅ Archive created"
+          echo "✅ Archive created at $RUNNER_TEMP/Runner.xcarchive"
 
       - name: Export IPA
         shell: bash
         run: |
           set -euo pipefail
+          
+          KEYCHAIN_PATH="$RUNNER_TEMP/build.keychain"
+          KEYCHAIN_PWD="ci_pwd_123"
+          
+          # Unlock keychain before exporting
+          security unlock-keychain -p "$KEYCHAIN_PWD" "$KEYCHAIN_PATH"
           
           mkdir -p build/ios/ipa
           
@@ -232,6 +296,7 @@ jobs:
             -archivePath "$RUNNER_TEMP/Runner.xcarchive" \
             -exportPath build/ios/ipa \
             -exportOptionsPlist ios/ExportOptions.plist \
+            OTHER_CODE_SIGN_FLAGS="--keychain $KEYCHAIN_PATH" \
             -allowProvisioningUpdates
           
           echo "✅ IPA exported"
@@ -257,16 +322,28 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p .private
-          echo "$ASC_KEY_P8_B64" | tr -d '\n\r ' | base64 --decode > .private/AuthKey.p8
-
+          
+          # Decode the P8 key
+          echo "$ASC_KEY_P8_B64" | tr -d '\n\r ' | base64 --decode > .private/AuthKey_${ASC_KEY_ID}.p8
+          
+          # Verify the key is valid
+          openssl pkey -in .private/AuthKey_${ASC_KEY_ID}.p8 -noout
+          echo "✅ ASC P8 key is valid"
+          
+          # Read the key content
+          KEY_CONTENT=$(cat .private/AuthKey_${ASC_KEY_ID}.p8)
+          
+          # Create api_key.json with the key content embedded
           cat > .private/api_key.json <<EOF
           {
             "key_id": "${ASC_KEY_ID}",
             "issuer_id": "${ASC_ISSUER_ID}",
-            "key_filepath": ".private/AuthKey.p8",
+            "key": $(echo "$KEY_CONTENT" | python3 -c 'import json, sys; print(json.dumps(sys.stdin.read()))'),
             "in_house": false
           }
           EOF
+          
+          echo "✅ Created api_key.json"
 
       - name: Upload to TestFlight
         shell: bash
@@ -276,16 +353,22 @@ jobs:
           IPA_PATH="$(ls -1 build/ios/ipa/*.ipa | head -n 1)"
           [ -f "$IPA_PATH" ] || { echo "❌ IPA not found"; exit 1; }
 
+          # Extract bundle ID from the IPA
           TMP_DIR="$(mktemp -d)"
           unzip -q "$IPA_PATH" -d "$TMP_DIR"
           APP_PATH="$(find "$TMP_DIR/Payload" -maxdepth 1 -type d -name "*.app" | head -n 1)"
           BUNDLE_ID=$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$APP_PATH/Info.plist")
 
-          echo "✅ Uploading: $BUNDLE_ID"
+          echo "✅ Uploading IPA to TestFlight"
+          echo "   Bundle ID: $BUNDLE_ID"
+          echo "   IPA: $IPA_PATH"
+          
           fastlane pilot upload \
             --ipa "$IPA_PATH" \
             --api_key_path ".private/api_key.json" \
             --app_identifier "$BUNDLE_ID" \
             --skip_waiting_for_build_processing true
 
-          echo "✅ Uploaded. Check App Store Connect → TestFlight."
+          echo ""
+          echo "✅ Upload complete! Build will appear in TestFlight in 15-60 minutes."
+          echo "   Check App Store Connect: https://appstoreconnect.apple.com"
