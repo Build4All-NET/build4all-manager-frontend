@@ -102,16 +102,32 @@ jobs:
           # Install provisioning profile
           PP_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
           mkdir -p "$PP_DIR"
-          echo "$IOS_MOBILEPROVISION_B64" | tr -d '\n\r ' | base64 --decode \
-            > "$RUNNER_TEMP/profile.mobileprovision"
-
-          # Extract UUID from provisioning profile
-          PP_UUID=$(/usr/libexec/PlistBuddy -c "Print :UUID" /dev/stdin <<< \
-            $(security cms -D -i "$RUNNER_TEMP/profile.mobileprovision"))
           
+          # Decode and save provisioning profile to temp location first
+          echo "$IOS_MOBILEPROVISION_B64" | tr -d '\n\r ' | base64 --decode > "$RUNNER_TEMP/profile.mobileprovision"
+          
+          # Verify the provisioning profile file exists and has content
+          if [ ! -s "$RUNNER_TEMP/profile.mobileprovision" ]; then
+            echo "❌ Provisioning profile is empty or missing"
+            exit 1
+          fi
+          
+          # Extract profile info to a temporary plist
+          security cms -D -i "$RUNNER_TEMP/profile.mobileprovision" > "$RUNNER_TEMP/profile.plist"
+          
+          # Extract UUID from the plist
+          PP_UUID=$(/usr/libexec/PlistBuddy -c "Print :UUID" "$RUNNER_TEMP/profile.plist")
+          PP_NAME=$(/usr/libexec/PlistBuddy -c "Print :Name" "$RUNNER_TEMP/profile.plist")
+          
+          # Copy to the correct location with UUID as filename
           cp "$RUNNER_TEMP/profile.mobileprovision" "$PP_DIR/$PP_UUID.mobileprovision"
+          
+          # Store for later use
+          echo "$PP_UUID" > "$RUNNER_TEMP/pp_uuid.txt"
+          echo "$PP_NAME" > "$RUNNER_TEMP/pp_name.txt"
 
           echo "✅ Provisioning Profile UUID: $PP_UUID"
+          echo "✅ Provisioning Profile Name: $PP_NAME"
           security find-identity -v -p codesigning || true
           echo "✅ Installed cert + profile"
 
@@ -120,18 +136,14 @@ jobs:
         run: |
           set -euo pipefail
           
-          # Get the provisioning profile UUID
-          PP_UUID=$(/usr/libexec/PlistBuddy -c "Print :UUID" /dev/stdin <<< \
-            $(security cms -D -i "$HOME/Library/MobileDevice/Provisioning Profiles"/*.mobileprovision | head -1))
+          # Read the stored values
+          PP_UUID=$(cat "$RUNNER_TEMP/pp_uuid.txt")
           
           # Update project.pbxproj to use manual signing
           PBXPROJ="ios/Runner.xcodeproj/project.pbxproj"
           
           # Disable automatic signing and set manual signing attributes
           sed -i '' 's/ProvisioningStyle = Automatic;/ProvisioningStyle = Manual;/g' "$PBXPROJ"
-          
-          # Add or update code signing settings in both Debug and Release configurations
-          # This is a simplified approach - for production you may need more specific targeting
           
           echo "✅ Configured manual code signing"
           echo "Team ID: $IOS_TEAM_ID"
@@ -146,10 +158,8 @@ jobs:
           # Get bundle ID from Info.plist
           BUNDLE_ID=$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" ios/Runner/Info.plist)
           
-          # Get provisioning profile UUID and name
-          PP_PATH="$HOME/Library/MobileDevice/Provisioning Profiles"/*.mobileprovision
-          PP_UUID=$(/usr/libexec/PlistBuddy -c "Print :UUID" /dev/stdin <<< $(security cms -D -i "$PP_PATH"))
-          PP_NAME=$(/usr/libexec/PlistBuddy -c "Print :Name" /dev/stdin <<< $(security cms -D -i "$PP_PATH"))
+          # Read stored provisioning profile info
+          PP_NAME=$(cat "$RUNNER_TEMP/pp_name.txt")
           
           # Create ExportOptions.plist
           cat > ios/ExportOptions.plist <<EOF
@@ -179,6 +189,8 @@ jobs:
           EOF
           
           echo "✅ Created ExportOptions.plist"
+          echo "Bundle ID: $BUNDLE_ID"
+          echo "Provisioning Profile Name: $PP_NAME"
           cat ios/ExportOptions.plist
 
       - name: Install CocoaPods
