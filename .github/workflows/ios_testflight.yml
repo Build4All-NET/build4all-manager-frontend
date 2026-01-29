@@ -45,6 +45,18 @@ jobs:
         run: |
           ls -la ios
           test -f ios/Podfile && echo "✅ Podfile found" || (echo "❌ Podfile missing" && exit 1)
+      - name: Debug P12 decode
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "$IOS_P12_B64" | tr -d '\n\r ' | base64 --decode > "$RUNNER_TEMP/cert.p12"
+          echo "Size:"
+          ls -lh "$RUNNER_TEMP/cert.p12"
+          echo "File type:"
+          file "$RUNNER_TEMP/cert.p12" || true
+          echo "Try open with openssl (validates password too):"
+          openssl pkcs12 -in "$RUNNER_TEMP/cert.p12" -passin pass:"$IOS_P12_PASSWORD" -info -noout
+          echo "✅ P12 valid + password OK"
 
       - name: Install signing cert + provisioning profile
         shell: bash
