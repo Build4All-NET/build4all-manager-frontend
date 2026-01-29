@@ -157,50 +157,61 @@ jobs:
           # Get bundle ID from Info.plist
           BUNDLE_ID=$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" ios/Runner/Info.plist)
           
-          # Update project.pbxproj to use manual signing
-          PBXPROJ="ios/Runner.xcodeproj/project.pbxproj"
+          # Create a Ruby script to properly modify the Xcode project
+          cat > /tmp/fix_signing.rb <<'RUBY_SCRIPT'
+          require 'xcodeproj'
           
-          # Backup original file
-          cp "$PBXPROJ" "$PBXPROJ.bak"
+          project_path = ARGV[0]
+          team_id = ARGV[1]
+          profile_uuid = ARGV[2]
+          code_sign_identity = ARGV[3]
           
-          # Disable automatic signing and set manual signing attributes
-          # This uses a more comprehensive approach to ensure all build configurations are updated
+          project = Xcodeproj::Project.open(project_path)
           
-          # First, set ProvisioningStyle to Manual
-          sed -i '' 's/ProvisioningStyle = Automatic;/ProvisioningStyle = Manual;/g' "$PBXPROJ"
+          # Find the Runner target
+          target = project.targets.find { |t| t.name == 'Runner' }
           
-          # Add or update DEVELOPMENT_TEAM
-          if ! grep -q "DEVELOPMENT_TEAM = $IOS_TEAM_ID;" "$PBXPROJ"; then
-            # Add DEVELOPMENT_TEAM after each ASSETCATALOG_COMPILER line (common anchor point)
-            sed -i '' "/ASSETCATALOG_COMPILER_APPICON_NAME/a\\
-          DEVELOPMENT_TEAM = $IOS_TEAM_ID;
-          " "$PBXPROJ"
-          fi
+          if target.nil?
+            puts "❌ Runner target not found"
+            exit 1
+          end
           
-          # Add PROVISIONING_PROFILE_SPECIFIER using UUID
-          if ! grep -q "PROVISIONING_PROFILE_SPECIFIER" "$PBXPROJ"; then
-            sed -i '' "/DEVELOPMENT_TEAM/a\\
-          PROVISIONING_PROFILE_SPECIFIER = \"$PP_UUID\";
-          " "$PBXPROJ"
-          else
-            sed -i '' "s/PROVISIONING_PROFILE_SPECIFIER = .*;/PROVISIONING_PROFILE_SPECIFIER = \"$PP_UUID\";/g" "$PBXPROJ"
-          fi
+          # Configure signing for all configurations (Debug, Release, Profile)
+          target.build_configurations.each do |config|
+            config.build_settings['CODE_SIGN_STYLE'] = 'Manual'
+            config.build_settings['DEVELOPMENT_TEAM'] = team_id
+            config.build_settings['PROVISIONING_PROFILE_SPECIFIER'] = profile_uuid
+            config.build_settings['CODE_SIGN_IDENTITY'] = code_sign_identity
+            config.build_settings['CODE_SIGN_IDENTITY[sdk=iphoneos*]'] = code_sign_identity
+            
+            puts "✅ Updated #{config.name} configuration"
+          end
           
-          # Add CODE_SIGN_IDENTITY
-          if ! grep -q "CODE_SIGN_IDENTITY\[sdk=iphoneos\*\]" "$PBXPROJ"; then
-            sed -i '' "/PROVISIONING_PROFILE_SPECIFIER/a\\
-          \"CODE_SIGN_IDENTITY[sdk=iphoneos*]\" = \"$IOS_CODE_SIGN_IDENTITY\";
-          " "$PBXPROJ"
-          else
-            sed -i '' "s/\"CODE_SIGN_IDENTITY\[sdk=iphoneos\*\]\" = .*/\"CODE_SIGN_IDENTITY[sdk=iphoneos*]\" = \"$IOS_CODE_SIGN_IDENTITY\";/g" "$PBXPROJ"
-          fi
+          # Also update project-level settings
+          project.build_configurations.each do |config|
+            # Only set team at project level, not provisioning profile
+            config.build_settings['DEVELOPMENT_TEAM'] = team_id
+          end
           
-          # Add CODE_SIGN_STYLE
-          if ! grep -q "CODE_SIGN_STYLE = Manual;" "$PBXPROJ"; then
-            sed -i '' "/CODE_SIGN_IDENTITY/a\\
-          CODE_SIGN_STYLE = Manual;
-          " "$PBXPROJ"
-          fi
+          # Update target attributes for manual signing
+          project.root_object.attributes['TargetAttributes'] ||= {}
+          project.root_object.attributes['TargetAttributes'][target.uuid] ||= {}
+          project.root_object.attributes['TargetAttributes'][target.uuid]['ProvisioningStyle'] = 'Manual'
+          
+          project.save
+          
+          puts "✅ Project configuration saved"
+          RUBY_SCRIPT
+
+          # Install xcodeproj gem if not present
+          gem list -i xcodeproj || gem install xcodeproj --no-document
+          
+          # Run the Ruby script
+          ruby /tmp/fix_signing.rb \
+            "ios/Runner.xcodeproj" \
+            "$IOS_TEAM_ID" \
+            "$PP_UUID" \
+            "$IOS_CODE_SIGN_IDENTITY"
           
           echo "✅ Configured manual code signing"
           echo "Team ID: $IOS_TEAM_ID"
