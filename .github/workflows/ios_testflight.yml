@@ -186,58 +186,89 @@ jobs:
           # Remove Xcode's workspace data that caches signing settings
           rm -rf ios/Runner.xcodeproj/project.xcworkspace/xcuserdata || true
           rm -rf ios/Runner.xcodeproj/xcuserdata || true
+          rm -rf ios/Runner.xcworkspace/xcuserdata || true
           
           echo ""
           echo "=== Modifying project.pbxproj ==="
           
-          # Find and replace ProvisioningStyle in TargetAttributes section
-          # This is the critical setting that tells Xcode to use manual signing
-          perl -i -pe 's/(ProvisioningStyle = )Automatic;/${1}Manual;/g' "$PBXPROJ"
+          # CRITICAL: Change ProvisioningStyle from Automatic to Manual in TargetAttributes
+          # This is what tells Xcode not to use automatic provisioning
+          sed -i '' 's/ProvisioningStyle = Automatic;/ProvisioningStyle = Manual;/g' "$PBXPROJ"
           
-          # Remove any existing PROVISIONING_PROFILE or PROVISIONING_PROFILE_SPECIFIER settings
-          # to avoid conflicts
-          sed -i '' '/PROVISIONING_PROFILE = /d' "$PBXPROJ"
-          sed -i '' '/PROVISIONING_PROFILE_SPECIFIER = /d' "$PBXPROJ"
+          # Also remove any DevelopmentTeam from TargetAttributes that might override
+          sed -i '' '/DevelopmentTeam = .*;/d' "$PBXPROJ"
           
-          # Find the buildSettings sections for Release configuration and add our settings
-          # We need to add these to the Runner target's build configurations
+          # Find all XCBuildConfiguration sections and identify which ones belong to Runner target
+          # We'll use Python for more precise editing
+          python3 <<PYTHON_SCRIPT
+          import re
+          import sys
           
-          # Use awk to properly insert the signing settings into each buildSettings block
-          awk -v team="$IOS_TEAM_ID" -v profile="$PP_UUID" -v identity="$IOS_CODE_SIGN_IDENTITY" '
-          /buildSettings = {/ {
-              in_build_settings = 1
-              print
-              next
-          }
-          in_build_settings && /};/ {
-              # Add our settings before the closing brace
-              print "\t\t\t\tCODE_SIGN_IDENTITY = \"" identity "\";"
-              print "\t\t\t\t\"CODE_SIGN_IDENTITY[sdk=iphoneos*]\" = \"" identity "\";"
-              print "\t\t\t\tCODE_SIGN_STYLE = Manual;"
-              print "\t\t\t\tDEVELOPMENT_TEAM = " team ";"
-              print "\t\t\t\tPROVISIONING_PROFILE_SPECIFIER = \"" profile "\";"
-              in_build_settings = 0
-              print
-              next
-          }
-          { print }
-          ' "$PBXPROJ" > "$PBXPROJ.tmp" && mv "$PBXPROJ.tmp" "$PBXPROJ"
+          with open("$PBXPROJ", 'r') as f:
+              content = f.read()
           
-          echo "✅ Modified project.pbxproj"
+          # Find the Runner target configurations (Debug, Release, Profile)
+          # These are typically named with comments like "/* Debug */ ="
+          runner_config_pattern = r'(/\* (Debug|Release|Profile) \*/ = \{[^}]*?buildSettings = \{)(.*?)(\};)'
+          
+          def add_signing_settings(match):
+          prefix = match.group(1)
+          config_name = match.group(2)
+          build_settings = match.group(3)
+          suffix = match.group(4)
+          
+          # Check if this is likely a Runner target config (not Pods)
+          # Runner configs usually have ASSETCATALOG_COMPILER or INFOPLIST_FILE
+          if 'ASSETCATALOG_COMPILER' in build_settings or 'INFOPLIST_FILE' in build_settings or 'Runner/Info.plist' in build_settings:
+              # Remove existing signing settings to avoid duplicates
+              build_settings = re.sub(r'\s*CODE_SIGN_IDENTITY.*?;', '', build_settings)
+            build_settings = re.sub(r'\s*CODE_SIGN_STYLE.*?;', '', build_settings)
+            build_settings = re.sub(r'\s*DEVELOPMENT_TEAM.*?;', '', build_settings)
+            build_settings = re.sub(r'\s*PROVISIONING_PROFILE_SPECIFIER.*?;', '', build_settings)
+            build_settings = re.sub(r'\s*PROVISIONING_PROFILE[^_].*?;', '', build_settings)
+            
+            # Add our signing settings
+            new_settings = f'''
+            \t\t\t\tCODE_SIGN_IDENTITY = "$IOS_CODE_SIGN_IDENTITY";
+            \t\t\t\t"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "$IOS_CODE_SIGN_IDENTITY";
+            \t\t\t\tCODE_SIGN_STYLE = Manual;
+            \t\t\t\tDEVELOPMENT_TEAM = $IOS_TEAM_ID;
+            \t\t\t\tPROVISIONING_PROFILE_SPECIFIER = "$PP_UUID";'''
+            
+            build_settings = new_settings + build_settings
+            
+            print(f"✅ Modified {config_name} configuration", file=sys.stderr)
+        
+           return prefix + build_settings + suffix
+    
+          # Apply the modifications
+          content = re.sub(runner_config_pattern, add_signing_settings, content, flags=re.DOTALL)
+          
+          with open("$PBXPROJ", 'w') as f:
+              f.write(content)
+          
+          print("✅ Python modifications complete", file=sys.stderr)
+          PYTHON_SCRIPT     
+            
+            echo "✅ Modified project.pbxproj"
           
           # Verify the changes
           echo ""
           echo "=== Verification ==="
           echo "Checking for Manual ProvisioningStyle:"
-          grep "ProvisioningStyle = Manual" "$PBXPROJ" || echo "⚠️  Not found"
+          grep "ProvisioningStyle = Manual" "$PBXPROJ" && echo "✅ Found" || echo "⚠️  Not found"
           
           echo ""
-          echo "Checking for PROVISIONING_PROFILE_SPECIFIER:"
-          grep "PROVISIONING_PROFILE_SPECIFIER" "$PBXPROJ" | head -5 || echo "⚠️  Not found"
+          echo "Checking for PROVISIONING_PROFILE_SPECIFIER with our UUID:"
+          grep "PROVISIONING_PROFILE_SPECIFIER.*$PP_UUID" "$PBXPROJ" && echo "✅ Found" || echo "⚠️  Not found"
           
           echo ""
-          echo "Checking for CODE_SIGN_STYLE:"
-          grep "CODE_SIGN_STYLE" "$PBXPROJ" | head -5 || echo "⚠️  Not found"
+          echo "Checking for CODE_SIGN_STYLE = Manual:"
+          grep "CODE_SIGN_STYLE = Manual" "$PBXPROJ" && echo "✅ Found" || echo "⚠️  Not found"
+          
+          echo ""
+          echo "Checking for DEVELOPMENT_TEAM:"
+          grep "DEVELOPMENT_TEAM = $IOS_TEAM_ID" "$PBXPROJ" && echo "✅ Found" || echo "⚠️  Not found"
           
           echo ""
           echo "✅ Configuration complete"
