@@ -270,16 +270,14 @@ jobs:
           # Build the archive using xcodebuild directly for better control
           cd ios
           
+          # Build archive - don't set PROVISIONING_PROFILE_SPECIFIER globally as it affects Pods
+          # The provisioning profile is already configured in the project.pbxproj
           xcodebuild -workspace Runner.xcworkspace \
             -scheme Runner \
             -configuration Release \
             -archivePath "$RUNNER_TEMP/Runner.xcarchive" \
             -destination 'generic/platform=iOS' \
-            archive \
-            CODE_SIGN_IDENTITY="$IOS_CODE_SIGN_IDENTITY" \
-            DEVELOPMENT_TEAM="$IOS_TEAM_ID" \
-            PROVISIONING_PROFILE_SPECIFIER="$PP_UUID" \
-            CODE_SIGN_STYLE=Manual
+            archive
           
           echo "✅ Archive created"
 
