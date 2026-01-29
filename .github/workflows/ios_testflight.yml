@@ -178,90 +178,69 @@ jobs:
           echo "Code Sign Identity: $IOS_CODE_SIGN_IDENTITY"
           echo "Bundle ID: $BUNDLE_ID"
           
-          # Create a Ruby script to properly modify the Xcode project
-          cat > /tmp/fix_signing.rb <<'RUBY_SCRIPT'
-          require 'xcodeproj'
+          PBXPROJ="ios/Runner.xcodeproj/project.pbxproj"
           
-          project_path = ARGV[0]
-          team_id = ARGV[1]
-          profile_uuid = ARGV[2]
-          code_sign_identity = ARGV[3]
+          # Backup
+          cp "$PBXPROJ" "$PBXPROJ.backup"
           
-          puts "Opening project: #{project_path}"
-          project = Xcodeproj::Project.open(project_path)
-          
-          # Find the Runner target
-          target = project.targets.find { |t| t.name == 'Runner' }
-          
-          if target.nil?
-            puts "❌ Runner target not found"
-            exit 1
-          end
-          
-          puts "Found target: #{target.name}"
-          
-          # Configure signing for all configurations (Debug, Release, Profile)
-          target.build_configurations.each do |config|
-            puts "\n=== Configuring #{config.name} ==="
-            
-            # Remove any automatic provisioning settings
-            config.build_settings.delete('PROVISIONING_PROFILE')
-            config.build_settings.delete('CODE_SIGN_IDENTITY[sdk=iphoneos*]') if config.build_settings['CODE_SIGN_IDENTITY[sdk=iphoneos*]'] == 'iPhone Developer'
-            
-            # Set manual signing
-            config.build_settings['CODE_SIGN_STYLE'] = 'Manual'
-            config.build_settings['DEVELOPMENT_TEAM'] = team_id
-            config.build_settings['PROVISIONING_PROFILE_SPECIFIER'] = profile_uuid
-            config.build_settings['CODE_SIGN_IDENTITY'] = code_sign_identity
-            config.build_settings['CODE_SIGN_IDENTITY[sdk=iphoneos*]'] = code_sign_identity
-            
-            puts "  CODE_SIGN_STYLE: #{config.build_settings['CODE_SIGN_STYLE']}"
-            puts "  DEVELOPMENT_TEAM: #{config.build_settings['DEVELOPMENT_TEAM']}"
-            puts "  PROVISIONING_PROFILE_SPECIFIER: #{config.build_settings['PROVISIONING_PROFILE_SPECIFIER']}"
-            puts "  CODE_SIGN_IDENTITY: #{config.build_settings['CODE_SIGN_IDENTITY']}"
-          end
-          
-          # Update project-level settings
-          project.build_configurations.each do |config|
-            config.build_settings['DEVELOPMENT_TEAM'] = team_id
-          end
-          
-          # Update target attributes for manual signing
-          project.root_object.attributes['TargetAttributes'] ||= {}
-          project.root_object.attributes['TargetAttributes'][target.uuid] ||= {}
-          project.root_object.attributes['TargetAttributes'][target.uuid]['ProvisioningStyle'] = 'Manual'
-          # Remove DevelopmentTeam from TargetAttributes as it can override our settings
-          project.root_object.attributes['TargetAttributes'][target.uuid].delete('DevelopmentTeam')
-          project.root_object.attributes['TargetAttributes'][target.uuid]['DevelopmentTeam'] = team_id
-          
-          puts "\n=== Target Attributes ==="
-          puts project.root_object.attributes['TargetAttributes'][target.uuid].inspect
-          
-          project.save
-          
-          puts "\n✅ Project configuration saved successfully"
-          RUBY_SCRIPT
-
-          # Install xcodeproj gem if not present
-          echo "Installing xcodeproj gem..."
-          gem list -i xcodeproj || gem install xcodeproj --no-document
-          
-          # Run the Ruby script
-          echo "Running Ruby configuration script..."
-          ruby /tmp/fix_signing.rb \
-            "ios/Runner.xcodeproj" \
-            "$IOS_TEAM_ID" \
-            "$PP_UUID" \
-            "$IOS_CODE_SIGN_IDENTITY"
+          # Remove Xcode's workspace data that caches signing settings
+          rm -rf ios/Runner.xcodeproj/project.xcworkspace/xcuserdata || true
+          rm -rf ios/Runner.xcodeproj/xcuserdata || true
           
           echo ""
-          echo "✅ Manual code signing configured"
+          echo "=== Modifying project.pbxproj ==="
+          
+          # Find and replace ProvisioningStyle in TargetAttributes section
+          # This is the critical setting that tells Xcode to use manual signing
+          perl -i -pe 's/(ProvisioningStyle = )Automatic;/${1}Manual;/g' "$PBXPROJ"
+          
+          # Remove any existing PROVISIONING_PROFILE or PROVISIONING_PROFILE_SPECIFIER settings
+          # to avoid conflicts
+          sed -i '' '/PROVISIONING_PROFILE = /d' "$PBXPROJ"
+          sed -i '' '/PROVISIONING_PROFILE_SPECIFIER = /d' "$PBXPROJ"
+          
+          # Find the buildSettings sections for Release configuration and add our settings
+          # We need to add these to the Runner target's build configurations
+          
+          # Use awk to properly insert the signing settings into each buildSettings block
+          awk -v team="$IOS_TEAM_ID" -v profile="$PP_UUID" -v identity="$IOS_CODE_SIGN_IDENTITY" '
+          /buildSettings = {/ {
+              in_build_settings = 1
+              print
+              next
+          }
+          in_build_settings && /};/ {
+              # Add our settings before the closing brace
+              print "\t\t\t\tCODE_SIGN_IDENTITY = \"" identity "\";"
+              print "\t\t\t\t\"CODE_SIGN_IDENTITY[sdk=iphoneos*]\" = \"" identity "\";"
+              print "\t\t\t\tCODE_SIGN_STYLE = Manual;"
+              print "\t\t\t\tDEVELOPMENT_TEAM = " team ";"
+              print "\t\t\t\tPROVISIONING_PROFILE_SPECIFIER = \"" profile "\";"
+              in_build_settings = 0
+              print
+              next
+          }
+          { print }
+          ' "$PBXPROJ" > "$PBXPROJ.tmp" && mv "$PBXPROJ.tmp" "$PBXPROJ"
+          
+          echo "✅ Modified project.pbxproj"
           
           # Verify the changes
           echo ""
-          echo "=== Verifying project.pbxproj changes ==="
-          grep -A2 "PROVISIONING_PROFILE_SPECIFIER" ios/Runner.xcodeproj/project.pbxproj | head -20 || echo "PROVISIONING_PROFILE_SPECIFIER not found"
-          grep -A2 "CODE_SIGN_STYLE" ios/Runner.xcodeproj/project.pbxproj | head -20 || echo "CODE_SIGN_STYLE not found"
+          echo "=== Verification ==="
+          echo "Checking for Manual ProvisioningStyle:"
+          grep "ProvisioningStyle = Manual" "$PBXPROJ" || echo "⚠️  Not found"
+          
+          echo ""
+          echo "Checking for PROVISIONING_PROFILE_SPECIFIER:"
+          grep "PROVISIONING_PROFILE_SPECIFIER" "$PBXPROJ" | head -5 || echo "⚠️  Not found"
+          
+          echo ""
+          echo "Checking for CODE_SIGN_STYLE:"
+          grep "CODE_SIGN_STYLE" "$PBXPROJ" | head -5 || echo "⚠️  Not found"
+          
+          echo ""
+          echo "✅ Configuration complete"
 
       - name: Update ExportOptions.plist
         shell: bash
