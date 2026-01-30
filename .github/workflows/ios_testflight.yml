@@ -115,6 +115,27 @@ jobs:
           security find-identity -v -p codesigning || true
           echo "✅ Installed cert + profile"
 
+          - name: Verify provisioning profile matches bundle + cert
+            shell: bash
+            run: |
+              set -euo pipefail
+              security cms -D -i "$RUNNER_TEMP/profile.mobileprovision" > "$RUNNER_TEMP/profile.plist"
+          
+              echo "Profile Name:"
+              /usr/libexec/PlistBuddy -c "Print :Name" "$RUNNER_TEMP/profile.plist" || true
+          
+              echo "TeamIdentifier:"
+              /usr/libexec/PlistBuddy -c "Print :TeamIdentifier:0" "$RUNNER_TEMP/profile.plist" || true
+          
+              echo "ApplicationIdentifierPrefix:"
+              /usr/libexec/PlistBuddy -c "Print :ApplicationIdentifierPrefix:0" "$RUNNER_TEMP/profile.plist" || true
+          
+              echo "Entitlements application-identifier:"
+              /usr/libexec/PlistBuddy -c "Print :Entitlements:application-identifier" "$RUNNER_TEMP/profile.plist" || true
+          
+              echo "Entitlements get-task-allow (should be false for App Store):"
+              /usr/libexec/PlistBuddy -c "Print :Entitlements:get-task-allow" "$RUNNER_TEMP/profile.plist" || true
+
       - name: Show Profile Name + Bundle ID (and export env)
         shell: bash
         run: |
