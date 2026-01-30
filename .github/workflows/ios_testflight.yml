@@ -115,26 +115,26 @@ jobs:
           security find-identity -v -p codesigning || true
           echo "✅ Installed cert + profile"
 
-          - name: Verify provisioning profile matches bundle + cert
-            shell: bash
-            run: |
-              set -euo pipefail
-              security cms -D -i "$RUNNER_TEMP/profile.mobileprovision" > "$RUNNER_TEMP/profile.plist"
-          
-              echo "Profile Name:"
-              /usr/libexec/PlistBuddy -c "Print :Name" "$RUNNER_TEMP/profile.plist" || true
-          
-              echo "TeamIdentifier:"
-              /usr/libexec/PlistBuddy -c "Print :TeamIdentifier:0" "$RUNNER_TEMP/profile.plist" || true
-          
-              echo "ApplicationIdentifierPrefix:"
-              /usr/libexec/PlistBuddy -c "Print :ApplicationIdentifierPrefix:0" "$RUNNER_TEMP/profile.plist" || true
-          
-              echo "Entitlements application-identifier:"
-              /usr/libexec/PlistBuddy -c "Print :Entitlements:application-identifier" "$RUNNER_TEMP/profile.plist" || true
-          
-              echo "Entitlements get-task-allow (should be false for App Store):"
-              /usr/libexec/PlistBuddy -c "Print :Entitlements:get-task-allow" "$RUNNER_TEMP/profile.plist" || true
+      - name: Verify provisioning profile matches bundle + cert
+        shell: bash
+        run: |
+          set -euo pipefail
+          security cms -D -i "$RUNNER_TEMP/profile.mobileprovision" > "$RUNNER_TEMP/profile.plist"
+
+          echo "Profile Name:"
+          /usr/libexec/PlistBuddy -c "Print :Name" "$RUNNER_TEMP/profile.plist" || true
+
+          echo "TeamIdentifier:"
+          /usr/libexec/PlistBuddy -c "Print :TeamIdentifier:0" "$RUNNER_TEMP/profile.plist" || true
+
+          echo "ApplicationIdentifierPrefix:"
+          /usr/libexec/PlistBuddy -c "Print :ApplicationIdentifierPrefix:0" "$RUNNER_TEMP/profile.plist" || true
+
+          echo "Entitlements application-identifier:"
+          /usr/libexec/PlistBuddy -c "Print :Entitlements:application-identifier" "$RUNNER_TEMP/profile.plist" || true
+
+          echo "Entitlements get-task-allow (should be false for App Store):"
+          /usr/libexec/PlistBuddy -c "Print :Entitlements:get-task-allow" "$RUNNER_TEMP/profile.plist" || true
 
       - name: Show Profile Name + Bundle ID (and export env)
         shell: bash
@@ -206,38 +206,34 @@ jobs:
         run: |
           set -euo pipefail
           PODS_PBX="ios/Pods/Pods.xcodeproj/project.pbxproj"
-      
-          # Ensure Pods never try to sign
+
           perl -0777 -i -pe 's/CODE_SIGNING_ALLOWED = YES;/CODE_SIGNING_ALLOWED = NO;/g' "$PODS_PBX" || true
           perl -0777 -i -pe 's/CODE_SIGNING_REQUIRED = YES;/CODE_SIGNING_REQUIRED = NO;/g' "$PODS_PBX" || true
           perl -0777 -i -pe 's/PROVISIONING_PROFILE_SPECIFIER = .*?;/PROVISIONING_PROFILE_SPECIFIER = "";/g' "$PODS_PBX" || true
           perl -0777 -i -pe 's/DEVELOPMENT_TEAM = .*?;/DEVELOPMENT_TEAM = "";/g' "$PODS_PBX" || true
-      
+
           echo "✅ Pods code signing disabled"
 
-          - name: Build iOS Archive
-            shell: bash
-            run: |
-              set -euo pipefail
-              cd ios
-          
-              # Use UUID (more reliable than name)
-              PP_UUID=$(cat "$RUNNER_TEMP/pp_uuid.txt")
-          
-              xcodebuild -workspace Runner.xcworkspace \
-                -scheme Runner \
-                -configuration Release \
-                -archivePath "$RUNNER_TEMP/Runner.xcarchive" \
-                -destination 'generic/platform=iOS' \
-                archive \
-                CODE_SIGN_STYLE=Manual \
-                DEVELOPMENT_TEAM="$IOS_TEAM_ID" \
-                CODE_SIGN_IDENTITY="$IOS_CODE_SIGN_IDENTITY" \
-                PROVISIONING_PROFILE="$PP_UUID"
-          
-              echo "✅ Archive created"
+      - name: Build iOS Archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd ios
 
+          PP_UUID=$(cat "$RUNNER_TEMP/pp_uuid.txt")
 
+          xcodebuild -workspace Runner.xcworkspace \
+            -scheme Runner \
+            -configuration Release \
+            -archivePath "$RUNNER_TEMP/Runner.xcarchive" \
+            -destination 'generic/platform=iOS' \
+            archive \
+            CODE_SIGN_STYLE=Manual \
+            DEVELOPMENT_TEAM="$IOS_TEAM_ID" \
+            CODE_SIGN_IDENTITY="$IOS_CODE_SIGN_IDENTITY" \
+            PROVISIONING_PROFILE="$PP_UUID"
+
+          echo "✅ Archive created"
 
       - name: Export IPA
         shell: bash
