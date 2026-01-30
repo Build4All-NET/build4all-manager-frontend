@@ -1,4 +1,4 @@
-name: iOS - Build IPA + Upload TestFlight (NO dart-define)
+name: iOS - Build IPA + Upload TestFlight (Manual signing, CI)
 
 on:
   workflow_dispatch:
@@ -13,7 +13,7 @@ jobs:
       IOS_MOBILEPROVISION_B64: ${{ secrets.IOS_MOBILEPROVISION_B64 }}
       IOS_TEAM_ID: ${{ secrets.IOS_TEAM_ID }}
       IOS_EXPORT_METHOD: ${{ secrets.IOS_EXPORT_METHOD }} # app-store
-      IOS_CODE_SIGN_IDENTITY: ${{ secrets.IOS_CODE_SIGN_IDENTITY }} # Apple Distribution
+      IOS_CODE_SIGN_IDENTITY: ${{ secrets.IOS_CODE_SIGN_IDENTITY }} # Apple Distribution: ...
 
       ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
       ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
@@ -23,6 +23,9 @@ jobs:
       FASTLANE_OPT_OUT_USAGE: "true"
       LANG: en_US.UTF-8
       LC_ALL: en_US.UTF-8
+
+      # ✅ MUST match Apple Developer App ID bundle id
+      IOS_BUNDLE_ID: com.build4all.build4allmanager
 
     steps:
       - name: Checkout
@@ -36,13 +39,30 @@ jobs:
           cache: true
 
       - name: Ensure iOS platform exists (generate ios/)
+        shell: bash
         run: |
+          set -euo pipefail
           flutter clean
           flutter create --platforms=ios .
           flutter pub get
 
-      - name: Set minimum iOS deployment target
+      - name: Force correct Bundle ID (Runner)
+        shell: bash
         run: |
+          set -euo pipefail
+          PBXPROJ="ios/Runner.xcodeproj/project.pbxproj"
+
+          # Replace any existing PRODUCT_BUNDLE_IDENTIFIER with the desired one
+          perl -0777 -i -pe 's/PRODUCT_BUNDLE_IDENTIFIER = [^;]+;/PRODUCT_BUNDLE_IDENTIFIER = '"$IOS_BUNDLE_ID"';/g' "$PBXPROJ"
+
+          echo "✅ Bundle ID forced to: $IOS_BUNDLE_ID"
+          /usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" ios/Runner/Info.plist || true
+
+      - name: Set minimum iOS deployment target (14.0)
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Podfile platform
           if grep -q "# platform :ios" ios/Podfile; then
             sed -i '' "s/# platform :ios, '.*'/platform :ios, '14.0'/" ios/Podfile
           elif ! grep -q "platform :ios" ios/Podfile; then
@@ -51,17 +71,11 @@ jobs:
             sed -i '' "s/platform :ios, '.*'/platform :ios, '14.0'/" ios/Podfile
           fi
 
+          # Runner deployment target
           sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = [0-9.]*;/IPHONEOS_DEPLOYMENT_TARGET = 14.0;/g' ios/Runner.xcodeproj/project.pbxproj
           echo "✅ iOS deployment target set to 14.0"
 
-      - name: Check Podfile exists
-        run: |
-          ls -la ios
-          echo "--- Podfile content (first 20 lines) ---"
-          cat ios/Podfile | head -20
-          test -f ios/Podfile && echo "✅ Podfile found" || (echo "❌ Podfile missing" && exit 1)
-
-      - name: Debug P12 decode
+      - name: Debug P12 decode (validates password)
         shell: bash
         run: |
           set -euo pipefail
@@ -71,7 +85,7 @@ jobs:
           openssl pkcs12 -in "$RUNNER_TEMP/cert.p12" -passin pass:"$IOS_P12_PASSWORD" -info -noout
           echo "✅ P12 valid + password OK"
 
-      - name: Install signing cert + provisioning profile
+      - name: Install signing cert + provisioning profile (extract UUID/Name)
         shell: bash
         run: |
           set -euo pipefail
@@ -95,113 +109,49 @@ jobs:
           mkdir -p "$PP_DIR"
 
           echo "$IOS_MOBILEPROVISION_B64" | tr -d '\n\r ' | base64 --decode > "$RUNNER_TEMP/profile.mobileprovision"
-
-          if [ ! -s "$RUNNER_TEMP/profile.mobileprovision" ]; then
-            echo "❌ Provisioning profile is empty or missing"
-            exit 1
-          fi
+          test -s "$RUNNER_TEMP/profile.mobileprovision"
 
           security cms -D -i "$RUNNER_TEMP/profile.mobileprovision" > "$RUNNER_TEMP/profile.plist"
           PP_UUID=$(/usr/libexec/PlistBuddy -c "Print :UUID" "$RUNNER_TEMP/profile.plist")
           PP_NAME=$(/usr/libexec/PlistBuddy -c "Print :Name" "$RUNNER_TEMP/profile.plist")
+          APP_ID=$(/usr/libexec/PlistBuddy -c "Print :Entitlements:application-identifier" "$RUNNER_TEMP/profile.plist")
 
           cp "$RUNNER_TEMP/profile.mobileprovision" "$PP_DIR/$PP_UUID.mobileprovision"
 
-          echo "$PP_UUID" > "$RUNNER_TEMP/pp_uuid.txt"
-          echo "$PP_NAME" > "$RUNNER_TEMP/pp_name.txt"
+          echo "PP_UUID=$PP_UUID" >> "$GITHUB_ENV"
+          echo "PP_NAME=$PP_NAME" >> "$GITHUB_ENV"
+          echo "APP_ID_IN_PROFILE=$APP_ID" >> "$GITHUB_ENV"
 
           echo "✅ Provisioning Profile UUID: $PP_UUID"
           echo "✅ Provisioning Profile Name: $PP_NAME"
+          echo "✅ Profile application-identifier: $APP_ID"
           security find-identity -v -p codesigning || true
-          echo "✅ Installed cert + profile"
 
-      - name: Verify provisioning profile matches bundle + cert
+      - name: Verify profile matches Bundle ID
         shell: bash
         run: |
           set -euo pipefail
-          security cms -D -i "$RUNNER_TEMP/profile.mobileprovision" > "$RUNNER_TEMP/profile.plist"
-
-          echo "Profile Name:"
-          /usr/libexec/PlistBuddy -c "Print :Name" "$RUNNER_TEMP/profile.plist" || true
-
-          echo "TeamIdentifier:"
-          /usr/libexec/PlistBuddy -c "Print :TeamIdentifier:0" "$RUNNER_TEMP/profile.plist" || true
-
-          echo "ApplicationIdentifierPrefix:"
-          /usr/libexec/PlistBuddy -c "Print :ApplicationIdentifierPrefix:0" "$RUNNER_TEMP/profile.plist" || true
-
-          echo "Entitlements application-identifier:"
-          /usr/libexec/PlistBuddy -c "Print :Entitlements:application-identifier" "$RUNNER_TEMP/profile.plist" || true
-
-          echo "Entitlements get-task-allow (should be false for App Store):"
-          /usr/libexec/PlistBuddy -c "Print :Entitlements:get-task-allow" "$RUNNER_TEMP/profile.plist" || true
-
-      - name: Show Profile Name + Bundle ID (and export env)
-        shell: bash
-        run: |
-          set -euo pipefail
-          PP_NAME=$(cat "$RUNNER_TEMP/pp_name.txt")
-          PP_UUID=$(cat "$RUNNER_TEMP/pp_uuid.txt")
-          BUNDLE_ID=$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" ios/Runner/Info.plist)
-
-          echo "Provisioning Profile Name: $PP_NAME"
-          echo "Provisioning Profile UUID: $PP_UUID"
-          echo "CFBundleIdentifier: $BUNDLE_ID"
-
-          echo "PP_NAME=$PP_NAME" >> $GITHUB_ENV
-          echo "PP_UUID=$PP_UUID" >> $GITHUB_ENV
-          echo "BUNDLE_ID=$BUNDLE_ID" >> $GITHUB_ENV
-
-      - name: Configure Xcode project for manual signing
-        shell: bash
-        run: |
-          set -euo pipefail
-          PBXPROJ="ios/Runner.xcodeproj/project.pbxproj"
-          sed -i '' 's/ProvisioningStyle = Automatic;/ProvisioningStyle = Manual;/g' "$PBXPROJ"
-          echo "✅ Configured manual code signing"
-
-      - name: Update ExportOptions.plist
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          cat > ios/ExportOptions.plist <<EOF
-          <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-          <plist version="1.0">
-          <dict>
-              <key>method</key>
-              <string>${IOS_EXPORT_METHOD}</string>
-              <key>teamID</key>
-              <string>${IOS_TEAM_ID}</string>
-              <key>signingStyle</key>
-              <string>manual</string>
-              <key>provisioningProfiles</key>
-              <dict>
-                  <key>${BUNDLE_ID}</key>
-                  <string>${PP_NAME}</string>
-              </dict>
-              <key>signingCertificate</key>
-              <string>${IOS_CODE_SIGN_IDENTITY}</string>
-              <key>uploadSymbols</key>
-              <true/>
-              <key>compileBitcode</key>
-              <false/>
-          </dict>
-          </plist>
-          EOF
-
-          echo "✅ Created ExportOptions.plist"
-          cat ios/ExportOptions.plist
+          echo "Expected bundle id: $IOS_BUNDLE_ID"
+          echo "Profile app id:      $APP_ID_IN_PROFILE"
+          # profile app id format: TEAMID.bundleid
+          if [[ "$APP_ID_IN_PROFILE" != *".$IOS_BUNDLE_ID" ]]; then
+            echo "❌ Provisioning profile does NOT match bundle id."
+            echo "   Profile:  $APP_ID_IN_PROFILE"
+            echo "   Expected: *.$IOS_BUNDLE_ID"
+            exit 1
+          fi
+          echo "✅ Bundle ID matches provisioning profile"
 
       - name: Install CocoaPods
+        shell: bash
         run: |
+          set -euo pipefail
           cd ios
           pod repo update
           pod install --repo-update
           cd ..
 
-      - name: Disable code signing for Pods
+      - name: Disable code signing for Pods targets
         shell: bash
         run: |
           set -euo pipefail
@@ -210,17 +160,49 @@ jobs:
           perl -0777 -i -pe 's/CODE_SIGNING_ALLOWED = YES;/CODE_SIGNING_ALLOWED = NO;/g' "$PODS_PBX" || true
           perl -0777 -i -pe 's/CODE_SIGNING_REQUIRED = YES;/CODE_SIGNING_REQUIRED = NO;/g' "$PODS_PBX" || true
           perl -0777 -i -pe 's/PROVISIONING_PROFILE_SPECIFIER = .*?;/PROVISIONING_PROFILE_SPECIFIER = "";/g' "$PODS_PBX" || true
+          perl -0777 -i -pe 's/PROVISIONING_PROFILE = .*?;/PROVISIONING_PROFILE = "";/g' "$PODS_PBX" || true
           perl -0777 -i -pe 's/DEVELOPMENT_TEAM = .*?;/DEVELOPMENT_TEAM = "";/g' "$PODS_PBX" || true
 
-          echo "✅ Pods code signing disabled"
+          echo "✅ Pods signing disabled"
 
-      - name: Build iOS Archive
+      - name: Create ExportOptions.plist (manual signing)
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > ios/ExportOptions.plist <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key>
+            <string>${IOS_EXPORT_METHOD}</string>
+            <key>teamID</key>
+            <string>${IOS_TEAM_ID}</string>
+            <key>signingStyle</key>
+            <string>manual</string>
+            <key>provisioningProfiles</key>
+            <dict>
+              <key>${IOS_BUNDLE_ID}</key>
+              <string>${PP_NAME}</string>
+            </dict>
+            <key>signingCertificate</key>
+            <string>${IOS_CODE_SIGN_IDENTITY}</string>
+            <key>compileBitcode</key>
+            <false/>
+            <key>uploadSymbols</key>
+            <true/>
+          </dict>
+          </plist>
+          EOF
+
+          echo "✅ ExportOptions.plist created"
+          cat ios/ExportOptions.plist
+
+      - name: Build iOS Archive (sign Runner only)
         shell: bash
         run: |
           set -euo pipefail
           cd ios
-
-          PP_UUID=$(cat "$RUNNER_TEMP/pp_uuid.txt")
 
           xcodebuild -workspace Runner.xcworkspace \
             -scheme Runner \
@@ -231,7 +213,7 @@ jobs:
             CODE_SIGN_STYLE=Manual \
             DEVELOPMENT_TEAM="$IOS_TEAM_ID" \
             CODE_SIGN_IDENTITY="$IOS_CODE_SIGN_IDENTITY" \
-            PROVISIONING_PROFILE="$PP_UUID"
+            PROVISIONING_PROFILE_SPECIFIER="$PP_NAME"
 
           echo "✅ Archive created"
 
@@ -262,7 +244,10 @@ jobs:
           ruby-version: "3.2"
 
       - name: Install fastlane
-        run: gem install fastlane -N
+        shell: bash
+        run: |
+          set -euo pipefail
+          gem install fastlane -N
 
       - name: Create ASC api_key.json
         shell: bash
@@ -288,11 +273,11 @@ jobs:
           IPA_PATH="$(ls -1 build/ios/ipa/*.ipa | head -n 1)"
           [ -f "$IPA_PATH" ] || { echo "❌ IPA not found"; exit 1; }
 
-          echo "✅ Uploading: $BUNDLE_ID"
+          echo "✅ Uploading to TestFlight: $IOS_BUNDLE_ID"
           fastlane pilot upload \
             --ipa "$IPA_PATH" \
             --api_key_path ".private/api_key.json" \
-            --app_identifier "$BUNDLE_ID" \
+            --app_identifier "$IOS_BUNDLE_ID" \
             --skip_waiting_for_build_processing true
 
           echo "✅ Uploaded. Check App Store Connect → TestFlight."
