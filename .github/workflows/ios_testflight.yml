@@ -19,7 +19,7 @@ jobs:
     runs-on: macos-latest
 
     env:
-      FLUTTER_VERSION: "3.24.0" # change if needed
+      FLUTTER_VERSION: "3.27.0" # change if needed
       BUNDLE_ID: "com.build4all.build4allmanager"
       IOS_EXPORT_METHOD: ${{ secrets.IOS_EXPORT_METHOD }} # for TestFlight => app-store
 
@@ -31,6 +31,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
           cache: true
 
       - name: Flutter pub get
