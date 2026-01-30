@@ -180,6 +180,20 @@ jobs:
           pod install --repo-update
           cd ..
 
+      - name: Disable code signing for Pods
+        shell: bash
+        run: |
+          set -euo pipefail
+          PODS_PBX="ios/Pods/Pods.xcodeproj/project.pbxproj"
+      
+          # Ensure Pods never try to sign
+          perl -0777 -i -pe 's/CODE_SIGNING_ALLOWED = YES;/CODE_SIGNING_ALLOWED = NO;/g' "$PODS_PBX" || true
+          perl -0777 -i -pe 's/CODE_SIGNING_REQUIRED = YES;/CODE_SIGNING_REQUIRED = NO;/g' "$PODS_PBX" || true
+          perl -0777 -i -pe 's/PROVISIONING_PROFILE_SPECIFIER = .*?;/PROVISIONING_PROFILE_SPECIFIER = "";/g' "$PODS_PBX" || true
+          perl -0777 -i -pe 's/DEVELOPMENT_TEAM = .*?;/DEVELOPMENT_TEAM = "";/g' "$PODS_PBX" || true
+      
+          echo "✅ Pods code signing disabled"
+
       - name: Build iOS Archive
         shell: bash
         run: |
