@@ -32,6 +32,29 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Select newest installed Xcode (safe)
+        shell: bash
+        run: |
+          set -euo pipefail
+      
+          echo "🔎 Installed Xcodes:"
+          ls -1 /Applications | grep -E '^Xcode.*\.app$' || true
+      
+          # Pick the newest Xcode by sorting names (works with Xcode_16.2.app, Xcode_15.4.app, etc.)
+          XCODE_APP="$(ls -1 /Applications | grep -E '^Xcode.*\.app$' | sort -V | tail -n 1)"
+      
+          if [ -z "${XCODE_APP:-}" ]; then
+            echo "❌ No Xcode found in /Applications"
+            exit 1
+          fi
+      
+          echo "✅ Selected: $XCODE_APP"
+          sudo xcode-select -s "/Applications/$XCODE_APP/Contents/Developer"
+      
+          xcodebuild -version
+          echo "iOS SDK: $(xcrun --sdk iphoneos --show-sdk-version)"
+
+
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -39,301 +62,935 @@ jobs:
           channel: stable
           cache: true
 
-      # ✅ Fix org ambiguity + keep correct reverse domain (NOT full bundle id)
-      - name: Recreate iOS folder (force org)
+      - name: Flutter pub get
         shell: bash
         run: |
           set -euo pipefail
-          rm -rf ios
-          flutter clean
-          flutter create --platforms=ios --org com.build4all .
+          flutter --version
           flutter pub get
 
-      - name: Force Bundle ID everywhere
+      - name: Show dispatch payload (debug)
         shell: bash
         run: |
           set -euo pipefail
-          PBX="ios/Runner.xcodeproj/project.pbxproj"
-          /usr/bin/perl -0777 -i -pe 's/PRODUCT_BUNDLE_IDENTIFIER = [^;]+;/PRODUCT_BUNDLE_IDENTIFIER = '"$IOS_BUNDLE_ID"';/g' "$PBX"
-          echo "✅ Bundle ID forced to $IOS_BUNDLE_ID"
+          echo '${{ toJson(github.event.client_payload) }}'
 
-      # ✅ Pod + Pods deployment target to 14.0
-      - name: Set iOS deployment target to 14.0
+      - name: Build ci_env.json (BY_LINK runtime-config + fallback + B64)
         shell: bash
         run: |
           set -euo pipefail
+          mkdir -p lib/env
 
-          # Podfile platform
-          if grep -q "# platform :ios" ios/Podfile; then
-            sed -i '' "s/# platform :ios, '.*'/platform :ios, '14.0'/" ios/Podfile
-          elif ! grep -q "platform :ios" ios/Podfile; then
-            sed -i '' "1s/^/platform :ios, '14.0'\n/" ios/Podfile
-          else
-            sed -i '' "s/platform :ios, '.*'/platform :ios, '14.0'/" ios/Podfile
+          python3 - <<'PY'
+          import json, os, urllib.request, urllib.error, socket, re
+
+          payload = json.loads(r'''${{ toJson(github.event.client_payload) }}''') or {}
+          cfg = payload.get("CONFIG") or {}
+
+          api_base = (cfg.get("API_BASE_URL") or payload.get("API_BASE_URL") or "").rstrip("/")
+          link_id = str(
+              cfg.get("OWNER_PROJECT_LINK_ID")
+              or payload.get("OWNER_PROJECT_LINK_ID")
+              or payload.get("ownerProjectLinkId")
+              or cfg.get("ownerProjectLinkId")
+              or ""
+          ).strip()
+
+          if not api_base:
+              raise SystemExit("Missing API_BASE_URL")
+          if not link_id:
+              raise SystemExit("Missing OWNER_PROJECT_LINK_ID")
+
+          url = f"{api_base}/api/public/runtime-config/by-link?linkId={link_id}"
+          runtime = {}
+          source = "FALLBACK (payload/defaults)"
+
+          token = (os.getenv("CI_RUNTIME_TOKEN") or "").strip()
+          headers = {"Accept": "application/json"}
+          if token:
+              headers["X-Auth-Token"] = token
+
+          try:
+              print("Fetching runtime config:", url)
+              print("Auth header present =", "YES" if token else "NO")
+              req = urllib.request.Request(url, headers=headers)
+              with urllib.request.urlopen(req, timeout=12) as r:
+                  raw = r.read().decode("utf-8")
+                  runtime = json.loads(raw)
+              source = "BY_LINK"
+          except (urllib.error.HTTPError, urllib.error.URLError, socket.timeout, json.JSONDecodeError) as e:
+              print("⚠️ runtime-config fetch failed, using fallback:", repr(e))
+
+          print("CONFIG SOURCE =", source)
+
+          def pick(key, default=None):
+              v = runtime.get(key)
+              if v not in (None, "", []):
+                  return v
+              v = cfg.get(key)
+              if v not in (None, "", []):
+                  return v
+              v = payload.get(key)
+              if v not in (None, "", []):
+                  return v
+              return default
+
+          app_name = pick("APP_NAME", "My App")
+          app_type = pick("APP_TYPE", "ECOMMERCE")
+          project_id = str(pick("PROJECT_ID", "")).strip()
+
+          ios_bundle = (
+              pick("iosBundleId") or 
+              pick("IOS_BUNDLE_ID") or 
+              pick("PACKAGE_NAME") or 
+              pick("APPLICATION_ID") or 
+              ""
+          ).strip()
+
+          if not ios_bundle:
+              ios_bundle = f"com.build4all.app{link_id}"
+          
+          ios_bundle = ios_bundle.lower()
+          ios_bundle = re.sub(r"[^a-z0-9._]", "", ios_bundle)
+          ios_bundle = re.sub(r"\.+", ".", ios_bundle).strip(".")
+          
+          if not ios_bundle or ios_bundle.count(".") < 1:
+              ios_bundle = f"com.build4all.app{link_id}"
+
+          vc = pick("IOS_BUILD_NUMBER") or pick("iosBuildNumber") or pick("ANDROID_VERSION_CODE")
+          vn = pick("IOS_VERSION_NAME") or pick("iosVersionName") or pick("ANDROID_VERSION_NAME")
+
+          try:
+              vc_int = int(vc) if vc not in (None,"",[]) else None
+          except Exception:
+              vc_int = None
+
+          vn_str = (str(vn).strip() if vn not in (None,"",[]) else "")
+
+          env = {
+              "API_BASE_URL": api_base,
+              "APP_NAME": app_name,
+              "APP_TYPE": app_type,
+              "OWNER_PROJECT_LINK_ID": link_id,
+              "PROJECT_ID": project_id,
+              "IOS_BUNDLE_ID": ios_bundle,
+              "IOS_BUILD_NUMBER": vc_int if vc_int is not None else 1,
+              "IOS_VERSION_NAME": vn_str if vn_str else "1.0.0",
+              "CONFIG_SOURCE": source,
+          }
+
+          currency_id = pick("CURRENCY_ID")
+          if currency_id in (None, "", []):
+              currency_id = (
+                  runtime.get("currencyId")
+                  or cfg.get("currencyId")
+                  or payload.get("currencyId")
+              )
+          if currency_id not in (None, "", []):
+              env["CURRENCY_ID"] = str(currency_id).strip()
+
+          for key in [
+              "THEME_JSON_B64",
+              "NAV_JSON_B64",
+              "HOME_JSON_B64",
+              "ENABLED_FEATURES_JSON_B64",
+              "BRANDING_JSON_B64",
+          ]:
+              v = pick(key)
+              if v:
+                  env[key] = v
+
+          logo_url = (pick("LOGO_URL") or pick("LOGO_PATH") or "").strip()
+          if not logo_url:
+              logo_url = (runtime.get("logoUrl") or cfg.get("logoUrl") or payload.get("logoUrl") or "").strip()
+          if logo_url:
+              env["LOGO_URL"] = logo_url
+
+          open("ci_api_base.txt", "w", encoding="utf-8").write(api_base)
+          open("ci_link_id.txt", "w", encoding="utf-8").write(link_id)
+          open("ci_ios_bundle_id.txt", "w", encoding="utf-8").write(ios_bundle)
+
+          with open("lib/env/ci_env.json", "w", encoding="utf-8") as f:
+              json.dump(env, f, ensure_ascii=False, indent=2)
+
+          print("✅ ci_env.json written")
+          print("API_BASE_URL =", api_base)
+          print("OWNER_PROJECT_LINK_ID =", link_id)
+          print("PROJECT_ID =", project_id)
+          print("IOS_BUNDLE_ID =", ios_bundle)
+          print("IOS_BUILD_NUMBER =", env["IOS_BUILD_NUMBER"])
+          print("IOS_VERSION_NAME =", env["IOS_VERSION_NAME"])
+          print("CURRENCY_ID =", env.get("CURRENCY_ID"))
+          print("CONFIG_SOURCE =", source)
+          print("LOGO_URL =", env.get("LOGO_URL"))
+
+          for k in ["THEME_JSON_B64","NAV_JSON_B64","HOME_JSON_B64","ENABLED_FEATURES_JSON_B64","BRANDING_JSON_B64"]:
+              print(k, "=", "YES" if env.get(k) else "NO")
+          PY
+
+      - name: Debug env
+        shell: bash
+        run: |
+          echo "----- ci_env.json -----"
+          cat lib/env/ci_env.json
+
+      - name: Read App Store Connect metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os
+          payload = json.loads(r'''${{ toJson(github.event.client_payload) }}''') or {}
+          cfg = payload.get("CONFIG") or {}
+
+          def pick(*keys):
+            for k in keys:
+              if k in payload and payload[k]:
+                return payload[k]
+              if k in cfg and cfg[k]:
+                return cfg[k]
+            return ""
+
+          app_name = pick("APPLE_APP_NAME","appleAppName","appStoreAppName","ASC_APP_NAME")
+          sku      = pick("APPLE_SKU","appleSku","appStoreSku","ASC_SKU")
+          locale   = pick("APPLE_PRIMARY_LOCALE","applePrimaryLocale","primaryLocale","ASC_PRIMARY_LOCALE") or "en-US"
+          
+          # External testing metadata - with GitHub Secrets as defaults
+          beta_description = (
+              pick("BETA_APP_DESCRIPTION","betaAppDescription") 
+              or os.environ.get("DEFAULT_BETA_APP_DESCRIPTION", "")
+              or "Test our app and provide feedback on features, usability, and overall experience."
+          )
+          
+          feedback_email = (
+              pick("BETA_FEEDBACK_EMAIL","betaFeedbackEmail","ownerEmail")
+              or os.environ.get("DEFAULT_BETA_FEEDBACK_EMAIL", "")
+              or pick("ownerEmail")
+              or ""
+          )
+          
+          contact_phone = (
+              pick("BETA_CONTACT_PHONE","betaContactPhone")
+              or os.environ.get("DEFAULT_BETA_CONTACT_PHONE", "")
+              or "+1234567890"  # Fallback if not provided
+          )
+          
+          marketing_url = pick("MARKETING_URL","marketingUrl") or ""
+          privacy_url = pick("PRIVACY_POLICY_URL","privacyPolicyUrl") or ""
+
+          with open(os.environ["GITHUB_ENV"], "a", encoding="utf-8") as f:
+            f.write(f"APPLE_APP_NAME={app_name}\n")
+            f.write(f"APPLE_SKU={sku}\n")
+            f.write(f"APPLE_PRIMARY_LOCALE={locale}\n")
+            f.write(f"BETA_APP_DESCRIPTION={beta_description}\n")
+            f.write(f"BETA_FEEDBACK_EMAIL={feedback_email}\n")
+            f.write(f"BETA_CONTACT_PHONE={contact_phone}\n")
+            f.write(f"MARKETING_URL={marketing_url}\n")
+            f.write(f"PRIVACY_POLICY_URL={privacy_url}\n")
+
+          print("APPLE_APP_NAME=", app_name)
+          print("APPLE_SKU=", sku)
+          print("APPLE_PRIMARY_LOCALE=", locale)
+          print("BETA_APP_DESCRIPTION=", beta_description[:100] + "..." if len(beta_description) > 100 else beta_description)
+          print("BETA_FEEDBACK_EMAIL=", feedback_email)
+          print("BETA_CONTACT_PHONE=", contact_phone)
+          print("MARKETING_URL=", marketing_url)
+          print("PRIVACY_POLICY_URL=", privacy_url)
+          PY
+
+      - name: Ensure iOS Podfile exists
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ ! -f "ios/Podfile" ]; then
+            flutter create .
           fi
+          test -f ios/Podfile
 
-          # Force all Pods targets deployment target via post_install
-          # Keep Pods with Automatic signing but disable actual code signing
-          if ! grep -q "post_install do |installer|" ios/Podfile; then
-            cat >> ios/Podfile <<'RUBY'
-
-          post_install do |installer|
-            installer.pods_project.targets.each do |target|
-              target.build_configurations.each do |config|
-                config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '14.0'
-                
-                # Pods should keep automatic signing style but skip actual signing
-                config.build_settings['CODE_SIGNING_ALLOWED'] = 'NO'
-                config.build_settings['CODE_SIGNING_REQUIRED'] = 'NO'
-                config.build_settings.delete('CODE_SIGN_IDENTITY')
-                config.build_settings.delete('PROVISIONING_PROFILE_SPECIFIER')
-              end
-            end
-          end
-          RUBY
-          fi
-
-          # Runner deployment target
-          sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = [0-9.]*;/IPHONEOS_DEPLOYMENT_TARGET = 14.0;/g' ios/Runner.xcodeproj/project.pbxproj
-
-          echo "✅ iOS deployment target set to 14.0"
-
-      - name: Validate P12
+      - name: Set iOS version & build number
         shell: bash
         run: |
           set -euo pipefail
-          echo "$IOS_P12_B64" | tr -d '\n\r ' | base64 --decode > "$RUNNER_TEMP/cert.p12"
-          openssl pkcs12 -in "$RUNNER_TEMP/cert.p12" -passin pass:"$IOS_P12_PASSWORD" -info -noout
-          echo "✅ P12 OK"
+          
+          python3 - <<'PY'
+          import json, re
+          
+          cfg = json.load(open("lib/env/ci_env.json"))
+          
+          version_name = cfg.get("IOS_VERSION_NAME", "1.0.0")
+          build_number = cfg.get("IOS_BUILD_NUMBER", 1)
+          
+          version_name = str(version_name).strip()
+          build_number = str(build_number).strip()
+          
+          print(f"iOS Version: {version_name}")
+          print(f"iOS Build Number: {build_number}")
+          
+          info_plist = "ios/Runner/Info.plist"
+          with open(info_plist, "r", encoding="utf-8") as f:
+              content = f.read()
+          
+          content = re.sub(
+              r"(<key>CFBundleShortVersionString</key>\s*<string>)[^<]*(</string>)",
+              rf"\g<1>{version_name}\g<2>",
+              content
+          )
+          
+          content = re.sub(
+              r"(<key>CFBundleVersion</key>\s*<string>)[^<]*(</string>)",
+              rf"\g<1>{build_number}\g<2>",
+              content
+          )
+          
+          with open(info_plist, "w", encoding="utf-8") as f:
+              f.write(content)
+          
+          print(f"✅ Updated {info_plist}")
+          PY
 
-      - name: Install cert + provisioning profile (extract PP_NAME)
+      - name: Add privacy strings to Info.plist
+        shell: bash
+        run: |
+          set -euo pipefail
+          
+          INFO_PLIST="ios/Runner/Info.plist"
+          
+          /usr/libexec/PlistBuddy -c "Add :NSPhotoLibraryUsageDescription string 'This app needs access to your photo library to allow you to select and upload images.'" "$INFO_PLIST" 2>/dev/null || \
+          /usr/libexec/PlistBuddy -c "Set :NSPhotoLibraryUsageDescription 'This app needs access to your photo library to allow you to select and upload images.'" "$INFO_PLIST"
+          
+          /usr/libexec/PlistBuddy -c "Add :NSCameraUsageDescription string 'This app needs access to your camera to allow you to take and upload photos.'" "$INFO_PLIST" 2>/dev/null || \
+          /usr/libexec/PlistBuddy -c "Set :NSCameraUsageDescription 'This app needs access to your camera to allow you to take and upload photos.'" "$INFO_PLIST"
+          
+          /usr/libexec/PlistBuddy -c "Add :NSPhotoLibraryAddUsageDescription string 'This app needs permission to save images to your photo library.'" "$INFO_PLIST" 2>/dev/null || \
+          /usr/libexec/PlistBuddy -c "Set :NSPhotoLibraryAddUsageDescription 'This app needs permission to save images to your photo library.'" "$INFO_PLIST"
+          
+          echo "✅ Privacy strings added"
+
+      - name: Apply branding (logo + app name)
         shell: bash
         run: |
           set -euo pipefail
 
-          KEYCHAIN="$RUNNER_TEMP/build.keychain"
-          KEYCHAIN_PWD="ci_pwd_123"
+          python3 - <<'PY'
+          import json, urllib.request, pathlib, shutil
 
-          security create-keychain -p "$KEYCHAIN_PWD" "$KEYCHAIN"
-          security set-keychain-settings -lut 21600 "$KEYCHAIN"
-          security unlock-keychain -p "$KEYCHAIN_PWD" "$KEYCHAIN"
-          security list-keychains -d user -s "$KEYCHAIN" login.keychain-db
-          security default-keychain -s "$KEYCHAIN"
+          cfg = json.load(open("lib/env/ci_env.json","r",encoding="utf-8"))
 
-          security import "$RUNNER_TEMP/cert.p12" -k "$KEYCHAIN" -P "$IOS_P12_PASSWORD" -A \
+          app_name_raw = cfg.get("APP_NAME","My App")
+          api_base = (cfg.get("API_BASE_URL") or "").rstrip("/")
+          logo_url = (cfg.get("LOGO_URL") or "").strip()
+
+          print("APP_NAME:", app_name_raw)
+          print("LOGO_URL (raw):", logo_url)
+          print("API_BASE_URL:", api_base)
+
+          pathlib.Path("assets/branding").mkdir(parents=True, exist_ok=True)
+
+          if logo_url and logo_url.startswith("/") and api_base:
+              logo_url = api_base + logo_url
+              print("Resolved absolute LOGO_URL:", logo_url)
+
+          if logo_url:
+              try:
+                  print("Downloading logo from:", logo_url)
+                  urllib.request.urlretrieve(logo_url, "assets/branding/logo.png")
+                  shutil.copyfile("assets/branding/logo.png","assets/branding/launcher.png")
+                  shutil.copyfile("assets/branding/logo.png","assets/branding/splash.png")
+                  print("✅ Logo downloaded successfully")
+              except Exception as e:
+                  print("⚠️ Failed to download logo:", e)
+                  print("Continuing without custom logo...")
+          else:
+              print("⚠️ No LOGO_URL provided, skipping logo download")
+          PY
+
+          flutter pub get
+          flutter pub run flutter_launcher_icons || echo "⚠️ flutter_launcher_icons failed"
+          flutter pub run flutter_native_splash:create || echo "⚠️ flutter_native_splash failed"
+
+      - name: Set iOS App Name in Info.plist
+        shell: bash
+        run: |
+          set -euo pipefail
+          
+          INFO_PLIST="ios/Runner/Info.plist"
+          APP_NAME=$(python3 -c "import json; print(json.load(open('lib/env/ci_env.json'))['APP_NAME'])")
+          
+          echo "Setting iOS App Name to: $APP_NAME"
+          
+          /usr/libexec/PlistBuddy -c "Add :CFBundleDisplayName string '$APP_NAME'" "$INFO_PLIST" 2>/dev/null || \
+          /usr/libexec/PlistBuddy -c "Set :CFBundleDisplayName '$APP_NAME'" "$INFO_PLIST"
+          
+          /usr/libexec/PlistBuddy -c "Set :CFBundleName '$APP_NAME'" "$INFO_PLIST" 2>/dev/null || \
+          /usr/libexec/PlistBuddy -c "Add :CFBundleName string '$APP_NAME'" "$INFO_PLIST"
+          
+          echo "✅ iOS App Name set"
+
+      - name: Setup iOS signing certificate
+        shell: bash
+        run: |
+          set -euo pipefail
+          [ -n "${IOS_P12_B64:-}" ] || { echo "❌ Missing IOS_P12_B64"; exit 1; }
+          [ -n "${IOS_P12_PASSWORD:-}" ] || { echo "❌ Missing IOS_P12_PASSWORD"; exit 1; }
+
+          KEYCHAIN_PATH="${GITHUB_WORKSPACE}/build.keychain"
+          KEYCHAIN_PWD="ci_keychain_pwd_123"
+
+          security create-keychain -p "$KEYCHAIN_PWD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PWD" "$KEYCHAIN_PATH"
+
+          security list-keychains -d user -s "$KEYCHAIN_PATH" login.keychain-db
+          security default-keychain -s "$KEYCHAIN_PATH"
+
+          echo "$IOS_P12_B64" | tr -d '\n\r ' | base64 --decode > ios_cert.p12
+          security import ios_cert.p12 -k "$KEYCHAIN_PATH" -P "$IOS_P12_PASSWORD" -A \
             -T /usr/bin/codesign -T /usr/bin/security -T /usr/bin/xcodebuild
 
-          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PWD" "$KEYCHAIN"
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PWD" "$KEYCHAIN_PATH"
 
-          PP_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
-          mkdir -p "$PP_DIR"
+          CNT=$(security find-identity -v -p codesigning | grep -c "Apple Distribution" || true)
+          if [ "$CNT" -lt 1 ]; then
+            echo "❌ Apple Distribution identity not found"
+            exit 1
+          fi
 
-          echo "$IOS_MOBILEPROVISION_B64" | tr -d '\n\r ' | base64 --decode > "$RUNNER_TEMP/profile.mobileprovision"
-          test -s "$RUNNER_TEMP/profile.mobileprovision"
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.2"
 
-          security cms -D -i "$RUNNER_TEMP/profile.mobileprovision" > "$RUNNER_TEMP/profile.plist"
-          PP_UUID=$(/usr/libexec/PlistBuddy -c "Print :UUID" "$RUNNER_TEMP/profile.plist")
-          PP_NAME=$(/usr/libexec/PlistBuddy -c "Print :Name" "$RUNNER_TEMP/profile.plist")
-          APP_ID=$(/usr/libexec/PlistBuddy -c "Print :Entitlements:application-identifier" "$RUNNER_TEMP/profile.plist")
-
-          cp "$RUNNER_TEMP/profile.mobileprovision" "$PP_DIR/$PP_UUID.mobileprovision"
-
-          echo "PP_NAME=$PP_NAME" >> "$GITHUB_ENV"
-          echo "PP_UUID=$PP_UUID" >> "$GITHUB_ENV"
-          echo "APP_ID_IN_PROFILE=$APP_ID" >> "$GITHUB_ENV"
-
-          echo "✅ PP_NAME: $PP_NAME"
-          echo "✅ APP_ID_IN_PROFILE: $APP_ID"
-          security find-identity -v -p codesigning || true
-
-      - name: Verify profile matches bundle id
+      - name: Install CocoaPods + fastlane
         shell: bash
         run: |
           set -euo pipefail
-          if [[ "$APP_ID_IN_PROFILE" != *".$IOS_BUNDLE_ID" ]]; then
-            echo "❌ Profile app id does not match bundle id"
-            echo "Profile:  $APP_ID_IN_PROFILE"
-            echo "BundleId:  $IOS_BUNDLE_ID"
-            exit 1
-          fi
-          echo "✅ Profile matches bundle id"
+          gem install cocoapods -N
+          gem install fastlane -N
+          pod --version
+          fastlane --version
 
-      - name: Install CocoaPods
+      - name: Clean Pods
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf ios/Pods
+          rm -f ios/Podfile.lock
+
+      - name: Install iOS Pods
         shell: bash
         run: |
           set -euo pipefail
           cd ios
-          pod repo update
-          pod install --repo-update
-          cd ..
+          pod install || { pod repo update; pod install; }
 
-      # ✅ Ensure Pods project stays with automatic/no signing
-      - name: Clean Pods signing configuration
+      - name: Create App Store Connect api_key.json
         shell: bash
         run: |
           set -euo pipefail
-          PODS_PBX="ios/Pods/Pods.xcodeproj/project.pbxproj"
+          mkdir -p .private
+
+          [ -n "${ASC_KEY_ID:-}" ] || { echo "❌ ASC_KEY_ID empty"; exit 1; }
+          [ -n "${ASC_ISSUER_ID:-}" ] || { echo "❌ ASC_ISSUER_ID empty"; exit 1; }
+          [ -n "${ASC_KEY_P8_B64:-}" ] || { echo "❌ ASC_KEY_P8_B64 empty"; exit 1; }
+
+          echo "${ASC_KEY_P8_B64}" | base64 --decode > .private/AuthKey_${ASC_KEY_ID}.p8
+
+          python3 - <<'PY'
+          import json, pathlib, os
+
+          key_path = pathlib.Path(f".private/AuthKey_{os.environ['ASC_KEY_ID']}.p8")
           
-          if [ -f "$PODS_PBX" ]; then
-            # Remove any PROVISIONING_PROFILE_SPECIFIER from Pods
-            sed -i '' '/PROVISIONING_PROFILE_SPECIFIER/d' "$PODS_PBX"
-            
-            # Ensure Pods use Automatic style (not Manual)
-            sed -i '' 's/ProvisioningStyle = Manual;/ProvisioningStyle = Automatic;/g' "$PODS_PBX"
-            sed -i '' 's/CODE_SIGN_STYLE = Manual;/CODE_SIGN_STYLE = Automatic;/g' "$PODS_PBX"
-            
-            echo "✅ Pods signing cleaned - set to Automatic"
+          # Read as binary then decode, handling potential encoding issues
+          try:
+              p8_content = key_path.read_text(encoding='utf-8')
+          except UnicodeDecodeError:
+              # If UTF-8 fails, try reading as bytes and decode as ASCII
+              try:
+                  p8_content = key_path.read_bytes().decode('ascii')
+              except:
+                  # Last resort: latin-1 which accepts all byte values
+                  p8_content = key_path.read_bytes().decode('latin-1')
+                  print("⚠️ Warning: Using latin-1 fallback for key file")
+
+          api_key_data = {
+            "key_id": os.environ["ASC_KEY_ID"].strip(),
+            "issuer_id": os.environ["ASC_ISSUER_ID"].strip(),
+            "key": p8_content,
+            "in_house": False
+          }
+
+          pathlib.Path(".private/api_key.json").write_text(
+              json.dumps(api_key_data, ensure_ascii=False, indent=2)
+          )
+          
+          print("✅ api_key.json created successfully")
+          PY
+          
+          # Verify the key file looks correct
+          echo "🔍 Verifying key file format..."
+          if head -n 1 .private/AuthKey_${ASC_KEY_ID}.p8 | grep -q "BEGIN PRIVATE KEY"; then
+            echo "✅ Key file format looks correct"
+          else
+            echo "⚠️ Warning: Key file might not be in correct format"
+            echo "First line:"
+            head -n 1 .private/AuthKey_${ASC_KEY_ID}.p8
           fi
 
-      # ✅ CRITICAL: Configure manual signing properly
-      - name: Configure Runner manual signing in pbxproj
+      - name: Install required Python packages
+        shell: bash
+        run: |
+          pip3 install PyJWT cryptography requests --break-system-packages
+
+      - name: Setup Beta App Localizations & Review Info (Required for External Testing)
         shell: bash
         run: |
           set -euo pipefail
-          PBX="ios/Runner.xcodeproj/project.pbxproj"
+          
+          API_KEY_JSON="$GITHUB_WORKSPACE/.private/api_key.json"
+          BUNDLE_ID="$(tr -d '\r\n' < ci_ios_bundle_id.txt)"
+          
+          echo "📋 Setting up Beta metadata for external testing..."
+          echo "Bundle ID: $BUNDLE_ID"
+          echo "Description: ${BETA_APP_DESCRIPTION:0:80}..."
+          echo "Feedback Email: ${BETA_FEEDBACK_EMAIL}"
+          echo "Contact Phone: ${BETA_CONTACT_PHONE}"
+          echo ""
+          
+          python3 - "$API_KEY_JSON" "$BUNDLE_ID" "${BETA_APP_DESCRIPTION}" "${BETA_FEEDBACK_EMAIL}" "${BETA_CONTACT_PHONE}" <<'PYEOF'
+          import json, jwt, time, requests, sys
+          
+          api_key = json.load(open(sys.argv[1]))
+          
+          def create_token():
+              return jwt.encode({
+                  'iss': api_key['issuer_id'],
+                  'iat': int(time.time()),
+                  'exp': int(time.time()) + 1200,
+                  'aud': 'appstoreconnect-v1'
+              }, api_key['key'], algorithm='ES256',
+              headers={'kid': api_key['key_id'], 'typ': 'JWT'})
+          
+          def h():
+              return {
+                  "Authorization": f"Bearer {create_token()}",
+                  "Content-Type": "application/json"
+              }
+          
+          bundle_id = sys.argv[2]
+          beta_description = sys.argv[3]
+          feedback_email = sys.argv[4]
+          contact_phone = sys.argv[5] if len(sys.argv) > 5 else "+1234567890"
+          
+          # Find app
+          print("1️⃣ Finding app in App Store Connect...")
+          r = requests.get(
+              f"https://api.appstoreconnect.apple.com/v1/apps?filter[bundleId]={bundle_id}",
+              headers=h()
+          )
+          r.raise_for_status()
+          apps = r.json()['data']
+          
+          if not apps:
+              print(f"❌ App not found: {bundle_id}")
+              sys.exit(1)
+          
+          app_id = apps[0]['id']
+          print(f"   ✅ App found: {app_id}")
+          print()
+          
+          # Setup Beta App Localization
+          print("2️⃣ Setting up Beta App Localization...")
+          r = requests.get(
+              f"https://api.appstoreconnect.apple.com/v1/betaAppLocalizations?filter[app]={app_id}&filter[locale]=en-US",
+              headers=h()
+          )
+          r.raise_for_status()
+          
+          localization_data = {
+              "feedbackEmail": feedback_email,
+              "description": beta_description
+          }
+          
+          existing = r.json()['data']
+          
+          if existing:
+              loc_id = existing[0]['id']
+              r2 = requests.patch(
+                  f"https://api.appstoreconnect.apple.com/v1/betaAppLocalizations/{loc_id}",
+                  headers=h(),
+                  json={
+                      "data": {
+                          "type": "betaAppLocalizations",
+                          "id": loc_id,
+                          "attributes": localization_data
+                      }
+                  }
+              )
+              
+              if r2.status_code == 200:
+                  print("   ✅ Beta app localization updated")
+              else:
+                  print(f"   ⚠️  Update failed: {r2.status_code}")
+                  print(r2.text)
+          else:
+              r2 = requests.post(
+                  "https://api.appstoreconnect.apple.com/v1/betaAppLocalizations",
+                  headers=h(),
+                  json={
+                      "data": {
+                          "type": "betaAppLocalizations",
+                          "attributes": {
+                              "locale": "en-US",
+                              **localization_data
+                          },
+                          "relationships": {
+                              "app": {"data": {"type": "apps", "id": app_id}}
+                          }
+                      }
+                  }
+              )
+              
+              if r2.status_code in (200, 201):
+                  print("   ✅ Beta app localization created")
+              else:
+                  print(f"   ⚠️  Creation failed: {r2.status_code}")
+                  print(r2.text)
+          
+          print()
+          
+          # Setup Beta App Review Detail (CRITICAL for external testing)
+          print("3️⃣ Setting up Beta App Review Detail...")
+          try:
+              # Get existing beta app review detail
+              r = requests.get(
+                  f"https://api.appstoreconnect.apple.com/v1/apps/{app_id}/betaAppReviewDetail",
+                  headers=h()
+              )
+              
+              # Extract name from email
+              email_name = feedback_email.split('@')[0] if '@' in feedback_email else "Beta"
+              first_name = email_name.split('.')[0].capitalize() if '.' in email_name else email_name.capitalize()
+              last_name = email_name.split('.')[1].capitalize() if '.' in email_name and len(email_name.split('.')) > 1 else "Tester"
+              
+              review_data = {
+                  "contactEmail": feedback_email,
+                  "contactFirstName": first_name,
+                  "contactLastName": last_name,
+                  "contactPhone": contact_phone,
+                  "demoAccountRequired": False
+              }
+              
+              if r.status_code == 200:
+                  # Update existing
+                  detail_id = r.json()['data']['id']
+                  print(f"   Updating existing review detail: {detail_id}")
+                  
+                  r2 = requests.patch(
+                      f"https://api.appstoreconnect.apple.com/v1/betaAppReviewDetails/{detail_id}",
+                      headers=h(),
+                      json={
+                          "data": {
+                              "type": "betaAppReviewDetails",
+                              "id": detail_id,
+                              "attributes": review_data
+                          }
+                      }
+                  )
+                  
+                  if r2.status_code == 200:
+                      print("   ✅ Beta review detail updated")
+                      print(f"      Contact: {first_name} {last_name}")
+                      print(f"      Email: {feedback_email}")
+                      print(f"      Phone: {contact_phone}")
+                  else:
+                      print(f"   ⚠️  Update failed: {r2.status_code}")
+                      print(r2.text)
+              else:
+                  # Create new
+                  print(f"   Creating new review detail...")
+                  
+                  r2 = requests.post(
+                      "https://api.appstoreconnect.apple.com/v1/betaAppReviewDetails",
+                      headers=h(),
+                      json={
+                          "data": {
+                              "type": "betaAppReviewDetails",
+                              "attributes": review_data,
+                              "relationships": {
+                                  "app": {"data": {"type": "apps", "id": app_id}}
+                              }
+                          }
+                      }
+                  )
+                  
+                  if r2.status_code in (200, 201):
+                      print("   ✅ Beta review detail created")
+                      print(f"      Contact: {first_name} {last_name}")
+                      print(f"      Email: {feedback_email}")
+                      print(f"      Phone: {contact_phone}")
+                  else:
+                      print(f"   ⚠️  Creation failed: {r2.status_code}")
+                      print(r2.text)
+                      
+          except Exception as e:
+              print(f"   ⚠️  Error: {str(e)[:100]}")
+          
+          print()
+          print("=" * 60)
+          print("✅ Beta metadata setup complete!")
+          print("=" * 60)
+          print("   📋 Beta App Localization: Configured")
+          print("   👤 Beta Review Contact: Configured")
+          print("   📧 Feedback Email:", feedback_email)
+          print("   📱 Contact Phone:", contact_phone)
+          print()
+          print("🚀 Ready for external testing upload!")
+          print("=" * 60)
+          PYEOF
 
-          # Replace ALL instances of ProvisioningStyle = Automatic with Manual
-          sed -i '' 's/ProvisioningStyle = Automatic;/ProvisioningStyle = Manual;/g' "$PBX"
-          
-          # Replace ALL instances of CODE_SIGN_STYLE = Automatic with Manual
-          /usr/bin/perl -0777 -i -pe 's/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual;/g' "$PBX"
+      - name: Ensure App ID exists
+        shell: bash
+        run: |
+          set -euo pipefail
+          BUNDLE_ID="$(cat ci_ios_bundle_id.txt | tr -d '\r\n')"
 
-          # Set DEVELOPMENT_TEAM for all configurations
-          /usr/bin/perl -0777 -i -pe 's/DEVELOPMENT_TEAM = [^;]*;/DEVELOPMENT_TEAM = '"$IOS_TEAM_ID"';/g' "$PBX"
-          
-          # If DEVELOPMENT_TEAM doesn't exist in buildSettings, add it after CURRENT_PROJECT_VERSION
-          /usr/bin/perl -0777 -i -pe 's/(CURRENT_PROJECT_VERSION = [^;]+;)/$1\n\t\t\t\tDEVELOPMENT_TEAM = '"$IOS_TEAM_ID"';/g' "$PBX"
+          fastlane run produce \
+            app_identifier:"$BUNDLE_ID" \
+            team_id:"${IOS_TEAM_ID}" \
+            api_key_path:"$GITHUB_WORKSPACE/.private/api_key.json" \
+            skip_itc:true \
+            language:en \
+            app_name:"Runner" || true
 
-          # Set CODE_SIGN_IDENTITY
-          /usr/bin/perl -0777 -i -pe 's/CODE_SIGN_IDENTITY = [^;]*;/CODE_SIGN_IDENTITY = "'"$IOS_CODE_SIGN_IDENTITY"'";/g' "$PBX"
-          
-          # Set PROVISIONING_PROFILE_SPECIFIER
-          /usr/bin/perl -0777 -i -pe 's/PROVISIONING_PROFILE_SPECIFIER = [^;]*;/PROVISIONING_PROFILE_SPECIFIER = "'"$PP_NAME"'";/g' "$PBX"
+      - name: Get provisioning profile
+        shell: bash
+        run: |
+          set -euo pipefail
+          BUNDLE_ID="$(tr -d '\r\n' < ci_ios_bundle_id.txt)"
 
-          echo "✅ Runner signing configured in pbxproj"
+          PROFILE_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
+          mkdir -p "$PROFILE_DIR"
+
+          fastlane run sigh \
+            app_identifier:"$BUNDLE_ID" \
+            team_id:"${IOS_TEAM_ID}" \
+            api_key_path:"$GITHUB_WORKSPACE/.private/api_key.json" \
+            provisioning_name:"B4A_${BUNDLE_ID}_APPSTORE" \
+            readonly:false \
+            output_path:"$PROFILE_DIR"
+
+          sleep 2
+
+      - name: Detect provisioning profile name
+        shell: bash
+        run: |
+          set -euo pipefail
+          BUNDLE_ID="$(cat ci_ios_bundle_id.txt | tr -d '\r\n')"
+          APP_ID="${IOS_TEAM_ID}.${BUNDLE_ID}"
+
+          PROFILES_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
+
+          FOUND_NAME=""
           
-          # Verify the changes
-          echo "Verifying DEVELOPMENT_TEAM is set:"
-          grep "DEVELOPMENT_TEAM" "$PBX" | head -5 || echo "⚠️ DEVELOPMENT_TEAM not found"
-          
-          echo "Verifying CODE_SIGN_STYLE is Manual:"
-          grep "CODE_SIGN_STYLE" "$PBX" | head -5 || echo "⚠️ CODE_SIGN_STYLE not found"
+          for f in "$PROFILES_DIR"/*.mobileprovision; do
+            [ -f "$f" ] || continue
+            
+            TMP_PLIST="$(mktemp /tmp/profile.XXXXXX.plist)"
+            /usr/bin/security cms -D -i "$f" > "$TMP_PLIST" 2>/dev/null || {
+              rm -f "$TMP_PLIST"
+              continue
+            }
+
+            P_NAME=$("/usr/libexec/PlistBuddy" -c "Print :Name" "$TMP_PLIST" 2>/dev/null || echo "Unknown")
+            P_APPID=$("/usr/libexec/PlistBuddy" -c "Print :Entitlements:application-identifier" "$TMP_PLIST" 2>/dev/null || echo "")
+            
+            if [ "$P_APPID" = "$APP_ID" ] || [ "$P_APPID" = "${IOS_TEAM_ID}.*" ] || echo "$P_APPID" | grep -q "$BUNDLE_ID"; then
+              FOUND_NAME="$P_NAME"
+              echo "$FOUND_NAME" > ci_profile_name.txt
+              rm -f "$TMP_PLIST"
+              break
+            fi
+            
+            rm -f "$TMP_PLIST"
+          done
+
+          if [ -z "$FOUND_NAME" ]; then
+            echo "❌ No provisioning profile matched"
+            exit 1
+          fi
+
+          echo "✅ Profile: $FOUND_NAME"
 
       - name: Create ExportOptions.plist
         shell: bash
         run: |
           set -euo pipefail
+
+          METHOD="${IOS_EXPORT_METHOD:-app-store}"
+          TEAM="${IOS_TEAM_ID}"
+          BUNDLE_ID="$(tr -d '\r\n' < ci_ios_bundle_id.txt)"
+          PROFILE_NAME="$(tr -d '\r\n' < ci_profile_name.txt)"
+
           cat > ios/ExportOptions.plist <<EOF
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
           <plist version="1.0">
           <dict>
             <key>method</key>
-            <string>${IOS_EXPORT_METHOD}</string>
-            <key>teamID</key>
-            <string>${IOS_TEAM_ID}</string>
+            <string>${METHOD}</string>
             <key>signingStyle</key>
             <string>manual</string>
+            <key>teamID</key>
+            <string>${TEAM}</string>
+            <key>signingCertificate</key>
+            <string>Apple Distribution</string>
             <key>provisioningProfiles</key>
             <dict>
-              <key>${IOS_BUNDLE_ID}</key>
-              <string>${PP_NAME}</string>
+              <key>${BUNDLE_ID}</key>
+              <string>${PROFILE_NAME}</string>
             </dict>
-            <key>signingCertificate</key>
-            <string>${IOS_CODE_SIGN_IDENTITY}</string>
+            <key>destination</key>
+            <string>export</string>
             <key>compileBitcode</key>
             <false/>
-            <key>uploadSymbols</key>
-            <true/>
           </dict>
           </plist>
           EOF
 
-      - name: Build iOS Archive (full logs)
+          /usr/bin/plutil -lint ios/ExportOptions.plist
+
+      - name: Patch Runner signing
         shell: bash
         run: |
           set -euo pipefail
+
+          gem install xcodeproj -N
+
+          BUNDLE_ID="$(tr -d '\r\n' < ci_ios_bundle_id.txt)"
+          PROFILE_NAME="$(tr -d '\r\n' < ci_profile_name.txt)"
+          TEAM_ID="${IOS_TEAM_ID}"
+
+          cat > patch_runner_signing.rb <<'RUBY'
+          require "xcodeproj"
+
+          bundle_id = ENV.fetch("BUNDLE_ID")
+          profile   = ENV.fetch("PROFILE_NAME")
+          team_id   = ENV.fetch("TEAM_ID")
+
+          proj_path = "ios/Runner.xcodeproj"
+          project = Xcodeproj::Project.open(proj_path)
+
+          runner = project.targets.find { |t| t.name == "Runner" }
+          raise "Runner target not found" unless runner
+
+          runner.build_configurations.each do |cfg|
+            next unless cfg.name == "Release"
+            s = cfg.build_settings
+
+            s["PRODUCT_BUNDLE_IDENTIFIER"] = bundle_id
+            s["CODE_SIGN_STYLE"] = "Manual"
+            s["DEVELOPMENT_TEAM"] = team_id
+            s["CODE_SIGN_IDENTITY"] = "Apple Distribution"
+            s["PROVISIONING_PROFILE_SPECIFIER"] = profile
+            s["CODE_SIGNING_ALLOWED"] = "YES"
+            s["CODE_SIGNING_REQUIRED"] = "YES"
+          end
+
+          project.save
+          RUBY
+
+          BUNDLE_ID="$BUNDLE_ID" PROFILE_NAME="$PROFILE_NAME" TEAM_ID="$TEAM_ID" ruby patch_runner_signing.rb
+
+      - name: Build iOS
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter build ios --release --no-codesign \
+            --dart-define-from-file=lib/env/ci_env.json
+
+      - name: Force Pods = no signing
+        shell: bash
+        run: |
+          set -euo pipefail
+          PODS_PBX="ios/Pods/Pods.xcodeproj/project.pbxproj"
+          
+          perl -pi -e 's/(PROVISIONING_PROFILE_SPECIFIER(\[sdk=iphoneos\*\])?) = [^;]*;/\1 = "";/g' "$PODS_PBX"
+          perl -pi -e 's/PROVISIONING_PROFILE = [^;]*;/PROVISIONING_PROFILE = "";/g' "$PODS_PBX"
+          perl -pi -e 's/DEVELOPMENT_TEAM = [A-Z0-9]+;/DEVELOPMENT_TEAM = "";/g' "$PODS_PBX"
+          perl -pi -e 's/(CODE_SIGN_IDENTITY(\[sdk=iphoneos\*\])?) = [^;]*;/\1 = "";/g' "$PODS_PBX"
+          perl -pi -e 's/CODE_SIGN_STYLE = Manual;/CODE_SIGN_STYLE = Automatic;/g' "$PODS_PBX"
+          perl -pi -e 's/CODE_SIGNING_ALLOWED = YES;/CODE_SIGNING_ALLOWED = NO;/g' "$PODS_PBX"
+          perl -pi -e 's/CODE_SIGNING_REQUIRED = YES;/CODE_SIGNING_REQUIRED = NO;/g' "$PODS_PBX"
+
+      - name: Archive
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          KEYCHAIN_PATH="${GITHUB_WORKSPACE}/build.keychain"
+          KEYCHAIN_PWD="ci_keychain_pwd_123"
+          security default-keychain -s "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PWD" "$KEYCHAIN_PATH" || true
+
+          mkdir -p build/ios/archive
           cd ios
 
-          LOG="$RUNNER_TEMP/xcodebuild_archive.log"
-          : > "$LOG"
-
-          set +e
-          xcodebuild -workspace Runner.xcworkspace \
+          xcodebuild \
+            -workspace Runner.xcworkspace \
             -scheme Runner \
             -configuration Release \
-            -archivePath "$RUNNER_TEMP/Runner.xcarchive" \
+            -sdk iphoneos \
             -destination 'generic/platform=iOS' \
-            archive \
-            2>&1 | tee -a "$LOG"
-          RC=${PIPESTATUS[0]}
-          set -e
-
-          echo "xcodebuild exit code: $RC"
-          if [ "$RC" -ne 0 ]; then
-            echo "❌ LAST 200 lines:"
-            tail -n 200 "$LOG" || true
-            exit "$RC"
-          fi
-          echo "✅ Archive created"
+            -archivePath ../build/ios/archive/Runner.xcarchive \
+            OTHER_CODE_SIGN_FLAGS="--keychain ${KEYCHAIN_PATH}" \
+            archive
 
       - name: Export IPA
         shell: bash
         run: |
           set -euo pipefail
+
+          KEYCHAIN_PATH="${GITHUB_WORKSPACE}/build.keychain"
+          KEYCHAIN_PWD="ci_keychain_pwd_123"
+          security default-keychain -s "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PWD" "$KEYCHAIN_PATH" || true
+
           mkdir -p build/ios/ipa
+          cd ios
 
           xcodebuild -exportArchive \
-            -archivePath "$RUNNER_TEMP/Runner.xcarchive" \
-            -exportPath build/ios/ipa \
-            -exportOptionsPlist ios/ExportOptions.plist
+            -archivePath ../build/ios/archive/Runner.xcarchive \
+            -exportOptionsPlist ExportOptions.plist \
+            -exportPath ../build/ios/ipa \
+            OTHER_CODE_SIGN_FLAGS="--keychain ${KEYCHAIN_PATH}"
 
-          ls -lh build/ios/ipa/
-
+     
       - name: Upload IPA artifact
         uses: actions/upload-artifact@v4
         with:
           name: ios-ipa
-          path: build/ios/ipa/*.ipa
+          path: build/ios/ipa/**/*.ipa
           if-no-files-found: error
 
-      - name: Setup Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: "3.2"
-
-      - name: Install fastlane
+      - name: Upload to TestFlight (External Testing)
         shell: bash
         run: |
           set -euo pipefail
-          gem install fastlane -N
-
-      - name: Create ASC api_key.json
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p .private
-          echo "$ASC_KEY_P8_B64" | tr -d '\n\r ' | base64 --decode > .private/AuthKey.p8
-
-          cat > .private/api_key.json <<EOF
-          {
-            "key_id": "${ASC_KEY_ID}",
-            "issuer_id": "${ASC_ISSUER_ID}",
-            "key_filepath": ".private/AuthKey.p8",
-            "in_house": false
-          }
-          EOF
-
-      - name: Upload to TestFlight
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          IPA_PATH="$(ls -1 build/ios/ipa/*.ipa | head -n 1)"
-          [ -f "$IPA_PATH" ] || { echo "❌ IPA not found"; exit 1; }
-
+          
+          API_KEY_JSON="$GITHUB_WORKSPACE/.private/api_key.json"
+          BUNDLE_ID="$(tr -d '\r\n' < ci_ios_bundle_id.txt)"
+          IPA_PATH="$(find "$GITHUB_WORKSPACE/build/ios/ipa" -type f -name "*.ipa" | head -n 1)"
+          
+          echo "📤 Uploading to TestFlight for External Testing..."
+          echo "⚠️  Note: External builds require Apple's beta review (24-48 hours)"
+          
           fastlane pilot upload \
             --ipa "$IPA_PATH" \
-            --api_key_path ".private/api_key.json" \
-            --app_identifier "$IOS_BUNDLE_ID" \
-            --skip_waiting_for_build_processing true
+            --api_key_path "$API_KEY_JSON" \
+            --app_identifier "$BUNDLE_ID" \
+            --skip_waiting_for_build_processing false \
+            --distribute_external true \
+            --skip_submission false \
+            --changelog "Initial beta release for testing"
+      
+          echo "✅ Upload complete!"
+          echo "⏳ Build submitted for external beta review"
