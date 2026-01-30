@@ -79,22 +79,42 @@ jobs:
           pod --version
           fastlane --version
 
-      - name: Create App Store Connect api_key.json
+      - name: Create App Store Connect api_key.json (fastlane compatible)
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p .private
 
-          echo "${ASC_KEY_P8_B64}" | tr -d '\n\r ' | base64 --decode > ".private/AuthKey_${ASC_KEY_ID}.p8"
+          # Decode p8 from base64
+          echo "$ASC_KEY_P8_B64" | tr -d '\n\r ' | base64 --decode > .private/AuthKey.p8
 
-          cat > .private/api_key.json <<EOF
-          {
-            "key_id": "${ASC_KEY_ID}",
-            "issuer_id": "${ASC_ISSUER_ID}",
-            "key_filepath": ".private/AuthKey_${ASC_KEY_ID}.p8",
-            "in_house": false
+          # Build fastlane-compatible api_key.json (must include "key")
+          python3 - <<'PY'
+          import json, os, pathlib
+
+          key_text = pathlib.Path(".private/AuthKey.p8").read_text(encoding="utf-8")
+
+          data = {
+            "key_id": os.environ["ASC_KEY_ID"].strip(),
+            "issuer_id": os.environ["ASC_ISSUER_ID"].strip(),
+            "key": key_text,
+            "in_house": False
           }
-          EOF
+
+          pathlib.Path(".private/api_key.json").write_text(json.dumps(data, indent=2))
+          print("✅ .private/api_key.json created for fastlane")
+          PY
+
+          # Quick validation (avoid printing the key)
+          python3 - <<'PY'
+          import json
+          d=json.load(open(".private/api_key.json"))
+          assert "key_id" in d and d["key_id"]
+          assert "issuer_id" in d and d["issuer_id"]
+          assert "key" in d and "BEGIN PRIVATE KEY" in d["key"]
+          print("✅ api_key.json validated (key present)")
+          PY
+
 
       - name: Clean Pods
         shell: bash
