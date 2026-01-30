@@ -121,42 +121,44 @@ jobs:
           pod --version
           fastlane --version
 
-      - name: Create App Store Connect api_key.json
+      - name: Create App Store Connect api_key.json (Fastlane format)
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p .private
+      
           [ -n "${ASC_KEY_ID:-}" ] || { echo "❌ ASC_KEY_ID empty"; exit 1; }
           [ -n "${ASC_ISSUER_ID:-}" ] || { echo "❌ ASC_ISSUER_ID empty"; exit 1; }
           [ -n "${ASC_KEY_P8_B64:-}" ] || { echo "❌ ASC_KEY_P8_B64 empty"; exit 1; }
-
-          echo "${ASC_KEY_P8_B64}" | base64 --decode > .private/AuthKey_${ASC_KEY_ID}.p8
-
-          python3 - <<'PY'
-          import json, pathlib, os
-          key_path = pathlib.Path(f".private/AuthKey_{os.environ['ASC_KEY_ID']}.p8")
-          p8 = key_path.read_text(encoding="utf-8", errors="ignore")
-          data = {
-            "key_id": os.environ["ASC_KEY_ID"].strip(),
-            "issuer_id": os.environ["ASC_ISSUER_ID"].strip(),
-            "key": p8,
-            "in_house": False
+      
+          echo "${ASC_KEY_P8_B64}" | base64 --decode > ".private/AuthKey_${ASC_KEY_ID}.p8"
+      
+          cat > ".private/api_key.json" <<EOF
+          {
+            "key_id": "${ASC_KEY_ID}",
+            "issuer_id": "${ASC_ISSUER_ID}",
+            "key_filepath": ".private/AuthKey_${ASC_KEY_ID}.p8"
           }
-          pathlib.Path(".private/api_key.json").write_text(json.dumps(data, indent=2))
-          print("✅ api_key.json created")
-          PY
+          EOF
+      
+          echo "✅ api_key.json created in Fastlane format"
+
 
       - name: Ensure App ID exists (safe)
         shell: bash
         run: |
           set -euo pipefail
+      
+          # Tell fastlane to use the API key from file (works across actions)
+          export APP_STORE_CONNECT_API_KEY_PATH="$GITHUB_WORKSPACE/.private/api_key.json"
+      
           fastlane run produce \
             app_identifier:"${BUNDLE_ID}" \
             team_id:"${IOS_TEAM_ID}" \
-            api_key_path:"$GITHUB_WORKSPACE/.private/api_key.json" \
             skip_itc:true \
             language:en \
             app_name:"Build4All Manager" || true
+
 
       - name: Get provisioning profile (App Store)
         shell: bash
@@ -164,7 +166,7 @@ jobs:
           set -euo pipefail
           PROFILE_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
           mkdir -p "$PROFILE_DIR"
-
+      
           fastlane run sigh \
             app_identifier:"${BUNDLE_ID}" \
             team_id:"${IOS_TEAM_ID}" \
@@ -172,6 +174,7 @@ jobs:
             provisioning_name:"B4A_${BUNDLE_ID}_APPSTORE" \
             readonly:false \
             output_path:"$PROFILE_DIR"
+
 
       - name: Detect provisioning profile name
         shell: bash
