@@ -131,6 +131,15 @@ jobs:
           security find-identity -v -p codesigning || true
           echo "✅ Installed cert + profile"
 
+          - name: Show Profile Name + Bundle ID
+            shell: bash
+            run: |
+              set -euo pipefail
+              PP_NAME=$(cat "$RUNNER_TEMP/pp_name.txt")
+              echo "Provisioning Profile Name: $PP_NAME"
+              BUNDLE_ID=$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" ios/Runner/Info.plist)
+              echo "CFBundleIdentifier: $BUNDLE_ID"
+    
       - name: Configure Xcode project for manual signing
         shell: bash
         run: |
