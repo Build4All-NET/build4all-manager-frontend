@@ -103,6 +103,22 @@ jobs:
           rm -rf ios/Pods
           rm -f ios/Podfile.lock
 
+      - name: Force iOS deployment target (Podfile + Xcode)
+        shell: bash
+        run: |
+          set -euo pipefail
+          PODFILE="ios/Podfile"
+          if [ -f "$PODFILE" ]; then
+            if grep -q "platform :ios" "$PODFILE"; then
+              sed -i '' "s/platform :ios, '.*'/platform :ios, '14.0'/" "$PODFILE"
+            else
+              sed -i '' "1s/^/platform :ios, '14.0'\n/" "$PODFILE"
+            fi
+          fi
+          PBX="ios/Runner.xcodeproj/project.pbxproj"
+          [ -f "$PBX" ] && sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = [0-9.]*;/IPHONEOS_DEPLOYMENT_TARGET = 14.0;/g' "$PBX"
+          echo "✅ Deployment target forced to iOS 14.0"
+
       - name: Install Pods
         shell: bash
         run: |
