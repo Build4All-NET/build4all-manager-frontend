@@ -302,6 +302,23 @@ jobs:
           RUBY
 
           BUNDLE_ID="${BUNDLE_ID}" PROFILE_NAME="${PROFILE_NAME}" TEAM_ID="${IOS_TEAM_ID}" ruby patch_runner_signing.rb
+          
+      - name: Force iOS minimum deployment target (Podfile)
+        shell: bash
+        run: |
+          set -euo pipefail
+          PODFILE="ios/Podfile"
+      
+          echo "🔧 Patching Podfile iOS platform → 14.0"
+      
+          if ! grep -q "^platform :ios" "$PODFILE"; then
+            sed -i '' '1s;^;platform :ios, '\''14.0'\''\n\n;' "$PODFILE"
+          else
+            sed -i '' "s/platform :ios, '[0-9.]\\+'/platform :ios, '14.0'/" "$PODFILE"
+          fi
+      
+          echo "📄 Podfile (top):"
+          head -n 5 "$PODFILE"
 
       - name: Install iOS Pods
         shell: bash
@@ -309,6 +326,16 @@ jobs:
           set -euo pipefail
           cd ios
           pod install || { pod repo update; pod install; }
+
+      - name: Force iOS deployment target for all Pods
+        shell: bash
+        run: |
+          set -euo pipefail
+          PODS_PROJECT="ios/Pods/Pods.xcodeproj/project.pbxproj"
+      
+          echo "🔧 Forcing IPHONEOS_DEPLOYMENT_TARGET = 14.0 for Pods"
+      
+          perl -pi -e "s/IPHONEOS_DEPLOYMENT_TARGET = [0-9.]+;/IPHONEOS_DEPLOYMENT_TARGET = 14.0;/g" "$PODS_PROJECT"
 
       - name: Build iOS (flutter)
         shell: bash
