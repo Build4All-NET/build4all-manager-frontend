@@ -73,15 +73,20 @@ jobs:
           fi
 
           # Force all Pods targets deployment target via post_install
+          # Keep Pods with Automatic signing but disable actual code signing
           if ! grep -q "post_install do |installer|" ios/Podfile; then
             cat >> ios/Podfile <<'RUBY'
 
           post_install do |installer|
-            installer.pods_project.targets.each do |t|
-              t.build_configurations.each do |config|
+            installer.pods_project.targets.each do |target|
+              target.build_configurations.each do |config|
                 config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '14.0'
+                
+                # Pods should keep automatic signing style but skip actual signing
                 config.build_settings['CODE_SIGNING_ALLOWED'] = 'NO'
                 config.build_settings['CODE_SIGNING_REQUIRED'] = 'NO'
+                config.build_settings.delete('CODE_SIGN_IDENTITY')
+                config.build_settings.delete('PROVISIONING_PROFILE_SPECIFIER')
               end
             end
           end
@@ -162,6 +167,24 @@ jobs:
           pod install --repo-update
           cd ..
 
+      # ✅ Ensure Pods project stays with automatic/no signing
+      - name: Clean Pods signing configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          PODS_PBX="ios/Pods/Pods.xcodeproj/project.pbxproj"
+          
+          if [ -f "$PODS_PBX" ]; then
+            # Remove any PROVISIONING_PROFILE_SPECIFIER from Pods
+            sed -i '' '/PROVISIONING_PROFILE_SPECIFIER/d' "$PODS_PBX"
+            
+            # Ensure Pods use Automatic style (not Manual)
+            sed -i '' 's/ProvisioningStyle = Manual;/ProvisioningStyle = Automatic;/g' "$PODS_PBX"
+            sed -i '' 's/CODE_SIGN_STYLE = Manual;/CODE_SIGN_STYLE = Automatic;/g' "$PODS_PBX"
+            
+            echo "✅ Pods signing cleaned - set to Automatic"
+          fi
+
       # ✅ CRITICAL: Configure manual signing properly
       - name: Configure Runner manual signing in pbxproj
         shell: bash
@@ -241,10 +264,6 @@ jobs:
             -configuration Release \
             -archivePath "$RUNNER_TEMP/Runner.xcarchive" \
             -destination 'generic/platform=iOS' \
-            DEVELOPMENT_TEAM="$IOS_TEAM_ID" \
-            CODE_SIGN_STYLE=Manual \
-            CODE_SIGN_IDENTITY="$IOS_CODE_SIGN_IDENTITY" \
-            PROVISIONING_PROFILE_SPECIFIER="$PP_NAME" \
             archive \
             2>&1 | tee -a "$LOG"
           RC=${PIPESTATUS[0]}
