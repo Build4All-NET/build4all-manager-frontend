@@ -28,20 +28,17 @@ jobs:
     runs-on: macos-15
 
     env:
-      # Fixed bundle identifier for this repo/app
       BUNDLE_ID: "com.build4all.build4allmanager"
 
-      # Signing / Apple / Fastlane
       IOS_P12_B64: ${{ secrets.IOS_P12_B64 }}
       IOS_P12_PASSWORD: ${{ secrets.IOS_P12_PASSWORD }}
       IOS_TEAM_ID: ${{ secrets.IOS_TEAM_ID }}
-      IOS_EXPORT_METHOD: ${{ secrets.IOS_EXPORT_METHOD }} # for TestFlight => app-store
+      IOS_EXPORT_METHOD: ${{ secrets.IOS_EXPORT_METHOD }} # app-store
 
       ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
       ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
       ASC_KEY_P8_B64: ${{ secrets.ASC_KEY_P8_B64 }}
 
-      # Optional defaults (used only if you enable external testing steps)
       DEFAULT_BETA_APP_DESCRIPTION: ${{ secrets.DEFAULT_BETA_APP_DESCRIPTION }}
       DEFAULT_BETA_FEEDBACK_EMAIL: ${{ secrets.DEFAULT_BETA_FEEDBACK_EMAIL }}
       DEFAULT_BETA_CONTACT_PHONE: ${{ secrets.DEFAULT_BETA_CONTACT_PHONE }}
@@ -126,34 +123,50 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p .private
-      
+
           [ -n "${ASC_KEY_ID:-}" ] || { echo "❌ ASC_KEY_ID empty"; exit 1; }
           [ -n "${ASC_ISSUER_ID:-}" ] || { echo "❌ ASC_ISSUER_ID empty"; exit 1; }
           [ -n "${ASC_KEY_P8_B64:-}" ] || { echo "❌ ASC_KEY_P8_B64 empty"; exit 1; }
-      
-          echo "${ASC_KEY_P8_B64}" | base64 --decode > ".private/AuthKey_${ASC_KEY_ID}.p8"
-      
+
+          # decode ASC_KEY_P8_B64 safely (strip whitespace, add padding)
           python3 - <<'PY'
-          import json, os, pathlib
+          import os, re, base64, pathlib, json, binascii
+
           key_id = os.environ["ASC_KEY_ID"].strip()
           issuer_id = os.environ["ASC_ISSUER_ID"].strip()
-          p8_path = pathlib.Path(f".private/AuthKey_{key_id}.p8")
-      
-          # Fastlane expects "key" as the PEM content (string)
-          key_content = p8_path.read_text(encoding="utf-8", errors="strict")
-      
+          raw = os.environ["ASC_KEY_P8_B64"]
+
+          p8_path = pathlib.Path(".private") / f"AuthKey_{key_id}.p8"
+          p8_path.parent.mkdir(parents=True, exist_ok=True)
+
+          # Remove whitespace and surrounding quotes
+          s = re.sub(r"\s+", "", raw).strip().strip('"').strip("'")
+
+          # If raw PEM was stored by mistake, write it directly
+          if "BEGIN" in raw and "PRIVATE" in raw:
+              p8_path.write_text(raw.strip(), encoding="utf-8")
+          else:
+              # Fix padding
+              s += "=" * ((-len(s)) % 4)
+              try:
+                  p8_path.write_bytes(base64.b64decode(s))
+              except binascii.Error as e:
+                  raise SystemExit(f"❌ ASC_KEY_P8_B64 invalid base64: {e}")
+
+          key_content = p8_path.read_text(encoding="utf-8")
+
           api_key_data = {
-            "key_id": key_id,
-            "issuer_id": issuer_id,
-            "key": key_content,
-            "in_house": False
+              "key_id": key_id,
+              "issuer_id": issuer_id,
+              "key": key_content,
+              "in_house": False
           }
-      
+
           pathlib.Path(".private/api_key.json").write_text(
-            json.dumps(api_key_data, indent=2),
-            encoding="utf-8"
+              json.dumps(api_key_data, indent=2),
+              encoding="utf-8"
           )
-      
+
           print("✅ api_key.json created with inline key")
           PY
 
@@ -164,165 +177,127 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-      
+
           pip3 install PyJWT cryptography requests --break-system-packages
-      
+
           PROFILE_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
           mkdir -p "$PROFILE_DIR"
-      
+
           python3 - <<'PY'
-          import os, time, json, base64, requests, jwt, pathlib
-      
+          import os, time, base64, requests, jwt, pathlib
+
           bundle_id = os.environ["BUNDLE_ID"].strip()
-          team_id = os.environ["IOS_TEAM_ID"].strip()
           key_id = os.environ["ASC_KEY_ID"].strip()
           issuer_id = os.environ["ASC_ISSUER_ID"].strip()
-      
-          # p8 from base64
-          p8_b64 = os.environ["ASC_KEY_P8_B64"].strip()
+
           p8_path = pathlib.Path(".private") / f"AuthKey_{key_id}.p8"
-          p8_path.parent.mkdir(parents=True, exist_ok=True)
-          import re, binascii
-
-          raw = os.environ["ASC_KEY_P8_B64"]
-          
-          # Remove whitespace and quotes
-          s = re.sub(r"\s+", "", raw).strip().strip('"').strip("'")
-          
-          # If user stored RAW .p8 content instead of base64, detect it and write it directly
-          if "BEGINPRIVATEKEY" in s or "BEGIN" in raw:
-              # handle proper PEM text
-              p8_path.write_text(raw.strip(), encoding="utf-8")
-          else:
-              # Base64 path: fix missing padding automatically
-              missing = (-len(s)) % 4
-              if missing:
-                  s += "=" * missing
-              try:
-                  p8_path.write_bytes(base64.b64decode(s))
-              except binascii.Error as e:
-                  raise SystemExit(f"❌ ASC_KEY_P8_B64 is not valid base64 even after padding fix: {e}")
-
-      
           private_key = p8_path.read_text(encoding="utf-8")
-      
+
           def token():
-            return jwt.encode(
-              {
-                "iss": issuer_id,
-                "iat": int(time.time()),
-                "exp": int(time.time()) + 1200,
-                "aud": "appstoreconnect-v1"
-              },
-              private_key,
-              algorithm="ES256",
-              headers={"kid": key_id, "typ": "JWT"}
-            )
-      
+              return jwt.encode(
+                  {"iss": issuer_id, "iat": int(time.time()), "exp": int(time.time()) + 1200, "aud": "appstoreconnect-v1"},
+                  private_key,
+                  algorithm="ES256",
+                  headers={"kid": key_id, "typ": "JWT"}
+              )
+
           def h():
-            return {
-              "Authorization": f"Bearer {token()}",
-              "Content-Type": "application/json"
-            }
-      
+              return {"Authorization": f"Bearer {token()}", "Content-Type": "application/json"}
+
           # 1) Find Bundle ID resource
           r = requests.get(
-            f"https://api.appstoreconnect.apple.com/v1/bundleIds?filter[identifier]={bundle_id}",
-            headers=h(),
-            timeout=30
+              f"https://api.appstoreconnect.apple.com/v1/bundleIds?filter[identifier]={bundle_id}",
+              headers=h(),
+              timeout=30
           )
           r.raise_for_status()
           data = r.json().get("data", [])
           if not data:
-            raise SystemExit(f"❌ BundleId not found in ASC: {bundle_id} (create it once in Apple Developer portal / ASC)")
+              raise SystemExit(f"❌ BundleId not found in ASC: {bundle_id}")
           bundle_resource_id = data[0]["id"]
           print("✅ bundleIds id =", bundle_resource_id)
-      
-          # 2) Try to find an existing App Store profile for this bundle
-          # profileState can be ACTIVE/INVALID; we want something downloadable
+
+          # 2) List IOS_APP_STORE profiles (no invalid bundle filter) then match by relationship
           r = requests.get(
-            f"https://api.appstoreconnect.apple.com/v1/profiles"
-            f"?filter[profileType]=IOS_APP_STORE"
-            f"&filter[bundleId]={bundle_resource_id}"
-            f"&limit=1",
-            headers=h(),
-            timeout=30
+              "https://api.appstoreconnect.apple.com/v1/profiles?filter[profileType]=IOS_APP_STORE&limit=50",
+              headers=h(),
+              timeout=30
           )
           r.raise_for_status()
-          profs = r.json().get("data", [])
+          profiles = r.json().get("data", [])
+
           prof_id = None
           prof_name = None
-      
-          if profs:
-            prof_id = profs[0]["id"]
-            prof_name = profs[0]["attributes"]["name"]
-            print("✅ Found existing profile:", prof_name, prof_id)
-      
-          # 3) If no profile exists, create one (requires cert IDs)
+
+          for p in profiles:
+              rel = (p.get("relationships") or {}).get("bundleId") or {}
+              rel_data = rel.get("data") or {}
+              if rel_data.get("id") == bundle_resource_id:
+                  prof_id = p["id"]
+                  prof_name = p["attributes"]["name"]
+                  break
+
+          # 3) If no profile exists, create one (requires certificate id)
           if not prof_id:
-            # Get distribution certificates
-            r = requests.get(
-              "https://api.appstoreconnect.apple.com/v1/certificates?filter[certificateType]=DISTRIBUTION&limit=5",
-              headers=h(),
-              timeout=30
-            )
-            r.raise_for_status()
-            certs = r.json().get("data", [])
-            if not certs:
-              raise SystemExit("❌ No DISTRIBUTION certificates found in ASC")
-      
-            cert_id = certs[0]["id"]
-            prof_name = f"B4A_{bundle_id}_APPSTORE"
-            payload = {
-              "data": {
-                "type": "profiles",
-                "attributes": {
-                  "name": prof_name,
-                  "profileType": "IOS_APP_STORE"
-                },
-                "relationships": {
-                  "bundleId": { "data": { "type": "bundleIds", "id": bundle_resource_id } },
-                  "certificates": { "data": [ { "type": "certificates", "id": cert_id } ] }
-                }
+              r = requests.get(
+                  "https://api.appstoreconnect.apple.com/v1/certificates?filter[certificateType]=DISTRIBUTION&limit=10",
+                  headers=h(),
+                  timeout=30
+              )
+              r.raise_for_status()
+              certs = r.json().get("data", [])
+              if not certs:
+                  raise SystemExit("❌ No DISTRIBUTION certificates found in ASC")
+
+              cert_id = certs[0]["id"]
+              prof_name = f"B4A_{bundle_id}_APPSTORE"
+
+              payload = {
+                  "data": {
+                      "type": "profiles",
+                      "attributes": {"name": prof_name, "profileType": "IOS_APP_STORE"},
+                      "relationships": {
+                          "bundleId": {"data": {"type": "bundleIds", "id": bundle_resource_id}},
+                          "certificates": {"data": [{"type": "certificates", "id": cert_id}]}
+                      }
+                  }
               }
-            }
-      
-            r = requests.post(
-              "https://api.appstoreconnect.apple.com/v1/profiles",
-              headers=h(),
-              json=payload,
-              timeout=30
-            )
-            r.raise_for_status()
-            created = r.json()["data"]
-            prof_id = created["id"]
-            prof_name = created["attributes"]["name"]
-            print("✅ Created profile:", prof_name, prof_id)
-      
-          # 4) Download the profile (base64 content)
+
+              r = requests.post(
+                  "https://api.appstoreconnect.apple.com/v1/profiles",
+                  headers=h(),
+                  json=payload,
+                  timeout=30
+              )
+              r.raise_for_status()
+              created = r.json()["data"]
+              prof_id = created["id"]
+              prof_name = created["attributes"]["name"]
+              print("✅ Created profile:", prof_name, prof_id)
+          else:
+              print("✅ Found existing profile:", prof_name, prof_id)
+
+          # 4) Download profile
           r = requests.get(
-            f"https://api.appstoreconnect.apple.com/v1/profiles/{prof_id}",
-            headers=h(),
-            timeout=30
+              f"https://api.appstoreconnect.apple.com/v1/profiles/{prof_id}",
+              headers=h(),
+              timeout=30
           )
           r.raise_for_status()
           prof = r.json()["data"]
           content_b64 = prof["attributes"]["profileContent"]
           mobileprov = base64.b64decode(content_b64)
-      
+
           out_dir = pathlib.Path.home() / "Library/MobileDevice/Provisioning Profiles"
           out_dir.mkdir(parents=True, exist_ok=True)
           out_path = out_dir / f"{prof_id}.mobileprovision"
           out_path.write_bytes(mobileprov)
-      
-          # Write name for your later "ExportOptions.plist" step
+
           pathlib.Path("ci_profile_name.txt").write_text(prof_name, encoding="utf-8")
-      
+
           print("✅ Saved:", out_path)
           print("✅ Profile name:", prof_name)
           PY
-
-
 
       - name: Detect provisioning profile name
         shell: bash
@@ -500,8 +475,15 @@ jobs:
           API_KEY_JSON="$GITHUB_WORKSPACE/.private/api_key.json"
           IPA_PATH="$(find "$GITHUB_WORKSPACE/build/ios/ipa" -type f -name "*.ipa" | head -n 1)"
 
-          DIST_EXT="${{ github.event.inputs.distribute_external }}"
-          CHANGELOG="${{ github.event.inputs.changelog }}"
+          # On push, github.event.inputs.* doesn't exist -> default to internal
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            DIST_EXT="${{ github.event.inputs.distribute_external }}"
+            CHANGELOG="${{ github.event.inputs.changelog }}"
+          else
+            DIST_EXT="false"
+            CHANGELOG="CI build (push)"
+          fi
+
           [ -n "$CHANGELOG" ] || CHANGELOG="CI build"
 
           if [ "$DIST_EXT" = "true" ]; then
