@@ -43,8 +43,9 @@ jobs:
         run: |
           set -euo pipefail
           flutter clean
-          flutter create --platforms=ios .
+          flutter create --platforms=ios --org com.build4all .
           flutter pub get
+
 
       - name: Force correct Bundle ID (Runner)
         shell: bash
