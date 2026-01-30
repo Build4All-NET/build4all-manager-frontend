@@ -182,7 +182,27 @@ jobs:
           p8_b64 = os.environ["ASC_KEY_P8_B64"].strip()
           p8_path = pathlib.Path(".private") / f"AuthKey_{key_id}.p8"
           p8_path.parent.mkdir(parents=True, exist_ok=True)
-          p8_path.write_bytes(base64.b64decode(p8_b64))
+          import re, binascii
+
+          raw = os.environ["ASC_KEY_P8_B64"]
+          
+          # Remove whitespace and quotes
+          s = re.sub(r"\s+", "", raw).strip().strip('"').strip("'")
+          
+          # If user stored RAW .p8 content instead of base64, detect it and write it directly
+          if "BEGINPRIVATEKEY" in s or "BEGIN" in raw:
+              # handle proper PEM text
+              p8_path.write_text(raw.strip(), encoding="utf-8")
+          else:
+              # Base64 path: fix missing padding automatically
+              missing = (-len(s)) % 4
+              if missing:
+                  s += "=" * missing
+              try:
+                  p8_path.write_bytes(base64.b64decode(s))
+              except binascii.Error as e:
+                  raise SystemExit(f"❌ ASC_KEY_P8_B64 is not valid base64 even after padding fix: {e}")
+
       
           private_key = p8_path.read_text(encoding="utf-8")
       
