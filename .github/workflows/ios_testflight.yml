@@ -108,6 +108,20 @@ jobs:
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: "3.2"
+          
+      - name: Force iOS minimum deployment target (Pods)
+        shell: bash
+        run: |
+          set -euo pipefail
+          PODFILE="ios/Podfile"
+      
+          if ! grep -q "platform :ios" "$PODFILE"; then
+            sed -i '' '1s;^;platform :ios, '\''14.0'\''\n\n;' "$PODFILE"
+          else
+            sed -i '' "s/platform :ios, '[0-9.]\\+'/platform :ios, '14.0'/" "$PODFILE"
+          fi
+      
+          echo "✅ Podfile iOS platform forced to 14.0"
 
       - name: Install CocoaPods + fastlane
         shell: bash
