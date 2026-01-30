@@ -84,36 +84,58 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p .private
-
-          # Decode p8 from base64
+      
+          # Decode p8 from base64 (remove whitespace first)
           echo "$ASC_KEY_P8_B64" | tr -d '\n\r ' | base64 --decode > .private/AuthKey.p8
-
-          # Build fastlane-compatible api_key.json (must include "key")
+      
+          # Basic file checks
+          if [ ! -s .private/AuthKey.p8 ]; then
+            echo "❌ AuthKey.p8 is empty after base64 decode"
+            exit 1
+          fi
+      
+          echo "✅ AuthKey.p8 size: $(wc -c < .private/AuthKey.p8) bytes"
+          echo "🔎 AuthKey.p8 first line:"
+          head -n 1 .private/AuthKey.p8
+      
+          # Create api_key.json containing the key content (NOT filepath)
           python3 - <<'PY'
           import json, os, pathlib
-
-          key_text = pathlib.Path(".private/AuthKey.p8").read_text(encoding="utf-8")
-
+      
+          p = pathlib.Path(".private/AuthKey.p8")
+          key_text = p.read_text(encoding="utf-8", errors="strict").strip()
+      
           data = {
             "key_id": os.environ["ASC_KEY_ID"].strip(),
             "issuer_id": os.environ["ASC_ISSUER_ID"].strip(),
             "key": key_text,
             "in_house": False
           }
-
-          pathlib.Path(".private/api_key.json").write_text(json.dumps(data, indent=2))
+      
+          pathlib.Path(".private/api_key.json").write_text(json.dumps(data, indent=2), encoding="utf-8")
           print("✅ .private/api_key.json created for fastlane")
           PY
-
-          # Quick validation (avoid printing the key)
+      
+          # Validate key header (do NOT print full key)
           python3 - <<'PY'
           import json
-          d=json.load(open(".private/api_key.json"))
-          assert "key_id" in d and d["key_id"]
-          assert "issuer_id" in d and d["issuer_id"]
-          assert "key" in d and "BEGIN PRIVATE KEY" in d["key"]
-          print("✅ api_key.json validated (key present)")
+      
+          d=json.load(open(".private/api_key.json","r",encoding="utf-8"))
+          key=d.get("key","").strip()
+      
+          assert d.get("key_id"), "Missing key_id"
+          assert d.get("issuer_id"), "Missing issuer_id"
+          assert key, "Missing key content"
+      
+          first_line = key.splitlines()[0].strip() if key.splitlines() else ""
+          ok = first_line in ("-----BEGIN PRIVATE KEY-----", "-----BEGIN EC PRIVATE KEY-----")
+      
+          if not ok:
+            raise AssertionError(f"Unexpected key header: {first_line}")
+      
+          print("✅ api_key.json validated (key header OK)")
           PY
+
 
 
       - name: Clean Pods
