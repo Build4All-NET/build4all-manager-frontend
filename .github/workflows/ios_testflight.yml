@@ -152,19 +152,21 @@ jobs:
           pod install --repo-update
           cd ..
 
-      - name: Disable code signing for Pods targets
+      - name: Disable code signing for Pods
         shell: bash
         run: |
           set -euo pipefail
           PODS_PBX="ios/Pods/Pods.xcodeproj/project.pbxproj"
+      
+          # Disable signing for every Pods target/config
+          /usr/bin/perl -0777 -i -pe 's/CODE_SIGNING_ALLOWED = YES;/CODE_SIGNING_ALLOWED = NO;/g' "$PODS_PBX"
+          /usr/bin/perl -0777 -i -pe 's/CODE_SIGNING_REQUIRED = YES;/CODE_SIGNING_REQUIRED = NO;/g' "$PODS_PBX"
+          /usr/bin/perl -0777 -i -pe 's/PROVISIONING_PROFILE_SPECIFIER = [^;]*;/PROVISIONING_PROFILE_SPECIFIER = "";/g' "$PODS_PBX"
+          /usr/bin/perl -0777 -i -pe 's/PROVISIONING_PROFILE = [^;]*;/PROVISIONING_PROFILE = "";/g' "$PODS_PBX"
+          /usr/bin/perl -0777 -i -pe 's/DEVELOPMENT_TEAM = [^;]*;/DEVELOPMENT_TEAM = "";/g' "$PODS_PBX"
+      
+          echo "✅ Pods code signing disabled"
 
-          perl -0777 -i -pe 's/CODE_SIGNING_ALLOWED = YES;/CODE_SIGNING_ALLOWED = NO;/g' "$PODS_PBX" || true
-          perl -0777 -i -pe 's/CODE_SIGNING_REQUIRED = YES;/CODE_SIGNING_REQUIRED = NO;/g' "$PODS_PBX" || true
-          perl -0777 -i -pe 's/PROVISIONING_PROFILE_SPECIFIER = .*?;/PROVISIONING_PROFILE_SPECIFIER = "";/g' "$PODS_PBX" || true
-          perl -0777 -i -pe 's/PROVISIONING_PROFILE = .*?;/PROVISIONING_PROFILE = "";/g' "$PODS_PBX" || true
-          perl -0777 -i -pe 's/DEVELOPMENT_TEAM = .*?;/DEVELOPMENT_TEAM = "";/g' "$PODS_PBX" || true
-
-          echo "✅ Pods signing disabled"
 
       - name: Create ExportOptions.plist (manual signing)
         shell: bash
@@ -199,24 +201,25 @@ jobs:
           echo "✅ ExportOptions.plist created"
           cat ios/ExportOptions.plist
 
-      - name: Build iOS Archive (sign Runner only)
-        shell: bash
-        run: |
-          set -euo pipefail
-          cd ios
+          - name: Build iOS Archive
+            shell: bash
+            run: |
+              set -euo pipefail
+              cd ios
+          
+              PP_NAME="$(cat "$RUNNER_TEMP/pp_name.txt")"
+          
+              xcodebuild -workspace Runner.xcworkspace \
+                -scheme Runner \
+                -configuration Release \
+                -archivePath "$RUNNER_TEMP/Runner.xcarchive" \
+                -destination 'generic/platform=iOS' \
+                archive \
+                CODE_SIGN_STYLE=Manual \
+                DEVELOPMENT_TEAM="$IOS_TEAM_ID" \
+                CODE_SIGN_IDENTITY="$IOS_CODE_SIGN_IDENTITY" \
+                PROVISIONING_PROFILE_SPECIFIER="$PP_NAME"
 
-          xcodebuild -workspace Runner.xcworkspace \
-            -scheme Runner \
-            -configuration Release \
-            -archivePath "$RUNNER_TEMP/Runner.xcarchive" \
-            -destination 'generic/platform=iOS' \
-            archive \
-            CODE_SIGN_STYLE=Manual \
-            DEVELOPMENT_TEAM="$IOS_TEAM_ID" \
-            CODE_SIGN_IDENTITY="$IOS_CODE_SIGN_IDENTITY" \
-            PROVISIONING_PROFILE_SPECIFIER="$PP_NAME"
-
-          echo "✅ Archive created"
 
       - name: Export IPA
         shell: bash
