@@ -121,7 +121,7 @@ jobs:
           pod --version
           fastlane --version
 
-      - name: Create App Store Connect api_key.json (Fastlane format)
+      - name: Create App Store Connect api_key.json (inline key for fastlane)
         shell: bash
         run: |
           set -euo pipefail
@@ -133,32 +133,32 @@ jobs:
       
           echo "${ASC_KEY_P8_B64}" | base64 --decode > ".private/AuthKey_${ASC_KEY_ID}.p8"
       
-          cat > ".private/api_key.json" <<EOF
-          {
-            "key_id": "${ASC_KEY_ID}",
-            "issuer_id": "${ASC_ISSUER_ID}",
-            "key_filepath": ".private/AuthKey_${ASC_KEY_ID}.p8"
+          python3 - <<'PY'
+          import json, os, pathlib
+          key_id = os.environ["ASC_KEY_ID"].strip()
+          issuer_id = os.environ["ASC_ISSUER_ID"].strip()
+          p8_path = pathlib.Path(f".private/AuthKey_{key_id}.p8")
+      
+          # Fastlane expects "key" as the PEM content (string)
+          key_content = p8_path.read_text(encoding="utf-8", errors="strict")
+      
+          api_key_data = {
+            "key_id": key_id,
+            "issuer_id": issuer_id,
+            "key": key_content,
+            "in_house": False
           }
-          EOF
       
-          echo "✅ api_key.json created in Fastlane format"
-
-
-      - name: Ensure App ID exists (safe)
-        shell: bash
-        run: |
-          set -euo pipefail
+          pathlib.Path(".private/api_key.json").write_text(
+            json.dumps(api_key_data, indent=2),
+            encoding="utf-8"
+          )
       
-          # Tell fastlane to use the API key from file (works across actions)
-          export APP_STORE_CONNECT_API_KEY_PATH="$GITHUB_WORKSPACE/.private/api_key.json"
-      
-          fastlane run produce \
-            app_identifier:"${BUNDLE_ID}" \
-            team_id:"${IOS_TEAM_ID}" \
-            skip_itc:true \
-            language:en \
-            app_name:"Build4All Manager" || true
+          print("✅ api_key.json created with inline key")
+          PY
 
+      - name: Export API key path for Fastlane
+        run: echo "APP_STORE_CONNECT_API_KEY_PATH=$GITHUB_WORKSPACE/.private/api_key.json" >> $GITHUB_ENV
 
       - name: Get provisioning profile (App Store)
         shell: bash
