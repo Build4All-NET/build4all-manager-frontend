@@ -52,20 +52,6 @@ jobs:
             sed -i '' "s/platform :ios, '.*'/platform :ios, '14.0'/" ios/Podfile
           fi
           
-          # Add post_install hook to set deployment target for all pods
-          if ! grep -q "post_install do" ios/Podfile; then
-            cat >> ios/Podfile <<'EOF'
-
-          post_install do |installer|
-            installer.pods_project.targets.each do |target|
-              target.build_configurations.each do |config|
-                config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '14.0'
-                end
-              end
-            end
-            EOF
-                      fi
-          
           # Update Xcode project deployment target
           sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = [0-9.]*;/IPHONEOS_DEPLOYMENT_TARGET = 14.0;/g' ios/Runner.xcodeproj/project.pbxproj
           
@@ -74,8 +60,8 @@ jobs:
       - name: Check Podfile exists
         run: |
           ls -la ios
-          echo "--- Podfile content (first 30 lines) ---"
-          cat ios/Podfile | head -30
+          echo "--- Podfile content (first 20 lines) ---"
+          cat ios/Podfile | head -20
           test -f ios/Podfile && echo "✅ Podfile found" || (echo "❌ Podfile missing" && exit 1)
 
       - name: Debug P12 decode
@@ -132,36 +118,18 @@ jobs:
           # Extract UUID from the plist
           PP_UUID=$(/usr/libexec/PlistBuddy -c "Print :UUID" "$RUNNER_TEMP/profile.plist")
           PP_NAME=$(/usr/libexec/PlistBuddy -c "Print :Name" "$RUNNER_TEMP/profile.plist")
-          APP_ID=$(/usr/libexec/PlistBuddy -c "Print :Entitlements:application-identifier" "$RUNNER_TEMP/profile.plist" 2>/dev/null || echo "N/A")
-          TEAM_ID=$(/usr/libexec/PlistBuddy -c "Print :TeamIdentifier:0" "$RUNNER_TEMP/profile.plist" 2>/dev/null || echo "N/A")
           
           # Copy to the correct location with UUID as filename
           cp "$RUNNER_TEMP/profile.mobileprovision" "$PP_DIR/$PP_UUID.mobileprovision"
           
-          # Store for later use - both in temp files AND environment variables
+          # Store for later use
           echo "$PP_UUID" > "$RUNNER_TEMP/pp_uuid.txt"
           echo "$PP_NAME" > "$RUNNER_TEMP/pp_name.txt"
-          
-          # Export to GitHub environment for next steps
-          echo "PP_UUID=$PP_UUID" >> $GITHUB_ENV
-          echo "PP_NAME=$PP_NAME" >> $GITHUB_ENV
 
-          echo "✅ Provisioning Profile installed"
-          echo "  UUID: $PP_UUID"
-          echo "  Name: $PP_NAME"
-          echo "  App ID: $APP_ID"
-          echo "  Team ID: $TEAM_ID"
-          
-          echo ""
-          echo "=== Installed Provisioning Profiles ==="
-          ls -la "$PP_DIR"
-          
-          echo ""
-          echo "=== Available Code Signing Identities ==="
-          security find-identity -v -p codesigning "$KEYCHAIN_PATH"
-          
-          echo ""
-          echo "✅ Setup complete"
+          echo "✅ Provisioning Profile UUID: $PP_UUID"
+          echo "✅ Provisioning Profile Name: $PP_NAME"
+          security find-identity -v -p codesigning || true
+          echo "✅ Installed cert + profile"
 
       - name: Configure Xcode project for manual signing
         shell: bash
@@ -170,122 +138,17 @@ jobs:
           
           # Read the stored values
           PP_UUID=$(cat "$RUNNER_TEMP/pp_uuid.txt")
-          PP_NAME=$(cat "$RUNNER_TEMP/pp_name.txt")
           
-          # Get bundle ID from Info.plist
-          BUNDLE_ID=$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" ios/Runner/Info.plist)
-          
-          echo "=== Configuration Values ==="
-          echo "Team ID: $IOS_TEAM_ID"
-          echo "Profile UUID: $PP_UUID"
-          echo "Profile Name: $PP_NAME"
-          echo "Code Sign Identity: $IOS_CODE_SIGN_IDENTITY"
-          echo "Bundle ID: $BUNDLE_ID"
-          
+          # Update project.pbxproj to use manual signing
           PBXPROJ="ios/Runner.xcodeproj/project.pbxproj"
           
-          # Backup
-          cp "$PBXPROJ" "$PBXPROJ.backup"
-          
-          # Remove Xcode's workspace data that caches signing settings
-          rm -rf ios/Runner.xcodeproj/project.xcworkspace/xcuserdata || true
-          rm -rf ios/Runner.xcodeproj/xcuserdata || true
-          rm -rf ios/Runner.xcworkspace/xcuserdata || true
-          
-          echo ""
-          echo "=== Modifying project.pbxproj ==="
-          
-          # CRITICAL: Change ProvisioningStyle from Automatic to Manual in TargetAttributes
+          # Disable automatic signing and set manual signing attributes
           sed -i '' 's/ProvisioningStyle = Automatic;/ProvisioningStyle = Manual;/g' "$PBXPROJ"
           
-          # Remove any DevelopmentTeam from TargetAttributes that might override
-          sed -i '' '/DevelopmentTeam = .*;/d' "$PBXPROJ"
-          
-          # Create Python script to modify the pbxproj file
-          cat > /tmp/modify_pbxproj.py << 'ENDOFPYTHON'
-          import re
-          import sys
-          import os
-          
-          pbxproj_path = "ios/Runner.xcodeproj/project.pbxproj"
-          
-          with open(pbxproj_path, 'r') as f:
-              content = f.read()
-          
-          # Get values from environment
-          team_id = os.environ.get('IOS_TEAM_ID', '')
-          pp_uuid = os.environ.get('PP_UUID', '')
-          identity = os.environ.get('IOS_CODE_SIGN_IDENTITY', '')
-          
-          print(f"Using Team ID: {team_id}", file=sys.stderr)
-          print(f"Using Profile UUID: {pp_uuid}", file=sys.stderr)
-          print(f"Using Identity: {identity}", file=sys.stderr)
-          
-          # Pattern to find Runner target build configurations
-          runner_config_pattern = r'(/\* (Debug|Release|Profile) \*/ = \{[^}]*?buildSettings = \{)(.*?)(\};)'
-          
-          def add_signing_settings(match):
-              prefix = match.group(1)
-              config_name = match.group(2)
-              build_settings = match.group(3)
-              suffix = match.group(4)
-              
-              # Check if this is a Runner target config (not Pods)
-              if 'ASSETCATALOG_COMPILER' in build_settings or 'INFOPLIST_FILE' in build_settings or 'Runner/Info.plist' in build_settings:
-                  # Remove existing signing settings
-                  build_settings = re.sub(r'\s*CODE_SIGN_IDENTITY[^;]*;', '', build_settings)
-                  build_settings = re.sub(r'\s*CODE_SIGN_STYLE[^;]*;', '', build_settings)
-                  build_settings = re.sub(r'\s*DEVELOPMENT_TEAM[^;]*;', '', build_settings)
-                  build_settings = re.sub(r'\s*PROVISIONING_PROFILE_SPECIFIER[^;]*;', '', build_settings)
-                  build_settings = re.sub(r'\s*PROVISIONING_PROFILE\s*=[^;]*;', '', build_settings)
-                  
-                  # Add new signing settings
-                  new_settings = f'''
-          \t\t\t\tCODE_SIGN_IDENTITY = "{identity}";
-          \t\t\t\t"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "{identity}";
-          \t\t\t\tCODE_SIGN_STYLE = Manual;
-          \t\t\t\tDEVELOPMENT_TEAM = {team_id};
-          \t\t\t\tPROVISIONING_PROFILE_SPECIFIER = "{pp_uuid}";'''
-                  
-                  build_settings = new_settings + build_settings
-                  print(f"✅ Modified {config_name} configuration", file=sys.stderr)
-              
-              return prefix + build_settings + suffix
-          
-          # Apply modifications
-          content = re.sub(runner_config_pattern, add_signing_settings, content, flags=re.DOTALL)
-          
-          with open(pbxproj_path, 'w') as f:
-              f.write(content)
-          
-          print("✅ Python modifications complete", file=sys.stderr)
-          ENDOFPYTHON
-          
-          # Run the Python script
-          python3 /tmp/modify_pbxproj.py
-          
-          echo "✅ Modified project.pbxproj"
-          
-          # Verify the changes
-          echo ""
-          echo "=== Verification ==="
-          echo "Checking for Manual ProvisioningStyle:"
-          grep "ProvisioningStyle = Manual" "$PBXPROJ" && echo "✅ Found" || echo "⚠️  Not found"
-          
-          echo ""
-          echo "Checking for PROVISIONING_PROFILE_SPECIFIER with our UUID:"
-          grep "PROVISIONING_PROFILE_SPECIFIER.*$PP_UUID" "$PBXPROJ" && echo "✅ Found" || echo "⚠️  Not found"
-          
-          echo ""
-          echo "Checking for CODE_SIGN_STYLE = Manual:"
-          grep "CODE_SIGN_STYLE = Manual" "$PBXPROJ" && echo "✅ Found" || echo "⚠️  Not found"
-          
-          echo ""
-          echo "Checking for DEVELOPMENT_TEAM:"
-          grep "DEVELOPMENT_TEAM = $IOS_TEAM_ID" "$PBXPROJ" && echo "✅ Found" || echo "⚠️  Not found"
-          
-          echo ""
-          echo "✅ Configuration complete"
+          echo "✅ Configured manual code signing"
+          echo "Team ID: $IOS_TEAM_ID"
+          echo "Profile UUID: $PP_UUID"
+          echo "Code Sign Identity: $IOS_CODE_SIGN_IDENTITY"
 
       - name: Update ExportOptions.plist
         shell: bash
@@ -342,20 +205,19 @@ jobs:
         run: |
           set -euo pipefail
           
-          # Read provisioning profile UUID
-          PP_UUID=$(cat "$RUNNER_TEMP/pp_uuid.txt")
-          
           # Build the archive using xcodebuild directly for better control
           cd ios
           
-          # Build archive - don't set PROVISIONING_PROFILE_SPECIFIER globally as it affects Pods
-          # The provisioning profile is already configured in the project.pbxproj
           xcodebuild -workspace Runner.xcworkspace \
             -scheme Runner \
             -configuration Release \
             -archivePath "$RUNNER_TEMP/Runner.xcarchive" \
             -destination 'generic/platform=iOS' \
-            archive
+            archive \
+            CODE_SIGN_IDENTITY="$IOS_CODE_SIGN_IDENTITY" \
+            DEVELOPMENT_TEAM="$IOS_TEAM_ID" \
+            PROVISIONING_PROFILE_SPECIFIER="" \
+            CODE_SIGN_STYLE=Manual
           
           echo "✅ Archive created"
 
