@@ -1,4 +1,4 @@
-package com.example.build4all_manager
+package com.buil4all.build4allmanager
 
 import io.flutter.embedding.android.FlutterActivity
 
