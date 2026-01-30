@@ -43,7 +43,6 @@ jobs:
 
       - name: Set minimum iOS deployment target
         run: |
-          # Uncomment and set platform in Podfile to iOS 14.0
           if grep -q "# platform :ios" ios/Podfile; then
             sed -i '' "s/# platform :ios, '.*'/platform :ios, '14.0'/" ios/Podfile
           elif ! grep -q "platform :ios" ios/Podfile; then
@@ -51,10 +50,8 @@ jobs:
           else
             sed -i '' "s/platform :ios, '.*'/platform :ios, '14.0'/" ios/Podfile
           fi
-          
-          # Update Xcode project deployment target
+
           sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = [0-9.]*;/IPHONEOS_DEPLOYMENT_TARGET = 14.0;/g' ios/Runner.xcodeproj/project.pbxproj
-          
           echo "✅ iOS deployment target set to 14.0"
 
       - name: Check Podfile exists
@@ -69,11 +66,8 @@ jobs:
         run: |
           set -euo pipefail
           echo "$IOS_P12_B64" | tr -d '\n\r ' | base64 --decode > "$RUNNER_TEMP/cert.p12"
-          echo "Size:"
           ls -lh "$RUNNER_TEMP/cert.p12"
-          echo "File type:"
           file "$RUNNER_TEMP/cert.p12" || true
-          echo "Try open with openssl (validates password too):"
           openssl pkcs12 -in "$RUNNER_TEMP/cert.p12" -passin pass:"$IOS_P12_PASSWORD" -info -noout
           echo "✅ P12 valid + password OK"
 
@@ -85,44 +79,34 @@ jobs:
           KEYCHAIN_PATH="$RUNNER_TEMP/build.keychain"
           KEYCHAIN_PWD="ci_pwd_123"
 
-          # Create and configure keychain
           security create-keychain -p "$KEYCHAIN_PWD" "$KEYCHAIN_PATH"
           security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
           security unlock-keychain -p "$KEYCHAIN_PWD" "$KEYCHAIN_PATH"
           security list-keychains -d user -s "$KEYCHAIN_PATH" login.keychain-db
           security default-keychain -s "$KEYCHAIN_PATH"
 
-          # Import certificate
           echo "$IOS_P12_B64" | tr -d '\n\r ' | base64 --decode > "$RUNNER_TEMP/cert.p12"
           security import "$RUNNER_TEMP/cert.p12" -k "$KEYCHAIN_PATH" -P "$IOS_P12_PASSWORD" -A \
             -T /usr/bin/codesign -T /usr/bin/security -T /usr/bin/xcodebuild
 
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PWD" "$KEYCHAIN_PATH"
 
-          # Install provisioning profile
           PP_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
           mkdir -p "$PP_DIR"
-          
-          # Decode and save provisioning profile to temp location first
+
           echo "$IOS_MOBILEPROVISION_B64" | tr -d '\n\r ' | base64 --decode > "$RUNNER_TEMP/profile.mobileprovision"
-          
-          # Verify the provisioning profile file exists and has content
+
           if [ ! -s "$RUNNER_TEMP/profile.mobileprovision" ]; then
             echo "❌ Provisioning profile is empty or missing"
             exit 1
           fi
-          
-          # Extract profile info to a temporary plist
+
           security cms -D -i "$RUNNER_TEMP/profile.mobileprovision" > "$RUNNER_TEMP/profile.plist"
-          
-          # Extract UUID from the plist
           PP_UUID=$(/usr/libexec/PlistBuddy -c "Print :UUID" "$RUNNER_TEMP/profile.plist")
           PP_NAME=$(/usr/libexec/PlistBuddy -c "Print :Name" "$RUNNER_TEMP/profile.plist")
-          
-          # Copy to the correct location with UUID as filename
+
           cp "$RUNNER_TEMP/profile.mobileprovision" "$PP_DIR/$PP_UUID.mobileprovision"
-          
-          # Store for later use
+
           echo "$PP_UUID" > "$RUNNER_TEMP/pp_uuid.txt"
           echo "$PP_NAME" > "$RUNNER_TEMP/pp_name.txt"
 
@@ -131,46 +115,35 @@ jobs:
           security find-identity -v -p codesigning || true
           echo "✅ Installed cert + profile"
 
-          - name: Show Profile Name + Bundle ID
-            shell: bash
-            run: |
-              set -euo pipefail
-              PP_NAME=$(cat "$RUNNER_TEMP/pp_name.txt")
-              echo "Provisioning Profile Name: $PP_NAME"
-              BUNDLE_ID=$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" ios/Runner/Info.plist)
-              echo "CFBundleIdentifier: $BUNDLE_ID"
-    
+      - name: Show Profile Name + Bundle ID (and export env)
+        shell: bash
+        run: |
+          set -euo pipefail
+          PP_NAME=$(cat "$RUNNER_TEMP/pp_name.txt")
+          PP_UUID=$(cat "$RUNNER_TEMP/pp_uuid.txt")
+          BUNDLE_ID=$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" ios/Runner/Info.plist)
+
+          echo "Provisioning Profile Name: $PP_NAME"
+          echo "Provisioning Profile UUID: $PP_UUID"
+          echo "CFBundleIdentifier: $BUNDLE_ID"
+
+          echo "PP_NAME=$PP_NAME" >> $GITHUB_ENV
+          echo "PP_UUID=$PP_UUID" >> $GITHUB_ENV
+          echo "BUNDLE_ID=$BUNDLE_ID" >> $GITHUB_ENV
+
       - name: Configure Xcode project for manual signing
         shell: bash
         run: |
           set -euo pipefail
-          
-          # Read the stored values
-          PP_UUID=$(cat "$RUNNER_TEMP/pp_uuid.txt")
-          
-          # Update project.pbxproj to use manual signing
           PBXPROJ="ios/Runner.xcodeproj/project.pbxproj"
-          
-          # Disable automatic signing and set manual signing attributes
           sed -i '' 's/ProvisioningStyle = Automatic;/ProvisioningStyle = Manual;/g' "$PBXPROJ"
-          
           echo "✅ Configured manual code signing"
-          echo "Team ID: $IOS_TEAM_ID"
-          echo "Profile UUID: $PP_UUID"
-          echo "Code Sign Identity: $IOS_CODE_SIGN_IDENTITY"
 
       - name: Update ExportOptions.plist
         shell: bash
         run: |
           set -euo pipefail
-          
-          # Get bundle ID from Info.plist
-          BUNDLE_ID=$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" ios/Runner/Info.plist)
-          
-          # Read stored provisioning profile info
-          PP_NAME=$(cat "$RUNNER_TEMP/pp_name.txt")
-          
-          # Create ExportOptions.plist
+
           cat > ios/ExportOptions.plist <<EOF
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -196,10 +169,8 @@ jobs:
           </dict>
           </plist>
           EOF
-          
+
           echo "✅ Created ExportOptions.plist"
-          echo "Bundle ID: $BUNDLE_ID"
-          echo "Provisioning Profile Name: $PP_NAME"
           cat ios/ExportOptions.plist
 
       - name: Install CocoaPods
@@ -213,36 +184,32 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          
-          # Build the archive using xcodebuild directly for better control
           cd ios
-          
+
           xcodebuild -workspace Runner.xcworkspace \
             -scheme Runner \
             -configuration Release \
             -archivePath "$RUNNER_TEMP/Runner.xcarchive" \
             -destination 'generic/platform=iOS' \
             archive \
-            CODE_SIGN_IDENTITY="$IOS_CODE_SIGN_IDENTITY" \
+            CODE_SIGN_STYLE=Manual \
             DEVELOPMENT_TEAM="$IOS_TEAM_ID" \
-            PROVISIONING_PROFILE_SPECIFIER="" \
-            CODE_SIGN_STYLE=Manual
-          
+            CODE_SIGN_IDENTITY="$IOS_CODE_SIGN_IDENTITY" \
+            PROVISIONING_PROFILE_SPECIFIER="$PP_NAME"
+
           echo "✅ Archive created"
 
       - name: Export IPA
         shell: bash
         run: |
           set -euo pipefail
-          
           mkdir -p build/ios/ipa
-          
+
           xcodebuild -exportArchive \
             -archivePath "$RUNNER_TEMP/Runner.xcarchive" \
             -exportPath build/ios/ipa \
-            -exportOptionsPlist ios/ExportOptions.plist \
-            -allowProvisioningUpdates
-          
+            -exportOptionsPlist ios/ExportOptions.plist
+
           echo "✅ IPA exported"
           ls -lh build/ios/ipa/
 
@@ -284,11 +251,6 @@ jobs:
 
           IPA_PATH="$(ls -1 build/ios/ipa/*.ipa | head -n 1)"
           [ -f "$IPA_PATH" ] || { echo "❌ IPA not found"; exit 1; }
-
-          TMP_DIR="$(mktemp -d)"
-          unzip -q "$IPA_PATH" -d "$TMP_DIR"
-          APP_PATH="$(find "$TMP_DIR/Payload" -maxdepth 1 -type d -name "*.app" | head -n 1)"
-          BUNDLE_ID=$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$APP_PATH/Info.plist")
 
           echo "✅ Uploading: $BUNDLE_ID"
           fastlane pilot upload \
