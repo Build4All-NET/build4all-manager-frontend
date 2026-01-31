@@ -129,8 +129,8 @@ jobs:
           set -euo pipefail
           gem install cocoapods -N
           gem install fastlane -N
-          pod --
-          fastlane --
+          pod --version
+          fastlane --version
 
       - name: Create App Store Connect api_key.json (inline key for fastlane)
         shell: bash
