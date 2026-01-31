@@ -63,12 +63,12 @@ jobs:
           [ -n "${XCODE_APP:-}" ] || { echo "❌ No Xcode found"; exit 1; }
           echo "✅ Selected: $XCODE_APP"
           sudo xcode-select -s "/Applications/$XCODE_APP/Contents/Developer"
-          xcodebuild -version
+          xcodebuild -
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.32.0"
+          flutter-: "3.32.0"
           channel: stable
           cache: true
 
@@ -76,9 +76,28 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          flutter --version
+          flutter --
           flutter pub get
+      # ✅ Fix for your error: ensure build number always increases
+      - name: Compute build name/number (from pubspec + CI run)
+        shell: bash
+        run: |
+          set -euo pipefail
 
+          BUILD_NAME="$(python3 - <<'PY'
+          import re
+          t=open("pubspec.yaml","r",encoding="utf-8").read()
+          m=re.search(r"^version:\s*([0-9]+(?:\.[0-9]+){1,3})", t, re.M)
+          print(m.group(1) if m else "1.0.0")
+          PY
+          )"
+                    BUILD_NUMBER="${GITHUB_RUN_NUMBER}"
+          
+                    echo "BUILD_NAME=$BUILD_NAME" >> $GITHUB_ENV
+                    echo "BUILD_NUMBER=$BUILD_NUMBER" >> $GITHUB_ENV
+                    echo "✅ BUILD_NAME=$BUILD_NAME"
+                    echo "✅ BUILD_NUMBER=$BUILD_NUMBER"
+          
       - name: Setup iOS signing certificate (P12 -> keychain)
         shell: bash
         run: |
@@ -107,7 +126,7 @@ jobs:
 
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: "3.2"
+          ruby-: "3.2"
           
       - name: Force iOS minimum deployment target (Pods)
         shell: bash
@@ -129,8 +148,8 @@ jobs:
           set -euo pipefail
           gem install cocoapods -N
           gem install fastlane -N
-          pod --version
-          fastlane --version
+          pod --
+          fastlane --
 
       - name: Create App Store Connect api_key.json (inline key for fastlane)
         shell: bash
@@ -364,6 +383,8 @@ jobs:
         run: |
           set -euo pipefail
           flutter build ios --release --no-codesign
+            --build-name "$BUILD_NAME" \
+            --build-number "$BUILD_NUMBER"
 
       - name: Force Pods = no signing
         shell: bash
