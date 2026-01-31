@@ -358,6 +358,24 @@ jobs:
           echo "✅ Verifying:"
           /usr/libexec/PlistBuddy -c "Print :NSPhotoLibraryUsageDescription" "$INFO_PLIST"
           /usr/libexec/PlistBuddy -c "Print :NSCameraUsageDescription" "$INFO_PLIST"
+      - name: Compute build name/number
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Build name = version before the +
+          BUILD_NAME="$(python3 - <<'PY'
+          import re
+          t=open("pubspec.yaml","r",encoding="utf-8").read()
+          m=re.search(r"^version:\s*([0-9]+(?:\.[0-9]+){1,3})", t, re.M)
+          print(m.group(1) if m else "1.0.0")
+          PY
+          )"
+          # Build number must be an integer and strictly increasing
+          BUILD_NUMBER="${GITHUB_RUN_NUMBER}"
+
+          echo "BUILD_NAME=$BUILD_NAME" >> $GITHUB_ENV
+          echo "BUILD_NUMBER=$BUILD_NUMBER" >> $GITHUB_ENV
+          echo "✅ Using BUILD_NAME=$BUILD_NAME BUILD_NUMBER=$BUILD_NUMBER"
            
       - name: Build iOS (flutter)
         shell: bash
