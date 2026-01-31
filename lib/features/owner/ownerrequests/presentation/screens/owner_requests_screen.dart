@@ -18,30 +18,6 @@ import '../../data/services/owner_requests_api.dart';
 import '../widgets/preview_phone.dart';
 import '../widgets/palette_builder.dart';
 
-/// ===============================================================
-/// OwnerRequestScreen (UPDATED)
-///
-/// ✅ FIGMA "Preview & Customize" design approach:
-/// - Left/Top: Live phone preview (updates instantly)
-/// - Right/Bottom: Customize panels:
-///     1) App Identity   (formerly "Basics")
-///     2) Palette
-///     3) Runtime Config
-/// - Pinned submit bar at bottom
-///
-/// IMPORTANT USER REQUESTS IMPLEMENTED:
-/// ✅ App Identity:
-///   - Project ID is HIDDEN
-///   - App Logo moved here (after App Name)
-///   - Notes is NOT mandatory (no validator)
-/// ✅ Palette:
-///   - Remove "Preview Your App Hello owner..." block inside Palette (showPreview=false)
-/// ✅ Tabs:
-///   - Branding removed from tabs
-///   - Tabs redesigned to match screenshot (pill style + icons)
-/// ✅ Runtime Config:
-///   - Still hosted by RuntimeSection widget (kept external)
-/// ===============================================================
 class OwnerRequestScreen extends StatefulWidget {
   final String baseUrl;
   final int ownerId;
@@ -68,8 +44,7 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
 
   final _formKey = GlobalKey<FormState>();
 
-  late final TextEditingController
-      _projectIdCtrl; // still used for submit (hidden from UI)
+  late final TextEditingController _projectIdCtrl; // hidden in UI but used in submit
   late final TextEditingController _appNameCtrl;
   final _notesCtrl = TextEditingController();
 
@@ -90,15 +65,21 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
   // UI panel selection (tabs)
   _Panel _panel = _Panel.identity;
 
+  // ✅ Submit enabled ONLY if AppName + Logo
+  bool get _canSubmit {
+    final appOk = _appNameCtrl.text.trim().isNotEmpty;
+    final logoOk = _logoFile != null;
+    return !_loading && appOk && logoOk;
+  }
+
+  // ✅ Always fallback USD if currency not chosen
   void _ensureUsdSelected() {
     if (_selectedCurrency != null) return;
     if (_currencies.isEmpty) return;
 
-    final usd =
-        _currencies.where((c) => c.code.toUpperCase() == 'USD').toList();
+    final usd = _currencies.where((c) => c.code.toUpperCase() == 'USD').toList();
     _selectedCurrency = usd.isNotEmpty ? usd.first : _currencies.first;
   }
-
 
   @override
   void initState() {
@@ -109,6 +90,11 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
       text: widget.initialProjectId?.toString() ?? '',
     );
     _appNameCtrl = TextEditingController(text: widget.initialAppName ?? '');
+
+    // ✅ so submit button updates live as user types
+    _appNameCtrl.addListener(() {
+      if (mounted) setState(() {});
+    });
 
     _loadCurrencies();
   }
@@ -129,22 +115,20 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
     try {
       final list = await api.fetchCurrencies();
       if (!mounted) return;
-     setState(() {
+      setState(() {
         _currencies = list;
 
-        // ✅ Prefer USD by default
+        // ✅ default USD (no need to open dropdown)
         final usd = list.where((c) => c.code.toUpperCase() == 'USD').toList();
         if (usd.isNotEmpty) {
           _selectedCurrency = usd.first;
           return;
         }
 
-        // fallback: EUR if USD not found
+        // fallback EUR if USD missing
         final eur = list.where((c) => c.code.toUpperCase() == 'EUR').toList();
-        _selectedCurrency =
-            eur.isNotEmpty ? eur.first : (list.isNotEmpty ? list.first : null);
+        _selectedCurrency = eur.isNotEmpty ? eur.first : (list.isNotEmpty ? list.first : null);
       });
-
     } catch (_) {
       if (!mounted) return;
       AppToast.error(context, l.owner_request_err_load_currencies);
@@ -152,7 +136,7 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
   }
 
   /// ------------------------------------------------------------
-  /// App Identity: pick logo from gallery
+  /// pick logo from gallery
   /// ------------------------------------------------------------
   Future<void> _pickLogo() async {
     if (_loading) return;
@@ -170,9 +154,6 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
     AppToast.success(context, l.owner_request_logo_selected);
   }
 
-  /// ------------------------------------------------------------
-  /// App Identity: remove selected logo
-  /// ------------------------------------------------------------
   void _removeLogo() {
     if (_loading) return;
     final l = AppLocalizations.of(context)!;
@@ -182,46 +163,37 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
   }
 
   /// ------------------------------------------------------------
-  /// Validation helper
-  /// ------------------------------------------------------------
-  String? _validateInt(String? v) {
-    final l = AppLocalizations.of(context)!;
-
-    final s = (v ?? '').trim();
-    if (s.isEmpty) return l.err_required;
-    final n = int.tryParse(s);
-    if (n == null || n <= 0) return l.owner_request_err_valid_number;
-    return null;
-  }
-
-  /// ------------------------------------------------------------
-  /// Submit (same backend contract, WITHOUT override url)
+  /// Submit
   /// ------------------------------------------------------------
   Future<void> _submit() async {
     FocusScope.of(context).unfocus();
     final l = AppLocalizations.of(context)!;
 
-//  ensure currencies are loaded before submit
+    // ✅ currency auto-load + auto USD (no dropdown needed)
     if (_currencies.isEmpty) {
       await _loadCurrencies();
     }
-
-// Auto-pick USD if owner didn’t choose
     _ensureUsdSelected();
 
-    if (_selectedCurrency == null) {
-      AppToast.error(context, l.owner_request_err_select_currency);
+    // ✅ hard requirements: App name + Logo فقط
+    if (_appNameCtrl.text.trim().isEmpty) {
+      AppToast.error(context, l.owner_request_err_app_name_required);
+      return;
+    }
+    if (_logoFile == null) {
+      // you can add a localization key later; for now:
+      AppToast.error(context, 'Logo is required. Please upload a logo.');
       return;
     }
 
-
-
+    // ✅ keep formKey only for fields that are truly required in UI.
+    // Notes are optional so no validator.
     if (!_formKey.currentState!.validate()) {
       AppToast.error(context, l.owner_request_err_fix_fields);
       return;
     }
 
-    // Project ID is hidden from UI, but still required to submit.
+    // Project ID hidden from UI but backend needs it
     final projectIdStr = _projectIdCtrl.text.trim();
     final projectId = int.tryParse(projectIdStr);
     if (projectId == null || projectId <= 0) {
@@ -229,29 +201,27 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
       return;
     }
 
-    final appName = _appNameCtrl.text.trim();
-    if (appName.isEmpty) {
-      AppToast.error(context, l.owner_request_err_app_name_required);
+    // Currency must exist (but we default USD)
+    if (_selectedCurrency == null) {
+      AppToast.error(context, l.owner_request_err_select_currency);
       return;
     }
 
     setState(() => _loading = true);
 
     try {
-      // Colors (as hex) sent to backend
       final primaryHex = hexOf(_draft.primary);
       final secondaryHex = hexOf(_draft.secondary);
       final bgHex = hexOf(_draft.background);
       final onBgHex = hexOf(_draft.onBackground);
       final errorHex = hexOf(_draft.error);
 
-      // Runtime JSON payloads (same you submit)
       final out = _runtime.toJsonOut();
 
       await api.submitOwnerRequest(
         ownerId: widget.ownerId,
         projectId: projectId,
-        appName: appName,
+        appName: _appNameCtrl.text.trim(),
         notes: _notesCtrl.text.trim(),
         primaryColor: primaryHex,
         secondaryColor: secondaryHex,
@@ -263,7 +233,6 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
         homeJson: out.homeJson,
         enabledFeaturesJson: out.enabledFeaturesJson,
         brandingJson: out.brandingJson,
-        // ✅ apiBaseUrlOverride removed بالكامل
         logoFile: _logoFile,
       );
 
@@ -271,7 +240,6 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
 
       AppToast.success(context, l.owner_request_submit_success);
 
-      // Navigate back or update owner nav
       try {
         context.read<OwnerNavCubit>().setIndex(1);
       } catch (_) {}
@@ -279,8 +247,6 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
       Navigator.of(context).pop(true);
     } catch (e) {
       if (!mounted) return;
-
-      final l2 = AppLocalizations.of(context)!;
 
       String msg = e.toString();
       if (e is DioException) {
@@ -292,7 +258,7 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
         }
       }
 
-      AppToast.error(context, l2.owner_request_submit_failed(msg));
+      AppToast.error(context, l.owner_request_submit_failed(msg));
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -304,15 +270,12 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
     final t = Theme.of(context).textTheme;
     final l = AppLocalizations.of(context)!;
 
-    // Use existing keys (avoid missing localization getters)
     final previewSubtitle = l.owner_request_hero_subtitle;
 
-    // App name placeholder
     final appName = _appNameCtrl.text.trim().isEmpty
         ? l.owner_request_app_name_hint
         : _appNameCtrl.text.trim();
 
-    // Runtime output for preview
     final previewOut = _runtime.toJsonOut();
 
     return Scaffold(
@@ -329,6 +292,7 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
       ),
       bottomNavigationBar: _SubmitBar(
         loading: _loading,
+        enabled: _canSubmit, // ✅ only app name + logo
         onSubmit: _submit,
       ),
       body: SafeArea(
@@ -338,14 +302,12 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
             builder: (context, constraints) {
               final isWide = constraints.maxWidth >= 980;
 
-              // ✅ Wide layout: preview left, customize right
               if (isWide) {
                 return Padding(
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 110),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // LEFT: Preview phone (keep as is)
                       Expanded(
                         flex: 4,
                         child: _Card(
@@ -366,8 +328,7 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
                                   currency: _selectedCurrency,
                                   navJson: previewOut.navJson,
                                   homeJson: previewOut.homeJson,
-                                  enabledFeaturesJson:
-                                      previewOut.enabledFeaturesJson,
+                                  enabledFeaturesJson: previewOut.enabledFeaturesJson,
                                   brandingJson: previewOut.brandingJson,
                                 ),
                               ),
@@ -376,21 +337,17 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
                         ),
                       ),
                       const SizedBox(width: 14),
-
-                      // RIGHT: Customize panels
                       Expanded(
                         flex: 5,
                         child: _CustomizeColumn(
-                          titleStyle: t.titleMedium
-                              ?.copyWith(fontWeight: FontWeight.w900),
+                          titleStyle: t.titleMedium?.copyWith(fontWeight: FontWeight.w900),
                           loading: _loading,
                           currencies: _currencies,
                           selectedCurrency: _selectedCurrency,
                           onPickCurrency: () async {
                             if (_currencies.isEmpty) await _loadCurrencies();
                             if (!mounted) return;
-                            final picked = await _showCurrencySearchSheet(
-                                context, _currencies);
+                            final picked = await _showCurrencySearchSheet(context, _currencies);
                             if (picked != null) {
                               setState(() => _selectedCurrency = picked);
                             }
@@ -398,13 +355,11 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
                           projectIdCtrl: _projectIdCtrl,
                           appNameCtrl: _appNameCtrl,
                           notesCtrl: _notesCtrl,
-                          validateInt: _validateInt,
                           presetId: _selectedPresetId,
                           draft: _draft,
                           runtime: _runtime,
                           logoFile: _logoFile,
-                          onPresetChanged: (id) =>
-                              setState(() => _selectedPresetId = id),
+                          onPresetChanged: (id) => setState(() => _selectedPresetId = id),
                           onDraftChanged: (d) => setState(() => _draft = d),
                           onRuntimeChanged: (d) => setState(() => _runtime = d),
                           onPickLogo: _pickLogo,
@@ -418,7 +373,6 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
                 );
               }
 
-              // ✅ Mobile layout: preview then customize
               return ListView(
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 130),
                 children: [
@@ -449,16 +403,14 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
                   ),
                   const SizedBox(height: 14),
                   _CustomizeColumn(
-                    titleStyle:
-                        t.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+                    titleStyle: t.titleMedium?.copyWith(fontWeight: FontWeight.w900),
                     loading: _loading,
                     currencies: _currencies,
                     selectedCurrency: _selectedCurrency,
                     onPickCurrency: () async {
                       if (_currencies.isEmpty) await _loadCurrencies();
                       if (!mounted) return;
-                      final picked =
-                          await _showCurrencySearchSheet(context, _currencies);
+                      final picked = await _showCurrencySearchSheet(context, _currencies);
                       if (picked != null) {
                         setState(() => _selectedCurrency = picked);
                       }
@@ -466,13 +418,11 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
                     projectIdCtrl: _projectIdCtrl,
                     appNameCtrl: _appNameCtrl,
                     notesCtrl: _notesCtrl,
-                    validateInt: _validateInt,
                     presetId: _selectedPresetId,
                     draft: _draft,
                     runtime: _runtime,
                     logoFile: _logoFile,
-                    onPresetChanged: (id) =>
-                        setState(() => _selectedPresetId = id),
+                    onPresetChanged: (id) => setState(() => _selectedPresetId = id),
                     onDraftChanged: (d) => setState(() => _draft = d),
                     onRuntimeChanged: (d) => setState(() => _runtime = d),
                     onPickLogo: _pickLogo,
@@ -489,9 +439,6 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
     );
   }
 
-  /// ==========================================================
-  /// Currency bottom sheet (search + pick)
-  /// ==========================================================
   Future<CurrencyModel?> _showCurrencySearchSheet(
     BuildContext context,
     List<CurrencyModel> all,
@@ -578,9 +525,8 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
                           return ListTile(
                             contentPadding: EdgeInsets.zero,
                             title: Text(
-                              c.shortLabel, // ✅ clean: "USD ($)"
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.w700),
+                              c.shortLabel,
+                              style: const TextStyle(fontWeight: FontWeight.w700),
                             ),
                             subtitle: Text(c.currencyType),
                             trailing: const Icon(Icons.chevron_right_rounded),
@@ -601,28 +547,21 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
 }
 
 /// ===============================================================
-/// Tabs / Panels (App Identity, Palette, Runtime Config)
+/// Tabs / Panels
 /// ===============================================================
 enum _Panel { identity, palette, runtime }
 
-/// ===============================================================
-/// RIGHT SIDE: "App Settings" title + pill tabs + panel card
-/// ===============================================================
 class _CustomizeColumn extends StatelessWidget {
   final TextStyle? titleStyle;
-
   final bool loading;
 
   final List<CurrencyModel> currencies;
   final CurrencyModel? selectedCurrency;
   final VoidCallback onPickCurrency;
 
-  final TextEditingController
-      projectIdCtrl; // hidden in UI, still required for submit
+  final TextEditingController projectIdCtrl;
   final TextEditingController appNameCtrl;
   final TextEditingController notesCtrl;
-
-  final String? Function(String?) validateInt;
 
   final String? presetId;
   final ThemeDraft draft;
@@ -650,7 +589,6 @@ class _CustomizeColumn extends StatelessWidget {
     required this.projectIdCtrl,
     required this.appNameCtrl,
     required this.notesCtrl,
-    required this.validateInt,
     required this.presetId,
     required this.draft,
     required this.runtime,
@@ -671,16 +609,10 @@ class _CustomizeColumn extends StatelessWidget {
       children: [
         Text(
           'App Settings',
-          style: Theme.of(context)
-              .textTheme
-              .titleMedium
-              ?.copyWith(fontWeight: FontWeight.w900),
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
         ),
         const SizedBox(height: 10),
-        _PillTabs(
-          selected: panel,
-          onChanged: onPanelChanged,
-        ),
+        _PillTabs(selected: panel, onChanged: onPanelChanged),
         const SizedBox(height: 12),
         AnimatedSwitcher(
           duration: const Duration(milliseconds: 180),
@@ -693,7 +625,6 @@ class _CustomizeColumn extends StatelessWidget {
                 projectIdCtrl: projectIdCtrl,
                 appNameCtrl: appNameCtrl,
                 notesCtrl: notesCtrl,
-                validateInt: validateInt,
                 logoFile: logoFile,
                 onPickLogo: onPickLogo,
                 onRemoveLogo: onRemoveLogo,
@@ -734,17 +665,11 @@ class _CustomizeColumn extends StatelessWidget {
   }
 }
 
-/// ===============================================================
-/// Pill Tabs (Identity / Palette / Runtime)
-/// ===============================================================
 class _PillTabs extends StatelessWidget {
   final _Panel selected;
   final ValueChanged<_Panel> onChanged;
 
-  const _PillTabs({
-    required this.selected,
-    required this.onChanged,
-  });
+  const _PillTabs({required this.selected, required this.onChanged});
 
   static const _green = Color(0xFF16A34A);
 
@@ -773,11 +698,7 @@ class _PillTabs extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  icon,
-                  size: 16,
-                  color: active ? Colors.white : cs.onSurfaceVariant,
-                ),
+                Icon(icon, size: 16, color: active ? Colors.white : cs.onSurfaceVariant),
                 const SizedBox(width: 6),
                 Text(
                   label,
@@ -803,18 +724,9 @@ class _PillTabs extends StatelessWidget {
       ),
       child: Row(
         children: [
-          tab(
-              value: _Panel.identity,
-              label: 'Identity',
-              icon: Icons.badge_outlined),
-          tab(
-              value: _Panel.palette,
-              label: 'Palette',
-              icon: Icons.palette_outlined),
-          tab(
-              value: _Panel.runtime,
-              label: 'Runtime',
-              icon: Icons.tune_rounded),
+          tab(value: _Panel.identity, label: 'Identity', icon: Icons.badge_outlined),
+          tab(value: _Panel.palette, label: 'Palette', icon: Icons.palette_outlined),
+          tab(value: _Panel.runtime, label: 'Runtime', icon: Icons.tune_rounded),
         ],
       ),
     );
@@ -822,7 +734,8 @@ class _PillTabs extends StatelessWidget {
 }
 
 /// ===============================================================
-/// App Identity Panel (override URL removed)
+/// Identity Panel (ONLY AppName required visually + Logo required by submit)
+/// Currency always shows USD fallback even if not opened
 /// ===============================================================
 class _IdentityPanel extends StatelessWidget {
   final bool loading;
@@ -833,8 +746,6 @@ class _IdentityPanel extends StatelessWidget {
   final TextEditingController projectIdCtrl;
   final TextEditingController appNameCtrl;
   final TextEditingController notesCtrl;
-
-  final String? Function(String?) validateInt;
 
   final File? logoFile;
   final VoidCallback onPickLogo;
@@ -848,7 +759,6 @@ class _IdentityPanel extends StatelessWidget {
     required this.projectIdCtrl,
     required this.appNameCtrl,
     required this.notesCtrl,
-    required this.validateInt,
     required this.logoFile,
     required this.onPickLogo,
     required this.onRemoveLogo,
@@ -867,8 +777,7 @@ class _IdentityPanel extends StatelessWidget {
             isDense: true,
             filled: true,
             fillColor: cs.surfaceContainerHighest,
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
               borderSide: BorderSide(color: cs.outlineVariant),
@@ -879,30 +788,17 @@ class _IdentityPanel extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide:
-                  const BorderSide(color: Color(0xFF16A34A), width: 1.5),
+              borderSide: const BorderSide(color: Color(0xFF16A34A), width: 1.5),
             ),
           ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ✅ Project ID hidden (still validated & used on submit)
-            // TextFormField(
-            //   controller: projectIdCtrl,
-            //   readOnly: true,
-            //   decoration: const InputDecoration(labelText: 'Project ID'),
-            //   validator: validateInt,
-            // ),
-
-            // App name
+            // App name (required)
             Text(
               'App name',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w800,
-                color: cs.onSurface.withOpacity(.75),
-              ),
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: cs.onSurface.withOpacity(.75)),
             ),
             const SizedBox(height: 6),
             TextFormField(
@@ -912,20 +808,15 @@ class _IdentityPanel extends StatelessWidget {
                 prefixIcon: Icon(Icons.apps_rounded, size: 18, color: hint),
                 hintText: 'My Shop',
               ),
-              validator: (v) =>
-                  (v == null || v.trim().isEmpty) ? 'Required' : null,
+              validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
             ),
 
             const SizedBox(height: 14),
 
-            // App Logo
+            // Logo (required but handled by submit button logic)
             Text(
-              'App Logo',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w800,
-                color: cs.onSurface.withOpacity(.75),
-              ),
+              'App Logo *',
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: cs.onSurface.withOpacity(.75)),
             ),
             const SizedBox(height: 8),
             Row(
@@ -950,18 +841,14 @@ class _IdentityPanel extends StatelessWidget {
                   child: SizedBox(
                     height: 42,
                     child: ElevatedButton.icon(
+                      // ✅ Upload button stays enabled unless loading
                       onPressed: loading ? null : onPickLogo,
                       icon: const Icon(Icons.upload_rounded, size: 18),
-                      label: const Text(
-                        'Upload',
-                        style: TextStyle(fontWeight: FontWeight.w900),
-                      ),
+                      label: const Text('Upload', style: TextStyle(fontWeight: FontWeight.w900)),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF16A34A),
                         foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(999),
-                        ),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
                         elevation: 0,
                       ),
                     ),
@@ -980,22 +867,17 @@ class _IdentityPanel extends StatelessWidget {
 
             const SizedBox(height: 14),
 
-            // Select currency
+            // Currency (NOT required; always shows USD fallback)
             Text(
               'Select currency',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w800,
-                color: cs.onSurface.withOpacity(.75),
-              ),
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: cs.onSurface.withOpacity(.75)),
             ),
             const SizedBox(height: 6),
             InkWell(
               borderRadius: BorderRadius.circular(14),
               onTap: loading ? null : onPickCurrency,
               child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                 decoration: BoxDecoration(
                   color: cs.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(14),
@@ -1007,13 +889,8 @@ class _IdentityPanel extends StatelessWidget {
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
-                        selectedCurrency == null
-                            ? 'USD - US Dollar'
-                            : selectedCurrency!.shortLabel,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w900,
-                          fontSize: 13,
-                        ),
+                        selectedCurrency == null ?  'USD (\$)' : selectedCurrency!.shortLabel,
+                        style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -1026,14 +903,10 @@ class _IdentityPanel extends StatelessWidget {
 
             const SizedBox(height: 14),
 
-            // Notes (NOT mandatory)
+            // Notes optional
             Text(
               'Notes',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w800,
-                color: cs.onSurface.withOpacity(.75),
-              ),
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: cs.onSurface.withOpacity(.75)),
             ),
             const SizedBox(height: 6),
             TextFormField(
@@ -1052,14 +925,16 @@ class _IdentityPanel extends StatelessWidget {
 }
 
 /// ===============================================================
-/// Pinned submit bar
+/// Submit bar (disabled unless AppName + Logo)
 /// ===============================================================
 class _SubmitBar extends StatelessWidget {
   final bool loading;
+  final bool enabled;
   final VoidCallback onSubmit;
 
   const _SubmitBar({
     required this.loading,
+    required this.enabled,
     required this.onSubmit,
   });
 
@@ -1090,17 +965,15 @@ class _SubmitBar extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    "",
-                    style: t.bodySmall?.copyWith(
-                      color: cs.onSurface.withOpacity(.65),
-                    ),
+                    enabled ? 'Ready to submit ✅' : 'App name + logo required',
+                    style: t.bodySmall?.copyWith(color: cs.onSurface.withOpacity(.65)),
                   ),
                 ],
               ),
             ),
             const SizedBox(width: 12),
             ElevatedButton.icon(
-              onPressed: loading ? null : onSubmit,
+              onPressed: (!enabled || loading) ? null : onSubmit,
               icon: loading
                   ? SizedBox(
                       width: 18,
@@ -1113,11 +986,8 @@ class _SubmitBar extends StatelessWidget {
                   : const Icon(Icons.send_rounded),
               label: Text(loading ? l.owner_request_submitting : l.submit),
               style: ElevatedButton.styleFrom(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
               ),
             ),
           ],
@@ -1128,7 +998,7 @@ class _SubmitBar extends StatelessWidget {
 }
 
 /// ===============================================================
-/// Small UI helpers (Figma-ish)
+/// Small UI helpers
 /// ===============================================================
 class _Card extends StatelessWidget {
   final Widget child;
@@ -1214,9 +1084,7 @@ class _HeaderRow extends StatelessWidget {
               const SizedBox(height: 2),
               Text(
                 subtitle,
-                style: t.bodySmall?.copyWith(
-                  color: cs.onSurface.withOpacity(.65),
-                ),
+                style: t.bodySmall?.copyWith(color: cs.onSurface.withOpacity(.65)),
               ),
             ],
           ),

@@ -15,6 +15,7 @@ import '../bloc/owner_projects_event.dart';
 import '../bloc/owner_projects_state.dart';
 
 enum _PlatformReadyFilter { all, android, ios }
+
 enum _EnvironmentFilter { all, local, test, production }
 
 class OwnerProjectsScreen extends StatefulWidget {
@@ -116,7 +117,8 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
         body: SafeArea(
           child: LayoutBuilder(
             builder: (context, viewport) {
-              final double maxContentWidth = _maxContentWidth(viewport.maxWidth);
+              final double maxContentWidth =
+                  _maxContentWidth(viewport.maxWidth);
               final double hPad = _contentHPad(viewport.maxWidth);
 
               return Align(
@@ -128,7 +130,7 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
                     child: BlocBuilder<OwnerProjectsBloc, OwnerProjectsState>(
                       builder: (context, state) {
                         final l10n = AppLocalizations.of(context)!;
-                        final double bottomPad = 16;
+                        final double bottomPad = 12; // tighter
 
                         final filtered = state.filtered
                             .where(_matchPlatform)
@@ -148,19 +150,17 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
                             slivers: [
                               const SliverToBoxAdapter(child: _Header()),
                               const SliverToBoxAdapter(
-                                child: SizedBox(height: 12),
-                              ),
-
+                                  child: SizedBox(height: 10)),
                               SliverToBoxAdapter(
                                 child: _SearchField(
                                   l10n: l10n,
                                   showFilters: _showFilters,
                                   onToggleFilters: () {
-                                    setState(() => _showFilters = !_showFilters);
+                                    setState(
+                                        () => _showFilters = !_showFilters);
                                   },
                                 ),
                               ),
-
                               SliverToBoxAdapter(
                                 child: AnimatedSize(
                                   duration: const Duration(milliseconds: 220),
@@ -168,7 +168,8 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
                                   alignment: Alignment.topCenter,
                                   child: _showFilters
                                       ? Padding(
-                                          padding: const EdgeInsets.only(top: 12),
+                                          padding:
+                                              const EdgeInsets.only(top: 10),
                                           child: _FiltersBar(
                                             platform: _platform,
                                             env: _env,
@@ -189,11 +190,8 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
                                       : const SizedBox(height: 0),
                                 ),
                               ),
-
                               const SliverToBoxAdapter(
-                                child: SizedBox(height: 12),
-                              ),
-
+                                  child: SizedBox(height: 10)),
                               if (state.loading) ...[
                                 SliverPadding(
                                   padding: EdgeInsets.only(bottom: bottomPad),
@@ -215,17 +213,21 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
                                 ),
                               ] else ...[
                                 SliverPadding(
-                                  padding: const EdgeInsets.only(bottom: 12),
+                                  padding: const EdgeInsets.only(bottom: 8),
                                   sliver: SliverList(
                                     delegate: SliverChildBuilderDelegate(
                                       (context, index) {
                                         final item = filtered[index];
                                         return Padding(
-                                          padding: const EdgeInsets.only(bottom: 12),
+                                          // ✅ tighter spacing between tiles
+                                          padding:
+                                              const EdgeInsets.only(bottom: 6),
                                           child: ProjectTile(
                                             project: item,
-                                            serverRootNoApi: serverRootNoApi(widget.dio),
-                                            publishApi: OwnerPublishApi(widget.dio),
+                                            serverRootNoApi:
+                                                serverRootNoApi(widget.dio),
+                                            publishApi:
+                                                OwnerPublishApi(widget.dio),
                                           ),
                                         );
                                       },
@@ -236,17 +238,21 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
                                 if (visible < total)
                                   SliverToBoxAdapter(
                                     child: Padding(
-                                      padding:
-                                          EdgeInsets.only(bottom: bottomPad, top: 4),
+                                      padding: EdgeInsets.only(
+                                        bottom: bottomPad,
+                                        top: 2,
+                                      ),
                                       child: Center(
                                         child: OutlinedButton.icon(
                                           onPressed: () {
                                             setState(() {
                                               _visibleCount =
-                                                  (_visibleCount + _pageSize).clamp(0, total);
+                                                  (_visibleCount + _pageSize)
+                                                      .clamp(0, total);
                                             });
                                           },
-                                          icon: const Icon(Icons.expand_more_rounded),
+                                          icon: const Icon(
+                                              Icons.expand_more_rounded),
                                           label: const Text('Load more'),
                                         ),
                                       ),
@@ -254,8 +260,7 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
                                   )
                                 else
                                   SliverToBoxAdapter(
-                                    child: SizedBox(height: bottomPad),
-                                  ),
+                                      child: SizedBox(height: bottomPad)),
                               ],
                             ],
                           ),
@@ -297,7 +302,7 @@ class _Header extends StatelessWidget {
     final tt = Theme.of(context).textTheme;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(4, 12, 4, 0),
+      padding: const EdgeInsets.fromLTRB(4, 10, 4, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -310,7 +315,8 @@ class _Header extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             l10n.owner_projects_searchHint,
-            style: tt.bodyMedium?.copyWith(color: cs.onSurface.withOpacity(.65)),
+            style:
+                tt.bodyMedium?.copyWith(color: cs.onSurface.withOpacity(.65)),
           ),
         ],
       ),
@@ -341,7 +347,7 @@ class _FiltersBar extends StatelessWidget {
     final bool ultraCompact = w < 360;
 
     final double pillHPad = ultraCompact ? 12 : (compact ? 14 : 16);
-    final double pillVPad = ultraCompact ? 10 : (compact ? 11 : 12);
+    final double pillVPad = ultraCompact ? 9 : (compact ? 10 : 11);
     final double fontSize = ultraCompact ? 12.5 : (compact ? 13.5 : 14);
 
     Widget group({
@@ -359,11 +365,7 @@ class _FiltersBar extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            children: pills,
-          ),
+          Wrap(spacing: 10, runSpacing: 10, children: pills),
         ],
       );
     }
@@ -440,7 +442,7 @@ class _FiltersBar extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
       decoration: BoxDecoration(
         color: cs.surface,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: cs.outlineVariant.withOpacity(.6)),
       ),
       child: LayoutBuilder(
@@ -451,7 +453,7 @@ class _FiltersBar extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 platformGroup,
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
                 envGroup,
               ],
             );
@@ -460,7 +462,7 @@ class _FiltersBar extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(child: platformGroup),
-              const SizedBox(width: 16),
+              const SizedBox(width: 14),
               Expanded(child: envGroup),
             ],
           );
@@ -540,17 +542,19 @@ class _SearchField extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4),
       child: TextField(
-        onChanged: (v) =>
-            context.read<OwnerProjectsBloc>().add(OwnerProjectsSearchChanged(v)),
+        onChanged: (v) => context
+            .read<OwnerProjectsBloc>()
+            .add(OwnerProjectsSearchChanged(v)),
         style: tt.bodyMedium,
         decoration: InputDecoration(
           prefixIcon: const Icon(Icons.search_rounded),
           hintText: l10n.owner_projects_searchHint,
           filled: true,
           fillColor: cs.surface,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(14),
             borderSide: BorderSide(color: cs.outlineVariant),
           ),
           suffixIcon: IconButton(
@@ -632,7 +636,8 @@ class _EmptyProjects extends StatelessWidget {
           ),
           const SizedBox(height: 14),
           FilledButton.icon(
-            onPressed: () => Navigator.of(context).pushNamed('/owner/request-new'),
+            onPressed: () =>
+                Navigator.of(context).pushNamed('/owner/request-new'),
             icon: const Icon(Icons.bolt_rounded),
             label: Text(l10n.owner_home_requestApp),
           ),
@@ -653,12 +658,12 @@ class _ListSkeleton extends StatelessWidget {
     return SliverList(
       delegate: SliverChildBuilderDelegate(
         (context, index) => Padding(
-          padding: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.only(bottom: 6),
           child: Container(
-            height: 160,
+            height: 154,
             decoration: BoxDecoration(
               color: cs.surfaceVariant.withOpacity(.5),
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(14),
             ),
           ),
         ),

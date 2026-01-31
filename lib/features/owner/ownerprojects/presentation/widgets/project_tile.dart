@@ -2,7 +2,9 @@ import 'package:build4all_manager/features/owner/common/domain/entities/owner_pr
 import 'package:build4all_manager/l10n/app_localizations.dart';
 import 'package:build4all_manager/shared/widgets/app_toast.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../../publish/data/services/owner_publish_api.dart';
 import '../../../publish/domain/entities/publish_draft.dart';
@@ -40,7 +42,22 @@ class ProjectTile extends StatelessWidget {
     }
 
     await launchUrl(uri, mode: LaunchMode.externalApplication);
-    AppToast.success(context, 'Download started');
+    AppToast.success(context, 'Opened ✅');
+  }
+
+  Future<void> _copyLink(BuildContext context, String url) async {
+    if (url.trim().isEmpty) return;
+    await Clipboard.setData(ClipboardData(text: url));
+    AppToast.success(context, 'Link copied ✅');
+  }
+
+  Future<void> _shareLink(
+      BuildContext context, String url, String label) async {
+    if (url.trim().isEmpty) return;
+    await Share.share(
+      '$label:\n$url',
+      subject: label,
+    );
   }
 
   String _statusLabel() {
@@ -72,18 +89,22 @@ class ProjectTile extends StatelessWidget {
     final apkUrl = _abs(project.apkUrl);
     final ipaUrl = _abs(project.ipaUrl);
 
-    final androidReady = apkUrl.isNotEmpty;
+    final androidReady = project.isApkReady || apkUrl.isNotEmpty;
     final iosReady = ipaUrl.isNotEmpty;
+
+    // ✅ iOS sharing text label (you can swap to "TestFlight" later if you add a testflightUrl)
+    final iosShareLabel = 'Download $appName iOS (IPA)';
 
     return LayoutBuilder(
       builder: (context, c) {
         final w = c.maxWidth;
 
         final bool tiny = w < 520;
-        final double titleSize = tiny ? 16 : 18;
+        final double titleSize = tiny ? 15.5 : 17.5;
         final double subSize = tiny ? 11 : 12;
-        final double pad = tiny ? 12 : 14;
-        final double iconBox = tiny ? 48 : 54;
+        final double pad = tiny ? 10 : 12;
+
+        final double iconBox = tiny ? 46 : 52;
         final double iconSize = tiny ? 24 : 28;
 
         Widget fitted(Widget child, {Alignment align = Alignment.center}) {
@@ -94,16 +115,75 @@ class ProjectTile extends StatelessWidget {
           );
         }
 
+        // ✅ shared top actions builder (copy + share)
+        Widget buildTopActions({
+          required bool enabled,
+          required String url,
+          required String shareLabel,
+        }) {
+          return Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: enabled ? () => _copyLink(context, url) : null,
+                  icon: Icon(Icons.copy_rounded, size: tiny ? 16 : 18),
+                  label: Text(
+                    'Copy link',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w900,
+                      fontSize: tiny ? 11 : 12,
+                    ),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: tiny ? 9 : 10,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: enabled
+                      ? () => _shareLink(context, url, shareLabel)
+                      : null,
+                  icon: Icon(Icons.share_rounded, size: tiny ? 16 : 18),
+                  label: Text(
+                    'Share',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w900,
+                      fontSize: tiny ? 11 : 12,
+                    ),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: tiny ? 9 : 10,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
+        }
+
         return Container(
           decoration: BoxDecoration(
             color: cs.surface,
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: cs.outlineVariant.withOpacity(.6)),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: cs.outlineVariant.withOpacity(.60)),
             boxShadow: const [
               BoxShadow(
-                color: Color(0x12000000),
-                blurRadius: 14,
-                offset: Offset(0, 10),
+                color: Color(0x08000000),
+                blurRadius: 8,
+                offset: Offset(0, 4),
               )
             ],
           ),
@@ -111,18 +191,18 @@ class ProjectTile extends StatelessWidget {
           child: Column(
             children: [
               Padding(
-                padding: EdgeInsets.fromLTRB(pad, pad, pad, tiny ? 10 : 12),
+                padding: EdgeInsets.fromLTRB(pad, pad, pad, tiny ? 8 : 10),
                 child: Row(
                   children: [
                     _AppIcon(
                       project: project,
                       band: cs.primary,
                       serverRootNoApi: serverRootNoApi,
-                      size: tiny ? 56 : 62,
-                      radius: tiny ? 16 : 18,
+                      size: tiny ? 54 : 60,
+                      radius: tiny ? 14 : 16,
                       fontSize: tiny ? 20 : 22,
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 10),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -150,9 +230,9 @@ class ProjectTile extends StatelessWidget {
                         ],
                       ),
                     ),
-                    const SizedBox(width: 10),
-                    _Pill(text: statusLabel, color: statusColor, tiny: tiny),
-                    const SizedBox(width: 10),
+                    const SizedBox(width: 8),
+                    _Pill(text: statusLabel, color: statusColor, tiny: true),
+                    const SizedBox(width: 8),
                     fitted(
                       OutlinedButton.icon(
                         onPressed: androidReady
@@ -171,8 +251,8 @@ class ProjectTile extends StatelessWidget {
                             borderRadius: BorderRadius.circular(999),
                           ),
                           padding: EdgeInsets.symmetric(
-                            horizontal: tiny ? 12 : 14,
-                            vertical: tiny ? 10 : 12,
+                            horizontal: tiny ? 10 : 12,
+                            vertical: tiny ? 9 : 10,
                           ),
                         ),
                       ),
@@ -181,7 +261,7 @@ class ProjectTile extends StatelessWidget {
                   ],
                 ),
               ),
-              Divider(height: 1, color: cs.outlineVariant.withOpacity(.6)),
+              Divider(height: 1, color: cs.outlineVariant.withOpacity(.60)),
               Padding(
                 padding: EdgeInsets.all(pad),
                 child: IntrinsicHeight(
@@ -209,13 +289,18 @@ class ProjectTile extends StatelessWidget {
                             platform: PublishPlatform.android,
                             store: PublishStore.playStore,
                           ),
+                          topActions: buildTopActions(
+                            enabled: apkUrl.isNotEmpty,
+                            url: apkUrl,
+                            shareLabel: 'Download $appName Android (APK)',
+                          ),
                           onDownload: (u) => _openUrl(context, u),
                         ),
                       ),
                       VerticalDivider(
-                        width: tiny ? 18 : 28,
+                        width: tiny ? 12 : 18,
                         thickness: 1,
-                        color: cs.outlineVariant.withOpacity(.6),
+                        color: cs.outlineVariant.withOpacity(.60),
                       ),
                       Expanded(
                         child: _PlatformPanel(
@@ -238,6 +323,14 @@ class ProjectTile extends StatelessWidget {
                             platform: PublishPlatform.ios,
                             store: PublishStore.appStore,
                           ),
+
+                          // ✅ iOS now has Copy + Share too
+                          topActions: buildTopActions(
+                            enabled: ipaUrl.isNotEmpty,
+                            url: ipaUrl,
+                            shareLabel: iosShareLabel,
+                          ),
+
                           onDownload: (u) => _openUrl(context, u),
                         ),
                       ),
@@ -270,6 +363,8 @@ class _PlatformPanel extends StatelessWidget {
 
   final String publishLabel;
   final VoidCallback onPublish;
+
+  final Widget? topActions;
   final void Function(String url) onDownload;
 
   const _PlatformPanel({
@@ -286,6 +381,7 @@ class _PlatformPanel extends StatelessWidget {
     required this.publishLabel,
     required this.onPublish,
     required this.onDownload,
+    required this.topActions,
   });
 
   @override
@@ -294,6 +390,9 @@ class _PlatformPanel extends StatelessWidget {
     final tt = Theme.of(context).textTheme;
 
     final double labelSize = compact ? 11 : 12;
+
+    // ✅ reserve same space so publish buttons align perfectly
+    final double topActionsSlotH = compact ? 40 : 44;
 
     Widget fitted(Widget child) => FittedBox(
           fit: BoxFit.scaleDown,
@@ -311,7 +410,7 @@ class _PlatformPanel extends StatelessWidget {
               height: iconBox,
               decoration: BoxDecoration(
                 color: primaryColor.withOpacity(.10),
-                borderRadius: BorderRadius.circular(18),
+                borderRadius: BorderRadius.circular(16),
               ),
               child: Icon(icon, color: primaryColor, size: iconSize),
             ),
@@ -340,9 +439,10 @@ class _PlatformPanel extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 12),
-        Divider(height: 1, color: cs.outlineVariant.withOpacity(.6)),
         const SizedBox(height: 10),
+        Divider(height: 1, color: cs.outlineVariant.withOpacity(.60)),
+        const SizedBox(height: 8),
+
         Text(
           storeLine,
           maxLines: 1,
@@ -352,7 +452,15 @@ class _PlatformPanel extends StatelessWidget {
             color: cs.onSurface.withOpacity(.7),
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 10),
+
+        // ✅ reserved slot (keeps everything aligned)
+        SizedBox(
+          height: topActionsSlotH,
+          child: topActions ?? const SizedBox.shrink(),
+        ),
+        const SizedBox(height: 10),
+
         Text(
           'DOWNLOAD',
           style: tt.labelLarge?.copyWith(
@@ -375,14 +483,19 @@ class _PlatformPanel extends StatelessWidget {
               ),
               style: OutlinedButton.styleFrom(
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14)),
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 padding: EdgeInsets.symmetric(
-                    horizontal: 12, vertical: compact ? 10 : 12),
+                  horizontal: 10,
+                  vertical: compact ? 9 : 10,
+                ),
               ),
             ),
           ),
         ),
-        const SizedBox(height: 12),
+
+        const SizedBox(height: 10),
+
         Text(
           'PUBLISH',
           style: tt.labelLarge?.copyWith(
@@ -406,9 +519,12 @@ class _PlatformPanel extends StatelessWidget {
                 backgroundColor: primaryColor,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(999)),
+                  borderRadius: BorderRadius.circular(999),
+                ),
                 padding: EdgeInsets.symmetric(
-                    horizontal: 12, vertical: compact ? 10 : 12),
+                  horizontal: 10,
+                  vertical: compact ? 9 : 10,
+                ),
                 elevation: 0,
               ),
             ),
@@ -502,7 +618,9 @@ class _Pill extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.symmetric(
-          horizontal: tiny ? 8 : 10, vertical: tiny ? 5 : 6),
+        horizontal: tiny ? 8 : 10,
+        vertical: tiny ? 5 : 6,
+      ),
       decoration: BoxDecoration(
         color: color.withOpacity(.12),
         borderRadius: BorderRadius.circular(999),
