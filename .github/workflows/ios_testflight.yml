@@ -63,12 +63,12 @@ jobs:
           [ -n "${XCODE_APP:-}" ] || { echo "❌ No Xcode found"; exit 1; }
           echo "✅ Selected: $XCODE_APP"
           sudo xcode-select -s "/Applications/$XCODE_APP/Contents/Developer"
-          xcodebuild -
+          xcodebuild -version
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-: "3.32.0"
+          flutter-version: "3.32.0"
           channel: stable
           cache: true
 
@@ -76,7 +76,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          flutter --
+          flutter --version
           flutter pub get
           
       - name: Setup iOS signing certificate (P12 -> keychain)
@@ -107,7 +107,7 @@ jobs:
 
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-: "3.2"
+          ruby-version: "3.2"
           
       - name: Force iOS minimum deployment target (Pods)
         shell: bash
