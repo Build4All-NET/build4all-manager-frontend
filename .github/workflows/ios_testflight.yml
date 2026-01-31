@@ -12,7 +12,7 @@ on:
         required: false
         default: "CI build"
   push:
-    branches: [ "main" ]
+    branches: ["main"]
     paths:
       - "lib/**"
       - "ios/**"
@@ -63,12 +63,12 @@ jobs:
           [ -n "${XCODE_APP:-}" ] || { echo "❌ No Xcode found"; exit 1; }
           echo "✅ Selected: $XCODE_APP"
           sudo xcode-select -s "/Applications/$XCODE_APP/Contents/Developer"
-          xcodebuild -
+          xcodebuild -version
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-: "3.32.0"
+          flutter-version: "3.32.0"
           channel: stable
           cache: true
 
@@ -76,8 +76,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          flutter --
+          flutter --version
           flutter pub get
+
       # ✅ Fix for your error: ensure build number always increases
       - name: Compute build name/number (from pubspec + CI run)
         shell: bash
@@ -85,19 +86,19 @@ jobs:
           set -euo pipefail
 
           BUILD_NAME="$(python3 - <<'PY'
-          import re
-          t=open("pubspec.yaml","r",encoding="utf-8").read()
-          m=re.search(r"^version:\s*([0-9]+(?:\.[0-9]+){1,3})", t, re.M)
-          print(m.group(1) if m else "1.0.0")
-          PY
-          )"
-                    BUILD_NUMBER="${GITHUB_RUN_NUMBER}"
-          
-                    echo "BUILD_NAME=$BUILD_NAME" >> $GITHUB_ENV
-                    echo "BUILD_NUMBER=$BUILD_NUMBER" >> $GITHUB_ENV
-                    echo "✅ BUILD_NAME=$BUILD_NAME"
-                    echo "✅ BUILD_NUMBER=$BUILD_NUMBER"
-          
+import re
+t=open("pubspec.yaml","r",encoding="utf-8").read()
+m=re.search(r"^version:\s*([0-9]+(?:\.[0-9]+){1,3})", t, re.M)
+print(m.group(1) if m else "1.0.0")
+PY
+)"
+          BUILD_NUMBER="${GITHUB_RUN_NUMBER}"
+
+          echo "BUILD_NAME=$BUILD_NAME" >> $GITHUB_ENV
+          echo "BUILD_NUMBER=$BUILD_NUMBER" >> $GITHUB_ENV
+          echo "✅ BUILD_NAME=$BUILD_NAME"
+          echo "✅ BUILD_NUMBER=$BUILD_NUMBER"
+
       - name: Setup iOS signing certificate (P12 -> keychain)
         shell: bash
         run: |
@@ -126,20 +127,20 @@ jobs:
 
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-: "3.2"
-          
+          ruby-version: "3.2"
+
       - name: Force iOS minimum deployment target (Pods)
         shell: bash
         run: |
           set -euo pipefail
           PODFILE="ios/Podfile"
-      
+
           if ! grep -q "platform :ios" "$PODFILE"; then
             sed -i '' '1s;^;platform :ios, '\''14.0'\''\n\n;' "$PODFILE"
           else
             sed -i '' "s/platform :ios, '[0-9.]\\+'/platform :ios, '14.0'/" "$PODFILE"
           fi
-      
+
           echo "✅ Podfile iOS platform forced to 14.0"
 
       - name: Install CocoaPods + fastlane
@@ -148,8 +149,8 @@ jobs:
           set -euo pipefail
           gem install cocoapods -N
           gem install fastlane -N
-          pod --
-          fastlane --
+          pod --version
+          fastlane --version
 
       - name: Create App Store Connect api_key.json (inline key for fastlane)
         shell: bash
@@ -161,7 +162,6 @@ jobs:
           [ -n "${ASC_ISSUER_ID:-}" ] || { echo "❌ ASC_ISSUER_ID empty"; exit 1; }
           [ -n "${ASC_KEY_P8_B64:-}" ] || { echo "❌ ASC_KEY_P8_B64 empty"; exit 1; }
 
-          # decode ASC_KEY_P8_B64 safely (strip whitespace, add padding)
           python3 - <<'PY'
           import os, re, base64, pathlib, json, binascii
 
@@ -172,14 +172,11 @@ jobs:
           p8_path = pathlib.Path(".private") / f"AuthKey_{key_id}.p8"
           p8_path.parent.mkdir(parents=True, exist_ok=True)
 
-          # Remove whitespace and surrounding quotes
           s = re.sub(r"\s+", "", raw).strip().strip('"').strip("'")
 
-          # If raw PEM was stored by mistake, write it directly
           if "BEGIN" in raw and "PRIVATE" in raw:
               p8_path.write_text(raw.strip(), encoding="utf-8")
           else:
-              # Fix padding
               s += "=" * ((-len(s)) % 4)
               try:
                   p8_path.write_bytes(base64.b64decode(s))
@@ -321,23 +318,6 @@ jobs:
           RUBY
 
           BUNDLE_ID="${BUNDLE_ID}" PROFILE_NAME="${PROFILE_NAME}" TEAM_ID="${IOS_TEAM_ID}" ruby patch_runner_signing.rb
-          
-      - name: Force iOS minimum deployment target (Podfile)
-        shell: bash
-        run: |
-          set -euo pipefail
-          PODFILE="ios/Podfile"
-      
-          echo "🔧 Patching Podfile iOS platform → 14.0"
-      
-          if ! grep -q "^platform :ios" "$PODFILE"; then
-            sed -i '' '1s;^;platform :ios, '\''14.0'\''\n\n;' "$PODFILE"
-          else
-            sed -i '' "s/platform :ios, '[0-9.]\\+'/platform :ios, '14.0'/" "$PODFILE"
-          fi
-      
-          echo "📄 Podfile (top):"
-          head -n 5 "$PODFILE"
 
       - name: Install iOS Pods
         shell: bash
@@ -353,36 +333,30 @@ jobs:
           PODS_PROJECT="ios/Pods/Pods.xcodeproj/project.pbxproj"
           echo "🔧 Forcing IPHONEOS_DEPLOYMENT_TARGET = 14.0 for Pods"
           perl -pi -e 's/IPHONEOS_DEPLOYMENT_TARGET = [0-9.]+;/IPHONEOS_DEPLOYMENT_TARGET = 14.0;/g' "$PODS_PROJECT"
-          
+
       - name: Add required privacy purpose strings (Info.plist)
         shell: bash
         run: |
           set -euo pipefail
           INFO_PLIST="ios/Runner/Info.plist"
-      
-          echo "🔧 Updating privacy keys in $INFO_PLIST"
-      
+
           /usr/libexec/PlistBuddy -c "Add :NSPhotoLibraryUsageDescription string 'This app needs access to your photo library to let you choose and upload images.'" "$INFO_PLIST" 2>/dev/null || \
           /usr/libexec/PlistBuddy -c "Set :NSPhotoLibraryUsageDescription 'This app needs access to your photo library to let you choose and upload images.'" "$INFO_PLIST"
-      
+
           /usr/libexec/PlistBuddy -c "Add :NSCameraUsageDescription string 'This app needs access to your camera to let you take and upload photos.'" "$INFO_PLIST" 2>/dev/null || \
           /usr/libexec/PlistBuddy -c "Set :NSCameraUsageDescription 'This app needs access to your camera to let you take and upload photos.'" "$INFO_PLIST"
-      
+
           /usr/libexec/PlistBuddy -c "Add :NSLocationWhenInUseUsageDescription string 'This app may use your location to show relevant content such as nearby services or map features.'" "$INFO_PLIST" 2>/dev/null || \
           /usr/libexec/PlistBuddy -c "Set :NSLocationWhenInUseUsageDescription 'This app may use your location to show relevant content such as nearby services or map features.'" "$INFO_PLIST"
-      
+
           /usr/libexec/PlistBuddy -c "Add :NSLocationAlwaysAndWhenInUseUsageDescription string 'This app may use your location to support features that rely on maps and location-based results.'" "$INFO_PLIST" 2>/dev/null || \
           /usr/libexec/PlistBuddy -c "Set :NSLocationAlwaysAndWhenInUseUsageDescription 'This app may use your location to support features that rely on maps and location-based results.'" "$INFO_PLIST"
-      
-          echo "✅ Verifying:"
-          /usr/libexec/PlistBuddy -c "Print :NSPhotoLibraryUsageDescription" "$INFO_PLIST"
-          /usr/libexec/PlistBuddy -c "Print :NSCameraUsageDescription" "$INFO_PLIST"
-           
+
       - name: Build iOS (flutter)
         shell: bash
         run: |
           set -euo pipefail
-          flutter build ios --release --no-codesign
+          flutter build ios --release --no-codesign \
             --build-name "$BUILD_NAME" \
             --build-number "$BUILD_NUMBER"
 
@@ -417,6 +391,8 @@ jobs:
             -sdk iphoneos \
             -destination 'generic/platform=iOS' \
             -archivePath ../build/ios/archive/Runner.xcarchive \
+            CURRENT_PROJECT_VERSION="${BUILD_NUMBER}" \
+            MARKETING_VERSION="${BUILD_NAME}" \
             OTHER_CODE_SIGN_FLAGS="--keychain ${KEYCHAIN_PATH}" \
             archive
 
@@ -451,7 +427,6 @@ jobs:
           API_KEY_JSON="$GITHUB_WORKSPACE/.private/api_key.json"
           IPA_PATH="$(find "$GITHUB_WORKSPACE/build/ios/ipa" -type f -name "*.ipa" | head -n 1)"
 
-          # On push, github.event.inputs.* doesn't exist -> default to internal
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             DIST_EXT="${{ github.event.inputs.distribute_external }}"
             CHANGELOG="${{ github.event.inputs.changelog }}"
