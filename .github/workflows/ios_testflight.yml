@@ -332,38 +332,33 @@ jobs:
         run: |
           set -euo pipefail
           PODS_PROJECT="ios/Pods/Pods.xcodeproj/project.pbxproj"
-      
           echo "🔧 Forcing IPHONEOS_DEPLOYMENT_TARGET = 14.0 for Pods"
+          perl -pi -e 's/IPHONEOS_DEPLOYMENT_TARGET = [0-9.]+;/IPHONEOS_DEPLOYMENT_TARGET = 14.0;/g' "$PODS_PROJECT"
+          
+      - name: Add required privacy purpose strings (Info.plist)
+        shell: bash
+        run: |
+          set -euo pipefail
+          INFO_PLIST="ios/Runner/Info.plist"
       
-          perl -pi -e "s/IPHONEOS_DEPLOYMENT_TARGET = [0-9.]+;/IPHONEOS_DEPLOYMENT_TARGET = 14.0;/g" "$PODS_PROJECT"
-
-          - name: Add required privacy purpose strings (Info.plist)
-            shell: bash
-            run: |
-              set -euo pipefail
-              INFO_PLIST="ios/Runner/Info.plist"
-          
-              echo "🔧 Updating privacy keys in $INFO_PLIST"
-          
-              /usr/libexec/PlistBuddy -c "Add :NSPhotoLibraryUsageDescription string 'This app needs access to your photo library to let you choose and upload images.'" "$INFO_PLIST" 2>/dev/null || \
-              /usr/libexec/PlistBuddy -c "Set :NSPhotoLibraryUsageDescription 'This app needs access to your photo library to let you choose and upload images.'" "$INFO_PLIST"
-          
-              /usr/libexec/PlistBuddy -c "Add :NSCameraUsageDescription string 'This app needs access to your camera to let you take and upload photos.'" "$INFO_PLIST" 2>/dev/null || \
-              /usr/libexec/PlistBuddy -c "Set :NSCameraUsageDescription 'This app needs access to your camera to let you take and upload photos.'" "$INFO_PLIST"
-          
-              # Optional but recommended (Apple warned about them)
-              /usr/libexec/PlistBuddy -c "Add :NSLocationWhenInUseUsageDescription string 'This app may use your location to show relevant content such as nearby services or map features.'" "$INFO_PLIST" 2>/dev/null || \
-              /usr/libexec/PlistBuddy -c "Set :NSLocationWhenInUseUsageDescription 'This app may use your location to show relevant content such as nearby services or map features.'" "$INFO_PLIST"
-          
-              /usr/libexec/PlistBuddy -c "Add :NSLocationAlwaysAndWhenInUseUsageDescription string 'This app may use your location to support features that rely on maps and location-based results.'" "$INFO_PLIST" 2>/dev/null || \
-              /usr/libexec/PlistBuddy -c "Set :NSLocationAlwaysAndWhenInUseUsageDescription 'This app may use your location to support features that rely on maps and location-based results.'" "$INFO_PLIST"
-          
-              echo "✅ Privacy keys set. Verifying:"
-              /usr/libexec/PlistBuddy -c "Print :NSPhotoLibraryUsageDescription" "$INFO_PLIST"
-              /usr/libexec/PlistBuddy -c "Print :NSCameraUsageDescription" "$INFO_PLIST"
-              /usr/libexec/PlistBuddy -c "Print :NSLocationWhenInUseUsageDescription" "$INFO_PLIST" || true
-              /usr/libexec/PlistBuddy -c "Print :NSLocationAlwaysAndWhenInUseUsageDescription" "$INFO_PLIST" || true
-
+          echo "🔧 Updating privacy keys in $INFO_PLIST"
+      
+          /usr/libexec/PlistBuddy -c "Add :NSPhotoLibraryUsageDescription string 'This app needs access to your photo library to let you choose and upload images.'" "$INFO_PLIST" 2>/dev/null || \
+          /usr/libexec/PlistBuddy -c "Set :NSPhotoLibraryUsageDescription 'This app needs access to your photo library to let you choose and upload images.'" "$INFO_PLIST"
+      
+          /usr/libexec/PlistBuddy -c "Add :NSCameraUsageDescription string 'This app needs access to your camera to let you take and upload photos.'" "$INFO_PLIST" 2>/dev/null || \
+          /usr/libexec/PlistBuddy -c "Set :NSCameraUsageDescription 'This app needs access to your camera to let you take and upload photos.'" "$INFO_PLIST"
+      
+          /usr/libexec/PlistBuddy -c "Add :NSLocationWhenInUseUsageDescription string 'This app may use your location to show relevant content such as nearby services or map features.'" "$INFO_PLIST" 2>/dev/null || \
+          /usr/libexec/PlistBuddy -c "Set :NSLocationWhenInUseUsageDescription 'This app may use your location to show relevant content such as nearby services or map features.'" "$INFO_PLIST"
+      
+          /usr/libexec/PlistBuddy -c "Add :NSLocationAlwaysAndWhenInUseUsageDescription string 'This app may use your location to support features that rely on maps and location-based results.'" "$INFO_PLIST" 2>/dev/null || \
+          /usr/libexec/PlistBuddy -c "Set :NSLocationAlwaysAndWhenInUseUsageDescription 'This app may use your location to support features that rely on maps and location-based results.'" "$INFO_PLIST"
+      
+          echo "✅ Verifying:"
+          /usr/libexec/PlistBuddy -c "Print :NSPhotoLibraryUsageDescription" "$INFO_PLIST"
+          /usr/libexec/PlistBuddy -c "Print :NSCameraUsageDescription" "$INFO_PLIST"
+           
       - name: Build iOS (flutter)
         shell: bash
         run: |
