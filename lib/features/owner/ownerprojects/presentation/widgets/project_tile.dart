@@ -22,9 +22,11 @@ class ProjectTile extends StatelessWidget {
     required this.publishApi,
   });
 
+  // ✅ makes relative urls absolute + handles "null"
   String _abs(String? maybe) {
-    if (maybe == null || maybe.isEmpty) return '';
+    if (maybe == null) return '';
     final s = maybe.trim();
+    if (s.isEmpty || s.toLowerCase() == 'null') return '';
     if (s.startsWith('http://') || s.startsWith('https://')) return s;
     final base = serverRootNoApi.replaceAll(RegExp(r'/+$'), '');
     final rel = s.startsWith('/') ? s : '/$s';
@@ -32,36 +34,63 @@ class ProjectTile extends StatelessWidget {
   }
 
   Future<void> _openUrl(BuildContext context, String urlStr) async {
-    if (urlStr.trim().isEmpty) return;
-    final uri = Uri.tryParse(urlStr);
-    if (uri == null) return;
+    final cleaned = urlStr.trim();
+    if (cleaned.isEmpty) {
+      AppToast.error(context, 'No link to open');
+      return;
+    }
+
+    final uri = Uri.tryParse(cleaned);
+    if (uri == null) {
+      AppToast.error(context, 'Invalid URL');
+      return;
+    }
 
     if (!await canLaunchUrl(uri)) {
-      AppToast.error(context, 'Cannot open: $urlStr');
+      AppToast.error(context, 'Cannot open: $cleaned');
       return;
     }
 
     await launchUrl(uri, mode: LaunchMode.externalApplication);
-    AppToast.success(context, 'Opened ✅');
   }
 
   Future<void> _copyLink(BuildContext context, String url) async {
-    if (url.trim().isEmpty) return;
-    await Clipboard.setData(ClipboardData(text: url));
+    final cleaned = url.trim();
+    if (cleaned.isEmpty) {
+      AppToast.error(context, 'No link to copy');
+      return;
+    }
+    await Clipboard.setData(ClipboardData(text: cleaned));
     AppToast.success(context, 'Link copied ✅');
   }
 
+  // ✅ iOS/iPad safe share (anchor rect) + visible errors
   Future<void> _shareLink(
-      BuildContext context, String url, String label) async {
-    if (url.trim().isEmpty) return;
-    await Share.share(
-      '$label:\n$url',
-      subject: label,
-    );
+    BuildContext context,
+    String url,
+    String label, {
+    Rect? sharePositionOrigin,
+  }) async {
+    final cleaned = url.trim();
+    if (cleaned.isEmpty) {
+      AppToast.error(context, 'No link to share');
+      return;
+    }
+
+    try {
+      await Share.share(
+        '$label:\n$cleaned',
+        subject: label,
+        sharePositionOrigin: sharePositionOrigin,
+      );
+    } catch (e) {
+      AppToast.error(context, 'Share failed: $e');
+      debugPrint('Share error: $e');
+    }
   }
 
   String _statusLabel() {
-    final s = project.status.trim();
+    final s = (project.status).trim();
     if (s.isNotEmpty) return s;
     return project.isApkReady ? 'ACTIVE' : 'IN_PRODUCTION';
   }
@@ -92,7 +121,6 @@ class ProjectTile extends StatelessWidget {
     final androidReady = project.isApkReady || apkUrl.isNotEmpty;
     final iosReady = ipaUrl.isNotEmpty;
 
-    // ✅ iOS sharing text label (you can swap to "TestFlight" later if you add a testflightUrl)
     final iosShareLabel = 'Download $appName iOS (IPA)';
 
     return LayoutBuilder(
@@ -115,7 +143,6 @@ class ProjectTile extends StatelessWidget {
           );
         }
 
-        // ✅ shared top actions builder (copy + share)
         Widget buildTopActions({
           required bool enabled,
           required String url,
@@ -146,33 +173,62 @@ class ProjectTile extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
+
+              // ✅ Share fixed for iOS/iPad (popover anchor)
               Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: enabled
-                      ? () => _shareLink(context, url, shareLabel)
-                      : null,
-                  icon: Icon(Icons.share_rounded, size: tiny ? 16 : 18),
-                  label: Text(
-                    'Share',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w900,
-                      fontSize: tiny ? 11 : 12,
-                    ),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: tiny ? 9 : 10,
-                    ),
-                  ),
+                child: Builder(
+                  builder: (btnCtx) {
+                    return OutlinedButton.icon(
+                      onPressed: enabled
+                          ? () async {
+                              final box =
+                                  btnCtx.findRenderObject() as RenderBox?;
+                              final rect = box == null
+                                  ? null
+                                  : (box.localToGlobal(Offset.zero) & box.size);
+
+                              await _shareLink(
+                                context,
+                                url,
+                                shareLabel,
+                                sharePositionOrigin: rect,
+                              );
+                            }
+                          : null,
+                      icon: Icon(Icons.share_rounded, size: tiny ? 16 : 18),
+                      label: Text(
+                        'Share',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w900,
+                          fontSize: tiny ? 11 : 12,
+                        ),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: tiny ? 9 : 10,
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ),
             ],
           );
         }
+
+        // ✅ FIXED: smooth gray header (no seam / no split look)
+        final headerGradient = LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            cs.surfaceVariant.withOpacity(.55),
+            cs.surface.withOpacity(1),
+          ],
+        );
 
         return Container(
           decoration: BoxDecoration(
@@ -190,78 +246,87 @@ class ProjectTile extends StatelessWidget {
           clipBehavior: Clip.antiAlias,
           child: Column(
             children: [
-              Padding(
-                padding: EdgeInsets.fromLTRB(pad, pad, pad, tiny ? 8 : 10),
-                child: Row(
-                  children: [
-                    _AppIcon(
-                      project: project,
-                      band: cs.primary,
-                      serverRootNoApi: serverRootNoApi,
-                      size: tiny ? 54 : 60,
-                      radius: tiny ? 14 : 16,
-                      fontSize: tiny ? 20 : 22,
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            appName,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: tt.titleLarge?.copyWith(
+              // ✅ HEADER AREA WITH SMOOTH GRAY GRADIENT BACKGROUND
+              Container(
+                decoration: BoxDecoration(
+                  gradient: headerGradient,
+                ),
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(pad, pad, pad, tiny ? 8 : 10),
+                  child: Row(
+                    children: [
+                      _AppIcon(
+                        project: project,
+                        band: cs.primary,
+                        serverRootNoApi: serverRootNoApi,
+                        size: tiny ? 54 : 60,
+                        radius: tiny ? 14 : 16,
+                        fontSize: tiny ? 20 : 22,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              appName,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: tt.titleLarge?.copyWith(
+                                fontWeight: FontWeight.w900,
+                                fontSize: titleSize,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '/${project.slug}',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: tt.bodySmall?.copyWith(
+                                fontSize: subSize,
+                                color: cs.onSurface.withOpacity(.65),
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      _Pill(text: statusLabel, color: statusColor, tiny: true),
+                      const SizedBox(width: 8),
+                      fitted(
+                        OutlinedButton.icon(
+                          onPressed: androidReady
+                              ? () => _openUrl(context, apkUrl)
+                              : null,
+                          icon:
+                              Icon(Icons.science_rounded, size: tiny ? 16 : 18),
+                          label: Text(
+                            l10n.owner_projects_test,
+                            style: TextStyle(
                               fontWeight: FontWeight.w900,
-                              fontSize: titleSize,
+                              fontSize: tiny ? 11 : 12,
                             ),
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            '/${project.slug}',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: tt.bodySmall?.copyWith(
-                              fontSize: subSize,
-                              color: cs.onSurface.withOpacity(.65),
-                              fontWeight: FontWeight.w700,
+                          style: OutlinedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: tiny ? 10 : 12,
+                              vertical: tiny ? 9 : 10,
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    _Pill(text: statusLabel, color: statusColor, tiny: true),
-                    const SizedBox(width: 8),
-                    fitted(
-                      OutlinedButton.icon(
-                        onPressed: androidReady
-                            ? () => _openUrl(context, apkUrl)
-                            : null,
-                        icon: Icon(Icons.science_rounded, size: tiny ? 16 : 18),
-                        label: Text(
-                          l10n.owner_projects_test,
-                          style: TextStyle(
-                            fontWeight: FontWeight.w900,
-                            fontSize: tiny ? 11 : 12,
-                          ),
                         ),
-                        style: OutlinedButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(999),
-                          ),
-                          padding: EdgeInsets.symmetric(
-                            horizontal: tiny ? 10 : 12,
-                            vertical: tiny ? 9 : 10,
-                          ),
-                        ),
+                        align: Alignment.centerRight,
                       ),
-                      align: Alignment.centerRight,
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
+
               Divider(height: 1, color: cs.outlineVariant.withOpacity(.60)),
+
               Padding(
                 padding: EdgeInsets.all(pad),
                 child: IntrinsicHeight(
@@ -323,14 +388,11 @@ class ProjectTile extends StatelessWidget {
                             platform: PublishPlatform.ios,
                             store: PublishStore.appStore,
                           ),
-
-                          // ✅ iOS now has Copy + Share too
                           topActions: buildTopActions(
                             enabled: ipaUrl.isNotEmpty,
                             url: ipaUrl,
                             shareLabel: iosShareLabel,
                           ),
-
                           onDownload: (u) => _openUrl(context, u),
                         ),
                       ),
@@ -390,8 +452,6 @@ class _PlatformPanel extends StatelessWidget {
     final tt = Theme.of(context).textTheme;
 
     final double labelSize = compact ? 11 : 12;
-
-    // ✅ reserve same space so publish buttons align perfectly
     final double topActionsSlotH = compact ? 40 : 44;
 
     Widget fitted(Widget child) => FittedBox(
@@ -442,7 +502,6 @@ class _PlatformPanel extends StatelessWidget {
         const SizedBox(height: 10),
         Divider(height: 1, color: cs.outlineVariant.withOpacity(.60)),
         const SizedBox(height: 8),
-
         Text(
           storeLine,
           maxLines: 1,
@@ -453,14 +512,11 @@ class _PlatformPanel extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 10),
-
-        // ✅ reserved slot (keeps everything aligned)
         SizedBox(
           height: topActionsSlotH,
           child: topActions ?? const SizedBox.shrink(),
         ),
         const SizedBox(height: 10),
-
         Text(
           'DOWNLOAD',
           style: tt.labelLarge?.copyWith(
@@ -493,9 +549,7 @@ class _PlatformPanel extends StatelessWidget {
             ),
           ),
         ),
-
         const SizedBox(height: 10),
-
         Text(
           'PUBLISH',
           style: tt.labelLarge?.copyWith(
@@ -554,8 +608,9 @@ class _AppIcon extends StatelessWidget {
   });
 
   String _abs(String? maybe) {
-    if (maybe == null || maybe.isEmpty) return '';
+    if (maybe == null) return '';
     final s = maybe.trim();
+    if (s.isEmpty || s.toLowerCase() == 'null') return '';
     if (s.startsWith('http://') || s.startsWith('https://')) return s;
     final base = serverRootNoApi.replaceAll(RegExp(r'/+$'), '');
     final rel = s.startsWith('/') ? s : '/$s';
