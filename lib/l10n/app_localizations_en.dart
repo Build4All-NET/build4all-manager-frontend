@@ -1648,4 +1648,170 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get lang_french => 'French';
+
+  @override
+  String get owner_publish_err_load_draft => 'Failed to load publish draft';
+
+  @override
+  String get owner_publish_err_save_failed => 'Save failed';
+
+  @override
+  String get owner_publish_err_submit_failed => 'Submit failed';
+
+  @override
+  String get owner_publish_err_logo_required => 'Logo is required';
+
+  @override
+  String get owner_publish_country_us => 'United States';
+
+  @override
+  String get owner_publish_country_lb => 'Lebanon';
+
+  @override
+  String get owner_publish_country_fr => 'France';
+
+  @override
+  String get owner_publish_upload_assets => 'Upload Assets (Icon + Screenshots)';
+
+  @override
+  String get owner_publish_current_icon => 'Current Icon';
+
+  @override
+  String get owner_publish_no_icon_yet => 'No icon uploaded yet.';
+
+  @override
+  String get owner_publish_current_screenshots => 'Current Screenshots';
+
+  @override
+  String get owner_publish_no_screenshots_yet => 'No screenshots uploaded yet.';
+
+  @override
+  String get owner_publish_rule_shots_2_8 => 'Rule: screenshots must be 2..8 before submitting.';
+
+  @override
+  String get common_error => 'Error';
+
+  @override
+  String get common_close => 'Close';
+
+  @override
+  String get common_add => 'Add';
+
+  @override
+  String get common_copy => 'Copy';
+
+  @override
+  String get common_share => 'Share';
+
+  @override
+  String get common_uploading => 'Uploading...';
+
+  @override
+  String get common_network_error_try_again => 'Network error. Please try again.';
+
+  @override
+  String get owner_publish_assets_title_android => 'Android Assets';
+
+  @override
+  String get owner_publish_assets_title_ios => 'iOS Assets';
+
+  @override
+  String get owner_publish_assets_app_icon => 'App Icon';
+
+  @override
+  String get owner_publish_assets_choose_icon => 'Choose Icon';
+
+  @override
+  String get owner_publish_assets_remove_icon => 'Remove icon';
+
+  @override
+  String get owner_publish_assets_screenshots_2_8 => 'Screenshots (2..8)';
+
+  @override
+  String get owner_publish_assets_no_screenshots => 'No screenshots selected yet.';
+
+  @override
+  String get owner_publish_assets_upload_assets => 'Upload Assets';
+
+  @override
+  String get owner_publish_assets_uploaded => 'Assets uploaded ✅';
+
+  @override
+  String get owner_publish_assets_err_pick_icon_or_screens => 'Pick an icon OR screenshots first';
+
+  @override
+  String get owner_publish_assets_err_screens_min2 => 'Screenshots: add at least 2';
+
+  @override
+  String get owner_publish_assets_err_screens_max8 => 'Screenshots: maximum 8 allowed';
+
+  @override
+  String get owner_project_err_no_link_open => 'No link to open';
+
+  @override
+  String get owner_project_err_invalid_url => 'Invalid URL';
+
+  @override
+  String get owner_project_err_cannot_open => 'Cannot open';
+
+  @override
+  String get owner_project_err_no_link_copy => 'No link to copy';
+
+  @override
+  String get owner_project_err_no_link_share => 'No link to share';
+
+  @override
+  String get owner_project_err_share_failed => 'Share failed';
+
+  @override
+  String get owner_project_link_copied => 'Link copied ✅';
+
+  @override
+  String get owner_project_status_active => 'ACTIVE';
+
+  @override
+  String get owner_project_status_in_production => 'IN_PRODUCTION';
+
+  @override
+  String get owner_project_android => 'Android';
+
+  @override
+  String get owner_project_ios => 'iOS';
+
+  @override
+  String get owner_project_apk => 'APK';
+
+  @override
+  String get owner_project_aab => 'AAB';
+
+  @override
+  String get owner_project_ipa => 'IPA';
+
+  @override
+  String get owner_project_play_not_requested => 'Play Store: Not Requested';
+
+  @override
+  String get owner_project_appstore_not_requested => 'App Store: Not Requested';
+
+  @override
+  String get owner_project_ready => 'Ready';
+
+  @override
+  String get owner_project_building => 'Building';
+
+  @override
+  String get owner_project_download_section => 'DOWNLOAD';
+
+  @override
+  String get owner_project_publish_section => 'PUBLISH';
+
+  @override
+  String owner_project_share_ios(Object appName) {
+    return 'Download $appName iOS (IPA)';
+  }
+
+  @override
+  String owner_project_share_android(Object appName, Object format) {
+    return 'Download $appName Android ($format)';
+  }
 }

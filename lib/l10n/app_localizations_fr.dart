@@ -887,7 +887,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get preview => 'Aperçu';
 
   @override
-  String get common_remove => 'Retirer';
+  String get common_remove => 'Supprimer';
 
   @override
   String get owner_request_hero_title => 'Créer une nouvelle app';
@@ -1648,4 +1648,170 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get lang_french => 'Français';
+
+  @override
+  String get owner_publish_err_load_draft => 'Échec du chargement du brouillon de publication';
+
+  @override
+  String get owner_publish_err_save_failed => 'Échec de l\'enregistrement';
+
+  @override
+  String get owner_publish_err_submit_failed => 'Échec de l\'envoi';
+
+  @override
+  String get owner_publish_err_logo_required => 'Le logo est obligatoire';
+
+  @override
+  String get owner_publish_country_us => 'États-Unis';
+
+  @override
+  String get owner_publish_country_lb => 'Liban';
+
+  @override
+  String get owner_publish_country_fr => 'France';
+
+  @override
+  String get owner_publish_upload_assets => 'Importer les éléments (Icône + Captures)';
+
+  @override
+  String get owner_publish_current_icon => 'Icône actuelle';
+
+  @override
+  String get owner_publish_no_icon_yet => 'Aucune icône importée pour le moment.';
+
+  @override
+  String get owner_publish_current_screenshots => 'Captures actuelles';
+
+  @override
+  String get owner_publish_no_screenshots_yet => 'Aucune capture importée pour le moment.';
+
+  @override
+  String get owner_publish_rule_shots_2_8 => 'Règle : les captures doivent être entre 2 et 8 avant l’envoi.';
+
+  @override
+  String get common_error => 'Error';
+
+  @override
+  String get common_close => 'Fermer';
+
+  @override
+  String get common_add => 'Ajouter';
+
+  @override
+  String get common_copy => 'Copier';
+
+  @override
+  String get common_share => 'Partager';
+
+  @override
+  String get common_uploading => 'Téléversement...';
+
+  @override
+  String get common_network_error_try_again => 'Erreur réseau. Veuillez réessayer.';
+
+  @override
+  String get owner_publish_assets_title_android => 'Éléments Android';
+
+  @override
+  String get owner_publish_assets_title_ios => 'Éléments iOS';
+
+  @override
+  String get owner_publish_assets_app_icon => 'Icône de l\'app';
+
+  @override
+  String get owner_publish_assets_choose_icon => 'Choisir l\'icône';
+
+  @override
+  String get owner_publish_assets_remove_icon => 'Supprimer l\'icône';
+
+  @override
+  String get owner_publish_assets_screenshots_2_8 => 'Captures (2..8)';
+
+  @override
+  String get owner_publish_assets_no_screenshots => 'Aucune capture sélectionnée.';
+
+  @override
+  String get owner_publish_assets_upload_assets => 'Téléverser';
+
+  @override
+  String get owner_publish_assets_uploaded => 'Éléments téléversés ✅';
+
+  @override
+  String get owner_publish_assets_err_pick_icon_or_screens => 'Choisissez une icône OU des captures d’abord';
+
+  @override
+  String get owner_publish_assets_err_screens_min2 => 'Captures : ajoutez au moins 2';
+
+  @override
+  String get owner_publish_assets_err_screens_max8 => 'Captures : maximum 8';
+
+  @override
+  String get owner_project_err_no_link_open => 'Aucun lien à ouvrir';
+
+  @override
+  String get owner_project_err_invalid_url => 'URL invalide';
+
+  @override
+  String get owner_project_err_cannot_open => 'Impossible d’ouvrir';
+
+  @override
+  String get owner_project_err_no_link_copy => 'Aucun lien à copier';
+
+  @override
+  String get owner_project_err_no_link_share => 'Aucun lien à partager';
+
+  @override
+  String get owner_project_err_share_failed => 'Échec du partage';
+
+  @override
+  String get owner_project_link_copied => 'Lien copié ✅';
+
+  @override
+  String get owner_project_status_active => 'ACTIVE';
+
+  @override
+  String get owner_project_status_in_production => 'EN_PRODUCTION';
+
+  @override
+  String get owner_project_android => 'Android';
+
+  @override
+  String get owner_project_ios => 'iOS';
+
+  @override
+  String get owner_project_apk => 'APK';
+
+  @override
+  String get owner_project_aab => 'AAB';
+
+  @override
+  String get owner_project_ipa => 'IPA';
+
+  @override
+  String get owner_project_play_not_requested => 'Play Store : non demandé';
+
+  @override
+  String get owner_project_appstore_not_requested => 'App Store : non demandé';
+
+  @override
+  String get owner_project_ready => 'Prêt';
+
+  @override
+  String get owner_project_building => 'En cours';
+
+  @override
+  String get owner_project_download_section => 'TÉLÉCHARGER';
+
+  @override
+  String get owner_project_publish_section => 'PUBLIER';
+
+  @override
+  String owner_project_share_ios(Object appName) {
+    return 'Télécharger $appName iOS (IPA)';
+  }
+
+  @override
+  String owner_project_share_android(Object appName, Object format) {
+    return 'Télécharger $appName Android ($format)';
+  }
 }

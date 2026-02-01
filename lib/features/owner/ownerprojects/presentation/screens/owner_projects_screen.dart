@@ -47,7 +47,7 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
     final repo = OwnerRepositoryImpl(OwnerApi(widget.dio));
 
     String serverRootNoApi(Dio d) {
-      final base = d.options.baseUrl; // http://host:8080/api
+      final base = d.options.baseUrl; // e.g. http://host:8080/api
       return base.replaceFirst(RegExp(r'/api/?$'), '');
     }
 
@@ -78,7 +78,7 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
     bool _androidReady(OwnerProject p) {
       final apk = (p.apkUrl ?? '').trim();
       final aab = (p.bundleUrl ?? '').trim();
-      return p.isApkReady || apk.isNotEmpty || aab.isNotEmpty;
+      return apk.isNotEmpty || aab.isNotEmpty;
     }
 
     bool _iosReady(OwnerProject p) {
@@ -100,7 +100,7 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
     bool _matchEnv(OwnerProject p) {
       if (_env == _EnvironmentFilter.all) return true;
 
-      final s = (p.status ?? '').toLowerCase();
+      final s = p.status.toLowerCase(); // ✅ FIX (status non-nullable)
       if (_env == _EnvironmentFilter.local) return s.contains('local');
       if (_env == _EnvironmentFilter.test) return s.contains('test');
       if (_env == _EnvironmentFilter.production) {
@@ -130,7 +130,7 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
                     child: BlocBuilder<OwnerProjectsBloc, OwnerProjectsState>(
                       builder: (context, state) {
                         final l10n = AppLocalizations.of(context)!;
-                        final double bottomPad = 12; // tighter
+                        final double bottomPad = 12;
 
                         final filtered = state.filtered
                             .where(_matchPlatform)
@@ -219,7 +219,6 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
                                       (context, index) {
                                         final item = filtered[index];
                                         return Padding(
-                                          // ✅ tighter spacing between tiles
                                           padding:
                                               const EdgeInsets.only(bottom: 6),
                                           child: ProjectTile(

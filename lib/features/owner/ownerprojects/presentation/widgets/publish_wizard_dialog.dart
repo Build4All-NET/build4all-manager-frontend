@@ -1,5 +1,6 @@
 import 'package:build4all_manager/l10n/app_localizations.dart';
-import 'package:build4all_manager/shared/widgets/app_toast.dart';
+import 'package:build4all_manager/shared/widgets/app_toast.dart'; // for ToastType enum (we won't use AppToast here)
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
 import '../../../publish/data/services/owner_publish_api.dart';
@@ -16,8 +17,6 @@ class PublishWizardDialog extends StatefulWidget {
   final PublishPlatform platform;
   final PublishStore store;
 
-  /// Optional fallback values coming from app list (OwnerProject / Link DTO).
-  /// Used only if the draft snapshot is empty.
   final String? androidPackageName;
   final String? iosBundleId;
 
@@ -39,14 +38,13 @@ class PublishWizardDialog extends StatefulWidget {
     required String appName,
     required PublishPlatform platform,
     required PublishStore store,
-
-    /// ✅ pass these from OwnerProjects screen if you have them
     String? androidPackageName,
     String? iosBundleId,
   }) {
     return showDialog(
       context: context,
       barrierDismissible: false,
+      useRootNavigator: true,
       builder: (_) => PublishWizardDialog(
         api: api,
         aupId: aupId,
@@ -81,6 +79,25 @@ class _PublishWizardDialogState extends State<PublishWizardDialog> {
 
   final _snapshotCtrl = TextEditingController();
 
+  // ✅ INLINE MESSAGE under steps bar
+  String? _inlineMsg;
+  ToastType _inlineType = ToastType.info;
+
+  void _showInline(String msg, {ToastType type = ToastType.error}) {
+    if (!mounted) return;
+    setState(() {
+      _inlineMsg = msg;
+      _inlineType = type;
+    });
+
+    Future.delayed(const Duration(seconds: 3), () {
+      if (!mounted) return;
+      if (_inlineMsg == msg) {
+        setState(() => _inlineMsg = null);
+      }
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -90,8 +107,110 @@ class _PublishWizardDialogState extends State<PublishWizardDialog> {
   String _fallbackSnapshot() {
     final a = (widget.androidPackageName ?? '').trim();
     final i = (widget.iosBundleId ?? '').trim();
-
     return widget.platform == PublishPlatform.android ? a : i;
+  }
+
+  String _title(AppLocalizations l10n) => widget.store == PublishStore.playStore
+      ? l10n.owner_publish_title_play
+      : l10n.owner_publish_title_appstore;
+
+  String _platformLabel(AppLocalizations l10n) =>
+      widget.platform == PublishPlatform.android
+          ? l10n.owner_publish_platform_android
+          : l10n.owner_publish_platform_ios;
+
+  String _snapshotLabel(AppLocalizations l10n) =>
+      widget.platform == PublishPlatform.android
+          ? l10n.owner_publish_package_name
+          : l10n.owner_publish_bundle_id;
+
+  /// ✅ Extract backend errors (including your 500 trace RuntimeException)
+  String _errText(Object e, AppLocalizations l10n) {
+    if (e is DioException) {
+      final data = e.response?.data;
+
+      String pickString(dynamic v) => (v ?? '').toString().trim();
+
+      if (data is Map) {
+        final err = pickString(data['error']);
+        if (err.isNotEmpty) return _mapKnownErrors(err, l10n);
+
+        final msg = pickString(data['message']);
+        if (msg.isNotEmpty) return _mapKnownErrors(msg, l10n);
+
+        final trace = pickString(data['trace']);
+        final extracted = _extractRuntimeException(trace);
+        if (extracted.isNotEmpty) return _mapKnownErrors(extracted, l10n);
+      }
+
+      final m = (e.message ?? '').trim();
+      if (m.isNotEmpty) return m;
+
+      return l10n.common_network_error_try_again;
+    }
+
+    final raw = e.toString().replaceFirst('Exception: ', '').trim();
+    if (raw.isEmpty) return l10n.common_error;
+    return _mapKnownErrors(raw, l10n);
+  }
+
+  String _extractRuntimeException(String trace) {
+    if (trace.isEmpty) return '';
+    final key = 'RuntimeException:';
+    final i = trace.indexOf(key);
+    if (i < 0) return '';
+    var s = trace.substring(i + key.length).trim();
+
+    final n1 = s.indexOf('\n');
+    final n2 = s.indexOf('\r');
+    final cut = [n1, n2].where((x) => x >= 0).toList();
+    if (cut.isNotEmpty) {
+      cut.sort();
+      s = s.substring(0, cut.first).trim();
+    }
+    return s;
+  }
+
+  String _mapKnownErrors(String raw, AppLocalizations l10n) {
+    final msg = raw.toLowerCase();
+
+    if (msg.contains('short description') && msg.contains('required')) {
+      return l10n.owner_publish_err_short;
+    }
+    if (msg.contains('full description') && msg.contains('required')) {
+      return l10n.owner_publish_err_full;
+    }
+    if (msg.contains('category') && msg.contains('required')) {
+      return l10n.owner_publish_err_category;
+    }
+    if (msg.contains('application') &&
+        msg.contains('name') &&
+        msg.contains('required')) {
+      return l10n.owner_publish_err_appname;
+    }
+
+    if (msg.contains('logo') &&
+        (msg.contains('required') ||
+            msg.contains('missing') ||
+            msg.contains('empty'))) {
+      return l10n.owner_publish_err_logo_required;
+    }
+
+    if (msg.contains('icon') &&
+        (msg.contains('required') ||
+            msg.contains('missing') ||
+            msg.contains('empty'))) {
+      return l10n.owner_publish_err_icon;
+    }
+
+    if ((msg.contains('screenshot') || msg.contains('screenshots')) &&
+        (msg.contains('at least') ||
+            msg.contains('minimum') ||
+            msg.contains('required'))) {
+      return l10n.owner_publish_err_shots2;
+    }
+
+    return raw.trim().isEmpty ? l10n.common_error : raw.trim();
   }
 
   Future<void> _loadDraft() async {
@@ -109,20 +228,17 @@ class _PublishWizardDialogState extends State<PublishWizardDialog> {
           ? d.applicationName
           : widget.appName;
 
-      shortCtrl.text =
-          d.shortDescription.trim().isEmpty ? '' : d.shortDescription;
-      fullCtrl.text = d.fullDescription.trim().isEmpty ? '' : d.fullDescription;
-
-      categoryCtrl.text = d.category.trim().isEmpty ? '' : d.category;
+      shortCtrl.text = d.shortDescription.trim();
+      fullCtrl.text = d.fullDescription.trim();
+      categoryCtrl.text = d.category.trim();
 
       if (d.countryAvailability.trim().isNotEmpty) {
-        country = d.countryAvailability;
+        country = d.countryAvailability.trim();
       }
 
       pricing = d.pricing;
       contentConfirmed = d.contentRatingConfirmed;
 
-      // ✅ snapshot: draft value OR fallback from app list (androidPackageName/iosBundleId)
       final draftSnap = widget.platform == PublishPlatform.android
           ? d.packageNameSnapshot
           : d.bundleIdSnapshot;
@@ -131,81 +247,65 @@ class _PublishWizardDialogState extends State<PublishWizardDialog> {
           (draftSnap.trim().isNotEmpty) ? draftSnap : _fallbackSnapshot();
       _snapshotCtrl.text = snap;
     } catch (e) {
-      if (mounted) {
-        AppToast.error(context, 'Failed to load draft: $e');
-        Navigator.pop(context);
-      }
+      if (!mounted) return;
+      final l10n = AppLocalizations.of(context)!;
+      _showInline(
+        '${l10n.owner_publish_err_load_draft}: ${_errText(e as Object, l10n)}',
+        type: ToastType.error,
+      );
+      Navigator.pop(context);
     } finally {
       if (mounted) setState(() => loading = false);
     }
   }
 
-  String _title(AppLocalizations l10n) => widget.store == PublishStore.playStore
-      ? l10n.owner_publish_title_play
-      : l10n.owner_publish_title_appstore;
+  void _validateStep1(AppLocalizations l10n) {
+    if (appNameCtrl.text.trim().isEmpty) {
+      throw l10n.owner_publish_err_appname;
+    }
+    if (shortCtrl.text.trim().isEmpty) {
+      throw l10n.owner_publish_err_short;
+    }
+    if (shortCtrl.text.trim().length > 80) {
+      throw l10n.owner_publish_err_short80;
+    }
+    if (fullCtrl.text.trim().isEmpty) {
+      throw l10n.owner_publish_err_full;
+    }
+  }
 
-  String _platformLabel(AppLocalizations l10n) =>
-      widget.platform == PublishPlatform.android
-          ? l10n.owner_publish_platform_android
-          : l10n.owner_publish_platform_ios;
+  void _validateStep2(AppLocalizations l10n) {
+    if (categoryCtrl.text.trim().isEmpty) {
+      throw l10n.owner_publish_err_category;
+    }
+    if (!contentConfirmed) {
+      throw l10n.owner_publish_err_content_confirm;
+    }
+  }
 
-  String _snapshotLabel(AppLocalizations l10n) =>
-      widget.platform == PublishPlatform.android
-          ? l10n.owner_publish_package_name
-          : l10n.owner_publish_bundle_id;
+  void _validateStep4Assets(AppLocalizations l10n) {
+    final d = draft;
+    if (d == null) return;
+
+    final hasIcon = d.appIconUrl.trim().isNotEmpty;
+    final shots = d.screenshotsUrls.where((e) => e.trim().isNotEmpty).toList();
+
+    if (!hasIcon) throw l10n.owner_publish_err_icon;
+    if (shots.length < 2) throw l10n.owner_publish_err_shots2;
+    if (shots.length > 8) throw l10n.owner_publish_err_shots8;
+  }
 
   Future<void> _saveStep() async {
     final l10n = AppLocalizations.of(context)!;
     if (draft == null) return;
 
-    if (step == 1) {
-      if (appNameCtrl.text.trim().isEmpty) {
-        AppToast.error(context, l10n.owner_publish_err_appname);
-        return;
-      }
-      if (shortCtrl.text.trim().isEmpty) {
-        AppToast.error(context, l10n.owner_publish_err_short);
-        return;
-      }
-      if (shortCtrl.text.trim().length > 80) {
-        AppToast.error(context, l10n.owner_publish_err_short80);
-        return;
-      }
-      if (fullCtrl.text.trim().isEmpty) {
-        AppToast.error(context, l10n.owner_publish_err_full);
-        return;
-      }
-    }
-
-    if (step == 2) {
-      if (categoryCtrl.text.trim().isEmpty) {
-        AppToast.error(context, l10n.owner_publish_err_category);
-        return;
-      }
-      if (!contentConfirmed) {
-        AppToast.error(context, l10n.owner_publish_err_content_confirm);
-        return;
-      }
-    }
-
-    if (step == 4) {
-      final d = draft!;
-      final hasIcon = d.appIconUrl.trim().isNotEmpty;
-      final shots =
-          d.screenshotsUrls.where((e) => e.trim().isNotEmpty).toList();
-
-      if (!hasIcon) {
-        AppToast.error(context, l10n.owner_publish_err_icon);
-        return;
-      }
-      if (shots.length < 2) {
-        AppToast.error(context, l10n.owner_publish_err_shots2);
-        return;
-      }
-      if (shots.length > 8) {
-        AppToast.error(context, l10n.owner_publish_err_shots8);
-        return;
-      }
+    try {
+      if (step == 1) _validateStep1(l10n);
+      if (step == 2) _validateStep2(l10n);
+      if (step == 4) _validateStep4Assets(l10n);
+    } catch (msg) {
+      _showInline(msg.toString(), type: ToastType.error);
+      rethrow;
     }
 
     setState(() => saving = true);
@@ -223,16 +323,55 @@ class _PublishWizardDialogState extends State<PublishWizardDialog> {
 
       draft = updated;
 
-      // keep snapshot updated in UI (in case backend now returned it)
       final draftSnap = widget.platform == PublishPlatform.android
           ? updated.packageNameSnapshot
           : updated.bundleIdSnapshot;
 
       if (draftSnap.trim().isNotEmpty) {
-        _snapshotCtrl.text = draftSnap;
+        _snapshotCtrl.text = draftSnap.trim();
       }
     } catch (e) {
-      AppToast.error(context, 'Save failed: $e');
+      _showInline(
+        '${l10n.owner_publish_err_save_failed}: ${_errText(e as Object, l10n)}',
+        type: ToastType.error,
+      );
+      rethrow;
+    } finally {
+      if (mounted) setState(() => saving = false);
+    }
+  }
+
+  Future<void> _saveAll() async {
+    final l10n = AppLocalizations.of(context)!;
+    if (draft == null) return;
+
+    try {
+      _validateStep1(l10n);
+      _validateStep2(l10n);
+      _validateStep4Assets(l10n);
+    } catch (msg) {
+      _showInline(msg.toString(), type: ToastType.error);
+      rethrow;
+    }
+
+    setState(() => saving = true);
+    try {
+      final updated = await widget.api.patchDraft(
+        requestId: draft!.id,
+        applicationName: appNameCtrl.text.trim(),
+        shortDescription: shortCtrl.text.trim(),
+        fullDescription: fullCtrl.text.trim(),
+        category: categoryCtrl.text.trim(),
+        countryAvailability: country,
+        pricing: pricing,
+        contentRatingConfirmed: contentConfirmed,
+      );
+      draft = updated;
+    } catch (e) {
+      _showInline(
+        '${l10n.owner_publish_err_save_failed}: ${_errText(e as Object, l10n)}',
+        type: ToastType.error,
+      );
       rethrow;
     } finally {
       if (mounted) setState(() => saving = false);
@@ -245,15 +384,20 @@ class _PublishWizardDialogState extends State<PublishWizardDialog> {
 
     setState(() => saving = true);
     try {
-      await _saveStep();
-
+      await _saveAll();
       final res = await widget.api.submit(requestId: draft!.id);
       draft = res;
 
-      AppToast.success(context, l10n.owner_publish_submitted);
+      _showInline(l10n.owner_publish_submitted, type: ToastType.success);
+
+      // Let user see it for a tiny moment then close
+      await Future.delayed(const Duration(milliseconds: 350));
       if (mounted) Navigator.pop(context);
     } catch (e) {
-      AppToast.error(context, '$e');
+      _showInline(
+        '${l10n.owner_publish_err_submit_failed}: ${_errText(e as Object, l10n)}',
+        type: ToastType.error,
+      );
     } finally {
       if (mounted) setState(() => saving = false);
     }
@@ -340,11 +484,25 @@ class _PublishWizardDialogState extends State<PublishWizardDialog> {
                           onPressed:
                               saving ? null : () => Navigator.pop(context),
                           icon: const Icon(Icons.close_rounded),
+                          tooltip: l10n.common_close,
                         ),
                       ],
                     ),
                   ),
+
                   _StepsBar(step: step),
+
+                  // ✅ INLINE message appears HERE (under steps)
+                  if (_inlineMsg != null)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(18, 0, 18, 10),
+                      child: _InlineBanner(
+                        message: _inlineMsg!,
+                        type: _inlineType,
+                        onClose: () => setState(() => _inlineMsg = null),
+                      ),
+                    ),
+
                   Expanded(
                     child: SingleChildScrollView(
                       padding: const EdgeInsets.fromLTRB(18, 16, 18, 10),
@@ -382,9 +540,9 @@ class _PublishWizardDialogState extends State<PublishWizardDialog> {
                                     setState(() => step -= 1);
                                   }
                                 },
-                          child: Text(
-                            step == 1 ? l10n.common_cancel : l10n.common_back,
-                          ),
+                          child: Text(step == 1
+                              ? l10n.common_cancel
+                              : l10n.common_back),
                         ),
                         const Spacer(),
                         FilledButton(
@@ -407,11 +565,9 @@ class _PublishWizardDialogState extends State<PublishWizardDialog> {
                                   child:
                                       CircularProgressIndicator(strokeWidth: 2),
                                 )
-                              : Text(
-                                  step < 4
-                                      ? l10n.common_continue
-                                      : l10n.owner_publish_submit,
-                                ),
+                              : Text(step < 4
+                                  ? l10n.common_continue
+                                  : l10n.owner_publish_submit),
                         ),
                       ],
                     ),
@@ -505,6 +661,86 @@ class _StepsBar extends StatelessWidget {
   }
 }
 
+class _InlineBanner extends StatelessWidget {
+  final String message;
+  final ToastType type;
+  final VoidCallback onClose;
+
+  const _InlineBanner({
+    required this.message,
+    required this.type,
+    required this.onClose,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    Color bg;
+    Color fg;
+
+    switch (type) {
+      case ToastType.success:
+        bg = Colors.green.withOpacity(.12);
+        fg = Colors.green.shade300;
+        break;
+      case ToastType.warning:
+        bg = Colors.orange.withOpacity(.12);
+        fg = Colors.orange.shade300;
+        break;
+      case ToastType.error:
+        bg = Colors.red.withOpacity(.12);
+        fg = Colors.red.shade300;
+        break;
+      case ToastType.info:
+      default:
+        bg = cs.surfaceContainerHighest;
+        fg = cs.primary;
+        break;
+    }
+
+    return Material(
+      color: Colors.transparent,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: fg.withOpacity(.35)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 10,
+              height: 10,
+              decoration: BoxDecoration(color: fg, shape: BoxShape.circle),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                message,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: cs.onSurface,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+            IconButton(
+              onPressed: onClose,
+              icon: Icon(Icons.close_rounded,
+                  color: cs.onSurface.withOpacity(.7)),
+              splashRadius: 18,
+              tooltip: 'Close',
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _StepBody extends StatelessWidget {
   final int step;
 
@@ -523,7 +759,6 @@ class _StepBody extends StatelessWidget {
   final String snapshotLabel;
   final TextEditingController snapshotCtrl;
 
-  // Step 4
   final PublishDraft? draft;
   final VoidCallback onOpenUploader;
 
@@ -569,30 +804,23 @@ class _StepBody extends StatelessWidget {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            l10n.owner_publish_step1_title,
-            style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w900),
-          ),
+          Text(l10n.owner_publish_step1_title,
+              style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w900)),
           const SizedBox(height: 4),
-          Text(
-            l10n.owner_publish_step1_sub,
-            style: tt.bodySmall?.copyWith(color: cs.onSurface.withOpacity(.65)),
-          ),
+          Text(l10n.owner_publish_step1_sub,
+              style:
+                  tt.bodySmall?.copyWith(color: cs.onSurface.withOpacity(.65))),
           const SizedBox(height: 18),
-          Text(
-            l10n.owner_publish_app_name,
-            style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w900),
-          ),
+          Text(l10n.owner_publish_app_name,
+              style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w900)),
           const SizedBox(height: 6),
           TextField(
             controller: appNameCtrl,
             decoration: deco(l10n.owner_publish_app_name_hint),
           ),
           const SizedBox(height: 14),
-          Text(
-            snapshotLabel,
-            style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w900),
-          ),
+          Text(snapshotLabel,
+              style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w900)),
           const SizedBox(height: 6),
           TextField(
             controller: snapshotCtrl,
@@ -603,10 +831,8 @@ class _StepBody extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 14),
-          Text(
-            l10n.owner_publish_short_desc,
-            style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w900),
-          ),
+          Text(l10n.owner_publish_short_desc,
+              style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w900)),
           const SizedBox(height: 6),
           TextField(
             controller: shortCtrl,
@@ -614,10 +840,8 @@ class _StepBody extends StatelessWidget {
             decoration: deco(l10n.owner_publish_short_desc_hint),
           ),
           const SizedBox(height: 8),
-          Text(
-            l10n.owner_publish_full_desc,
-            style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w900),
-          ),
+          Text(l10n.owner_publish_full_desc,
+              style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w900)),
           const SizedBox(height: 6),
           TextField(
             controller: fullCtrl,
@@ -632,47 +856,41 @@ class _StepBody extends StatelessWidget {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            l10n.owner_publish_step2_title,
-            style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w900),
-          ),
+          Text(l10n.owner_publish_step2_title,
+              style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w900)),
           const SizedBox(height: 4),
-          Text(
-            l10n.owner_publish_step2_sub,
-            style: tt.bodySmall?.copyWith(color: cs.onSurface.withOpacity(.65)),
-          ),
+          Text(l10n.owner_publish_step2_sub,
+              style:
+                  tt.bodySmall?.copyWith(color: cs.onSurface.withOpacity(.65))),
           const SizedBox(height: 18),
-          Text(
-            l10n.owner_publish_category,
-            style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w900),
-          ),
+          Text(l10n.owner_publish_category,
+              style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w900)),
           const SizedBox(height: 6),
           TextField(
             controller: categoryCtrl,
             decoration: deco(l10n.owner_publish_category_hint),
           ),
           const SizedBox(height: 14),
-          Text(
-            l10n.owner_publish_country,
-            style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w900),
-          ),
+          Text(l10n.owner_publish_country,
+              style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w900)),
           const SizedBox(height: 6),
           DropdownButtonFormField<String>(
             value: country,
             decoration: deco(''),
-            items: const [
+            items: [
               DropdownMenuItem(
-                  value: 'United States', child: Text('United States')),
-              DropdownMenuItem(value: 'Lebanon', child: Text('Lebanon')),
-              DropdownMenuItem(value: 'France', child: Text('France')),
+                  value: 'United States',
+                  child: Text(l10n.owner_publish_country_us)),
+              DropdownMenuItem(
+                  value: 'Lebanon', child: Text(l10n.owner_publish_country_lb)),
+              DropdownMenuItem(
+                  value: 'France', child: Text(l10n.owner_publish_country_fr)),
             ],
             onChanged: (v) => onCountryChanged(v ?? 'United States'),
           ),
           const SizedBox(height: 14),
-          Text(
-            l10n.owner_publish_pricing,
-            style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w900),
-          ),
+          Text(l10n.owner_publish_pricing,
+              style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w900)),
           const SizedBox(height: 8),
           Row(
             children: [
@@ -729,15 +947,12 @@ class _StepBody extends StatelessWidget {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            l10n.owner_publish_step3_title,
-            style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w900),
-          ),
+          Text(l10n.owner_publish_step3_title,
+              style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w900)),
           const SizedBox(height: 4),
-          Text(
-            l10n.owner_publish_step3_sub,
-            style: tt.bodySmall?.copyWith(color: cs.onSurface.withOpacity(.65)),
-          ),
+          Text(l10n.owner_publish_step3_sub,
+              style:
+                  tt.bodySmall?.copyWith(color: cs.onSurface.withOpacity(.65))),
           const SizedBox(height: 18),
           _ReadOnlyBox(
             label: l10n.owner_publish_privacy_url,
@@ -757,7 +972,7 @@ class _StepBody extends StatelessWidget {
       );
     }
 
-    // ✅ STEP 4: Files upload + previews
+    // STEP 4 preview
     final d = draft;
     final dio = DioClient.ensure();
     final serverRootNoApi = serverRootNoApiFromBaseUrl(dio.options.baseUrl);
@@ -776,24 +991,21 @@ class _StepBody extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          l10n.owner_publish_step4_title,
-          style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w900),
-        ),
+        Text(l10n.owner_publish_step4_title,
+            style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w900)),
         const SizedBox(height: 4),
-        Text(
-          l10n.owner_publish_step4_sub,
-          style: tt.bodySmall?.copyWith(color: cs.onSurface.withOpacity(.65)),
-        ),
+        Text(l10n.owner_publish_step4_sub,
+            style:
+                tt.bodySmall?.copyWith(color: cs.onSurface.withOpacity(.65))),
         const SizedBox(height: 18),
         SizedBox(
           width: double.infinity,
           child: ElevatedButton.icon(
             onPressed: onOpenUploader,
             icon: const Icon(Icons.cloud_upload_rounded),
-            label: const Text(
-              'Upload Assets (Icon + Screenshots)',
-              style: TextStyle(fontWeight: FontWeight.w900),
+            label: Text(
+              l10n.owner_publish_upload_assets,
+              style: const TextStyle(fontWeight: FontWeight.w900),
             ),
             style: ElevatedButton.styleFrom(
               shape: RoundedRectangleBorder(
@@ -806,12 +1018,12 @@ class _StepBody extends StatelessWidget {
         const SizedBox(height: 14),
         Divider(height: 1, color: cs.outlineVariant.withOpacity(.6)),
         const SizedBox(height: 14),
-        Text('Current Icon',
+        Text(l10n.owner_publish_current_icon,
             style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w900)),
         const SizedBox(height: 10),
         if (icon.isEmpty)
           Text(
-            'No icon uploaded yet.',
+            l10n.owner_publish_no_icon_yet,
             style: tt.bodyMedium?.copyWith(color: cs.onSurface.withOpacity(.7)),
           )
         else
@@ -821,12 +1033,12 @@ class _StepBody extends StatelessWidget {
                 Image.network(icon, width: 84, height: 84, fit: BoxFit.cover),
           ),
         const SizedBox(height: 18),
-        Text('Current Screenshots',
+        Text(l10n.owner_publish_current_screenshots,
             style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w900)),
         const SizedBox(height: 10),
         if (shots.isEmpty)
           Text(
-            'No screenshots uploaded yet.',
+            l10n.owner_publish_no_screenshots_yet,
             style: tt.bodyMedium?.copyWith(color: cs.onSurface.withOpacity(.7)),
           )
         else
@@ -836,18 +1048,16 @@ class _StepBody extends StatelessWidget {
               scrollDirection: Axis.horizontal,
               itemCount: shots.length,
               separatorBuilder: (_, __) => const SizedBox(width: 10),
-              itemBuilder: (_, i) {
-                return ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: Image.network(shots[i],
-                      width: 140, height: 92, fit: BoxFit.cover),
-                );
-              },
+              itemBuilder: (_, i) => ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Image.network(shots[i],
+                    width: 140, height: 92, fit: BoxFit.cover),
+              ),
             ),
           ),
         const SizedBox(height: 12),
         Text(
-          'Rule: screenshots must be 2..8 before submitting.',
+          l10n.owner_publish_rule_shots_2_8,
           style: tt.bodySmall?.copyWith(color: cs.onSurface.withOpacity(.65)),
         ),
       ],

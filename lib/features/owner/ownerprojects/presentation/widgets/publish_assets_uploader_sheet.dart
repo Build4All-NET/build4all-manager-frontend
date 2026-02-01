@@ -2,14 +2,15 @@ import 'dart:io';
 
 import 'package:build4all_manager/features/owner/publish/data/services/owner_publish_api.dart';
 import 'package:build4all_manager/features/owner/publish/domain/entities/publish_draft.dart';
+import 'package:build4all_manager/l10n/app_localizations.dart';
 import 'package:build4all_manager/shared/widgets/app_toast.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 class PublishAssetsUploaderSheet extends StatefulWidget {
   final OwnerPublishApi api;
   final int requestId;
-
   final PublishPlatform platform;
 
   const PublishAssetsUploaderSheet({
@@ -42,13 +43,33 @@ class PublishAssetsUploaderSheet extends StatefulWidget {
       _PublishAssetsUploaderSheetState();
 }
 
-class _PublishAssetsUploaderSheetState extends State<PublishAssetsUploaderSheet> {
+class _PublishAssetsUploaderSheetState
+    extends State<PublishAssetsUploaderSheet> {
   final _picker = ImagePicker();
 
   File? _icon;
   final List<File> _shots = [];
-
   bool _uploading = false;
+
+  String _errText(dynamic e, AppLocalizations l10n) {
+    // ✅ Best effort extraction from backend
+    if (e is DioException) {
+      final data = e.response?.data;
+
+      if (data is Map) {
+        final err = (data['error'] ?? data['message'] ?? '').toString().trim();
+        if (err.isNotEmpty) return err;
+      }
+
+      final msg = e.message?.trim() ?? '';
+      if (msg.isNotEmpty) return msg;
+
+      return l10n.common_network_error_try_again;
+    }
+
+    final s = e.toString();
+    return s.replaceFirst('Exception: ', '');
+  }
 
   Future<void> _pickIcon() async {
     final x = await _picker.pickImage(
@@ -77,13 +98,22 @@ class _PublishAssetsUploaderSheetState extends State<PublishAssetsUploaderSheet>
   }
 
   Future<void> _upload() async {
+    final l10n = AppLocalizations.of(context)!;
+
+    // ✅ clear, specific validation
     if (_icon == null && _shots.isEmpty) {
-      AppToast.error(context, 'Pick an icon or screenshots first');
+      AppToast.error(
+          context, l10n.owner_publish_assets_err_pick_icon_or_screens);
       return;
     }
 
     if (_shots.isNotEmpty && _shots.length < 2) {
-      AppToast.error(context, 'Screenshots: add at least 2 before submitting');
+      AppToast.error(context, l10n.owner_publish_assets_err_screens_min2);
+      return;
+    }
+
+    if (_shots.length > 8) {
+      AppToast.error(context, l10n.owner_publish_assets_err_screens_max8);
       return;
     }
 
@@ -96,12 +126,11 @@ class _PublishAssetsUploaderSheetState extends State<PublishAssetsUploaderSheet>
       );
 
       if (!mounted) return;
-      AppToast.success(context, 'Assets uploaded');
-
+      AppToast.success(context, l10n.owner_publish_assets_uploaded);
       Navigator.pop(context, updated);
     } catch (e) {
       if (!mounted) return;
-      AppToast.error(context, 'Upload failed: $e');
+      AppToast.error(context, _errText(e, l10n));
     } finally {
       if (mounted) setState(() => _uploading = false);
     }
@@ -111,7 +140,12 @@ class _PublishAssetsUploaderSheetState extends State<PublishAssetsUploaderSheet>
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
+    final l10n = AppLocalizations.of(context)!;
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+
+    final title = widget.platform == PublishPlatform.android
+        ? l10n.owner_publish_assets_title_android
+        : l10n.owner_publish_assets_title_ios;
 
     return Padding(
       padding: EdgeInsets.only(bottom: bottomInset),
@@ -136,15 +170,13 @@ class _PublishAssetsUploaderSheetState extends State<PublishAssetsUploaderSheet>
                 ),
               ),
               const SizedBox(height: 14),
-
               Row(
                 children: [
                   Expanded(
                     child: Text(
-                      widget.platform == PublishPlatform.android
-                          ? 'Android Assets'
-                          : 'iOS Assets',
-                      style: tt.titleLarge?.copyWith(fontWeight: FontWeight.w900),
+                      title,
+                      style:
+                          tt.titleLarge?.copyWith(fontWeight: FontWeight.w900),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -152,21 +184,19 @@ class _PublishAssetsUploaderSheetState extends State<PublishAssetsUploaderSheet>
                   IconButton(
                     onPressed: _uploading ? null : () => Navigator.pop(context),
                     icon: const Icon(Icons.close_rounded),
+                    tooltip: l10n.common_close,
                   )
                 ],
               ),
-
               const SizedBox(height: 14),
-
               Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  'App Icon',
+                  l10n.owner_publish_assets_app_icon,
                   style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w900),
                 ),
               ),
               const SizedBox(height: 10),
-
               Row(
                 children: [
                   Container(
@@ -175,7 +205,8 @@ class _PublishAssetsUploaderSheetState extends State<PublishAssetsUploaderSheet>
                     decoration: BoxDecoration(
                       color: cs.surfaceVariant.withOpacity(.5),
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: cs.outlineVariant.withOpacity(.6)),
+                      border:
+                          Border.all(color: cs.outlineVariant.withOpacity(.6)),
                     ),
                     clipBehavior: Clip.antiAlias,
                     child: _icon == null
@@ -188,7 +219,7 @@ class _PublishAssetsUploaderSheetState extends State<PublishAssetsUploaderSheet>
                     child: OutlinedButton.icon(
                       onPressed: _uploading ? null : _pickIcon,
                       icon: const Icon(Icons.upload_rounded),
-                      label: const Text('Choose Icon'),
+                      label: Text(l10n.owner_publish_assets_choose_icon),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
@@ -200,31 +231,32 @@ class _PublishAssetsUploaderSheetState extends State<PublishAssetsUploaderSheet>
                   if (_icon != null) ...[
                     const SizedBox(width: 10),
                     IconButton(
-                      onPressed: _uploading ? null : () => setState(() => _icon = null),
+                      onPressed: _uploading
+                          ? null
+                          : () => setState(() => _icon = null),
                       icon: const Icon(Icons.delete_outline_rounded),
                       color: cs.error,
-                      tooltip: 'Remove icon',
+                      tooltip: l10n.owner_publish_assets_remove_icon,
                     ),
                   ],
                 ],
               ),
-
               const SizedBox(height: 16),
               Divider(height: 1, color: cs.outlineVariant.withOpacity(.6)),
               const SizedBox(height: 16),
-
               Row(
                 children: [
                   Expanded(
                     child: Text(
-                      'Screenshots (2..8)',
-                      style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w900),
+                      l10n.owner_publish_assets_screenshots_2_8,
+                      style:
+                          tt.labelLarge?.copyWith(fontWeight: FontWeight.w900),
                     ),
                   ),
                   OutlinedButton.icon(
                     onPressed: _uploading ? null : _pickScreenshots,
                     icon: const Icon(Icons.add_photo_alternate_rounded),
-                    label: const Text('Add'),
+                    label: Text(l10n.common_add),
                     style: OutlinedButton.styleFrom(
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(999),
@@ -233,9 +265,7 @@ class _PublishAssetsUploaderSheetState extends State<PublishAssetsUploaderSheet>
                   ),
                 ],
               ),
-
               const SizedBox(height: 10),
-
               if (_shots.isEmpty)
                 Container(
                   width: double.infinity,
@@ -243,10 +273,11 @@ class _PublishAssetsUploaderSheetState extends State<PublishAssetsUploaderSheet>
                   decoration: BoxDecoration(
                     color: cs.surfaceVariant.withOpacity(.35),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: cs.outlineVariant.withOpacity(.6)),
+                    border:
+                        Border.all(color: cs.outlineVariant.withOpacity(.6)),
                   ),
                   child: Text(
-                    'No screenshots selected yet.',
+                    l10n.owner_publish_assets_no_screenshots,
                     style: tt.bodyMedium?.copyWith(
                       color: cs.onSurface.withOpacity(.7),
                     ),
@@ -297,9 +328,7 @@ class _PublishAssetsUploaderSheetState extends State<PublishAssetsUploaderSheet>
                     },
                   ),
                 ),
-
               const SizedBox(height: 16),
-
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
@@ -312,7 +341,9 @@ class _PublishAssetsUploaderSheetState extends State<PublishAssetsUploaderSheet>
                         )
                       : const Icon(Icons.cloud_upload_rounded),
                   label: Text(
-                    _uploading ? 'Uploading...' : 'Upload Assets',
+                    _uploading
+                        ? l10n.common_uploading
+                        : l10n.owner_publish_assets_upload_assets,
                     style: const TextStyle(fontWeight: FontWeight.w900),
                   ),
                   style: ElevatedButton.styleFrom(

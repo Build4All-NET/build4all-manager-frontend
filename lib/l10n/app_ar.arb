@@ -661,6 +661,71 @@
   "common_system_language": "لغة الجهاز",
   "lang_english": "الإنجليزية",
   "lang_arabic": "العربية",
-  "lang_french": "الفرنسية"
+  "lang_french": "الفرنسية",
+   "owner_publish_err_load_draft": "فشل تحميل مسودة النشر",
+  "owner_publish_err_save_failed": "فشل الحفظ",
+  "owner_publish_err_submit_failed": "فشل الإرسال",
+
+  "owner_publish_err_logo_required": "اللوغو مطلوب",
+
+  "owner_publish_country_us": "الولايات المتحدة",
+  "owner_publish_country_lb": "لبنان",
+  "owner_publish_country_fr": "فرنسا",
+
+  "owner_publish_upload_assets": "رفع الملفات (أيقونة + صور)",
+  "owner_publish_current_icon": "الأيقونة الحالية",
+  "owner_publish_no_icon_yet": "ما في أيقونة مرفوعة بعد.",
+  "owner_publish_current_screenshots": "الصور الحالية",
+  "owner_publish_no_screenshots_yet": "ما في صور مرفوعة بعد.",
+  "owner_publish_rule_shots_2_8": "شرط: لازم الصور تكون بين 2 و 8 قبل الإرسال.",
   
+
+  "common_close": "إغلاق",
+  "common_add": "إضافة",
+  "common_remove": "إزالة",
+  "common_copy": "نسخ",
+  "common_share": "مشاركة",
+  "common_uploading": "عم يرفع...",
+  "common_network_error_try_again": "مشكلة بالشبكة. جرّب مرة تانية.",
+
+  "owner_publish_assets_title_android": "ملفات أندرويد",
+  "owner_publish_assets_title_ios": "ملفات iOS",
+  "owner_publish_assets_app_icon": "أيقونة التطبيق",
+  "owner_publish_assets_choose_icon": "اختيار أيقونة",
+  "owner_publish_assets_remove_icon": "حذف الأيقونة",
+  "owner_publish_assets_screenshots_2_8": "الصور (2..8)",
+  "owner_publish_assets_no_screenshots": "ما في صور مختارة بعد.",
+  "owner_publish_assets_upload_assets": "رفع الملفات",
+  "owner_publish_assets_uploaded": "تم رفع الملفات ✅",
+  "owner_publish_assets_err_pick_icon_or_screens": "اختار أيقونة أو صور بالأول",
+  "owner_publish_assets_err_screens_min2": "الصور: لازم على الأقل 2",
+  "owner_publish_assets_err_screens_max8": "الصور: الحد الأقصى 8",
+
+  "owner_project_err_no_link_open": "ما في رابط للفتح",
+  "owner_project_err_invalid_url": "الرابط غير صالح",
+  "owner_project_err_cannot_open": "ما فيني افتح",
+  "owner_project_err_no_link_copy": "ما في رابط للنسخ",
+  "owner_project_err_no_link_share": "ما في رابط للمشاركة",
+  "owner_project_err_share_failed": "فشلت المشاركة",
+
+  "owner_project_link_copied": "تم نسخ الرابط ✅",
+
+  "owner_project_status_active": "ACTIVE",
+  "owner_project_status_in_production": "IN_PRODUCTION",
+
+  "owner_project_android": "Android",
+  "owner_project_ios": "iOS",
+  "owner_project_apk": "APK",
+  "owner_project_aab": "AAB",
+  "owner_project_ipa": "IPA",
+  "owner_project_play_not_requested": "Play Store: مش مطلوب",
+  "owner_project_appstore_not_requested": "App Store: مش مطلوب",
+  "owner_project_ready": "جاهز",
+  "owner_project_building": "عم ينبني",
+  "owner_project_download_section": "تحميل",
+  "owner_project_publish_section": "نشر",
+
+  "owner_project_share_ios": "تحميل {appName} iOS (IPA)",
+  "owner_project_share_android": "تحميل {appName} Android ({format})"
 }
+

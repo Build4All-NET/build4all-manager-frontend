@@ -1648,4 +1648,170 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get lang_french => 'الفرنسية';
+
+  @override
+  String get owner_publish_err_load_draft => 'فشل تحميل مسودة النشر';
+
+  @override
+  String get owner_publish_err_save_failed => 'فشل الحفظ';
+
+  @override
+  String get owner_publish_err_submit_failed => 'فشل الإرسال';
+
+  @override
+  String get owner_publish_err_logo_required => 'اللوغو مطلوب';
+
+  @override
+  String get owner_publish_country_us => 'الولايات المتحدة';
+
+  @override
+  String get owner_publish_country_lb => 'لبنان';
+
+  @override
+  String get owner_publish_country_fr => 'فرنسا';
+
+  @override
+  String get owner_publish_upload_assets => 'رفع الملفات (أيقونة + صور)';
+
+  @override
+  String get owner_publish_current_icon => 'الأيقونة الحالية';
+
+  @override
+  String get owner_publish_no_icon_yet => 'ما في أيقونة مرفوعة بعد.';
+
+  @override
+  String get owner_publish_current_screenshots => 'الصور الحالية';
+
+  @override
+  String get owner_publish_no_screenshots_yet => 'ما في صور مرفوعة بعد.';
+
+  @override
+  String get owner_publish_rule_shots_2_8 => 'شرط: لازم الصور تكون بين 2 و 8 قبل الإرسال.';
+
+  @override
+  String get common_error => 'Error';
+
+  @override
+  String get common_close => 'إغلاق';
+
+  @override
+  String get common_add => 'إضافة';
+
+  @override
+  String get common_copy => 'نسخ';
+
+  @override
+  String get common_share => 'مشاركة';
+
+  @override
+  String get common_uploading => 'عم يرفع...';
+
+  @override
+  String get common_network_error_try_again => 'مشكلة بالشبكة. جرّب مرة تانية.';
+
+  @override
+  String get owner_publish_assets_title_android => 'ملفات أندرويد';
+
+  @override
+  String get owner_publish_assets_title_ios => 'ملفات iOS';
+
+  @override
+  String get owner_publish_assets_app_icon => 'أيقونة التطبيق';
+
+  @override
+  String get owner_publish_assets_choose_icon => 'اختيار أيقونة';
+
+  @override
+  String get owner_publish_assets_remove_icon => 'حذف الأيقونة';
+
+  @override
+  String get owner_publish_assets_screenshots_2_8 => 'الصور (2..8)';
+
+  @override
+  String get owner_publish_assets_no_screenshots => 'ما في صور مختارة بعد.';
+
+  @override
+  String get owner_publish_assets_upload_assets => 'رفع الملفات';
+
+  @override
+  String get owner_publish_assets_uploaded => 'تم رفع الملفات ✅';
+
+  @override
+  String get owner_publish_assets_err_pick_icon_or_screens => 'اختار أيقونة أو صور بالأول';
+
+  @override
+  String get owner_publish_assets_err_screens_min2 => 'الصور: لازم على الأقل 2';
+
+  @override
+  String get owner_publish_assets_err_screens_max8 => 'الصور: الحد الأقصى 8';
+
+  @override
+  String get owner_project_err_no_link_open => 'ما في رابط للفتح';
+
+  @override
+  String get owner_project_err_invalid_url => 'الرابط غير صالح';
+
+  @override
+  String get owner_project_err_cannot_open => 'ما فيني افتح';
+
+  @override
+  String get owner_project_err_no_link_copy => 'ما في رابط للنسخ';
+
+  @override
+  String get owner_project_err_no_link_share => 'ما في رابط للمشاركة';
+
+  @override
+  String get owner_project_err_share_failed => 'فشلت المشاركة';
+
+  @override
+  String get owner_project_link_copied => 'تم نسخ الرابط ✅';
+
+  @override
+  String get owner_project_status_active => 'ACTIVE';
+
+  @override
+  String get owner_project_status_in_production => 'IN_PRODUCTION';
+
+  @override
+  String get owner_project_android => 'Android';
+
+  @override
+  String get owner_project_ios => 'iOS';
+
+  @override
+  String get owner_project_apk => 'APK';
+
+  @override
+  String get owner_project_aab => 'AAB';
+
+  @override
+  String get owner_project_ipa => 'IPA';
+
+  @override
+  String get owner_project_play_not_requested => 'Play Store: مش مطلوب';
+
+  @override
+  String get owner_project_appstore_not_requested => 'App Store: مش مطلوب';
+
+  @override
+  String get owner_project_ready => 'جاهز';
+
+  @override
+  String get owner_project_building => 'عم ينبني';
+
+  @override
+  String get owner_project_download_section => 'تحميل';
+
+  @override
+  String get owner_project_publish_section => 'نشر';
+
+  @override
+  String owner_project_share_ios(Object appName) {
+    return 'تحميل $appName iOS (IPA)';
+  }
+
+  @override
+  String owner_project_share_android(Object appName, Object format) {
+    return 'تحميل $appName Android ($format)';
+  }
 }

@@ -3330,6 +3330,330 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'French'**
   String get lang_french;
+
+  /// No description provided for @owner_publish_err_load_draft.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load publish draft'**
+  String get owner_publish_err_load_draft;
+
+  /// No description provided for @owner_publish_err_save_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Save failed'**
+  String get owner_publish_err_save_failed;
+
+  /// No description provided for @owner_publish_err_submit_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit failed'**
+  String get owner_publish_err_submit_failed;
+
+  /// No description provided for @owner_publish_err_logo_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Logo is required'**
+  String get owner_publish_err_logo_required;
+
+  /// No description provided for @owner_publish_country_us.
+  ///
+  /// In en, this message translates to:
+  /// **'United States'**
+  String get owner_publish_country_us;
+
+  /// No description provided for @owner_publish_country_lb.
+  ///
+  /// In en, this message translates to:
+  /// **'Lebanon'**
+  String get owner_publish_country_lb;
+
+  /// No description provided for @owner_publish_country_fr.
+  ///
+  /// In en, this message translates to:
+  /// **'France'**
+  String get owner_publish_country_fr;
+
+  /// No description provided for @owner_publish_upload_assets.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload Assets (Icon + Screenshots)'**
+  String get owner_publish_upload_assets;
+
+  /// No description provided for @owner_publish_current_icon.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Icon'**
+  String get owner_publish_current_icon;
+
+  /// No description provided for @owner_publish_no_icon_yet.
+  ///
+  /// In en, this message translates to:
+  /// **'No icon uploaded yet.'**
+  String get owner_publish_no_icon_yet;
+
+  /// No description provided for @owner_publish_current_screenshots.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Screenshots'**
+  String get owner_publish_current_screenshots;
+
+  /// No description provided for @owner_publish_no_screenshots_yet.
+  ///
+  /// In en, this message translates to:
+  /// **'No screenshots uploaded yet.'**
+  String get owner_publish_no_screenshots_yet;
+
+  /// No description provided for @owner_publish_rule_shots_2_8.
+  ///
+  /// In en, this message translates to:
+  /// **'Rule: screenshots must be 2..8 before submitting.'**
+  String get owner_publish_rule_shots_2_8;
+
+  /// No description provided for @common_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get common_error;
+
+  /// No description provided for @common_close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get common_close;
+
+  /// No description provided for @common_add.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get common_add;
+
+  /// No description provided for @common_copy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get common_copy;
+
+  /// No description provided for @common_share.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get common_share;
+
+  /// No description provided for @common_uploading.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading...'**
+  String get common_uploading;
+
+  /// No description provided for @common_network_error_try_again.
+  ///
+  /// In en, this message translates to:
+  /// **'Network error. Please try again.'**
+  String get common_network_error_try_again;
+
+  /// No description provided for @owner_publish_assets_title_android.
+  ///
+  /// In en, this message translates to:
+  /// **'Android Assets'**
+  String get owner_publish_assets_title_android;
+
+  /// No description provided for @owner_publish_assets_title_ios.
+  ///
+  /// In en, this message translates to:
+  /// **'iOS Assets'**
+  String get owner_publish_assets_title_ios;
+
+  /// No description provided for @owner_publish_assets_app_icon.
+  ///
+  /// In en, this message translates to:
+  /// **'App Icon'**
+  String get owner_publish_assets_app_icon;
+
+  /// No description provided for @owner_publish_assets_choose_icon.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Icon'**
+  String get owner_publish_assets_choose_icon;
+
+  /// No description provided for @owner_publish_assets_remove_icon.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove icon'**
+  String get owner_publish_assets_remove_icon;
+
+  /// No description provided for @owner_publish_assets_screenshots_2_8.
+  ///
+  /// In en, this message translates to:
+  /// **'Screenshots (2..8)'**
+  String get owner_publish_assets_screenshots_2_8;
+
+  /// No description provided for @owner_publish_assets_no_screenshots.
+  ///
+  /// In en, this message translates to:
+  /// **'No screenshots selected yet.'**
+  String get owner_publish_assets_no_screenshots;
+
+  /// No description provided for @owner_publish_assets_upload_assets.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload Assets'**
+  String get owner_publish_assets_upload_assets;
+
+  /// No description provided for @owner_publish_assets_uploaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Assets uploaded ✅'**
+  String get owner_publish_assets_uploaded;
+
+  /// No description provided for @owner_publish_assets_err_pick_icon_or_screens.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick an icon OR screenshots first'**
+  String get owner_publish_assets_err_pick_icon_or_screens;
+
+  /// No description provided for @owner_publish_assets_err_screens_min2.
+  ///
+  /// In en, this message translates to:
+  /// **'Screenshots: add at least 2'**
+  String get owner_publish_assets_err_screens_min2;
+
+  /// No description provided for @owner_publish_assets_err_screens_max8.
+  ///
+  /// In en, this message translates to:
+  /// **'Screenshots: maximum 8 allowed'**
+  String get owner_publish_assets_err_screens_max8;
+
+  /// No description provided for @owner_project_err_no_link_open.
+  ///
+  /// In en, this message translates to:
+  /// **'No link to open'**
+  String get owner_project_err_no_link_open;
+
+  /// No description provided for @owner_project_err_invalid_url.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid URL'**
+  String get owner_project_err_invalid_url;
+
+  /// No description provided for @owner_project_err_cannot_open.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot open'**
+  String get owner_project_err_cannot_open;
+
+  /// No description provided for @owner_project_err_no_link_copy.
+  ///
+  /// In en, this message translates to:
+  /// **'No link to copy'**
+  String get owner_project_err_no_link_copy;
+
+  /// No description provided for @owner_project_err_no_link_share.
+  ///
+  /// In en, this message translates to:
+  /// **'No link to share'**
+  String get owner_project_err_no_link_share;
+
+  /// No description provided for @owner_project_err_share_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Share failed'**
+  String get owner_project_err_share_failed;
+
+  /// No description provided for @owner_project_link_copied.
+  ///
+  /// In en, this message translates to:
+  /// **'Link copied ✅'**
+  String get owner_project_link_copied;
+
+  /// No description provided for @owner_project_status_active.
+  ///
+  /// In en, this message translates to:
+  /// **'ACTIVE'**
+  String get owner_project_status_active;
+
+  /// No description provided for @owner_project_status_in_production.
+  ///
+  /// In en, this message translates to:
+  /// **'IN_PRODUCTION'**
+  String get owner_project_status_in_production;
+
+  /// No description provided for @owner_project_android.
+  ///
+  /// In en, this message translates to:
+  /// **'Android'**
+  String get owner_project_android;
+
+  /// No description provided for @owner_project_ios.
+  ///
+  /// In en, this message translates to:
+  /// **'iOS'**
+  String get owner_project_ios;
+
+  /// No description provided for @owner_project_apk.
+  ///
+  /// In en, this message translates to:
+  /// **'APK'**
+  String get owner_project_apk;
+
+  /// No description provided for @owner_project_aab.
+  ///
+  /// In en, this message translates to:
+  /// **'AAB'**
+  String get owner_project_aab;
+
+  /// No description provided for @owner_project_ipa.
+  ///
+  /// In en, this message translates to:
+  /// **'IPA'**
+  String get owner_project_ipa;
+
+  /// No description provided for @owner_project_play_not_requested.
+  ///
+  /// In en, this message translates to:
+  /// **'Play Store: Not Requested'**
+  String get owner_project_play_not_requested;
+
+  /// No description provided for @owner_project_appstore_not_requested.
+  ///
+  /// In en, this message translates to:
+  /// **'App Store: Not Requested'**
+  String get owner_project_appstore_not_requested;
+
+  /// No description provided for @owner_project_ready.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready'**
+  String get owner_project_ready;
+
+  /// No description provided for @owner_project_building.
+  ///
+  /// In en, this message translates to:
+  /// **'Building'**
+  String get owner_project_building;
+
+  /// No description provided for @owner_project_download_section.
+  ///
+  /// In en, this message translates to:
+  /// **'DOWNLOAD'**
+  String get owner_project_download_section;
+
+  /// No description provided for @owner_project_publish_section.
+  ///
+  /// In en, this message translates to:
+  /// **'PUBLISH'**
+  String get owner_project_publish_section;
+
+  /// No description provided for @owner_project_share_ios.
+  ///
+  /// In en, this message translates to:
+  /// **'Download {appName} iOS (IPA)'**
+  String owner_project_share_ios(Object appName);
+
+  /// No description provided for @owner_project_share_android.
+  ///
+  /// In en, this message translates to:
+  /// **'Download {appName} Android ({format})'**
+  String owner_project_share_android(Object appName, Object format);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

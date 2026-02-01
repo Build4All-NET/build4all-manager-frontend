@@ -3,8 +3,8 @@ import 'package:build4all_manager/l10n/app_localizations.dart';
 import 'package:build4all_manager/shared/widgets/app_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../publish/data/services/owner_publish_api.dart';
 import '../../../publish/domain/entities/publish_draft.dart';
@@ -22,32 +22,49 @@ class ProjectTile extends StatelessWidget {
     required this.publishApi,
   });
 
-  // ✅ makes relative urls absolute + handles "null"
+  // ✅ makes relative urls absolute + handles "null" + //domain + encoding
   String _abs(String? maybe) {
     if (maybe == null) return '';
-    final s = maybe.trim();
-    if (s.isEmpty || s.toLowerCase() == 'null') return '';
-    if (s.startsWith('http://') || s.startsWith('https://')) return s;
+    final s0 = maybe.trim();
+    if (s0.isEmpty || s0.toLowerCase() == 'null') return '';
+
+    // already absolute
+    if (s0.startsWith('http://') || s0.startsWith('https://')) {
+      return Uri.parse(s0).toString();
+    }
+
+    // handle //example.com/path
+    if (s0.startsWith('//')) {
+      return Uri.parse('https:$s0').toString();
+    }
+
+    // relative -> base + path
     final base = serverRootNoApi.replaceAll(RegExp(r'/+$'), '');
-    final rel = s.startsWith('/') ? s : '/$s';
-    return '$base$rel';
+    final rel = s0.startsWith('/') ? s0 : '/$s0';
+    final full = '$base$rel';
+
+    // encode safely
+    return Uri.parse(full).toString();
   }
 
   Future<void> _openUrl(BuildContext context, String urlStr) async {
+    final l10n = AppLocalizations.of(context)!;
     final cleaned = urlStr.trim();
+
     if (cleaned.isEmpty) {
-      AppToast.error(context, 'No link to open');
+      AppToast.error(context, l10n.owner_project_err_no_link_open);
       return;
     }
 
     final uri = Uri.tryParse(cleaned);
     if (uri == null) {
-      AppToast.error(context, 'Invalid URL');
+      AppToast.error(context, l10n.owner_project_err_invalid_url);
       return;
     }
 
     if (!await canLaunchUrl(uri)) {
-      AppToast.error(context, 'Cannot open: $cleaned');
+      AppToast.error(
+          context, '${l10n.owner_project_err_cannot_open}: $cleaned');
       return;
     }
 
@@ -55,25 +72,29 @@ class ProjectTile extends StatelessWidget {
   }
 
   Future<void> _copyLink(BuildContext context, String url) async {
+    final l10n = AppLocalizations.of(context)!;
     final cleaned = url.trim();
+
     if (cleaned.isEmpty) {
-      AppToast.error(context, 'No link to copy');
+      AppToast.error(context, l10n.owner_project_err_no_link_copy);
       return;
     }
+
     await Clipboard.setData(ClipboardData(text: cleaned));
-    AppToast.success(context, 'Link copied ✅');
+    AppToast.success(context, l10n.owner_project_link_copied);
   }
 
-  // ✅ iOS/iPad safe share (anchor rect) + visible errors
   Future<void> _shareLink(
     BuildContext context,
     String url,
     String label, {
     Rect? sharePositionOrigin,
   }) async {
+    final l10n = AppLocalizations.of(context)!;
     final cleaned = url.trim();
+
     if (cleaned.isEmpty) {
-      AppToast.error(context, 'No link to share');
+      AppToast.error(context, l10n.owner_project_err_no_link_share);
       return;
     }
 
@@ -84,20 +105,22 @@ class ProjectTile extends StatelessWidget {
         sharePositionOrigin: sharePositionOrigin,
       );
     } catch (e) {
-      AppToast.error(context, 'Share failed: $e');
+      AppToast.error(context, l10n.owner_project_err_share_failed);
       debugPrint('Share error: $e');
     }
   }
 
-  String _statusLabel() {
-    final s = (project.status).trim();
+  String _statusLabel(AppLocalizations l10n) {
+    final s = project.status.trim();
     if (s.isNotEmpty) return s;
-    return project.isApkReady ? 'ACTIVE' : 'IN_PRODUCTION';
+    return (project.isApkReady)
+        ? l10n.owner_project_status_active
+        : l10n.owner_project_status_in_production;
   }
 
   Color _statusColor(ColorScheme cs, String status) {
     final up = status.toUpperCase();
-    if (up == 'ACTIVE') return cs.tertiary;
+    if (up == 'ACTIVE' || up.contains('ACTIVE')) return cs.tertiary;
     if (up.contains('REVIEW')) return cs.secondary;
     if (up.contains('PROD')) return cs.primary;
     return cs.primary;
@@ -112,16 +135,25 @@ class ProjectTile extends StatelessWidget {
     final appName =
         project.appName.isNotEmpty ? project.appName : project.projectName;
 
-    final statusLabel = _statusLabel();
+    final statusLabel = _statusLabel(l10n);
     final statusColor = _statusColor(cs, statusLabel);
 
+    // ✅ Android can be APK or AAB (bundleUrl)
     final apkUrl = _abs(project.apkUrl);
-    final ipaUrl = _abs(project.ipaUrl);
+    final bundleUrl = _abs(project.bundleUrl);
+    final androidReady = apkUrl.isNotEmpty || bundleUrl.isNotEmpty;
 
-    final androidReady = project.isApkReady || apkUrl.isNotEmpty;
+    final androidDownloadUrl = apkUrl.isNotEmpty ? apkUrl : bundleUrl;
+    final androidDownloadLabel =
+        apkUrl.isNotEmpty ? l10n.owner_project_apk : l10n.owner_project_aab;
+
+    // ✅ iOS
+    final ipaUrl = _abs(project.ipaUrl);
     final iosReady = ipaUrl.isNotEmpty;
 
-    final iosShareLabel = 'Download $appName iOS (IPA)';
+    final iosShareLabel = l10n.owner_project_share_ios(appName);
+    final androidShareLabel =
+        l10n.owner_project_share_android(appName, androidDownloadLabel);
 
     return LayoutBuilder(
       builder: (context, c) {
@@ -155,7 +187,7 @@ class ProjectTile extends StatelessWidget {
                   onPressed: enabled ? () => _copyLink(context, url) : null,
                   icon: Icon(Icons.copy_rounded, size: tiny ? 16 : 18),
                   label: Text(
-                    'Copy link',
+                    l10n.common_copy,
                     style: TextStyle(
                       fontWeight: FontWeight.w900,
                       fontSize: tiny ? 11 : 12,
@@ -173,8 +205,6 @@ class ProjectTile extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-
-              // ✅ Share fixed for iOS/iPad (popover anchor)
               Expanded(
                 child: Builder(
                   builder: (btnCtx) {
@@ -197,7 +227,7 @@ class ProjectTile extends StatelessWidget {
                           : null,
                       icon: Icon(Icons.share_rounded, size: tiny ? 16 : 18),
                       label: Text(
-                        'Share',
+                        l10n.common_share,
                         style: TextStyle(
                           fontWeight: FontWeight.w900,
                           fontSize: tiny ? 11 : 12,
@@ -220,7 +250,6 @@ class ProjectTile extends StatelessWidget {
           );
         }
 
-        // ✅ FIXED: smooth gray header (no seam / no split look)
         final headerGradient = LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -229,6 +258,8 @@ class ProjectTile extends StatelessWidget {
             cs.surface.withOpacity(1),
           ],
         );
+
+        final idLine = project.packageOrBundleId;
 
         return Container(
           decoration: BoxDecoration(
@@ -246,11 +277,9 @@ class ProjectTile extends StatelessWidget {
           clipBehavior: Clip.antiAlias,
           child: Column(
             children: [
-              // ✅ HEADER AREA WITH SMOOTH GRAY GRADIENT BACKGROUND
+              // HEADER
               Container(
-                decoration: BoxDecoration(
-                  gradient: headerGradient,
-                ),
+                decoration: BoxDecoration(gradient: headerGradient),
                 child: Padding(
                   padding: EdgeInsets.fromLTRB(pad, pad, pad, tiny ? 8 : 10),
                   child: Row(
@@ -288,38 +317,24 @@ class ProjectTile extends StatelessWidget {
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
+                            if (idLine != null) ...[
+                              const SizedBox(height: 2),
+                              Text(
+                                idLine,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: tt.bodySmall?.copyWith(
+                                  fontSize: subSize,
+                                  color: cs.onSurface.withOpacity(.55),
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
                           ],
                         ),
                       ),
                       const SizedBox(width: 8),
                       _Pill(text: statusLabel, color: statusColor, tiny: true),
-                      const SizedBox(width: 8),
-                      fitted(
-                        OutlinedButton.icon(
-                          onPressed: androidReady
-                              ? () => _openUrl(context, apkUrl)
-                              : null,
-                          icon:
-                              Icon(Icons.science_rounded, size: tiny ? 16 : 18),
-                          label: Text(
-                            l10n.owner_projects_test,
-                            style: TextStyle(
-                              fontWeight: FontWeight.w900,
-                              fontSize: tiny ? 11 : 12,
-                            ),
-                          ),
-                          style: OutlinedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(999),
-                            ),
-                            padding: EdgeInsets.symmetric(
-                              horizontal: tiny ? 10 : 12,
-                              vertical: tiny ? 9 : 10,
-                            ),
-                          ),
-                        ),
-                        align: Alignment.centerRight,
-                      ),
                     ],
                   ),
                 ),
@@ -336,15 +351,15 @@ class ProjectTile extends StatelessWidget {
                       Expanded(
                         child: _PlatformPanel(
                           compact: tiny,
-                          title: 'Android',
+                          title: l10n.owner_project_android,
                           icon: Icons.android_rounded,
                           iconBox: iconBox,
                           iconSize: iconSize,
                           ready: androidReady,
-                          storeLine: 'Play Store: Not Requested',
+                          storeLine: l10n.owner_project_play_not_requested,
                           primaryColor: cs.primary,
-                          downloadLabel: 'APK',
-                          downloadUrl: apkUrl,
+                          downloadLabel: androidDownloadLabel,
+                          downloadUrl: androidDownloadUrl,
                           publishLabel: l10n.owner_publish_request_play,
                           onPublish: () => PublishWizardDialog.open(
                             context,
@@ -355,9 +370,9 @@ class ProjectTile extends StatelessWidget {
                             store: PublishStore.playStore,
                           ),
                           topActions: buildTopActions(
-                            enabled: apkUrl.isNotEmpty,
-                            url: apkUrl,
-                            shareLabel: 'Download $appName Android (APK)',
+                            enabled: androidDownloadUrl.isNotEmpty,
+                            url: androidDownloadUrl,
+                            shareLabel: androidShareLabel,
                           ),
                           onDownload: (u) => _openUrl(context, u),
                         ),
@@ -370,14 +385,14 @@ class ProjectTile extends StatelessWidget {
                       Expanded(
                         child: _PlatformPanel(
                           compact: tiny,
-                          title: 'iOS',
+                          title: l10n.owner_project_ios,
                           icon: Icons.apple_rounded,
                           iconBox: iconBox,
                           iconSize: iconSize,
                           ready: iosReady,
-                          storeLine: 'App Store: Not Requested',
+                          storeLine: l10n.owner_project_appstore_not_requested,
                           primaryColor: cs.onSurface,
-                          downloadLabel: 'IPA',
+                          downloadLabel: l10n.owner_project_ipa,
                           downloadUrl: ipaUrl,
                           publishLabel: l10n.owner_publish_request_appstore,
                           onPublish: () => PublishWizardDialog.open(
@@ -450,6 +465,7 @@ class _PlatformPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
+    final l10n = AppLocalizations.of(context)!;
 
     final double labelSize = compact ? 11 : 12;
     final double topActionsSlotH = compact ? 40 : 44;
@@ -490,7 +506,9 @@ class _PlatformPanel extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   _Pill(
-                    text: ready ? 'Ready' : 'Building',
+                    text: ready
+                        ? l10n.owner_project_ready
+                        : l10n.owner_project_building,
                     color: ready ? cs.primary : cs.tertiary,
                     tiny: compact,
                   ),
@@ -518,7 +536,7 @@ class _PlatformPanel extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         Text(
-          'DOWNLOAD',
+          l10n.owner_project_download_section,
           style: tt.labelLarge?.copyWith(
             fontWeight: FontWeight.w900,
             fontSize: compact ? 11 : 12,
@@ -551,7 +569,7 @@ class _PlatformPanel extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         Text(
-          'PUBLISH',
+          l10n.owner_project_publish_section,
           style: tt.labelLarge?.copyWith(
             fontWeight: FontWeight.w900,
             fontSize: compact ? 11 : 12,
@@ -609,19 +627,36 @@ class _AppIcon extends StatelessWidget {
 
   String _abs(String? maybe) {
     if (maybe == null) return '';
-    final s = maybe.trim();
-    if (s.isEmpty || s.toLowerCase() == 'null') return '';
-    if (s.startsWith('http://') || s.startsWith('https://')) return s;
+    final s0 = maybe.trim();
+    if (s0.isEmpty || s0.toLowerCase() == 'null') return '';
+
+    if (s0.startsWith('http://') || s0.startsWith('https://')) {
+      return Uri.parse(s0).toString();
+    }
+
+    if (s0.startsWith('//')) {
+      return Uri.parse('https:$s0').toString();
+    }
+
     final base = serverRootNoApi.replaceAll(RegExp(r'/+$'), '');
-    final rel = s.startsWith('/') ? s : '/$s';
-    return '$base$rel';
+    final rel = s0.startsWith('/') ? s0 : '/$s0';
+    final full = '$base$rel';
+
+    return Uri.parse(full).toString();
   }
 
   @override
   Widget build(BuildContext context) {
-    final logo = project.logoUrl;
-    if (logo != null && logo.trim().isNotEmpty) {
-      final src = _abs(logo);
+    final rawLogo = project.logoUrl;
+    final cleaned = (rawLogo ?? '').trim();
+
+    if (cleaned.isNotEmpty && cleaned.toLowerCase() != 'null') {
+      final baseSrc = _abs(cleaned);
+
+      // ✅ stable cache-bust (not DateTime.now spam)
+      final src =
+          '$baseSrc${baseSrc.contains('?') ? '&' : '?'}v=${project.linkId}';
+
       return ClipRRect(
         borderRadius: BorderRadius.circular(radius),
         child: Image.network(
@@ -629,10 +664,14 @@ class _AppIcon extends StatelessWidget {
           width: size,
           height: size,
           fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => _fallback(context),
+          errorBuilder: (_, err, __) {
+            debugPrint('LOGO FAIL => $src | $err');
+            return _fallback(context);
+          },
         ),
       );
     }
+
     return _fallback(context);
   }
 
