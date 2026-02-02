@@ -1,4 +1,3 @@
-// lib/features/owner/common/data/models/owner_project_dto.dart
 import '../../domain/entities/owner_project.dart';
 
 class OwnerProjectDto {
@@ -8,7 +7,7 @@ class OwnerProjectDto {
   final String? apkUrl;
 
   final int linkId;
-  final String status;
+  final String status; // MUST come from backend
   final String appName;
   final String? ipaUrl;
   final String? bundleUrl;
@@ -53,7 +52,7 @@ class OwnerProjectDto {
   }
 
   factory OwnerProjectDto.fromJson(Map<String, dynamic> j) {
-    //  Try multiple keys for logo to avoid backend mismatch
+    // logo key variations
     final logo = _asNullableString(
       j['logoUrl'] ??
           j['logo_url'] ??
@@ -63,19 +62,32 @@ class OwnerProjectDto {
           j['project_logo_url'],
     );
 
-    //  Try multiple keys for linkId too (common in projections)
+    // linkId variations
     final link = _asInt(
       j['linkId'] ?? j['ownerProjectLinkId'] ?? j['aupId'] ?? j['id'],
     );
 
+    // ✅ status variations (IMPORTANT)
+    // If backend uses a different key name, we still pick it.
+    final statusVal = _asString(
+      j['status'] ??
+          j['appStatus'] ??
+          j['buildStatus'] ??
+          j['envStatus'] ??
+          j['environmentStatus'] ??
+          j['environment'] ??
+          j['state'],
+      fallback: 'UNKNOWN',
+    );
+
     return OwnerProjectDto(
       projectId: _asInt(j['projectId'] ?? j['id']),
-      projectName: _asString(j['projectName']),
+      projectName: _asString(j['projectName'] ?? j['name']),
       slug: _asString(j['slug']),
       apkUrl: _asNullableString(j['apkUrl'] ?? j['apk_url']),
       linkId: link,
-      status: _asString(j['status'], fallback: 'UNKNOWN'),
-      appName: _asString(j['appName']),
+      status: statusVal,
+      appName: _asString(j['appName'] ?? j['displayName']),
       ipaUrl: _asNullableString(j['ipaUrl'] ?? j['ipa_url']),
       bundleUrl: _asNullableString(j['bundleUrl'] ?? j['bundle_url']),
       logoUrl: logo,
@@ -101,8 +113,6 @@ class OwnerProjectDto {
         ipaUrl: ipaUrl,
         bundleUrl: bundleUrl,
         logoUrl: logoUrl,
-
-       
         androidPackageName: androidPackageName,
         iosBundleId: iosBundleId,
       );

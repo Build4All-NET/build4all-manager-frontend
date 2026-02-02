@@ -28,22 +28,18 @@ class ProjectTile extends StatelessWidget {
     final s0 = maybe.trim();
     if (s0.isEmpty || s0.toLowerCase() == 'null') return '';
 
-    // already absolute
     if (s0.startsWith('http://') || s0.startsWith('https://')) {
       return Uri.parse(s0).toString();
     }
 
-    // handle //example.com/path
     if (s0.startsWith('//')) {
       return Uri.parse('https:$s0').toString();
     }
 
-    // relative -> base + path
     final base = serverRootNoApi.replaceAll(RegExp(r'/+$'), '');
     final rel = s0.startsWith('/') ? s0 : '/$s0';
     final full = '$base$rel';
 
-    // encode safely
     return Uri.parse(full).toString();
   }
 
@@ -110,19 +106,40 @@ class ProjectTile extends StatelessWidget {
     }
   }
 
-  String _statusLabel(AppLocalizations l10n) {
-    final s = project.status.trim();
-    if (s.isNotEmpty) return s;
-    return (project.isApkReady)
-        ? l10n.owner_project_status_active
-        : l10n.owner_project_status_in_production;
+  /// ✅ RULE YOU WANT:
+  /// - If backend says ACTIVE -> show "test"
+  /// - Otherwise show backend status as-is (raw)
+  String _statusLabel() {
+    final raw = project.status.trim();
+    final low = raw.toLowerCase();
+
+    if (raw.isEmpty || low == 'null') return 'UNKNOWN';
+
+    // ✅ Override ACTIVE => "test"
+    if (low == 'active' || low.contains('active')) return 'test';
+
+    // ✅ otherwise keep backend exactly
+    return raw;
   }
 
-  Color _statusColor(ColorScheme cs, String status) {
-    final up = status.toUpperCase();
-    if (up == 'ACTIVE' || up.contains('ACTIVE')) return cs.tertiary;
-    if (up.contains('REVIEW')) return cs.secondary;
-    if (up.contains('PROD')) return cs.primary;
+  /// ✅ Color based on displayed label (after override)
+  Color _statusColor(ColorScheme cs, String label) {
+    final low = label.toLowerCase();
+
+    if (low == 'unknown') return cs.outline;
+    if (low.contains('fail') ||
+        low.contains('error') ||
+        low.contains('reject')) {
+      return cs.error;
+    }
+
+    // ✅ "test" is special
+    if (low.contains('test')) return cs.secondary;
+
+    if (low.contains('review')) return cs.primary;
+    if (low.contains('prod') || low.contains('production')) return cs.tertiary;
+    if (low.contains('local')) return cs.outlineVariant;
+
     return cs.primary;
   }
 
@@ -135,7 +152,7 @@ class ProjectTile extends StatelessWidget {
     final appName =
         project.appName.isNotEmpty ? project.appName : project.projectName;
 
-    final statusLabel = _statusLabel(l10n);
+    final statusLabel = _statusLabel(); // ✅ includes ACTIVE=>test override
     final statusColor = _statusColor(cs, statusLabel);
 
     // ✅ Android can be APK or AAB (bundleUrl)
@@ -166,14 +183,6 @@ class ProjectTile extends StatelessWidget {
 
         final double iconBox = tiny ? 46 : 52;
         final double iconSize = tiny ? 24 : 28;
-
-        Widget fitted(Widget child, {Alignment align = Alignment.center}) {
-          return FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: align,
-            child: child,
-          );
-        }
 
         Widget buildTopActions({
           required bool enabled,
@@ -250,13 +259,16 @@ class ProjectTile extends StatelessWidget {
           );
         }
 
+        // ✅ FIX: real grey gradient (tdrj gray) independent of theme colors
         final headerGradient = LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            cs.surfaceVariant.withOpacity(.55),
-            cs.surface.withOpacity(1),
+            const Color.fromARGB(255, 148, 147, 147),
+            Colors.grey.shade400,
+            Colors.grey.shade200,
           ],
+          stops: const [0.0, 0.6, 1.0],
         );
 
         final idLine = project.packageOrBundleId;
@@ -280,63 +292,89 @@ class ProjectTile extends StatelessWidget {
               // HEADER
               Container(
                 decoration: BoxDecoration(gradient: headerGradient),
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(pad, pad, pad, tiny ? 8 : 10),
-                  child: Row(
-                    children: [
-                      _AppIcon(
-                        project: project,
-                        band: cs.primary,
-                        serverRootNoApi: serverRootNoApi,
-                        size: tiny ? 54 : 60,
-                        radius: tiny ? 14 : 16,
-                        fontSize: tiny ? 20 : 22,
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              appName,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: tt.titleLarge?.copyWith(
-                                fontWeight: FontWeight.w900,
-                                fontSize: titleSize,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '/${project.slug}',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: tt.bodySmall?.copyWith(
-                                fontSize: subSize,
-                                color: cs.onSurface.withOpacity(.65),
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            if (idLine != null) ...[
-                              const SizedBox(height: 2),
-                              Text(
-                                idLine,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: tt.bodySmall?.copyWith(
-                                  fontSize: subSize,
-                                  color: cs.onSurface.withOpacity(.55),
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
+                child: Stack(
+                  children: [
+                    // subtle top shine so it looks premium
+                    Positioned.fill(
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Colors.white.withOpacity(.65),
+                              Colors.white.withOpacity(0),
                             ],
-                          ],
+                          ),
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      _Pill(text: statusLabel, color: statusColor, tiny: true),
-                    ],
-                  ),
+                    ),
+                    Padding(
+                      padding:
+                          EdgeInsets.fromLTRB(pad, pad, pad, tiny ? 8 : 10),
+                      child: Row(
+                        children: [
+                          _AppIcon(
+                            project: project,
+                            band: cs.primary,
+                            serverRootNoApi: serverRootNoApi,
+                            size: tiny ? 54 : 60,
+                            radius: tiny ? 14 : 16,
+                            fontSize: tiny ? 20 : 22,
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  appName,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: tt.titleLarge?.copyWith(
+                                    fontWeight: FontWeight.w900,
+                                    fontSize: titleSize,
+                                    color: Colors.grey.shade900,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  '/${project.slug}',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: tt.bodySmall?.copyWith(
+                                    fontSize: subSize,
+                                    color: Colors.grey.shade700,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                if (idLine != null) ...[
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    idLine,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: tt.bodySmall?.copyWith(
+                                      fontSize: subSize,
+                                      color: Colors.grey.shade600,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+
+                          // ✅ STATUS PILL
+                          _Pill(
+                              text: statusLabel,
+                              color: statusColor,
+                              tiny: true),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
 
@@ -368,6 +406,7 @@ class ProjectTile extends StatelessWidget {
                             appName: appName,
                             platform: PublishPlatform.android,
                             store: PublishStore.playStore,
+                            androidPackageName: project.androidPackageName,
                           ),
                           topActions: buildTopActions(
                             enabled: androidDownloadUrl.isNotEmpty,
@@ -402,6 +441,7 @@ class ProjectTile extends StatelessWidget {
                             appName: appName,
                             platform: PublishPlatform.ios,
                             store: PublishStore.appStore,
+                            iosBundleId: project.iosBundleId,
                           ),
                           topActions: buildTopActions(
                             enabled: ipaUrl.isNotEmpty,
@@ -531,9 +571,8 @@ class _PlatformPanel extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         SizedBox(
-          height: topActionsSlotH,
-          child: topActions ?? const SizedBox.shrink(),
-        ),
+            height: topActionsSlotH,
+            child: topActions ?? const SizedBox.shrink()),
         const SizedBox(height: 10),
         Text(
           l10n.owner_project_download_section,
@@ -557,12 +596,9 @@ class _PlatformPanel extends StatelessWidget {
               ),
               style: OutlinedButton.styleFrom(
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                    borderRadius: BorderRadius.circular(12)),
                 padding: EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: compact ? 9 : 10,
-                ),
+                    horizontal: 10, vertical: compact ? 9 : 10),
               ),
             ),
           ),
@@ -591,12 +627,9 @@ class _PlatformPanel extends StatelessWidget {
                 backgroundColor: primaryColor,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(999),
-                ),
+                    borderRadius: BorderRadius.circular(999)),
                 padding: EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: compact ? 9 : 10,
-                ),
+                    horizontal: 10, vertical: compact ? 9 : 10),
                 elevation: 0,
               ),
             ),
@@ -652,8 +685,6 @@ class _AppIcon extends StatelessWidget {
 
     if (cleaned.isNotEmpty && cleaned.toLowerCase() != 'null') {
       final baseSrc = _abs(cleaned);
-
-      // ✅ stable cache-bust (not DateTime.now spam)
       final src =
           '$baseSrc${baseSrc.contains('?') ? '&' : '?'}v=${project.linkId}';
 
@@ -712,9 +743,7 @@ class _Pill extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.symmetric(
-        horizontal: tiny ? 8 : 10,
-        vertical: tiny ? 5 : 6,
-      ),
+          horizontal: tiny ? 8 : 10, vertical: tiny ? 5 : 6),
       decoration: BoxDecoration(
         color: color.withOpacity(.12),
         borderRadius: BorderRadius.circular(999),

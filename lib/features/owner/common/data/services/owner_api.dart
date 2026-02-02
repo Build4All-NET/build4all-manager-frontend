@@ -1,5 +1,6 @@
-// lib/features/common/data/services/owner_api.dart
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
+
 import '../models/app_config_dto.dart';
 import '../models/app_request_dto.dart';
 import '../models/owner_project_dto.dart';
@@ -14,11 +15,9 @@ class OwnerApi {
       final r = await dio.get('/public/app-config');
       return AppConfigDto.fromJson(r.data as Map<String, dynamic>);
     } on DioException catch (e) {
-      // swallow 403 (or any network issue) and return safe defaults
       if (e.response?.statusCode == 403) {
         return AppConfigDto(ownerProjectLinkId: null, wsPath: '');
       }
-      // also be defensive for any other error to keep home stable
       return AppConfigDto(ownerProjectLinkId: null, wsPath: '');
     }
   }
@@ -33,6 +32,12 @@ class OwnerApi {
   Future<List<OwnerProjectDto>> getMyApps({required int ownerId}) async {
     final r =
         await dio.get('/owner/my-apps', queryParameters: {'ownerId': ownerId});
+
+    // ✅ debug raw response (only in debug mode)
+    if (kDebugMode) {
+      debugPrint('MY_APPS RAW => ${r.data}');
+    }
+
     final list = (r.data as List).cast<Map<String, dynamic>>();
     return list.map(OwnerProjectDto.fromJson).toList();
   }
@@ -49,12 +54,10 @@ class OwnerApi {
       queryParameters: {
         'limit': limit,
         'sort': 'createdAt,desc',
-        'ownerId': ownerId
+        'ownerId': ownerId,
       },
     );
     final list = (r.data as List).cast<Map<String, dynamic>>();
     return list.map((j) => AppRequestDto.fromJson(j).toEntity()).toList();
   }
-
-  
 }
