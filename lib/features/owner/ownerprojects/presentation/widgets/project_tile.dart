@@ -264,8 +264,8 @@ class ProjectTile extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            const Color.fromARGB(255, 148, 147, 147),
-            Colors.grey.shade400,
+            const Color.fromARGB(255, 191, 191, 191),
+            const Color.fromARGB(255, 238, 238, 238),
             Colors.grey.shade200,
           ],
           stops: const [0.0, 0.6, 1.0],
