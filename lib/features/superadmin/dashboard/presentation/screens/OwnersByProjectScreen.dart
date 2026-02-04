@@ -111,7 +111,13 @@ class _OwnersByProjectScreenState extends State<OwnersByProjectScreen> {
                                 child: Icon(Icons.person_rounded),
                               ),
                               title: Text(o.fullName),
-                              subtitle: Text(o.email),
+                              subtitle: Text(
+                                [
+                                  o.email,
+                                  if ((o.phoneNumber ?? '').trim().isNotEmpty)
+                                    o.phoneNumber!,
+                                ].join(' • '),
+                              ),
                               trailing: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
