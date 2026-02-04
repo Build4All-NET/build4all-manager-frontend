@@ -85,24 +85,24 @@ jobs:
             echo "⚠️ ANDROID_KEYSTORE_B64 is empty. If your release build requires signing, upload will fail."
           fi
 
-      - name: Create android/key.properties (if keystore provided)
+      - name: Create android/key.properties
         shell: bash
         run: |
           set -euo pipefail
+      
+          # Create keystore file from secret
+          echo "${ANDROID_KEYSTORE_B64}" | tr -d '\n\r ' | base64 --decode > android/upload-keystore.jks
+      
+          # Create key.properties (EOF must not be indented)
+          cat > android/key.properties <<EOF
+          storeFile=upload-keystore.jks
+          storePassword=${ANDROID_KEYSTORE_PASSWORD}
+          keyAlias=${ANDROID_KEY_ALIAS}
+          keyPassword=${ANDROID_KEY_PASSWORD}
+          EOF
+          
+              echo "✅ android/key.properties created"
 
-          if [ -f android/upload-keystore.jks ]; then
-            [ -n "${ANDROID_KEYSTORE_PASSWORD:-}" ] || { echo "❌ Missing ANDROID_KEYSTORE_PASSWORD"; exit 1; }
-            [ -n "${ANDROID_KEY_ALIAS:-}" ] || { echo "❌ Missing ANDROID_KEY_ALIAS"; exit 1; }
-            [ -n "${ANDROID_KEY_PASSWORD:-}" ] || { echo "❌ Missing ANDROID_KEY_PASSWORD"; exit 1; }
-
-            cat > android/key.properties <<EOF
-            storeFile=upload-keystore.jks
-            storePassword=${ANDROID_KEYSTORE_PASSWORD}
-            keyAlias=${ANDROID_KEY_ALIAS}
-            keyPassword=${ANDROID_KEY_PASSWORD}
-            EOF
-            echo "✅ android/key.properties created"
-          fi
 
       # ----------------------------
       # Compute build name/number
