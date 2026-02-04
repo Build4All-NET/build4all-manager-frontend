@@ -1546,7 +1546,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get common_save_failed => 'Save failed';
 
   @override
-  String get common_open => 'Open';
+  String get common_open => 'فتح';
 
   @override
   String get common_unknown => 'Unknown';
@@ -1814,4 +1814,31 @@ class AppLocalizationsAr extends AppLocalizations {
   String owner_project_share_android(Object appName, Object format) {
     return 'تحميل $appName Android ($format)';
   }
+
+  @override
+  String get owner_project_ios_testflight_hint => 'ثبّت TestFlight لفتح التطبيق';
+
+  @override
+  String get owner_project_android_download_hint => 'حمّل للتثبيت:';
+
+  @override
+  String get errPhoneRequired => 'رقم الهاتف مطلوب';
+
+  @override
+  String get errPhoneInvalid => 'رقم الهاتف غير صالح';
+
+  @override
+  String get lblPhone => 'رقم الهاتف';
+
+  @override
+  String get hintPhone => '70000000';
+
+  @override
+  String get alreadyHaveAccountLogin => 'Already have an account? Login';
+
+  @override
+  String get owner_profile_phone => 'Phone Number';
+
+  @override
+  String get phoneNumber => 'Phone Number';
 }

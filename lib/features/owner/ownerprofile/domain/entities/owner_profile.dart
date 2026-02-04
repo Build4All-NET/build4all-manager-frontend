@@ -8,6 +8,8 @@ class OwnerProfile {
   final int? businessId;
   final bool notifyItemUpdates;
   final bool notifyUserFeedback;
+  final String? phoneNumber;
+
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -23,8 +25,11 @@ class OwnerProfile {
     required this.notifyUserFeedback,
     this.createdAt,
     this.updatedAt,
+    this.phoneNumber,
   });
 
   String get fullName =>
       [firstName, lastName].where((e) => e.isNotEmpty).join(' ');
+
+      
 }

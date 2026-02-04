@@ -8,6 +8,7 @@ class OwnerProfileDto {
   final int? businessId;
   final bool? notifyItemUpdates;
   final bool? notifyUserFeedback;
+  final String? phoneNumber;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -23,6 +24,7 @@ class OwnerProfileDto {
     this.notifyUserFeedback,
     this.createdAt,
     this.updatedAt,
+    this.phoneNumber,
   });
 
   static int _toInt(dynamic v, {int fallback = 0}) {
@@ -50,6 +52,8 @@ class OwnerProfileDto {
       notifyUserFeedback: j['notifyUserFeedback'] as bool?,
       createdAt: _toDate(j['createdAt']),
       updatedAt: _toDate(j['updatedAt']),
+      phoneNumber: (j['phoneNumber'] ?? '').toString(),
+
     );
   }
 }

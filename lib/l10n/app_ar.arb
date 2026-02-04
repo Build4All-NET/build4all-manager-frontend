@@ -726,6 +726,17 @@
   "owner_project_publish_section": "نشر",
 
   "owner_project_share_ios": "تحميل {appName} iOS (IPA)",
-  "owner_project_share_android": "تحميل {appName} Android ({format})"
+  "owner_project_share_android": "تحميل {appName} Android ({format})",
+   "owner_project_ios_testflight_hint": "ثبّت TestFlight لفتح التطبيق",
+  "owner_project_android_download_hint": "حمّل للتثبيت:",
+  "common_open": "فتح",
+  "errPhoneRequired": "رقم الهاتف مطلوب",
+  
+
+"errPhoneInvalid": "رقم الهاتف غير صالح",
+
+"lblPhone": "رقم الهاتف",
+"hintPhone": "70000000"
+
 }
 

@@ -9,7 +9,6 @@ import '../models/login_response_dto.dart';
 import '../services/auth_api.dart';
 import 'package:build4all_manager/core/network/dio_client.dart';
 
-
 class AuthRepositoryImpl implements IAuthRepository {
   final AuthApi api;
   final JwtLocalDataSource jwtStore;
@@ -105,6 +104,7 @@ class AuthRepositoryImpl implements IAuthRepository {
     required String username,
     required String firstName,
     required String lastName,
+    required String phoneNumber,
   }) async {
     try {
       final res = await api.ownerCompleteProfile(
@@ -112,6 +112,7 @@ class AuthRepositoryImpl implements IAuthRepository {
         username: username,
         firstName: firstName,
         lastName: lastName,
+        phoneNumber: phoneNumber,
       );
 
       final token = (res.data['token'] ?? '').toString();
@@ -124,6 +125,7 @@ class AuthRepositoryImpl implements IAuthRepository {
         lastName: (admin['lastName'] ?? '').toString(),
         email: (admin['email'] ?? '').toString(),
         role: 'OWNER',
+        // ✅ if AppUser doesn’t have phone yet, either ignore or add it (see section 6)
       );
 
       await jwtStore.save(token: token, role: 'OWNER');

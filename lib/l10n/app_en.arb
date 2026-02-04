@@ -28,7 +28,7 @@
   "@termsNotice": {
     "description": "Legal notice under the form"
   },
-  "lblIdentifier": "Email / Phone / Username",
+  "lblIdentifier": "Email / Username",
   "@lblIdentifier": {
     "description": "Generic identifier label"
   },
@@ -829,7 +829,22 @@
   "owner_project_publish_section": "PUBLISH",
 
   "owner_project_share_ios": "Download {appName} iOS (IPA)",
-  "owner_project_share_android": "Download {appName} Android ({format})"
+  "owner_project_share_android": "Download {appName} Android ({format})",
+  "owner_project_ios_testflight_hint": "Install TestFlight to open the app",
+  "owner_project_android_download_hint": "Download to install:",
+  "common_open": "Open",
+   "owner_project_ios_testflight_hint": "Installez TestFlight pour ouvrir l’application",
+  "owner_project_android_download_hint": "Télécharger pour installer :",
+  "common_open": "Ouvrir",
+  "errPhoneRequired": "Phone number is required",
+
+      "errPhoneInvalid": "Phone number is invalid",
+      "lblPhone": "Phone Number",
+      "hintPhone": "Enter your phone number",
+      "alreadyHaveAccountLogin": "Already have an account? Login",
+      "owner_profile_phone": "Phone Number",
+      "phoneNumber": "Phone Number"
+
 
 
 

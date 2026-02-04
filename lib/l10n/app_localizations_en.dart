@@ -33,7 +33,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get termsNotice => 'By continuing you agree to our Terms & Privacy Policy';
 
   @override
-  String get lblIdentifier => 'Email / Phone / Username';
+  String get lblIdentifier => 'Email / Username';
 
   @override
   String get hintIdentifier => 'you@example.com or +961xxxxxxxx or username';
@@ -1546,7 +1546,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get common_save_failed => 'Save failed';
 
   @override
-  String get common_open => 'Open';
+  String get common_open => 'Ouvrir';
 
   @override
   String get common_unknown => 'Unknown';
@@ -1814,4 +1814,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String owner_project_share_android(Object appName, Object format) {
     return 'Download $appName Android ($format)';
   }
+
+  @override
+  String get owner_project_ios_testflight_hint => 'Installez TestFlight pour ouvrir l’application';
+
+  @override
+  String get owner_project_android_download_hint => 'Télécharger pour installer :';
+
+  @override
+  String get errPhoneRequired => 'Phone number is required';
+
+  @override
+  String get errPhoneInvalid => 'Phone number is invalid';
+
+  @override
+  String get lblPhone => 'Phone Number';
+
+  @override
+  String get hintPhone => 'Enter your phone number';
+
+  @override
+  String get alreadyHaveAccountLogin => 'Already have an account? Login';
+
+  @override
+  String get owner_profile_phone => 'Phone Number';
+
+  @override
+  String get phoneNumber => 'Phone Number';
 }

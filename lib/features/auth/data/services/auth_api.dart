@@ -5,15 +5,13 @@ import '../models/login_request_dto.dart';
 class AuthApi {
   final Dio _dio = DioClient.ensure();
 
-  /// ✅ unified admin login for SUPER_ADMIN / OWNER / MANAGER
   Future<Response> login(LoginRequestDto body) {
     return _dio.post('/auth/admin/login', data: body.toJson());
   }
 
-  /// ✅ OWNER email-OTP registration (3 steps)
   Future<Response> ownerSendOtp({
     required String email,
-    required String password, // temporarily passed to backend step 2
+    required String password,
   }) {
     return _dio.post('/auth/owner/send-verification-email', queryParameters: {
       'email': email,
@@ -33,17 +31,21 @@ class AuthApi {
     });
   }
 
+  // ✅ UPDATED: phoneNumber
   Future<Response> ownerCompleteProfile({
     required String registrationToken,
     required String username,
     required String firstName,
     required String lastName,
+    required String phoneNumber,
   }) {
     return _dio.post('/auth/owner/complete-profile', data: {
       'registrationToken': registrationToken,
       'username': username,
       'firstName': firstName,
       'lastName': lastName,
+      'phoneNumber': phoneNumber,
     });
   }
 }
+

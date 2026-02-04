@@ -148,7 +148,7 @@ abstract class AppLocalizations {
   /// Generic identifier label
   ///
   /// In en, this message translates to:
-  /// **'Email / Phone / Username'**
+  /// **'Email / Username'**
   String get lblIdentifier;
 
   /// Generic identifier hint
@@ -3130,7 +3130,7 @@ abstract class AppLocalizations {
   /// No description provided for @common_open.
   ///
   /// In en, this message translates to:
-  /// **'Open'**
+  /// **'Ouvrir'**
   String get common_open;
 
   /// No description provided for @common_unknown.
@@ -3654,6 +3654,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Download {appName} Android ({format})'**
   String owner_project_share_android(Object appName, Object format);
+
+  /// No description provided for @owner_project_ios_testflight_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Installez TestFlight pour ouvrir l’application'**
+  String get owner_project_ios_testflight_hint;
+
+  /// No description provided for @owner_project_android_download_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Télécharger pour installer :'**
+  String get owner_project_android_download_hint;
+
+  /// No description provided for @errPhoneRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone number is required'**
+  String get errPhoneRequired;
+
+  /// No description provided for @errPhoneInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone number is invalid'**
+  String get errPhoneInvalid;
+
+  /// No description provided for @lblPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone Number'**
+  String get lblPhone;
+
+  /// No description provided for @hintPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your phone number'**
+  String get hintPhone;
+
+  /// No description provided for @alreadyHaveAccountLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Already have an account? Login'**
+  String get alreadyHaveAccountLogin;
+
+  /// No description provided for @owner_profile_phone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone Number'**
+  String get owner_profile_phone;
+
+  /// No description provided for @phoneNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone Number'**
+  String get phoneNumber;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

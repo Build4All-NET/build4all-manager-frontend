@@ -52,10 +52,12 @@ class OwnerRegisterBloc extends Bloc<OwnerRegisterEvent, OwnerRegisterState> {
         username: e.username,
         firstName: e.firstName,
         lastName: e.lastName,
+        phoneNumber: e.phoneNumber,
       );
       emit(state.copyWith(loading: false, completed: true));
     } catch (err) {
       emit(state.copyWith(loading: false, error: err.toString()));
     }
   }
+
 }

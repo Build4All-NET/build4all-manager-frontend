@@ -700,6 +700,13 @@
   "owner_project_publish_section": "PUBLIER",
 
   "owner_project_share_ios": "Télécharger {appName} iOS (IPA)",
-  "owner_project_share_android": "Télécharger {appName} Android ({format})"
+  "owner_project_share_android": "Télécharger {appName} Android ({format})",
+  "errPhoneRequired": "Numéro de téléphone requis",
+
+"errPhoneInvalid": "Numéro de téléphone invalide",
+
+"lblPhone": "Numéro de téléphone",
+
+"hintPhone": "Entrez votre numéro de téléphone"
 }
 

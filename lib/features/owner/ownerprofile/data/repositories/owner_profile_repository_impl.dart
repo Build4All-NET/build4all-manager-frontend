@@ -19,6 +19,7 @@ class OwnerProfileRepositoryImpl implements IOwnerProfileRepository {
         notifyUserFeedback: d.notifyUserFeedback ?? true,
         createdAt: d.createdAt,
         updatedAt: d.updatedAt,
+        phoneNumber: d.phoneNumber,
       );
 
   @override

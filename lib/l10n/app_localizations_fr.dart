@@ -1546,7 +1546,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get common_save_failed => 'Save failed';
 
   @override
-  String get common_open => 'Open';
+  String get common_open => 'Ouvrir';
 
   @override
   String get common_unknown => 'Unknown';
@@ -1814,4 +1814,31 @@ class AppLocalizationsFr extends AppLocalizations {
   String owner_project_share_android(Object appName, Object format) {
     return 'Télécharger $appName Android ($format)';
   }
+
+  @override
+  String get owner_project_ios_testflight_hint => 'Installez TestFlight pour ouvrir l’application';
+
+  @override
+  String get owner_project_android_download_hint => 'Télécharger pour installer :';
+
+  @override
+  String get errPhoneRequired => 'Numéro de téléphone requis';
+
+  @override
+  String get errPhoneInvalid => 'Numéro de téléphone invalide';
+
+  @override
+  String get lblPhone => 'Numéro de téléphone';
+
+  @override
+  String get hintPhone => 'Entrez votre numéro de téléphone';
+
+  @override
+  String get alreadyHaveAccountLogin => 'Already have an account? Login';
+
+  @override
+  String get owner_profile_phone => 'Phone Number';
+
+  @override
+  String get phoneNumber => 'Phone Number';
 }

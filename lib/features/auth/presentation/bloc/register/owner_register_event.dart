@@ -32,14 +32,17 @@ class OwnerCompleteProfile extends OwnerRegisterEvent {
   final String username;
   final String firstName;
   final String lastName;
+  final String phoneNumber;
 
   OwnerCompleteProfile(
     this.registrationToken,
     this.username,
     this.firstName,
     this.lastName,
+    this.phoneNumber,
   );
 
   @override
-  List<Object?> get props => [registrationToken, username, firstName, lastName];
+  List<Object?> get props =>
+      [registrationToken, username, firstName, lastName, phoneNumber];
 }

@@ -56,12 +56,19 @@ class ProfileInfoCard extends StatelessWidget {
             ),
           ),
           const Divider(height: 8),
-          row(
-            icon: Icons.alternate_email_rounded,
-            label: l10n.owner_profile_username,
-            value: p.username,
+         row(
+            icon: Icons.mail_outline_rounded,
+            label: l10n.owner_profile_email,
+            value: p.email,
           ),
           const Divider(indent: 72, endIndent: 12),
+          row(
+            icon: Icons.phone_outlined,
+            label: l10n.owner_profile_phone,
+            value: p.phoneNumber ?? '',
+          ),
+          const SizedBox(height: 8),
+
           row(
             icon: Icons.person_outline_rounded,
             label: l10n.owner_profile_name,
