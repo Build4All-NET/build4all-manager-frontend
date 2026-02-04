@@ -55,7 +55,7 @@ class OwnerProjectDetailsScreen extends StatelessWidget {
         : null;
 
     return Scaffold(
-      backgroundColor: cs.background,
+      backgroundColor: cs.surface,
       appBar: AppBar(
         backgroundColor: cs.surface,
         elevation: 0,
@@ -385,7 +385,7 @@ class _StatsRow extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final ux = Theme.of(context).extension<UiTokens>()!;
 
-    String _hint(String key) => switch (key) {
+    String hint(String key) => switch (key) {
           'stat_reviews_hint' => l10n.owner_proj_details_stat_reviews_hint,
           'stat_active_hint' => l10n.owner_proj_details_stat_active_hint,
           'stat_days_hint' => l10n.owner_proj_details_stat_days_hint,
@@ -404,20 +404,20 @@ class _StatsRow extends StatelessWidget {
           Expanded(
             child: _MetricItem(
               top: spec.stat1Title,
-              hint: _hint(spec.stat1Hint),
+              hint: hint(spec.stat1Hint),
               suffixStar: true,
             ),
           ),
           Expanded(
             child: _MetricItem(
               top: spec.stat2Title,
-              hint: _hint(spec.stat2Hint),
+              hint: hint(spec.stat2Hint),
             ),
           ),
           Expanded(
             child: _MetricItem(
               top: '${spec.stat3Title} ',
-              hint: _hint(spec.stat3Hint),
+              hint: hint(spec.stat3Hint),
             ),
           ),
         ],

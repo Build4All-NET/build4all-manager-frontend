@@ -271,7 +271,7 @@ class AppButton extends StatelessWidget {
 
     final bool enabled = onPressed != null && !isBusy;
 
-    final Color bg = enabled ? c.bg : cs.surfaceVariant.withOpacity(.6);
+    final Color bg = enabled ? c.bg : cs.surfaceContainerHighest.withOpacity(.6);
     final Color fg = enabled ? c.fg : cs.onSurface.withOpacity(.38);
     final Color br = (type == AppButtonType.outline)
         ? c.border
@@ -367,7 +367,7 @@ class AppIconButton extends StatelessWidget {
           );
 
     Widget btn = Material(
-      color: enabled ? bg : cs.surfaceVariant.withOpacity(.6),
+      color: enabled ? bg : cs.surfaceContainerHighest.withOpacity(.6),
       shape: CircleBorder(side: BorderSide(color: br, width: 1)),
       child: InkWell(
         onTap: enabled ? onPressed : null,

@@ -263,17 +263,11 @@ class ProjectTile extends StatelessWidget {
         final headerGradient = LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: isDark
-              ? const [
-                  Color(0xFF3A3A3A),
-                  Color(0xFF2A2A2A),
-                  Color(0xFF1F1F1F),
-                ]
-              : const [
-                  Color(0xFFBFBFBF),
-                  Color(0xFFEEEEEE),
-                  Color(0xFFEEEEEE),
-                ],
+          colors: [
+            const Color.fromARGB(255, 191, 191, 191),
+            const Color.fromARGB(255, 238, 238, 238),
+            Colors.grey.shade200,
+          ],
           stops: const [0.0, 0.6, 1.0],
         );
 

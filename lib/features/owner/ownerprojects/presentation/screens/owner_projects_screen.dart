@@ -75,29 +75,29 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
       }
     }
 
-    bool _androidReady(OwnerProject p) {
+    bool androidReady(OwnerProject p) {
       final apk = (p.apkUrl ?? '').trim();
       final aab = (p.bundleUrl ?? '').trim();
       return apk.isNotEmpty || aab.isNotEmpty;
     }
 
-    bool _iosReady(OwnerProject p) {
+    bool iosReady(OwnerProject p) {
       final ipa = (p.ipaUrl ?? '').trim();
       return ipa.isNotEmpty;
     }
 
-    bool _matchPlatform(OwnerProject p) {
+    bool matchPlatform(OwnerProject p) {
       switch (_platform) {
         case _PlatformReadyFilter.all:
           return true;
         case _PlatformReadyFilter.android:
-          return _androidReady(p);
+          return androidReady(p);
         case _PlatformReadyFilter.ios:
-          return _iosReady(p);
+          return iosReady(p);
       }
     }
 
-    bool _matchEnv(OwnerProject p) {
+    bool matchEnv(OwnerProject p) {
       if (_env == _EnvironmentFilter.all) return true;
 
       final s = p.status.toLowerCase(); // ✅ FIX (status non-nullable)
@@ -113,7 +113,7 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
       create: (_) => OwnerProjectsBloc(getMyApps: GetMyAppsUc(repo))
         ..add(OwnerProjectsStarted(widget.ownerId)),
       child: Scaffold(
-        backgroundColor: cs.background,
+        backgroundColor: cs.surface,
         body: SafeArea(
           child: LayoutBuilder(
             builder: (context, viewport) {
@@ -133,8 +133,8 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
                         final double bottomPad = 12;
 
                         final filtered = state.filtered
-                            .where(_matchPlatform)
-                            .where(_matchEnv)
+                            .where(matchPlatform)
+                            .where(matchEnv)
                             .toList();
 
                         final int total = filtered.length;
@@ -661,7 +661,7 @@ class _ListSkeleton extends StatelessWidget {
           child: Container(
             height: 154,
             decoration: BoxDecoration(
-              color: cs.surfaceVariant.withOpacity(.5),
+              color: cs.surfaceContainerHighest.withOpacity(.5),
               borderRadius: BorderRadius.circular(14),
             ),
           ),

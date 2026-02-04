@@ -25,7 +25,7 @@ class RequestCard extends StatelessWidget {
           'Pending'
         ),
       'REJECTED' => (cs.errorContainer.withOpacity(.28), cs.error, 'Rejected'),
-      _ => (cs.surfaceVariant.withOpacity(.22), cs.onSurface, req.status),
+      _ => (cs.surfaceContainerHighest.withOpacity(.22), cs.onSurface, req.status),
     };
 
     return Container(

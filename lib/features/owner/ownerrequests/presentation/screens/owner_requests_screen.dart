@@ -9,9 +9,6 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:image/image.dart' as img;
-import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart' as p;
 
 import 'package:build4all_manager/l10n/app_localizations.dart';
 
@@ -47,8 +44,7 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
 
   final _formKey = GlobalKey<FormState>();
 
-  late final TextEditingController
-      _projectIdCtrl; // hidden in UI but used in submit
+  late final TextEditingController _projectIdCtrl; // hidden in UI but used in submit
   late final TextEditingController _appNameCtrl;
   final _notesCtrl = TextEditingController();
 
@@ -81,8 +77,7 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
     if (_selectedCurrency != null) return;
     if (_currencies.isEmpty) return;
 
-    final usd =
-        _currencies.where((c) => c.code.toUpperCase() == 'USD').toList();
+    final usd = _currencies.where((c) => c.code.toUpperCase() == 'USD').toList();
     _selectedCurrency = usd.isNotEmpty ? usd.first : _currencies.first;
   }
 
@@ -132,8 +127,7 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
 
         // fallback EUR if USD missing
         final eur = list.where((c) => c.code.toUpperCase() == 'EUR').toList();
-        _selectedCurrency =
-            eur.isNotEmpty ? eur.first : (list.isNotEmpty ? list.first : null);
+        _selectedCurrency = eur.isNotEmpty ? eur.first : (list.isNotEmpty ? list.first : null);
       });
     } catch (_) {
       if (!mounted) return;
@@ -151,38 +145,13 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
     final picker = ImagePicker();
     final res = await picker.pickImage(
       source: ImageSource.gallery,
-      imageQuality: 100, // keep original, we will re-encode ourselves
+      imageQuality: 85,
     );
     if (res == null) return;
 
-    try {
-      final bytes = await res.readAsBytes();
-
-      // decode (handles iOS P3/HDR better after re-encode)
-      final decoded = img.decodeImage(bytes);
-      if (decoded == null) throw Exception("Could not decode image");
-
-      // optional: mild brightness bump if you still feel it’s darker
-      // final adjusted = img.adjustColor(decoded, brightness: 1.03);
-      final adjusted = decoded;
-
-      // re-encode to PNG (or JPG) => normalizes color profile
-      final outBytes = img.encodePng(adjusted);
-
-      final dir = await getTemporaryDirectory();
-      final outPath =
-          p.join(dir.path, 'logo_${DateTime.now().millisecondsSinceEpoch}.png');
-      final outFile = File(outPath);
-      await outFile.writeAsBytes(outBytes, flush: true);
-
-      if (!mounted) return;
-      setState(() => _logoFile = outFile);
-
-      AppToast.success(context, l.owner_request_logo_selected);
-    } catch (e) {
-      if (!mounted) return;
-      AppToast.error(context, "Failed to process logo: $e");
-    }
+    if (!mounted) return;
+    setState(() => _logoFile = File(res.path));
+    AppToast.success(context, l.owner_request_logo_selected);
   }
 
   void _removeLogo() {
@@ -310,7 +279,7 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
     final previewOut = _runtime.toJsonOut();
 
     return Scaffold(
-      backgroundColor: cs.background,
+      backgroundColor: cs.surface,
       appBar: AppBar(
         title: Text(l.owner_request_title),
         actions: [
@@ -359,8 +328,7 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
                                   currency: _selectedCurrency,
                                   navJson: previewOut.navJson,
                                   homeJson: previewOut.homeJson,
-                                  enabledFeaturesJson:
-                                      previewOut.enabledFeaturesJson,
+                                  enabledFeaturesJson: previewOut.enabledFeaturesJson,
                                   brandingJson: previewOut.brandingJson,
                                 ),
                               ),
@@ -372,16 +340,14 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
                       Expanded(
                         flex: 5,
                         child: _CustomizeColumn(
-                          titleStyle: t.titleMedium
-                              ?.copyWith(fontWeight: FontWeight.w900),
+                          titleStyle: t.titleMedium?.copyWith(fontWeight: FontWeight.w900),
                           loading: _loading,
                           currencies: _currencies,
                           selectedCurrency: _selectedCurrency,
                           onPickCurrency: () async {
                             if (_currencies.isEmpty) await _loadCurrencies();
                             if (!mounted) return;
-                            final picked = await _showCurrencySearchSheet(
-                                context, _currencies);
+                            final picked = await _showCurrencySearchSheet(context, _currencies);
                             if (picked != null) {
                               setState(() => _selectedCurrency = picked);
                             }
@@ -393,8 +359,7 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
                           draft: _draft,
                           runtime: _runtime,
                           logoFile: _logoFile,
-                          onPresetChanged: (id) =>
-                              setState(() => _selectedPresetId = id),
+                          onPresetChanged: (id) => setState(() => _selectedPresetId = id),
                           onDraftChanged: (d) => setState(() => _draft = d),
                           onRuntimeChanged: (d) => setState(() => _runtime = d),
                           onPickLogo: _pickLogo,
@@ -438,16 +403,14 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
                   ),
                   const SizedBox(height: 14),
                   _CustomizeColumn(
-                    titleStyle:
-                        t.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+                    titleStyle: t.titleMedium?.copyWith(fontWeight: FontWeight.w900),
                     loading: _loading,
                     currencies: _currencies,
                     selectedCurrency: _selectedCurrency,
                     onPickCurrency: () async {
                       if (_currencies.isEmpty) await _loadCurrencies();
                       if (!mounted) return;
-                      final picked =
-                          await _showCurrencySearchSheet(context, _currencies);
+                      final picked = await _showCurrencySearchSheet(context, _currencies);
                       if (picked != null) {
                         setState(() => _selectedCurrency = picked);
                       }
@@ -459,8 +422,7 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
                     draft: _draft,
                     runtime: _runtime,
                     logoFile: _logoFile,
-                    onPresetChanged: (id) =>
-                        setState(() => _selectedPresetId = id),
+                    onPresetChanged: (id) => setState(() => _selectedPresetId = id),
                     onDraftChanged: (d) => setState(() => _draft = d),
                     onRuntimeChanged: (d) => setState(() => _runtime = d),
                     onPickLogo: _pickLogo,
@@ -564,8 +526,7 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
                             contentPadding: EdgeInsets.zero,
                             title: Text(
                               c.shortLabel,
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.w700),
+                              style: const TextStyle(fontWeight: FontWeight.w700),
                             ),
                             subtitle: Text(c.currencyType),
                             trailing: const Icon(Icons.chevron_right_rounded),
@@ -619,7 +580,6 @@ class _CustomizeColumn extends StatelessWidget {
   final ValueChanged<_Panel> onPanelChanged;
 
   const _CustomizeColumn({
-    super.key,
     required this.titleStyle,
     required this.loading,
     required this.currencies,
@@ -648,10 +608,7 @@ class _CustomizeColumn extends StatelessWidget {
       children: [
         Text(
           'App Settings',
-          style: Theme.of(context)
-              .textTheme
-              .titleMedium
-              ?.copyWith(fontWeight: FontWeight.w900),
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
         ),
         const SizedBox(height: 10),
         _PillTabs(selected: panel, onChanged: onPanelChanged),
@@ -740,9 +697,7 @@ class _PillTabs extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(icon,
-                    size: 16,
-                    color: active ? Colors.white : cs.onSurfaceVariant),
+                Icon(icon, size: 16, color: active ? Colors.white : cs.onSurfaceVariant),
                 const SizedBox(width: 6),
                 Text(
                   label,
@@ -768,18 +723,9 @@ class _PillTabs extends StatelessWidget {
       ),
       child: Row(
         children: [
-          tab(
-              value: _Panel.identity,
-              label: 'Identity',
-              icon: Icons.badge_outlined),
-          tab(
-              value: _Panel.palette,
-              label: 'Palette',
-              icon: Icons.palette_outlined),
-          tab(
-              value: _Panel.runtime,
-              label: 'Runtime',
-              icon: Icons.tune_rounded),
+          tab(value: _Panel.identity, label: 'Identity', icon: Icons.badge_outlined),
+          tab(value: _Panel.palette, label: 'Palette', icon: Icons.palette_outlined),
+          tab(value: _Panel.runtime, label: 'Runtime', icon: Icons.tune_rounded),
         ],
       ),
     );
@@ -830,8 +776,7 @@ class _IdentityPanel extends StatelessWidget {
             isDense: true,
             filled: true,
             fillColor: cs.surfaceContainerHighest,
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
               borderSide: BorderSide(color: cs.outlineVariant),
@@ -842,8 +787,7 @@ class _IdentityPanel extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide:
-                  const BorderSide(color: Color(0xFF16A34A), width: 1.5),
+              borderSide: const BorderSide(color: Color(0xFF16A34A), width: 1.5),
             ),
           ),
         ),
@@ -853,10 +797,7 @@ class _IdentityPanel extends StatelessWidget {
             // App name (required)
             Text(
               'App name',
-              style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w800,
-                  color: cs.onSurface.withOpacity(.75)),
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: cs.onSurface.withOpacity(.75)),
             ),
             const SizedBox(height: 6),
             TextFormField(
@@ -866,8 +807,7 @@ class _IdentityPanel extends StatelessWidget {
                 prefixIcon: Icon(Icons.apps_rounded, size: 18, color: hint),
                 hintText: 'My Shop',
               ),
-              validator: (v) =>
-                  (v == null || v.trim().isEmpty) ? 'Required' : null,
+              validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
             ),
 
             const SizedBox(height: 14),
@@ -875,10 +815,7 @@ class _IdentityPanel extends StatelessWidget {
             // Logo (required but handled by submit button logic)
             Text(
               'App Logo *',
-              style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w800,
-                  color: cs.onSurface.withOpacity(.75)),
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: cs.onSurface.withOpacity(.75)),
             ),
             const SizedBox(height: 8),
             Row(
@@ -906,13 +843,11 @@ class _IdentityPanel extends StatelessWidget {
                       // ✅ Upload button stays enabled unless loading
                       onPressed: loading ? null : onPickLogo,
                       icon: const Icon(Icons.upload_rounded, size: 18),
-                      label: const Text('Upload',
-                          style: TextStyle(fontWeight: FontWeight.w900)),
+                      label: const Text('Upload', style: TextStyle(fontWeight: FontWeight.w900)),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF16A34A),
                         foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(999)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
                         elevation: 0,
                       ),
                     ),
@@ -934,18 +869,14 @@ class _IdentityPanel extends StatelessWidget {
             // Currency (NOT required; always shows USD fallback)
             Text(
               'Select currency',
-              style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w800,
-                  color: cs.onSurface.withOpacity(.75)),
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: cs.onSurface.withOpacity(.75)),
             ),
             const SizedBox(height: 6),
             InkWell(
               borderRadius: BorderRadius.circular(14),
               onTap: loading ? null : onPickCurrency,
               child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                 decoration: BoxDecoration(
                   color: cs.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(14),
@@ -957,11 +888,8 @@ class _IdentityPanel extends StatelessWidget {
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
-                        selectedCurrency == null
-                            ? 'USD (\$)'
-                            : selectedCurrency!.shortLabel,
-                        style: const TextStyle(
-                            fontWeight: FontWeight.w900, fontSize: 13),
+                        selectedCurrency == null ?  'USD (\$)' : selectedCurrency!.shortLabel,
+                        style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -977,10 +905,7 @@ class _IdentityPanel extends StatelessWidget {
             // Notes optional
             Text(
               'Notes',
-              style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w800,
-                  color: cs.onSurface.withOpacity(.75)),
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: cs.onSurface.withOpacity(.75)),
             ),
             const SizedBox(height: 6),
             TextFormField(
@@ -1040,8 +965,7 @@ class _SubmitBar extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     enabled ? 'Ready to submit ✅' : 'App name + logo required',
-                    style: t.bodySmall
-                        ?.copyWith(color: cs.onSurface.withOpacity(.65)),
+                    style: t.bodySmall?.copyWith(color: cs.onSurface.withOpacity(.65)),
                   ),
                 ],
               ),
@@ -1061,10 +985,8 @@ class _SubmitBar extends StatelessWidget {
                   : const Icon(Icons.send_rounded),
               label: Text(loading ? l.owner_request_submitting : l.submit),
               style: ElevatedButton.styleFrom(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14)),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
               ),
             ),
           ],
@@ -1079,7 +1001,7 @@ class _SubmitBar extends StatelessWidget {
 /// ===============================================================
 class _Card extends StatelessWidget {
   final Widget child;
-  const _Card({super.key, required this.child});
+  const _Card({required this.child});
 
   @override
   Widget build(BuildContext context) {
@@ -1161,8 +1083,7 @@ class _HeaderRow extends StatelessWidget {
               const SizedBox(height: 2),
               Text(
                 subtitle,
-                style:
-                    t.bodySmall?.copyWith(color: cs.onSurface.withOpacity(.65)),
+                style: t.bodySmall?.copyWith(color: cs.onSurface.withOpacity(.65)),
               ),
             ],
           ),

@@ -62,7 +62,7 @@ class _HomeScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: cs.background,
+      backgroundColor: cs.surface,
       body: SafeArea(
         child: _HomeBody(ownerName: ownerName),
       ),
@@ -321,7 +321,7 @@ class _LoadingList extends StatelessWidget {
           height: 64,
           margin: const EdgeInsets.symmetric(vertical: 8),
           decoration: BoxDecoration(
-            color: cs.surfaceVariant.withOpacity(.45),
+            color: cs.surfaceContainerHighest.withOpacity(.45),
             borderRadius: BorderRadius.circular(14),
           ),
         );

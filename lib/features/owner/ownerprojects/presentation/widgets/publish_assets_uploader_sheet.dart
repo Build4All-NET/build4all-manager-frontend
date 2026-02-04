@@ -203,7 +203,7 @@ class _PublishAssetsUploaderSheetState
                     width: 64,
                     height: 64,
                     decoration: BoxDecoration(
-                      color: cs.surfaceVariant.withOpacity(.5),
+                      color: cs.surfaceContainerHighest.withOpacity(.5),
                       borderRadius: BorderRadius.circular(16),
                       border:
                           Border.all(color: cs.outlineVariant.withOpacity(.6)),
@@ -271,7 +271,7 @@ class _PublishAssetsUploaderSheetState
                   width: double.infinity,
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: cs.surfaceVariant.withOpacity(.35),
+                    color: cs.surfaceContainerHighest.withOpacity(.35),
                     borderRadius: BorderRadius.circular(16),
                     border:
                         Border.all(color: cs.outlineVariant.withOpacity(.6)),

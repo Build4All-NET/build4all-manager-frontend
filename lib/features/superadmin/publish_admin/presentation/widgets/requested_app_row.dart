@@ -401,9 +401,9 @@ class _StatusPill extends StatelessWidget {
     final s = status.toUpperCase();
 
     Color c;
-    if (s == 'SUBMITTED' || s == 'IN_REVIEW')
+    if (s == 'SUBMITTED' || s == 'IN_REVIEW') {
       c = cs.primary;
-    else if (s == 'APPROVED')
+    } else if (s == 'APPROVED')
       c = Colors.green;
     else if (s == 'REJECTED')
       c = Colors.red;

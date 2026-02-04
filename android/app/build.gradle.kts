@@ -14,9 +14,10 @@ if (keyPropertiesFile.exists()) {
 }
 
 android {
-    namespace = "com.buil4all.build4allmanager"
+    namespace = "com.build4all.build4allmanager"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    //ndkVersion = flutter.ndkVersion
+    ndkVersion = "27.0.12077973"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11

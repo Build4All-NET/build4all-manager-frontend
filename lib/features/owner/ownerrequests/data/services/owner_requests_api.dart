@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import '../models/currency_model.dart';
-import '../../../common/data/models/app_request_dto.dart';
 
 class OwnerRequestApi {
   final Dio dio;

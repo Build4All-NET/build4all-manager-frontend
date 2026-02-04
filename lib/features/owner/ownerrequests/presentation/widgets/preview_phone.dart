@@ -323,7 +323,7 @@ class _Body extends StatelessWidget {
     final bg = const Color(0xFFF3FAFF);
     final on = draft.onBackground;
 
-    final money = (currency?.symbol?.trim().isNotEmpty == true)
+    final money = (currency?.symbol.trim().isNotEmpty == true)
         ? currency!.symbol.trim()
         : "\$";
 

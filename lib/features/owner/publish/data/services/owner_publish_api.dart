@@ -46,11 +46,13 @@ class OwnerPublishApi {
     if (fullDescription != null) body['fullDescription'] = fullDescription;
 
     if (category != null) body['category'] = category;
-    if (countryAvailability != null)
+    if (countryAvailability != null) {
       body['countryAvailability'] = countryAvailability;
+    }
     if (pricing != null) body['pricing'] = pricingToApi(pricing);
-    if (contentRatingConfirmed != null)
+    if (contentRatingConfirmed != null) {
       body['contentRatingConfirmed'] = contentRatingConfirmed;
+    }
 
     // ✅ Optional URL patch (if backend expects them)
     if (appIconUrl != null) body['appIconUrl'] = appIconUrl;

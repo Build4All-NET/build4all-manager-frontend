@@ -23,7 +23,7 @@ class BackendProjectDto {
   });
 
   factory BackendProjectDto.fromJson(Map<String, dynamic> j) {
-    DateTime? _p(String? iso) =>
+    DateTime? p(String? iso) =>
         (iso == null || iso.isEmpty) ? null : DateTime.tryParse(iso);
 
     return BackendProjectDto(
@@ -35,8 +35,8 @@ class BackendProjectDto {
       // ✅ NEW
       projectType: j['projectType']?.toString(),
 
-      createdAt: _p(j['createdAt']?.toString()),
-      updatedAt: _p(j['updatedAt']?.toString()),
+      createdAt: p(j['createdAt']?.toString()),
+      updatedAt: p(j['updatedAt']?.toString()),
     );
   }
 

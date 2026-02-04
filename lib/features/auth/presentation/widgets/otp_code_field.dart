@@ -19,7 +19,9 @@ class _OtpCodeFieldState extends State<OtpCodeField> {
 
   @override
   void dispose() {
-    for (final c in _controllers) c.dispose();
+    for (final c in _controllers) {
+      c.dispose();
+    }
     for (final n in _nodes) {
       n.unfocus();
       n.dispose();

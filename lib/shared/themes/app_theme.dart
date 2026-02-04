@@ -71,10 +71,6 @@ class AppTheme {
       outlineVariant:
           isDark ? const Color(0xFF243047) : const Color(0xFFE2E8F0),
 
-      // Material3 expects these too (Flutter will fill missing if needed, but better explicit)
-      background: isDark ? darkSurface : lightSurface,
-      onBackground: isDark ? const Color(0xFFE7EAF0) : const Color(0xFF0B1220),
-
       tertiary: p.success,
       onTertiary: Colors.white,
 
@@ -119,7 +115,7 @@ class AppTheme {
       colorScheme: cs,
       brightness: brightness,
       primaryColor: p.primary,
-      scaffoldBackgroundColor: cs.background,
+      scaffoldBackgroundColor: cs.surface,
       textTheme: GoogleFonts.interTextTheme(base.textTheme).apply(
         bodyColor: cs.onSurface,
         displayColor: cs.onSurface,

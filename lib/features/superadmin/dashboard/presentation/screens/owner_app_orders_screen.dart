@@ -283,13 +283,13 @@ class SuperAdminOrderHeaderRow {
   });
 
   factory SuperAdminOrderHeaderRow.fromJson(Map<String, dynamic> json) {
-    DateTime? _parseDate(dynamic v) {
+    DateTime? parseDate(dynamic v) {
       if (v == null) return null;
       if (v is DateTime) return v;
       return DateTime.tryParse(v.toString());
     }
 
-    double _d(dynamic v) {
+    double d(dynamic v) {
       if (v == null) return 0.0;
       if (v is num) return v.toDouble();
       return double.tryParse(v.toString()) ?? 0.0;
@@ -297,8 +297,8 @@ class SuperAdminOrderHeaderRow {
 
     return SuperAdminOrderHeaderRow(
       id: (json['id'] as num).toInt(),
-      orderDate: _parseDate(json['orderDate']),
-      totalPrice: _d(json['totalPrice']),
+      orderDate: parseDate(json['orderDate']),
+      totalPrice: d(json['totalPrice']),
       status: (json['status'] ?? '').toString(),
       statusUi: (json['statusUi'] ?? '').toString(),
       itemsCount: (json['itemsCount'] as num?)?.toInt() ?? 0,
@@ -324,16 +324,16 @@ class PaymentSummary {
   });
 
   factory PaymentSummary.fromJson(Map<String, dynamic> json) {
-    double _d(dynamic v) {
+    double d(dynamic v) {
       if (v == null) return 0.0;
       if (v is num) return v.toDouble();
       return double.tryParse(v.toString()) ?? 0.0;
     }
 
     return PaymentSummary(
-      orderTotal: _d(json['orderTotal']),
-      paidAmount: _d(json['paidAmount']),
-      remainingAmount: _d(json['remainingAmount']),
+      orderTotal: d(json['orderTotal']),
+      paidAmount: d(json['paidAmount']),
+      remainingAmount: d(json['remainingAmount']),
       paymentState: (json['paymentState'] ?? '').toString(),
     );
   }
@@ -517,7 +517,7 @@ class OwnerAppOrdersAnalyticsHeader extends StatelessWidget {
       (m, e) => e.revenue > m ? e.revenue : m,
     );
 
-    String _fmtRange(DateTimeRange? r) {
+    String fmtRange(DateTimeRange? r) {
       if (r == null) return l10n.allTimeLabel;
       String two(int v) => v.toString().padLeft(2, '0');
       final a = r.start.toLocal();
@@ -529,7 +529,7 @@ class OwnerAppOrdersAnalyticsHeader extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: cs.surfaceVariant.withOpacity(0.4),
+        color: cs.surfaceContainerHighest.withOpacity(0.4),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
@@ -552,7 +552,7 @@ class OwnerAppOrdersAnalyticsHeader extends StatelessWidget {
                   onPressed: onPickRange,
                   icon: Icon(Icons.date_range, size: 18, color: cs.outline),
                   label: Text(
-                    _fmtRange(range),
+                    fmtRange(range),
                     style: textTheme.bodySmall?.copyWith(
                       color: cs.outline,
                     ),
@@ -817,7 +817,7 @@ class SuperAdminOrderCard extends StatelessWidget {
     final paid = row.payment.paidAmount;
     final progress = total <= 0 ? 0.0 : (paid / total).clamp(0.0, 1.0);
 
-    String _fmtDate(DateTime? dt) {
+    String fmtDate(DateTime? dt) {
       if (dt == null) return '—';
       final d = dt.toLocal();
       String two(int v) => v.toString().padLeft(2, '0');
@@ -886,7 +886,7 @@ class SuperAdminOrderCard extends StatelessWidget {
                 const SizedBox(width: 4),
                 Expanded(
                   child: Text(
-                    _fmtDate(row.orderDate),
+                    fmtDate(row.orderDate),
                     style: textTheme.bodySmall?.copyWith(
                       color: cs.outline,
                     ),
