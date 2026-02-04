@@ -96,20 +96,23 @@ ThemedProjectDetailsSpec themedSpecFor(BuildContext context, String projectId) {
         _ => cs.primary,
       };
 
-  Color chipBg(Color accent) => accent.withOpacity(.12);
+  Color _chipBg(Color c) => c.withOpacity(.12);
 
-  Color headerEnd(Color accent) =>
+  Color _headerEnd(Color accent) =>
       Color.alphaBlend(Colors.white.withOpacity(.3), accent);
 
-  Color createEnd(Color accent) => HSLColor.fromColor(accent)
+  Color _createEnd(Color accent) => HSLColor.fromColor(accent)
       .withLightness(
-          (HSLColor.fromColor(accent).lightness + .18).clamp(.0, 1.0))
+        (HSLColor.fromColor(accent).lightness + .18).clamp(.0, 1.0),
+      )
       .toColor();
 
-  final accent = roleAccent(projectId);
-  final chipBg = chipBg(accent);
-  final headerEnd = headerEnd(accent);
-  final createEnd = createEnd(accent);
+  // ✅ computed colors (different names)
+  final Color accent = roleAccent(projectId);
+  final Color chipBgColor = _chipBg(accent);
+  final Color headerEndColor = _headerEnd(accent);
+  final Color createEndColor = _createEnd(accent);
+
 
   // Common stats (localized later):
   const s1Title = '4.8'; // ⭐ handled in UI, keep number only
@@ -124,9 +127,9 @@ ThemedProjectDetailsSpec themedSpecFor(BuildContext context, String projectId) {
         emoji: '🛍️',
         accent: accent,
         headerStart: accent,
-        headerEnd: headerEnd,
-        chipBg: chipBg,
-        createEnd: createEnd,
+        headerEnd: headerEndColor, 
+        chipBg: chipBgColor, 
+        createEnd: createEndColor,
         stat1Title: s1Title,
         stat1Hint: s1Hint,
         stat2Title: '5.1k',
@@ -149,11 +152,17 @@ ThemedProjectDetailsSpec themedSpecFor(BuildContext context, String projectId) {
           l.owner_proj_details_ecom_h3,
           l.owner_proj_details_ecom_h4,
         ],
-        screens: (l) => [
-          MiniScreen(l.owner_proj_details_ecom_s1_title,
-              l.owner_proj_details_ecom_s1_sub, chipBg(cs.surfaceTint)),
-          MiniScreen(l.owner_proj_details_ecom_s2_title,
-              l.owner_proj_details_ecom_s2_sub, chipBg(cs.primary)),
+          screens: (l) => [
+          MiniScreen(
+            l.owner_proj_details_ecom_s1_title,
+            l.owner_proj_details_ecom_s1_sub,
+            _chipBg(cs.surfaceTint), // ✅ use helper for different colors
+          ),
+          MiniScreen(
+            l.owner_proj_details_ecom_s2_title,
+            l.owner_proj_details_ecom_s2_sub,
+            _chipBg(cs.primary),
+          ),
         ],
         modules: (l) => [
           l.owner_proj_details_ecom_m1,
