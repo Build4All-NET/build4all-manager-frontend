@@ -7,8 +7,12 @@ on:
         description: "Track: internal | alpha | beta | production"
         required: true
         default: "internal"
+      release_status:
+        description: "Release status: completed | draft | inProgress"
+        required: true
+        default: "completed"
       changelog:
-        description: "Release notes (optional)"
+        description: "Release notes (What’s new)"
         required: false
         default: "CI build"
   push:
@@ -23,23 +27,34 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: android-playstore-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  build-android:
+  build-and-upload:
     runs-on: ubuntu-latest
 
     env:
       PACKAGE_NAME: "com.build4all.build4allmanager"
       PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
 
+      # Optional signing secrets (recommended)
+      ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+      ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+      ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+      ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Java
+      - name: Setup Java (Android)
         uses: actions/setup-java@v4
         with:
           distribution: "temurin"
           java-version: "17"
+          cache: gradle
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -49,31 +64,134 @@ jobs:
           cache: true
 
       - name: Flutter pub get
-        run: flutter pub get
-
-      # ---- Signing (upload keystore) ----
-      - name: Decode Android keystore
-        if: ${{ secrets.ANDROID_KEYSTORE_B64 != '' }}
+        shell: bash
         run: |
-          echo "${{ secrets.ANDROID_KEYSTORE_B64 }}" | base64 -d > android/upload-keystore.jks
+          set -euo pipefail
+          flutter --version
+          flutter pub get
 
-      - name: Create key.properties
-        if: ${{ secrets.ANDROID_KEYSTORE_B64 != '' }}
+      # ----------------------------
+      # Android Signing (Upload Key)
+      # ----------------------------
+      - name: Decode Android keystore (if provided)
+        shell: bash
         run: |
-          cat > android/key.properties <<EOF
-          storeFile=upload-keystore.jks
-          storePassword=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}
-          keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}
-          EOF
+          set -euo pipefail
 
-      - name: Build AAB (release)
-        run: flutter build appbundle --release
+          if [ -n "${ANDROID_KEYSTORE_B64:-}" ]; then
+            echo "$ANDROID_KEYSTORE_B64" | tr -d '\n\r ' | base64 --decode > android/upload-keystore.jks
+            echo "✅ Keystore written to android/upload-keystore.jks"
+          else
+            echo "⚠️ ANDROID_KEYSTORE_B64 is empty. If your release build requires signing, upload will fail."
+          fi
 
+      - name: Create android/key.properties (if keystore provided)
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [ -f android/upload-keystore.jks ]; then
+            [ -n "${ANDROID_KEYSTORE_PASSWORD:-}" ] || { echo "❌ Missing ANDROID_KEYSTORE_PASSWORD"; exit 1; }
+            [ -n "${ANDROID_KEY_ALIAS:-}" ] || { echo "❌ Missing ANDROID_KEY_ALIAS"; exit 1; }
+            [ -n "${ANDROID_KEY_PASSWORD:-}" ] || { echo "❌ Missing ANDROID_KEY_PASSWORD"; exit 1; }
+
+            cat > android/key.properties <<EOF
+            storeFile=upload-keystore.jks
+            storePassword=${ANDROID_KEYSTORE_PASSWORD}
+            keyAlias=${ANDROID_KEY_ALIAS}
+            keyPassword=${ANDROID_KEY_PASSWORD}
+            EOF
+            echo "✅ android/key.properties created"
+          fi
+
+      # ----------------------------
+      # Compute build name/number
+      # ----------------------------
+      - name: Compute build name/number
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          BUILD_NAME="$(python3 - <<'PY'
+          import re
+          t=open("pubspec.yaml","r",encoding="utf-8").read()
+          m=re.search(r"^version:\s*([0-9]+(?:\.[0-9]+){1,3})", t, re.M)
+          print(m.group(1) if m else "1.0.0")
+          PY
+          )"
+          BUILD_NUMBER="${GITHUB_RUN_NUMBER}"
+
+          echo "BUILD_NAME=$BUILD_NAME" >> $GITHUB_ENV
+          echo "BUILD_NUMBER=$BUILD_NUMBER" >> $GITHUB_ENV
+          echo "✅ Using BUILD_NAME=$BUILD_NAME BUILD_NUMBER=$BUILD_NUMBER"
+
+      # ----------------------------
+      # Build AAB
+      # ----------------------------
+      - name: Build Android App Bundle (AAB)
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter build appbundle --release \
+            --build-name "$BUILD_NAME" \
+            --build-number "$BUILD_NUMBER"
+
+      - name: Upload AAB artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-aab
+          path: build/app/outputs/bundle/release/*.aab
+          if-no-files-found: error
+
+      # ----------------------------
+      # Prepare release notes
+      # (r0adkll action can read "whatsNewDirectory")
+      # ----------------------------
+      - name: Prepare release notes (whatsnew)
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # Determine changelog
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            CHANGELOG="${{ github.event.inputs.changelog }}"
+          else
+            CHANGELOG="CI build (push)"
+          fi
+          [ -n "${CHANGELOG:-}" ] || CHANGELOG="CI build"
+
+          mkdir -p distribution/whatsnew
+          # Google Play expects locale files like whatsnew-en-US
+          echo "$CHANGELOG" > distribution/whatsnew/whatsnew-en-US
+
+          echo "✅ Release notes prepared:"
+          cat distribution/whatsnew/whatsnew-en-US
+
+      # ----------------------------
+      # Write service account json
+      # ----------------------------
       - name: Write service account json
+        shell: bash
         run: |
-          echo "$PLAY_SERVICE_ACCOUNT_JSON" > service-account.json
+          set -euo pipefail
+          [ -n "${PLAY_SERVICE_ACCOUNT_JSON:-}" ] || { echo "❌ Missing PLAY_SERVICE_ACCOUNT_JSON secret"; exit 1; }
+          echo '${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}' > service-account.json
 
+      # Optional safe debug (does NOT print private key)
+      - name: Debug service account (safe)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          j=json.load(open("service-account.json"))
+          print("client_email:", j.get("client_email"))
+          print("project_id:", j.get("project_id"))
+          PY
+
+      # ----------------------------
+      # Upload to Google Play
+      # ----------------------------
       - name: Upload to Google Play
         uses: r0adkll/upload-google-play@v1
         with:
@@ -81,4 +199,5 @@ jobs:
           packageName: ${{ env.PACKAGE_NAME }}
           releaseFiles: build/app/outputs/bundle/release/*.aab
           track: ${{ github.event.inputs.track || 'internal' }}
-          status: completed
+          status: ${{ github.event.inputs.release_status || 'completed' }}
+          whatsNewDirectory: distribution/whatsnew
