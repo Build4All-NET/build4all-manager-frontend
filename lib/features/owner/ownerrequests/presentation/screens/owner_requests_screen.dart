@@ -279,7 +279,7 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
     final previewOut = _runtime.toJsonOut();
 
     return Scaffold(
-      backgroundColor: cs.background,
+      backgroundColor: cs.surface,
       appBar: AppBar(
         title: Text(l.owner_request_title),
         actions: [
@@ -580,7 +580,6 @@ class _CustomizeColumn extends StatelessWidget {
   final ValueChanged<_Panel> onPanelChanged;
 
   const _CustomizeColumn({
-    super.key,
     required this.titleStyle,
     required this.loading,
     required this.currencies,
@@ -1002,7 +1001,7 @@ class _SubmitBar extends StatelessWidget {
 /// ===============================================================
 class _Card extends StatelessWidget {
   final Widget child;
-  const _Card({super.key, required this.child});
+  const _Card({required this.child});
 
   @override
   Widget build(BuildContext context) {

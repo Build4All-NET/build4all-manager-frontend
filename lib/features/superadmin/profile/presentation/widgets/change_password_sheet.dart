@@ -166,8 +166,9 @@ class _ChangePasswordSheetState extends State<ChangePasswordSheet> {
                       ),
                       validator: (v) {
                         if ((v ?? '').trim().isEmpty) return l10n.err_required;
-                        if (v != _nextCtl.text)
+                        if (v != _nextCtl.text) {
                           return l10n.errPasswordMismatch;
+                        }
                         return null;
                       },
                       enabled: !disabled,

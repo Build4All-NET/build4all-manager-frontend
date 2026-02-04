@@ -1,4 +1,5 @@
 /// lib/features/owner/ownerhome/presentation/specs/project_details_specs.dart
+library;
 import 'package:flutter/material.dart';
 import 'package:build4all_manager/l10n/app_localizations.dart';
 
@@ -106,9 +107,9 @@ ThemedProjectDetailsSpec themedSpecFor(BuildContext context, String projectId) {
       .toColor();
 
   final accent = roleAccent(projectId);
-  final _chipBg = chipBg(accent);
-  final _headerEnd = headerEnd(accent);
-  final _createEnd = createEnd(accent);
+  final chipBg = chipBg(accent);
+  final headerEnd = headerEnd(accent);
+  final createEnd = createEnd(accent);
 
   // Common stats (localized later):
   const s1Title = '4.8'; // ⭐ handled in UI, keep number only
@@ -123,9 +124,9 @@ ThemedProjectDetailsSpec themedSpecFor(BuildContext context, String projectId) {
         emoji: '🛍️',
         accent: accent,
         headerStart: accent,
-        headerEnd: _headerEnd,
-        chipBg: _chipBg,
-        createEnd: _createEnd,
+        headerEnd: headerEnd,
+        chipBg: chipBg,
+        createEnd: createEnd,
         stat1Title: s1Title,
         stat1Hint: s1Hint,
         stat2Title: '5.1k',

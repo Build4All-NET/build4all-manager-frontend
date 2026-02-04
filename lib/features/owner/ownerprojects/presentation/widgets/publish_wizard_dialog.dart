@@ -250,7 +250,7 @@ class _PublishWizardDialogState extends State<PublishWizardDialog> {
       if (!mounted) return;
       final l10n = AppLocalizations.of(context)!;
       _showInline(
-        '${l10n.owner_publish_err_load_draft}: ${_errText(e as Object, l10n)}',
+        '${l10n.owner_publish_err_load_draft}: ${_errText(e, l10n)}',
         type: ToastType.error,
       );
       Navigator.pop(context);
@@ -332,7 +332,7 @@ class _PublishWizardDialogState extends State<PublishWizardDialog> {
       }
     } catch (e) {
       _showInline(
-        '${l10n.owner_publish_err_save_failed}: ${_errText(e as Object, l10n)}',
+        '${l10n.owner_publish_err_save_failed}: ${_errText(e, l10n)}',
         type: ToastType.error,
       );
       rethrow;
@@ -369,7 +369,7 @@ class _PublishWizardDialogState extends State<PublishWizardDialog> {
       draft = updated;
     } catch (e) {
       _showInline(
-        '${l10n.owner_publish_err_save_failed}: ${_errText(e as Object, l10n)}',
+        '${l10n.owner_publish_err_save_failed}: ${_errText(e, l10n)}',
         type: ToastType.error,
       );
       rethrow;
@@ -395,7 +395,7 @@ class _PublishWizardDialogState extends State<PublishWizardDialog> {
       if (mounted) Navigator.pop(context);
     } catch (e) {
       _showInline(
-        '${l10n.owner_publish_err_submit_failed}: ${_errText(e as Object, l10n)}',
+        '${l10n.owner_publish_err_submit_failed}: ${_errText(e, l10n)}',
         type: ToastType.error,
       );
     } finally {
@@ -875,7 +875,7 @@ class _StepBody extends StatelessWidget {
               style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w900)),
           const SizedBox(height: 6),
           DropdownButtonFormField<String>(
-            value: country,
+            initialValue: country,
             decoration: deco(''),
             items: [
               DropdownMenuItem(

@@ -1,5 +1,5 @@
 // lib/core/network/globals.dart
-library globals;
+library;
 
 import 'package:dio/dio.dart';
 

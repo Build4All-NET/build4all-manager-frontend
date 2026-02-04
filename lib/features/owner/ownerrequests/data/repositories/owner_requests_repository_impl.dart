@@ -65,10 +65,12 @@ class OwnerRequestApi {
       MapEntry('brandingJson', brandingJson),
     ]);
 
-    if (themeId != null)
+    if (themeId != null) {
       form.fields.add(MapEntry('themeId', themeId.toString()));
-    if (slug != null && slug.trim().isNotEmpty)
+    }
+    if (slug != null && slug.trim().isNotEmpty) {
       form.fields.add(MapEntry('slug', slug.trim()));
+    }
     if (apiBaseUrlOverride != null && apiBaseUrlOverride.trim().isNotEmpty) {
       form.fields
           .add(MapEntry('apiBaseUrlOverride', apiBaseUrlOverride.trim()));

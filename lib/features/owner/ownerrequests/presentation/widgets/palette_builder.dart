@@ -121,7 +121,7 @@ String hexOf(Color c) {
   final r = c.red.toRadixString(16).padLeft(2, '0');
   final g = c.green.toRadixString(16).padLeft(2, '0');
   final b = c.blue.toRadixString(16).padLeft(2, '0');
-  return '#${r}${g}${b}'.toUpperCase();
+  return '#$r$g$b'.toUpperCase();
 }
 
 /// ----------------------------

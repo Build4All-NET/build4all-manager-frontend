@@ -83,8 +83,9 @@ class Build4AllManagerApp extends StatelessWidget {
                 ],
 
                 localeListResolutionCallback: (locales, supported) {
-                  if (locales == null || locales.isEmpty)
+                  if (locales == null || locales.isEmpty) {
                     return supported.first;
+                  }
                   final first = locales.first;
                   for (final s in supported) {
                     if (s.languageCode == first.languageCode) return s;

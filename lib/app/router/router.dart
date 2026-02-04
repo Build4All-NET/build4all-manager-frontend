@@ -211,7 +211,7 @@ Future<(int?, String?)> _loadOwnerProfileFromJwt() async {
 
 class _OwnerEntryLoader extends StatelessWidget {
   final int initialIndex;
-  const _OwnerEntryLoader({super.key, this.initialIndex = 0});
+  const _OwnerEntryLoader({this.initialIndex = 0});
 
   @override
   Widget build(BuildContext context) {
@@ -247,7 +247,7 @@ class _OwnerEntryLoader extends StatelessWidget {
 }
 
 class _OwnerProjectsBuilder extends StatelessWidget {
-  const _OwnerProjectsBuilder({super.key});
+  const _OwnerProjectsBuilder();
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<int?>(
@@ -273,7 +273,7 @@ class _OwnerProjectsBuilder extends StatelessWidget {
 
 class _OwnerProjectDetailsBuilder extends StatelessWidget {
   final ProjectTemplate tpl;
-  const _OwnerProjectDetailsBuilder({super.key, required this.tpl});
+  const _OwnerProjectDetailsBuilder({required this.tpl});
 
   @override
   Widget build(BuildContext context) {
@@ -358,7 +358,6 @@ class _OwnerRequestsBuilder extends StatelessWidget {
   final int? initialProjectId;
   final String? initialAppName;
   const _OwnerRequestsBuilder({
-    super.key,
     this.initialProjectId,
     this.initialAppName,
   });

@@ -30,7 +30,7 @@ class AppToast {
         break;
       case ToastType.info:
       default:
-        bg = cs.surfaceVariant.withOpacity(.45);
+        bg = cs.surfaceContainerHighest.withOpacity(.45);
         fg = cs.onSurface.withOpacity(.9);
         break;
     }

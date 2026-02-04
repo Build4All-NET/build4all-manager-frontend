@@ -26,10 +26,12 @@ class _NotificationsTileState extends State<NotificationsTile> {
   @override
   void didUpdateWidget(covariant NotificationsTile oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.notifyItems != widget.notifyItems)
+    if (oldWidget.notifyItems != widget.notifyItems) {
       _items = widget.notifyItems;
-    if (oldWidget.notifyFeedback != widget.notifyFeedback)
+    }
+    if (oldWidget.notifyFeedback != widget.notifyFeedback) {
       _fb = widget.notifyFeedback;
+    }
   }
 
   @override

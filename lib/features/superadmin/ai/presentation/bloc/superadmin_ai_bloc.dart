@@ -52,5 +52,5 @@ class SuperAdminAiBloc extends Bloc<SuperAdminAiEvent, SuperAdminAiState> {
 
 extension _CopyOwnerAiStatus on dynamic {
   // ignore: unused_element
-  dynamic copyWith({bool? aiEnabled}) => this;
+  dynamic copyWith() => this;
 }

@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import '../../domain/entities/admin_profile.dart';
 import '../../domain/repositories/i_admin_repository.dart';
 import '../models/admin_profile_model.dart';
