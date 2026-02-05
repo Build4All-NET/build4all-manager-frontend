@@ -786,6 +786,10 @@ class _StepBody extends StatelessWidget {
     final tt = Theme.of(context).textTheme;
     final l10n = AppLocalizations.of(context)!;
 
+    final allowedCountries = const ['United States', 'Lebanon', 'France'];
+    final selectedCountry =
+        allowedCountries.contains(country) ? country : 'United States';
+        
     InputDecoration deco(String hint) => InputDecoration(
           hintText: hint,
           filled: true,
@@ -874,20 +878,25 @@ class _StepBody extends StatelessWidget {
           Text(l10n.owner_publish_country,
               style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w900)),
           const SizedBox(height: 6),
-          DropdownButtonFormField<String>(
-            initialValue: country,
-            decoration: deco(''),
-            items: [
-              DropdownMenuItem(
-                  value: 'United States',
-                  child: Text(l10n.owner_publish_country_us)),
-              DropdownMenuItem(
-                  value: 'Lebanon', child: Text(l10n.owner_publish_country_lb)),
-              DropdownMenuItem(
-                  value: 'France', child: Text(l10n.owner_publish_country_fr)),
-            ],
-            onChanged: (v) => onCountryChanged(v ?? 'United States'),
-          ),
+DropdownButtonFormField<String>(
+  value: selectedCountry, // ✅ not initialValue
+  decoration: deco(''),
+  items: [
+    DropdownMenuItem(
+      value: 'United States',
+      child: Text(l10n.owner_publish_country_us),
+    ),
+    DropdownMenuItem(
+      value: 'Lebanon',
+      child: Text(l10n.owner_publish_country_lb),
+    ),
+    DropdownMenuItem(
+      value: 'France',
+      child: Text(l10n.owner_publish_country_fr),
+    ),
+  ],
+  onChanged: (v) => onCountryChanged(v ?? 'United States'),
+),
           const SizedBox(height: 14),
           Text(l10n.owner_publish_pricing,
               style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w900)),
