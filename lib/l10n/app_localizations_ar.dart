@@ -1841,4 +1841,34 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get phoneNumber => 'Phone Number';
+
+  @override
+  String get owner_project_failed => 'Failed';
+
+  @override
+  String get owner_project_build_failed => 'Build failed';
+
+  @override
+  String get owner_project_play_store => 'Play Store:';
+
+  @override
+  String get owner_project_app_store => 'App Store:';
+
+  @override
+  String get owner_project_requested => 'Requested';
+
+  @override
+  String get owner_project_not_requested => 'Not Requested';
+
+  @override
+  String get owner_project_download => 'Download & Install';
+
+  @override
+  String get owner_project_open => 'Download TestFlight to open';
+
+  @override
+  String get owner_project_retry_build => 'Retry Build';
+
+  @override
+  String get owner_project_publish => 'Publish';
 }

@@ -1841,4 +1841,34 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get phoneNumber => 'Phone Number';
+
+  @override
+  String get owner_project_failed => 'Échec';
+
+  @override
+  String get owner_project_build_failed => 'Échec de la compilation';
+
+  @override
+  String get owner_project_play_store => 'Play Store :';
+
+  @override
+  String get owner_project_app_store => 'App Store :';
+
+  @override
+  String get owner_project_requested => 'Demandé';
+
+  @override
+  String get owner_project_not_requested => 'Non demandé';
+
+  @override
+  String get owner_project_download => 'Télécharger';
+
+  @override
+  String get owner_project_open => 'Ouvrir';
+
+  @override
+  String get owner_project_retry_build => 'Relancer';
+
+  @override
+  String get owner_project_publish => 'Publier';
 }

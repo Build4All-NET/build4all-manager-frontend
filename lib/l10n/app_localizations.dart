@@ -1060,7 +1060,7 @@ abstract class AppLocalizations {
   /// No description provided for @common_download.
   ///
   /// In en, this message translates to:
-  /// **'Download'**
+  /// **'Download & Install'**
   String get common_download;
 
   /// No description provided for @common_download_apk.
@@ -3708,6 +3708,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Phone Number'**
   String get phoneNumber;
+
+  /// No description provided for @owner_project_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get owner_project_failed;
+
+  /// No description provided for @owner_project_build_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Build failed'**
+  String get owner_project_build_failed;
+
+  /// No description provided for @owner_project_play_store.
+  ///
+  /// In en, this message translates to:
+  /// **'Play Store:'**
+  String get owner_project_play_store;
+
+  /// No description provided for @owner_project_app_store.
+  ///
+  /// In en, this message translates to:
+  /// **'App Store:'**
+  String get owner_project_app_store;
+
+  /// No description provided for @owner_project_requested.
+  ///
+  /// In en, this message translates to:
+  /// **'Requested'**
+  String get owner_project_requested;
+
+  /// No description provided for @owner_project_not_requested.
+  ///
+  /// In en, this message translates to:
+  /// **'Not Requested'**
+  String get owner_project_not_requested;
+
+  /// No description provided for @owner_project_download.
+  ///
+  /// In en, this message translates to:
+  /// **'Download & Install'**
+  String get owner_project_download;
+
+  /// No description provided for @owner_project_open.
+  ///
+  /// In en, this message translates to:
+  /// **'Download TestFlight to open'**
+  String get owner_project_open;
+
+  /// No description provided for @owner_project_retry_build.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry Build'**
+  String get owner_project_retry_build;
+
+  /// No description provided for @owner_project_publish.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish'**
+  String get owner_project_publish;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

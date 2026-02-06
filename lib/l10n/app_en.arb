@@ -193,7 +193,7 @@
   "owner_projects_title": "Projects",
   "owner_requests_title": "Requests",
   "owner_profile_title": "Profile",
-   "owner_home_hello": "👋 Hi,",
+  "owner_home_hello": "👋 Hi,",
   "owner_home_subtitle": "Manage your apps easily",
   "owner_home_requestApp": "Request My App",
   "owner_home_myProjects": "My Active Projects",
@@ -206,12 +206,12 @@
   "tutorial_step2_body": "We’ll notify you when your request is approved or needs changes.",
   "tutorial_step3_title": "Download the APK",
   "tutorial_step3_body": "Once built, grab your APK directly from your dashboard.",
-   "owner_nav_title": "Owner",
+  "owner_nav_title": "Owner",
   "owner_nav_home": "Home",
   "owner_nav_projects": "My Apps",
   "owner_nav_requests": "Requests",
   "owner_nav_profile": "Profile",
-   "owner_projects_title": "Projects",
+  "owner_projects_title": "Projects",
   "owner_projects_searchHint": "Search name or slug…",
   "owner_projects_onlyReady": "Only APK ready",
   "owner_projects_emptyTitle": "No projects yet",
@@ -219,9 +219,7 @@
   "owner_projects_building": "Building…",
   "owner_projects_ready": "Ready",
   "owner_projects_openInBrowser": "Open",
- 
-
- "owner_request_title": "Request Your App",
+  "owner_request_title": "Request Your App",
   "owner_request_submit_hint": "Pick a project, name your app, add a logo (optional), choose a theme, then submit to build.",
   "owner_request_project": "Project",
   "owner_request_appName": "App name",
@@ -241,11 +239,11 @@
   "owner_request_my_requests": "My Requests",
   "owner_request_error_choose_project": "Please choose a project.",
   "owner_request_error_app_name": "Please enter an app name.",
-  "common_download": "Download",
+  "common_download": "Download & Install",
   "common_download_apk": "Download APK",
   "menuType": "Menu Type",
   "owner_request_upload_logo": "Upload logo file",
-   "owner_profile_title": "Owner Profile",
+  "owner_profile_title": "Owner Profile",
   "owner_profile_username": "Username",
   "owner_profile_name": "Name",
   "owner_profile_email": "Email",
@@ -265,7 +263,6 @@
   "common_search_hint": "Search...",
   "owner_home_search_hint": "Search apps, requests, guides",
   "owner_home_chooseProject": "Choose your project",
-
   "owner_proj_open": "Open project",
   "owner_proj_activities_title": "Activities",
   "owner_proj_activities_desc": "Ticketing, schedules, and event highlights crafted for experiences on the go.",
@@ -275,33 +272,46 @@
   "owner_proj_gym_desc": "Training plans, booking slots, and membership perks in one app.",
   "owner_proj_services_title": "Services",
   "owner_proj_services_desc": "Quotes, appointments, and customer updates tailored to your brand.",
-
   "status_delivered": "Delivered",
   "status_in_production": "In production",
   "status_approved": "Approved",
   "status_pending": "Pending",
   "status_rejected": "Rejected",
-
   "owner_home_recentRequests": "Recent requests",
   "owner_home_viewAll": "View all",
   "owner_home_noRecent": "No recent requests",
   "owner_home_hello": "👋Hi,  ",
   "owner_home_subtitle": "Ready to launch your next app build?",
   "owner_home_requestApp": "Request My App",
-
   "owner_request_requested": "Requested",
-
   "timeago_days": "{count}d ago",
-  "@timeago_days": { "placeholders": { "count": { "type": "int" } } },
+  "@timeago_days": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "timeago_hours": "{count}h ago",
-  "@timeago_hours": { "placeholders": { "count": { "type": "int" } } },
+  "@timeago_hours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "timeago_minutes": "{count}m ago",
-  "@timeago_minutes": { "placeholders": { "count": { "type": "int" } } },
+  "@timeago_minutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "timeago_just_now": "just now",
-   "owner_nav_home": "Home",
+  "owner_nav_home": "Home",
   "owner_nav_myapps": "My Apps",
   "owner_nav_profile": "Profile",
-
   "owner_proj_details_highlights": "Highlights",
   "owner_proj_details_screens": "Screens & flows",
   "owner_proj_details_modules": "Modules included",
@@ -313,7 +323,6 @@
   "stat_reviews_hint": "reviews",
   "stat_active_hint": "active deployments",
   "stat_days_hint": "days avg. turnaround",
-
   "owner_proj_details_headline_activities": "Plan, book, and manage every activity in one place.",
   "owner_proj_details_subhead_activities": "Perfect for studios, clubs, and programs with polished booking & schedules.",
   "owner_proj_details_act_h1": "Class schedules with waitlists",
@@ -329,7 +338,6 @@
   "owner_proj_details_act_m3": "Membership tiers with perks",
   "owner_proj_details_act_i1": "78% of members book via mobile within the first week.",
   "owner_proj_details_act_i2": "Retention jumps 24% after enabling reminder pushes.",
-
   "owner_proj_details_headline_ecommerce": "Launch a high-converting storefront your shoppers trust.",
   "owner_proj_details_subhead_ecommerce": "For DTC brands: catalogs, bundles, and one-click reorders.",
   "owner_proj_details_ecom_h1": "Visual catalog with rich media",
@@ -345,7 +353,6 @@
   "owner_proj_details_ecom_m3": "Gift cards and referral rewards",
   "owner_proj_details_ecom_i1": "Average order value lifts 32% with bundled offers.",
   "owner_proj_details_ecom_i2": "Customers reorder 2.1× faster via the mobile channel.",
-
   "owner_proj_details_headline_gym": "Give members a personal coach in their pocket.",
   "owner_proj_details_subhead_gym": "Hybrid training, class packs, and equipment rentals.",
   "owner_proj_details_gym_h1": "Goal-based onboarding",
@@ -361,7 +368,6 @@
   "owner_proj_details_gym_m3": "Nutrition plans with macro targets",
   "owner_proj_details_gym_i1": "Members completing onboarding convert 3× faster.",
   "owner_proj_details_gym_i2": "Churn drops 19% when messaging is enabled.",
-
   "owner_proj_details_headline_services": "Deliver a concierge-grade service experience.",
   "owner_proj_details_subhead_services": "For agencies, consultancies, and service pros.",
   "owner_proj_details_services_h1": "Smart booking windows",
@@ -381,7 +387,6 @@
   "owner_proj_details_stat_active_hint": "active deployments",
   "owner_proj_details_stat_days_hint": "days avg. turnaround",
   "owner_projects_subtitle": "Manage your projects and app builds seamlessly",
-  
   "copied": "Copied",
   "logout_confirm": "Do you want to log out?",
   "logged_out": "Logged out",
@@ -395,112 +400,85 @@
   "billing": "Billing",
   "copy": "Copy",
   "owner_proj_comingSoon": "Coming Soon",
-  
   "owner_request_title": "Create App Request",
   "refresh": "Refresh",
   "submit": "Submit",
   "cancel": "Cancel",
   "use": "Use",
   "preview": "Preview",
-
   "common_remove": "Remove",
-
   "err_required": "Required",
-
   "owner_request_hero_title": "Build a new app",
   "owner_request_hero_subtitle": "Pick theme + runtime visually. We generate JSON behind the scenes.",
-
   "owner_request_basics_title": "Basics",
   "owner_request_basics_subtitle": "Required info to generate your app.",
-
   "owner_request_project_id": "Project ID",
   "owner_request_project_id_hint": "Selected from project",
-
   "owner_request_app_name": "App name",
   "owner_request_app_name_hint": "ex: MyHobbySphereApp",
-
   "owner_request_notes": "Notes",
   "owner_request_notes_hint": "Short description / special request / anything important…",
-
   "owner_request_settings_title": "App Settings",
   "owner_request_settings_subtitle": "Currency + optional API override.",
-
   "owner_request_api_override": "API base URL override (optional)",
   "owner_request_api_override_hint": "ex: http://192.168.1.7:8080",
-
   "owner_request_palette_title": "Palette",
   "owner_request_palette_subtitle": "Pick a preset or customize colors.",
-
   "owner_request_runtime_title": "Runtime Config",
   "owner_request_runtime_subtitle": "Navigation + home layout + feature flags (no JSON typing).",
-
   "owner_request_branding_title": "Branding",
   "owner_request_branding_subtitle": "Logo is optional but makes it look legit.",
-
   "owner_request_err_load_currencies": "Failed to load currencies",
   "owner_request_err_valid_number": "Enter a valid number",
   "owner_request_err_select_currency": "Select a currency first",
   "owner_request_err_fix_fields": "Fix the highlighted fields",
   "owner_request_err_app_name_required": "App name is required",
-
   "owner_request_logo_selected": "Logo selected",
   "owner_request_logo_removed": "Logo removed",
   "owner_request_no_logo": "No logo selected",
   "owner_request_pick_logo": "Pick",
-
   "owner_request_select_currency": "Select currency",
   "owner_request_tap_to_choose": "Tap to choose",
   "owner_request_pick_currency": "Pick currency",
   "owner_request_currency_search_hint": "Search by label / code / id",
-
   "owner_request_currency_set": "Currency set to {code}",
   "@owner_request_currency_set": {
     "placeholders": {
-      "code": { "type": "String" }
+      "code": {
+        "type": "String"
+      }
     }
   },
-
   "owner_request_submit_ready": "Ready to submit?",
-
   "owner_request_submitting": "Submitting…",
   "owner_request_submit_success": "Request submitted ✅ CI started. APK soon 🚀",
-
   "owner_request_submit_failed": "Submit failed: {msg}",
   "@owner_request_submit_failed": {
     "placeholders": {
-      "msg": { "type": "String" }
+      "msg": {
+        "type": "String"
+      }
     }
   },
-
   "owner_request_selected": "Selected",
   "owner_request_tap_to_apply": "Tap to apply",
-
   "owner_request_primary": "Primary",
   "owner_request_secondary": "Secondary",
   "owner_request_background": "Background",
   "owner_request_text_on_background": "Text (onBackground)",
   "owner_request_error": "Error",
-
   "owner_request_pick_primary": "Pick Primary",
   "owner_request_pick_secondary": "Pick Secondary",
   "owner_request_pick_background": "Pick Background",
   "owner_request_pick_text_color": "Pick Text Color",
   "owner_request_pick_error": "Pick Error",
-
   "owner_request_quick_colors": "Quick colors",
   "owner_request_hex_optional": "Hex (optional)",
   "owner_request_hex_hint": "#RRGGBB",
   "owner_request_err_hex_format": "Use #RRGGBB",
-
   "owner_request_your_app": "Your App",
   "owner_request_preview_hello_owner": "Hello owner 👋",
-  "owner_request_preview_desc": "This is how your theme looks."
-
-
-
-  
-  
-,
+  "owner_request_preview_desc": "This is how your theme looks.",
   "super_create_project_title": "Create Project",
   "super_create_project_subtitle": "Add a new project template for owners to use.",
   "super_project_name": "Project name",
@@ -520,19 +498,23 @@
   "super_create_project_created_id": "Created successfully (ID: {id})",
   "@super_create_project_created_id": {
     "placeholders": {
-      "id": { "type": "String" }
+      "id": {
+        "type": "String"
+      }
     }
   },
   "super_create_project_success": "Project \"{name}\" created successfully!",
   "@super_create_project_success": {
     "placeholders": {
-      "name": { "type": "String" }
+      "name": {
+        "type": "String"
+      }
     }
   },
   "common_loading": "Loading...",
   "common_forbidden": "Forbidden",
   "common_unauthorized": "Unauthorized",
-    "retry": "Retry",
+  "retry": "Retry",
   "search_owners_hint": "Search owners…",
   "search_apps_hint": "Search apps…",
   "empty_owners": "No owners found",
@@ -541,24 +523,32 @@
   "toast_app_selected": "App: {slug}",
   "app_slug_status": "slug: {slug} • {status}",
   "apps_count": "{count} apps",
-
-  "@toast_app_selected": { "placeholders": { "slug": {} } },
-  "@app_slug_status": { "placeholders": { "slug": {}, "status": {} } },
-  "@apps_count": { "placeholders": { "count": {} } },
-   "ordersLabel": "Orders",
+  "@toast_app_selected": {
+    "placeholders": {
+      "slug": {}
+    }
+  },
+  "@app_slug_status": {
+    "placeholders": {
+      "slug": {},
+      "status": {}
+    }
+  },
+  "@apps_count": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "ordersLabel": "Orders",
   "orderLabel": "Order",
-
   "noOrdersTitle": "No orders",
   "noOrdersSubtitle": "No orders found for this app with the current filters.",
-
   "retryLabel": "Retry",
-
   "allTimeLabel": "All time",
   "dashboardLabel": "Dashboard",
   "last7DaysLabel": "Last 7 days",
   "last30DaysLabel": "Last 30 days",
   "clearLabel": "Clear",
-
   "grossSalesLabel": "Gross sales",
   "paidLabel": "Paid",
   "outstandingLabel": "Outstanding",
@@ -566,106 +556,86 @@
   "fullyPaidRateLabel": "Fully paid",
   "statusBreakdownLabel": "Status breakdown",
   "paidRevenueLast7DaysLabel": "Paid revenue (last 7 days)",
-
   "filterAllLabel": "All",
   "filterPendingLabel": "Pending",
   "filterCompletedLabel": "Completed",
   "filterCanceledLabel": "Canceled",
   "filterRejectedLabel": "Rejected",
   "filterRefundedLabel": "Refunded",
-
   "itemsLabel": "Items",
   "totalLabel": "Total",
   "remainingLabel": "Remaining",
   "fullyPaidShortLabel": "Fully paid",
   "owner_projects_test": "TEST",
-
-"owner_publish_title_play": "Publish to Google Play Store",
-"owner_publish_title_appstore": "Publish to App Store",
-"owner_publish_platform_android": "Android",
-"owner_publish_platform_ios": "iOS",
-
-"owner_publish_request_play": "Request Publish to Play Store",
-"owner_publish_request_appstore": "Request Publish to App Store",
-
-"owner_publish_step1_title": "Basic Information",
-"owner_publish_step1_sub": "Provide the basic details about your application",
-"owner_publish_step2_title": "Category & Details",
-"owner_publish_step2_sub": "Categorize your app and provide additional details",
-"owner_publish_step3_title": "Legal & Contact",
-"owner_publish_step3_sub": "These fields are managed by Build4All publisher profile",
-"owner_publish_step4_title": "Assets & Screenshots",
-"owner_publish_step4_sub": "Provide your app icon and screenshots URLs",
-
-"owner_publish_app_name": "Application Name",
-"owner_publish_app_name_hint": "ShopSphere",
-
-"owner_publish_package_name": "Package Name (Read-only)",
-"owner_publish_bundle_id": "Bundle ID (Read-only)",
-
-"owner_publish_short_desc": "Short Description",
-"owner_publish_short_desc_hint": "Brief app description (max 80 characters)",
-
-"owner_publish_full_desc": "Full Description",
-"owner_publish_full_desc_hint": "Write a full store listing description…",
-
-"owner_publish_category": "Category",
-"owner_publish_category_hint": "Select a category",
-
-"owner_publish_country": "Country Availability",
-"owner_publish_pricing": "Pricing",
-"owner_publish_free": "Free",
-"owner_publish_paid": "Paid",
-
-"owner_publish_content_confirm": "I confirm that this app complies with store policies and age-appropriate guidelines.",
-
-"owner_publish_privacy_url": "Privacy Policy URL",
-"owner_publish_dev_name": "Developer Name",
-"owner_publish_dev_email": "Developer Email",
-"owner_publish_managed_by_build4all": "Managed by Build4All",
-
-"owner_publish_icon_url": "App Icon URL",
-"owner_publish_icon_url_hint": "https://.../icon.png",
-"owner_publish_screenshots_urls": "Screenshots URLs",
-"owner_publish_screenshot": "Screenshot",
-"owner_publish_shots_rule": "Required: min 2, max 8 screenshots",
-
-"owner_publish_submit": "Submit for Review",
-"owner_publish_submitted": "Submitted for review",
-
-"owner_publish_err_appname": "Application name is required",
-"owner_publish_err_short": "Short description is required",
-"owner_publish_err_short80": "Short description max 80 characters",
-"owner_publish_err_full": "Full description is required",
-"owner_publish_err_category": "Category is required",
-"owner_publish_err_content_confirm": "You must confirm content rating compliance",
-"owner_publish_err_icon": "App icon URL is required",
-"owner_publish_err_shots2": "At least 2 screenshots are required",
-"owner_publish_err_shots8": "Max 8 screenshots allowed",
-"common_back": "Back",
-"common_continue": "Continue",
-"errFixForm": "Please fix the errors in the form",
-"msgWelcomeBack": "Welcome back",
-"msgVerified": "Verified",
-
+  "owner_publish_title_play": "Publish to Google Play Store",
+  "owner_publish_title_appstore": "Publish to App Store",
+  "owner_publish_platform_android": "Android",
+  "owner_publish_platform_ios": "iOS",
+  "owner_publish_request_play": "Request Publish to Play Store",
+  "owner_publish_request_appstore": "Request Publish to App Store",
+  "owner_publish_step1_title": "Basic Information",
+  "owner_publish_step1_sub": "Provide the basic details about your application",
+  "owner_publish_step2_title": "Category & Details",
+  "owner_publish_step2_sub": "Categorize your app and provide additional details",
+  "owner_publish_step3_title": "Legal & Contact",
+  "owner_publish_step3_sub": "These fields are managed by Build4All publisher profile",
+  "owner_publish_step4_title": "Assets & Screenshots",
+  "owner_publish_step4_sub": "Provide your app icon and screenshots URLs",
+  "owner_publish_app_name": "Application Name",
+  "owner_publish_app_name_hint": "ShopSphere",
+  "owner_publish_package_name": "Package Name (Read-only)",
+  "owner_publish_bundle_id": "Bundle ID (Read-only)",
+  "owner_publish_short_desc": "Short Description",
+  "owner_publish_short_desc_hint": "Brief app description (max 80 characters)",
+  "owner_publish_full_desc": "Full Description",
+  "owner_publish_full_desc_hint": "Write a full store listing description…",
+  "owner_publish_category": "Category",
+  "owner_publish_category_hint": "Select a category",
+  "owner_publish_country": "Country Availability",
+  "owner_publish_pricing": "Pricing",
+  "owner_publish_free": "Free",
+  "owner_publish_paid": "Paid",
+  "owner_publish_content_confirm": "I confirm that this app complies with store policies and age-appropriate guidelines.",
+  "owner_publish_privacy_url": "Privacy Policy URL",
+  "owner_publish_dev_name": "Developer Name",
+  "owner_publish_dev_email": "Developer Email",
+  "owner_publish_managed_by_build4all": "Managed by Build4All",
+  "owner_publish_icon_url": "App Icon URL",
+  "owner_publish_icon_url_hint": "https://.../icon.png",
+  "owner_publish_screenshots_urls": "Screenshots URLs",
+  "owner_publish_screenshot": "Screenshot",
+  "owner_publish_shots_rule": "Required: min 2, max 8 screenshots",
+  "owner_publish_submit": "Submit for Review",
+  "owner_publish_submitted": "Submitted for review",
+  "owner_publish_err_appname": "Application name is required",
+  "owner_publish_err_short": "Short description is required",
+  "owner_publish_err_short80": "Short description max 80 characters",
+  "owner_publish_err_full": "Full description is required",
+  "owner_publish_err_category": "Category is required",
+  "owner_publish_err_content_confirm": "You must confirm content rating compliance",
+  "owner_publish_err_icon": "App icon URL is required",
+  "owner_publish_err_shots2": "At least 2 screenshots are required",
+  "owner_publish_err_shots8": "Max 8 screenshots allowed",
+  "common_back": "Back",
+  "common_continue": "Continue",
+  "errFixForm": "Please fix the errors in the form",
+  "msgWelcomeBack": "Welcome back",
+  "msgVerified": "Verified",
   "nav_publish_requests": "Publish Requests",
   "publish_search_hint": "Search by app name, AUP id…",
   "publish_no_requests": "No requests found.",
   "common_refresh": "Refresh",
-
   "publish_status_submitted": "Submitted",
   "publish_status_in_review": "In review",
   "publish_status_approved": "Approved",
   "publish_status_rejected": "Rejected",
   "publish_status_published": "Published",
   "publish_status_draft": "Draft",
-
   "publish_details_title": "Publish Request",
   "publish_section_basic": "Basic",
   "publish_section_descriptions": "Descriptions",
   "publish_section_assets": "Assets",
   "publish_section_admin_notes": "Admin Notes",
-
   "publish_label_platform": "Platform",
   "publish_label_store": "Store",
   "publish_label_status": "Status",
@@ -675,35 +645,30 @@
   "publish_label_pricing": "Pricing",
   "publish_label_category": "Category",
   "publish_label_content_rating_confirmed": "Content rating confirmed",
-
   "publish_label_short": "Short",
   "publish_label_full": "Full",
   "publish_label_icon": "App Icon",
   "publish_label_screenshots": "Screenshots",
   "publish_label_no_screenshots": "No screenshots",
-
   "publish_action_reject": "Reject",
   "publish_action_approve": "Approve",
   "common_cancel": "Cancel",
-
   "publish_sheet_reject_title": "Reject request",
   "publish_sheet_approve_title": "Approve request",
   "publish_sheet_notes_hint": "Optional notes…",
-
   "toast_publish_approved": "Request approved",
   "toast_publish_rejected": "Request rejected",
   "err_unknown": "Something went wrong",
   "common_retry": "Retry",
-    "nav_super_admin": "Super Admin",
+  "nav_super_admin": "Super Admin",
   "nav_dashboard": "Dashboard",
   "super_nav_dashboard": "Dashboard",
   "super_nav_publish_requests": "Publish Requests",
   "super_nav_profile": "Profile",
   "err_unauthorized": "Unauthorized",
   "super_nav_create_project": "Create Project",
- 
   "publish_manage_publisher_profiles": "Manage Publisher Profiles",
-   "common_seed": "Seed",
+  "common_seed": "Seed",
   "common_saving": "Saving...",
   "common_saved": "Saved ✅",
   "common_save_failed": "Save failed",
@@ -711,7 +676,6 @@
   "common_unknown": "Unknown",
   "common_status": "Status",
   "common_fill_all_fields": "Please fill all fields",
-
   "publish_store_play": "PLAY_STORE",
   "publish_store_app": "APP_STORE",
   "publish_store_publisher_profile": "Store Publisher Profile",
@@ -721,7 +685,7 @@
   "publish_profiles_required_hint": "Owners can’t submit publish requests unless this is configured.",
   "publish_seeded_success": "Seeded ",
   "publish_seed_failed": "Seed failed",
-   "ai_label": "AI",
+  "ai_label": "AI",
   "ai_enabled": "Enabled",
   "ai_disabled": "Disabled",
   "ai_owner_setting_title": "Owner AI",
@@ -739,42 +703,41 @@
   "ownerAppsSlugStatus": "slug: {slug}  •  {status}",
   "@ownerAppsSlugStatus": {
     "placeholders": {
-      "slug": { "type": "String" },
-      "status": { "type": "String" }
+      "slug": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      }
     }
   },
-   "projectsSearchHint": "Search projects…",
+  "projectsSearchHint": "Search projects…",
   "projectsEmpty": "No projects found",
   "commonRetry": "Retry",
-    "err_unknown": "Something went wrong.",
+  "err_unknown": "Something went wrong.",
   "common_retry": "Retry",
   "nav_profile": "Profile",
-
   "profile_details": "Profile details",
   "profile_password_hint": "Update your password to keep your account secure.",
   "profile_change_password": "Change password",
-
   "common_security": "Security",
   "common_sign_out": "Sign out",
   "common_sign_out_hint": "You’ll need to sign in again to access the dashboard.",
   "common_signed_out": "Signed out successfully.",
   "common_sign_out_confirm": "Are you sure you want to sign out?",
   "common_cancel": "Cancel",
-    "common_language": "Language",
+  "common_language": "Language",
   "common_system_language": "System",
   "lang_english": "English",
   "lang_arabic": "Arabic",
   "lang_french": "French",
-   "owner_publish_err_load_draft": "Failed to load publish draft",
+  "owner_publish_err_load_draft": "Failed to load publish draft",
   "owner_publish_err_save_failed": "Save failed",
   "owner_publish_err_submit_failed": "Submit failed",
-
   "owner_publish_err_logo_required": "Logo is required",
-
   "owner_publish_country_us": "United States",
   "owner_publish_country_lb": "Lebanon",
   "owner_publish_country_fr": "France",
-
   "owner_publish_upload_assets": "Upload Assets (Icon + Screenshots)",
   "owner_publish_current_icon": "Current Icon",
   "owner_publish_no_icon_yet": "No icon uploaded yet.",
@@ -782,7 +745,6 @@
   "owner_publish_no_screenshots_yet": "No screenshots uploaded yet.",
   "owner_publish_rule_shots_2_8": "Rule: screenshots must be 2..8 before submitting.",
   "common_error": "Error",
-  
   "common_close": "Close",
   "common_add": "Add",
   "common_remove": "Remove",
@@ -790,7 +752,6 @@
   "common_share": "Share",
   "common_uploading": "Uploading...",
   "common_network_error_try_again": "Network error. Please try again.",
-
   "owner_publish_assets_title_android": "Android Assets",
   "owner_publish_assets_title_ios": "iOS Assets",
   "owner_publish_assets_app_icon": "App Icon",
@@ -803,19 +764,15 @@
   "owner_publish_assets_err_pick_icon_or_screens": "Pick an icon OR screenshots first",
   "owner_publish_assets_err_screens_min2": "Screenshots: add at least 2",
   "owner_publish_assets_err_screens_max8": "Screenshots: maximum 8 allowed",
-
   "owner_project_err_no_link_open": "No link to open",
   "owner_project_err_invalid_url": "Invalid URL",
   "owner_project_err_cannot_open": "Cannot open",
   "owner_project_err_no_link_copy": "No link to copy",
   "owner_project_err_no_link_share": "No link to share",
   "owner_project_err_share_failed": "Share failed",
-
   "owner_project_link_copied": "Link copied ✅",
-
   "owner_project_status_active": "ACTIVE",
   "owner_project_status_in_production": "IN_PRODUCTION",
-
   "owner_project_android": "Android",
   "owner_project_ios": "iOS",
   "owner_project_apk": "APK",
@@ -827,28 +784,30 @@
   "owner_project_building": "Building",
   "owner_project_download_section": "DOWNLOAD",
   "owner_project_publish_section": "PUBLISH",
-
   "owner_project_share_ios": "Download {appName} iOS (IPA)",
   "owner_project_share_android": "Download {appName} Android ({format})",
   "owner_project_ios_testflight_hint": "Install TestFlight to open the app",
   "owner_project_android_download_hint": "Download to install:",
   "common_open": "Open",
-   "owner_project_ios_testflight_hint": "Installez TestFlight pour ouvrir l’application",
+  "owner_project_ios_testflight_hint": "Installez TestFlight pour ouvrir l’application",
   "owner_project_android_download_hint": "Télécharger pour installer :",
   "common_open": "Ouvrir",
   "errPhoneRequired": "Phone number is required",
-
-      "errPhoneInvalid": "Phone number is invalid",
-      "lblPhone": "Phone Number",
-      "hintPhone": "Enter your phone number",
-      "alreadyHaveAccountLogin": "Already have an account? Login",
-      "owner_profile_phone": "Phone Number",
-      "phoneNumber": "Phone Number"
-
-
-
-
-
+  "errPhoneInvalid": "Phone number is invalid",
+  "lblPhone": "Phone Number",
+  "hintPhone": "Enter your phone number",
+  "alreadyHaveAccountLogin": "Already have an account? Login",
+  "owner_profile_phone": "Phone Number",
+  "phoneNumber": "Phone Number",
+  "owner_project_ready": "Ready",
+  "owner_project_failed": "Failed",
+  "owner_project_build_failed": "Build failed",
+  "owner_project_play_store": "Play Store:",
+  "owner_project_app_store": "App Store:",
+  "owner_project_requested": "Requested",
+  "owner_project_not_requested": "Not Requested",
+  "owner_project_download": "Download & Install",
+  "owner_project_open": "Download TestFlight to open",
+  "owner_project_retry_build": "Retry Build",
+  "owner_project_publish": "Publish"
 }
-
-

@@ -707,6 +707,19 @@
 
 "lblPhone": "Numéro de téléphone",
 
-"hintPhone": "Entrez votre numéro de téléphone"
+"hintPhone": "Entrez votre numéro de téléphone",
+"owner_project_ready": "Prêt",
+  "owner_project_failed": "Échec",
+  "owner_project_build_failed": "Échec de la compilation",
+
+  "owner_project_play_store": "Play Store :",
+  "owner_project_app_store": "App Store :",
+  "owner_project_requested": "Demandé",
+  "owner_project_not_requested": "Non demandé",
+
+  "owner_project_download": "Télécharger",
+  "owner_project_open": "Ouvrir",
+  "owner_project_retry_build": "Relancer",
+  "owner_project_publish": "Publier"
 }
 

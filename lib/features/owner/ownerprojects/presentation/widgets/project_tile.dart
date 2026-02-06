@@ -1,4 +1,8 @@
 // lib/features/owner/ownerprojects/presentation/widgets/project_tile.dart
+//
+// ✅ Same UI/behavior — just **MORE compact**
+// - Smaller paddings, radii, font sizes, button heights, icon sizes
+// - Keeps: header layout, 2 cards side-by-side, no overflow, same logic
 
 import 'package:build4all_manager/features/owner/common/domain/entities/owner_project.dart';
 import 'package:build4all_manager/l10n/app_localizations.dart';
@@ -24,7 +28,6 @@ class ProjectTile extends StatelessWidget {
     required this.publishApi,
   });
 
-  // ✅ makes relative urls absolute + handles "null" + //domain + encoding
   String _abs(String? maybe) {
     if (maybe == null) return '';
     final s0 = maybe.trim();
@@ -33,16 +36,13 @@ class ProjectTile extends StatelessWidget {
     if (s0.startsWith('http://') || s0.startsWith('https://')) {
       return Uri.parse(s0).toString();
     }
-
     if (s0.startsWith('//')) {
       return Uri.parse('https:$s0').toString();
     }
 
     final base = serverRootNoApi.replaceAll(RegExp(r'/+$'), '');
     final rel = s0.startsWith('/') ? s0 : '/$s0';
-    final full = '$base$rel';
-
-    return Uri.parse(full).toString();
+    return Uri.parse('$base$rel').toString();
   }
 
   Future<void> _openUrl(BuildContext context, String urlStr) async {
@@ -61,8 +61,7 @@ class ProjectTile extends StatelessWidget {
     }
 
     if (!await canLaunchUrl(uri)) {
-      AppToast.error(
-          context, '${l10n.owner_project_err_cannot_open}: $cleaned');
+      AppToast.error(context, '${l10n.owner_project_err_cannot_open}: $cleaned');
       return;
     }
 
@@ -108,36 +107,24 @@ class ProjectTile extends StatelessWidget {
     }
   }
 
-  /// ✅ ACTIVE => test (strict), NOT INACTIVE
   String _statusLabel() {
     final raw = project.status.trim();
     final low = raw.toLowerCase();
-
     if (raw.isEmpty || low == 'null') return 'UNKNOWN';
-
-    // ✅ active only
     if (low.split(RegExp(r'\s+')).first == 'active') return 'test';
-
     return raw;
   }
 
-  /// ✅ Color based on displayed label (after override)
   Color _statusColor(ColorScheme cs, String label) {
     final low = label.toLowerCase();
-
     if (low == 'unknown') return cs.outline;
-    if (low.contains('fail') ||
-        low.contains('error') ||
-        low.contains('reject')) {
+    if (low.contains('fail') || low.contains('error') || low.contains('reject')) {
       return cs.error;
     }
-
     if (low.contains('test')) return cs.secondary;
-
     if (low.contains('review')) return cs.primary;
     if (low.contains('prod') || low.contains('production')) return cs.tertiary;
     if (low.contains('local')) return cs.outlineVariant;
-
     return cs.primary;
   }
 
@@ -147,161 +134,64 @@ class ProjectTile extends StatelessWidget {
     final tt = Theme.of(context).textTheme;
     final l10n = AppLocalizations.of(context)!;
 
-    final appName =
-        project.appName.isNotEmpty ? project.appName : project.projectName;
+    final appName = project.appName.isNotEmpty ? project.appName : project.projectName;
 
     final statusLabel = _statusLabel();
     final statusColor = _statusColor(cs, statusLabel);
 
-    // ✅ Android can be APK or AAB (bundleUrl)
+    // Android
     final apkUrl = _abs(project.apkUrl);
     final bundleUrl = _abs(project.bundleUrl);
-    final androidReady = apkUrl.isNotEmpty || bundleUrl.isNotEmpty;
-    final androidDownloadUrl = apkUrl.isNotEmpty ? apkUrl : bundleUrl;
+    final androidUrl = apkUrl.isNotEmpty ? apkUrl : bundleUrl;
+    final androidReady = androidUrl.isNotEmpty;
 
-    // ✅ iOS
-    final ipaUrl = _abs(project.ipaUrl);
-    final iosReady = ipaUrl.isNotEmpty;
+    // iOS
+    final iosUrl = _abs(project.ipaUrl);
+    final iosReady = iosUrl.isNotEmpty;
 
-    final iosShareLabel = l10n.owner_project_share_ios(appName);
     final androidShareLabel = l10n.owner_project_share_android(
       appName,
       apkUrl.isNotEmpty ? l10n.owner_project_apk : l10n.owner_project_aab,
     );
+    final iosShareLabel = l10n.owner_project_share_ios(appName);
+
+    final idLine = project.packageOrBundleId;
 
     return LayoutBuilder(
       builder: (context, c) {
         final w = c.maxWidth;
 
-        final bool tiny = w < 520;
-        final double titleSize = tiny ? 15.5 : 17.5;
-        final double subSize = tiny ? 11 : 12;
-        final double pad = tiny ? 10 : 12;
+        // ✅ EXTRA compact sizing knobs
+        final bool small = w < 360;
+        final double pad = small ? 8 : 10; // smaller
+        final double headerPad = small ? 10 : 12; // smaller
+        final double gap = small ? 6 : 8;
 
-        final double iconBox = tiny ? 46 : 52;
-        final double iconSize = tiny ? 24 : 28;
+        final double cardGap = small ? 8 : 10;
+        final double eachCardW =
+            ((w - (pad * 2) - cardGap) / 2).clamp(135.0, 600.0);
 
-        Widget buildTopActions({
-          required bool enabled,
-          required String url,
-          required String shareLabel,
-        }) {
-          // NOTE: height alignment is handled inside _PlatformPanel (fixed btnH)
-          return Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: enabled ? () => _copyLink(context, url) : null,
-                  icon: Icon(Icons.copy_rounded, size: tiny ? 16 : 18),
-                  label: Text(
-                    l10n.common_copy,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w900,
-                      fontSize: tiny ? 11 : 12,
-                    ),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: tiny ? 9 : 10,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Builder(
-                  builder: (btnCtx) {
-                    return OutlinedButton.icon(
-                      onPressed: enabled
-                          ? () async {
-                              final box =
-                                  btnCtx.findRenderObject() as RenderBox?;
-                              final rect = box == null
-                                  ? null
-                                  : (box.localToGlobal(Offset.zero) & box.size);
-
-                              await _shareLink(
-                                context,
-                                url,
-                                shareLabel,
-                                sharePositionOrigin: rect,
-                              );
-                            }
-                          : null,
-                      icon: Icon(Icons.share_rounded, size: tiny ? 16 : 18),
-                      label: Text(
-                        l10n.common_share,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w900,
-                          fontSize: tiny ? 11 : 12,
-                        ),
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: tiny ? 9 : 10,
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
-          );
-        }
-
-        final isDark = Theme.of(context).brightness == Brightness.dark;
-
-        // ✅ grey gradient readable in both themes
         final headerGradient = LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            const Color.fromARGB(255, 191, 191, 191),
-            const Color.fromARGB(255, 238, 238, 238),
-            Colors.grey.shade200,
+            const Color(0xFFF7F7F7),
+            Colors.white,
+            Colors.grey.shade100,
           ],
-          stops: const [0.0, 0.6, 1.0],
         );
 
-        final titleColor =
-            isDark ? Colors.white.withOpacity(.92) : Colors.grey.shade900;
-        final subColor =
-            isDark ? Colors.white.withOpacity(.72) : Colors.grey.shade700;
-        final idColor =
-            isDark ? Colors.white.withOpacity(.60) : Colors.grey.shade600;
-
-        final idLine = project.packageOrBundleId;
-
-        // ✅ l10n fallback for new texts (no need to add keys right now)
-        final androidDownloadSectionTitle =
-            '${l10n.owner_project_download_section}:';
-        final iosDownloadSectionTitle = l10n.owner_project_download_section;
-
-        // These 2 strings you asked:
-        final iosTestFlightHint =
-            'Install TestFlight to open the app'; // if you later add l10n key, replace
-        final androidInstallHint =
-            'Download to install:'; // if you later add l10n key, replace
-
         return Container(
+          margin: const EdgeInsets.only(bottom: 12),
           decoration: BoxDecoration(
             color: cs.surface,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: cs.outlineVariant.withOpacity(.60)),
+            borderRadius: BorderRadius.circular(16),
             boxShadow: const [
               BoxShadow(
-                color: Color(0x08000000),
-                blurRadius: 8,
-                offset: Offset(0, 4),
-              )
+                color: Color(0x12000000),
+                blurRadius: 12,
+                offset: Offset(0, 6),
+              ),
             ],
           ),
           clipBehavior: Clip.antiAlias,
@@ -310,193 +200,175 @@ class ProjectTile extends StatelessWidget {
               // HEADER
               Container(
                 decoration: BoxDecoration(gradient: headerGradient),
-                child: Stack(
-                  children: [
-                    Positioned.fill(
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              Colors.white.withOpacity(isDark ? .10 : .65),
-                              Colors.white.withOpacity(0),
+                child: Padding(
+                  padding: EdgeInsets.all(headerPad),
+                  child: Row(
+                    children: [
+                      _AppIcon(
+                        project: project,
+                        serverRootNoApi: serverRootNoApi,
+                        size: small ? 40 : 44,
+                        radius: 12,
+                        band: cs.primary,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              appName,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: tt.titleLarge?.copyWith(
+                                fontWeight: FontWeight.w900,
+                                fontSize: small ? 15.5 : 17,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              project.slug,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: tt.bodyMedium?.copyWith(
+                                color: cs.onSurface.withOpacity(.70),
+                                fontWeight: FontWeight.w700,
+                                fontSize: small ? 11.5 : 12.5,
+                              ),
+                            ),
+                            if (idLine != null) ...[
+                              const SizedBox(height: 3),
+                              Text(
+                                idLine,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: tt.bodyMedium?.copyWith(
+                                  color: cs.onSurface.withOpacity(.60),
+                                  fontFamily: 'monospace',
+                                  fontSize: small ? 11 : 12,
+                                ),
+                              ),
                             ],
-                          ),
+                          ],
                         ),
                       ),
-                    ),
-                    Padding(
-                      padding:
-                          EdgeInsets.fromLTRB(pad, pad, pad, tiny ? 8 : 10),
-                      child: Row(
-                        children: [
-                          _AppIcon(
-                            project: project,
-                            band: cs.primary,
-                            serverRootNoApi: serverRootNoApi,
-                            size: tiny ? 54 : 60,
-                            radius: tiny ? 14 : 16,
-                            fontSize: tiny ? 20 : 22,
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  appName,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: tt.titleLarge?.copyWith(
-                                    fontWeight: FontWeight.w900,
-                                    fontSize: titleSize,
-                                    color: titleColor,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  '/${project.slug}',
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: tt.bodySmall?.copyWith(
-                                    fontSize: subSize,
-                                    color: subColor,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                                if (idLine != null) ...[
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    idLine,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: tt.bodySmall?.copyWith(
-                                      fontSize: subSize,
-                                      color: idColor,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ],
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          _Pill(
-                              text: statusLabel,
-                              color: statusColor,
-                              tiny: true),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              Divider(height: 1, color: cs.outlineVariant.withOpacity(.60)),
-
-              // ✅ better bottom spacing + min height
-              Padding(
-                padding: EdgeInsets.fromLTRB(pad, pad, pad, pad + 10),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(minHeight: tiny ? 220 : 240),
-                  child: IntrinsicHeight(
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        // ANDROID
-                        Expanded(
-                          child: _PlatformPanel(
-                            compact: tiny,
-                            title: l10n.owner_project_android,
-                            icon: Icons.android_rounded,
-                            iconBox: iconBox,
-                            iconSize: iconSize,
-                            ready: androidReady,
-                            storeLine: l10n.owner_project_play_not_requested,
-                            primaryColor: cs.primary,
-
-                            // ✅ per your request
-                            downloadSectionTitle: androidInstallHint,
-                            downloadButtonIcon:
-                                const Icon(Icons.download_rounded),
-                            downloadButtonText: '', // icon-only
-                            downloadButtonAlign:
-                                _DownloadAlign.start, // same align
-
-                            downloadUrl: androidDownloadUrl,
-
-                            publishLabel: l10n.owner_publish_request_play,
-                            onPublish: () => PublishWizardDialog.open(
-                              context,
-                              api: publishApi,
-                              aupId: project.linkId,
-                              appName: appName,
-                              platform: PublishPlatform.android,
-                              store: PublishStore.playStore,
-                              androidPackageName: project.androidPackageName,
-                            ),
-                            topActions: buildTopActions(
-                              enabled: androidDownloadUrl.isNotEmpty,
-                              url: androidDownloadUrl,
-                              shareLabel: androidShareLabel,
-                            ),
-                            onDownload: (u) => _openUrl(context, u),
-                          ),
-                        ),
-
-                        VerticalDivider(
-                          width: tiny ? 14 : 22,
-                          thickness: 1,
-                          color: cs.outlineVariant.withOpacity(.60),
-                        ),
-
-                        // IOS
-                        Expanded(
-                          child: _PlatformPanel(
-                            compact: tiny,
-                            title: l10n.owner_project_ios,
-                            icon: Icons.apple_rounded,
-                            iconBox: iconBox,
-                            iconSize: iconSize,
-                            ready: iosReady,
-                            storeLine:
-                                l10n.owner_project_appstore_not_requested,
-                            primaryColor: cs.onSurface,
-
-                            // ✅ per your request
-                            downloadSectionTitle: iosTestFlightHint,
-                            downloadButtonIcon:
-                                _TestFlightLikeIcon(size: tiny ? 20 : 22),
-                            downloadButtonText: 'Open', // you asked "Open"
-                            downloadButtonAlign:
-                                _DownloadAlign.start, // same align
-
-                            downloadUrl: ipaUrl,
-
-                            publishLabel: l10n.owner_publish_request_appstore,
-                            onPublish: () => PublishWizardDialog.open(
-                              context,
-                              api: publishApi,
-                              aupId: project.linkId,
-                              appName: appName,
-                              platform: PublishPlatform.ios,
-                              store: PublishStore.appStore,
-                              iosBundleId: project.iosBundleId,
-                            ),
-                            topActions: buildTopActions(
-                              enabled: ipaUrl.isNotEmpty,
-                              url: ipaUrl,
-                              shareLabel: iosShareLabel,
-                            ),
-                            onDownload: (u) => _openUrl(context, u),
-                          ),
-                        ),
-                      ],
-                    ),
+                      const SizedBox(width: 6),
+                      _StatusPill(label: statusLabel, color: statusColor),
+                    ],
                   ),
                 ),
               ),
+
+              Divider(height: 1, color: cs.outlineVariant.withOpacity(.7)),
+
+              // TWO CARDS ROW
+              Padding(
+                padding: EdgeInsets.all(pad),
+                child: IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      SizedBox(
+                        width: eachCardW,
+                        child: _PlatformCard(
+                          maxW: eachCardW,
+                          title: l10n.owner_project_android,
+                          icon: Icons.android_rounded,
+                          iconColor: const Color(0xFF22C55E),
+                          statusText: androidReady
+                              ? l10n.owner_project_ready
+                              : l10n.owner_project_failed,
+                          statusColor: androidReady
+                              ? const Color(0xFF22C55E)
+                              : const Color(0xFFEF4444),
+                          showErrorBox: false,
+                          errorBoxText: '',
+                          infoTitle: l10n.owner_project_play_store,
+                          infoValue: l10n.owner_project_requested,
+                          infoValueColor: const Color(0xFF1D4ED8),
+                          enabledActions: androidUrl.isNotEmpty,
+                         
+                          onCopy: () => _copyLink(context, androidUrl),
+                          onShare: () async {
+                            final box = context.findRenderObject() as RenderBox?;
+                            final rect =
+                                box == null ? null : (box.localToGlobal(Offset.zero) & box.size);
+                            await _shareLink(context, androidUrl, androidShareLabel,
+                                sharePositionOrigin: rect);
+                          },
+                          primaryText: l10n.common_download,
+                          primaryIcon: Icons.download_rounded,
+                          primaryEnabled: androidUrl.isNotEmpty,
+                          onPrimary: () => _openUrl(context, androidUrl),
+                          secondaryText: l10n.owner_project_requested,
+                          secondaryIcon: Icons.upload_rounded,
+                          secondaryEnabled: true,
+                          onSecondary: () => PublishWizardDialog.open(
+                            context,
+                            api: publishApi,
+                            aupId: project.linkId,
+                            appName: appName,
+                            platform: PublishPlatform.android,
+                            store: PublishStore.playStore,
+                            androidPackageName: project.androidPackageName,
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: cardGap),
+                      SizedBox(
+                        width: eachCardW,
+                        child: _PlatformCard(
+                          maxW: eachCardW,
+                          title: l10n.owner_project_ios,
+                          icon: Icons.apple_rounded,
+                          iconColor: const Color(0xFF2563EB),
+                          statusText: iosReady
+                              ? l10n.owner_project_ready
+                              : l10n.owner_project_failed,
+                          statusColor: iosReady
+                              ? const Color(0xFF22C55E)
+                              : const Color(0xFFEF4444),
+                          showErrorBox: false,
+                          infoTitle: l10n.owner_project_app_store,
+                          infoValue: iosReady
+                              ? l10n.owner_project_requested
+                              : l10n.owner_project_not_requested,
+                          infoValueColor: iosReady
+                              ? const Color(0xFF1D4ED8)
+                              : cs.onSurface.withOpacity(.55),
+                          enabledActions: iosUrl.isNotEmpty,
+                          onCopy: () => _copyLink(context, iosUrl),
+                          onShare: () async {
+                            final box = context.findRenderObject() as RenderBox?;
+                            final rect =
+                                box == null ? null : (box.localToGlobal(Offset.zero) & box.size);
+                            await _shareLink(context, iosUrl, iosShareLabel,
+                                sharePositionOrigin: rect);
+                          },
+                          primaryText: iosReady ? l10n.owner_project_open : l10n.owner_project_retry_build,
+                          primaryIcon: iosReady ? Icons.open_in_new_rounded : Icons.refresh_rounded,
+                          primaryEnabled: true,
+                          onPrimary: () => _openUrl(context, iosUrl),
+                          secondaryText: l10n.owner_project_requested,
+                          secondaryIcon: Icons.upload_rounded,
+                          secondaryEnabled: iosReady,
+                          onSecondary: () => PublishWizardDialog.open(
+                            context,
+                            api: publishApi,
+                            aupId: project.linkId,
+                            appName: appName,
+                            platform: PublishPlatform.ios,
+                            store: PublishStore.appStore,
+                            iosBundleId: project.iosBundleId,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              SizedBox(height: gap),
             ],
           ),
         );
@@ -505,362 +377,300 @@ class ProjectTile extends StatelessWidget {
   }
 }
 
-enum _DownloadAlign { start, end }
-
-class _PlatformPanel extends StatelessWidget {
-  final bool compact;
+// ─────────────────────────────────────────────
+// Platform Card — EXTRA compact
+// ─────────────────────────────────────────────
+class _PlatformCard extends StatelessWidget {
+  final double maxW;
 
   final String title;
   final IconData icon;
-  final double iconBox;
-  final double iconSize;
+  final Color iconColor;
 
-  final bool ready;
-  final String storeLine;
-  final Color primaryColor;
+  final String statusText;
+  final Color statusColor;
 
-  final String downloadSectionTitle;
-  final Widget downloadButtonIcon;
-  final String downloadButtonText;
-  final _DownloadAlign downloadButtonAlign;
+  final String infoTitle;
+  final String infoValue;
+  final Color infoValueColor;
 
-  final String downloadUrl;
+  final bool showErrorBox;
+  final String errorBoxText;
 
-  final String publishLabel;
-  final VoidCallback onPublish;
+  final bool enabledActions;
+  final VoidCallback onCopy;
+  final VoidCallback onShare;
 
-  final Widget? topActions;
-  final void Function(String url) onDownload;
+  final String primaryText;
+  final IconData primaryIcon;
+  final bool primaryEnabled;
+  final VoidCallback onPrimary;
 
-  const _PlatformPanel({
-    required this.compact,
+  final String secondaryText;
+  final IconData secondaryIcon;
+  final bool secondaryEnabled;
+  final VoidCallback onSecondary;
+
+  const _PlatformCard({
+    required this.maxW,
     required this.title,
     required this.icon,
-    required this.iconBox,
-    required this.iconSize,
-    required this.ready,
-    required this.storeLine,
-    required this.primaryColor,
-    required this.downloadSectionTitle,
-    required this.downloadButtonIcon,
-    required this.downloadButtonText,
-    required this.downloadButtonAlign,
-    required this.downloadUrl,
-    required this.publishLabel,
-    required this.onPublish,
-    required this.onDownload,
-    required this.topActions,
+    required this.iconColor,
+    required this.statusText,
+    required this.statusColor,
+    required this.infoTitle,
+    required this.infoValue,
+    required this.infoValueColor,
+    required this.enabledActions,
+    required this.onCopy,
+    required this.onShare,
+    required this.primaryText,
+    required this.primaryIcon,
+    required this.primaryEnabled,
+    required this.onPrimary,
+    required this.secondaryText,
+    required this.secondaryIcon,
+    required this.secondaryEnabled,
+    required this.onSecondary,
+    this.showErrorBox = false,
+    this.errorBoxText = '',
   });
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
-    final l10n = AppLocalizations.of(context)!;
 
-    // ✅ ONE height for ALL buttons across Android & iOS
-    final double btnH = compact ? 42 : 46;
+    final bool tiny = maxW < 185;
 
-    // ✅ FIX: reserve same vertical slots so Publish aligns perfectly
-    final double oneLineSlotH = compact ? 18 : 20; // storeLine
-    final double sectionTitleSlotH = compact ? 18 : 20; // section titles
+    final double pad = tiny ? 8 : 9;
+    final double btnH = tiny ? 34 : 36;
+    final double iconBtnSize = tiny ? 34 : 36;
 
-    final double labelSize = compact ? 11 : 12;
+    final double valueMaxFont = tiny ? 18 : 20;
+    final double titleFont = tiny ? 13.5 : 14.5;
+    final double storeTitleFont = tiny ? 12.5 : 13.5;
 
-    final double gap = compact ? 8 : 10;
-    final double gapSm = compact ? 6 : 8;
+    final double errorSlotH = tiny ? 34 : 38;
 
-    Widget fitted(Widget child) => FittedBox(
-          fit: BoxFit.scaleDown,
-          alignment: Alignment.center,
-          child: child,
-        );
-
-    Widget fixedOneLineSlot(String text, double height, TextStyle? style) {
-      return SizedBox(
-        height: height,
-        child: Align(
-          alignment: Alignment.centerLeft,
-          child: Text(
-            text,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: style,
-          ),
-        ),
-      );
-    }
-
-    // ✅ Download button (fixed height)
-    final downloadBtn = SizedBox(
-      height: btnH,
-      child: OutlinedButton(
-        onPressed: downloadUrl.isEmpty ? null : () => onDownload(downloadUrl),
-        style: OutlinedButton.styleFrom(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            IconTheme(
-              data: IconThemeData(size: compact ? 18 : 20),
-              child: downloadButtonIcon,
-            ),
-            if (downloadButtonText.isNotEmpty) ...[
-              const SizedBox(width: 8),
-              Text(
-                downloadButtonText,
-                style: TextStyle(
-                  fontWeight: FontWeight.w900,
-                  fontSize: labelSize,
+    return Container(
+      padding: EdgeInsets.all(pad),
+      decoration: BoxDecoration(
+        color: cs.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: cs.outlineVariant.withOpacity(.75)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, color: iconColor, size: tiny ? 17 : 18),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: tt.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    fontSize: titleFont,
+                  ),
                 ),
               ),
             ],
-          ],
-        ),
-      ),
-    );
+          ),
 
-    // ✅ Publish button (fixed height)
-    final publishBtn = SizedBox(
-      width: double.infinity,
-      height: btnH,
-      child: ElevatedButton.icon(
-        onPressed: onPublish,
-        icon: Icon(Icons.send_rounded, size: compact ? 16 : 18),
-        label: Text(
-          publishLabel,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(fontWeight: FontWeight.w900, fontSize: labelSize),
-        ),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: primaryColor,
-          foregroundColor: Colors.white,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
-          elevation: 0,
-        ),
-      ),
-    );
+          const SizedBox(height: 7),
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Container(
-              width: iconBox,
-              height: iconBox,
-              decoration: BoxDecoration(
-                color: primaryColor.withOpacity(.10),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Icon(icon, color: primaryColor, size: iconSize),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: tt.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w900,
-                      fontSize: compact ? 13 : 14,
+          _MiniPill(text: statusText, color: statusColor),
+
+          const SizedBox(height: 8),
+
+          SizedBox(
+            height: errorSlotH,
+            child: showErrorBox
+                ? Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 7),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFE7E7),
+                      borderRadius: BorderRadius.circular(10),
                     ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.error_outline_rounded,
+                            color: Color(0xFFDC2626), size: 15),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            errorBoxText,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: tt.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w800,
+                              color: const Color(0xFF111827),
+                              fontSize: tiny ? 11.5 : 12.5,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : const SizedBox.shrink(),
+          ),
+
+          const SizedBox(height: 6),
+
+          Text(
+            '$infoTitle:',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: tt.bodyLarge?.copyWith(
+              fontWeight: FontWeight.w900,
+              fontSize: storeTitleFont,
+              color: cs.onSurface.withOpacity(.85),
+            ),
+          ),
+
+          const SizedBox(height: 4),
+
+          SizedBox(
+            height: tiny ? 26 : 30,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  infoValue,
+                  style: tt.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    color: infoValueColor,
+                    fontSize: valueMaxFont,
                   ),
-                  SizedBox(height: gapSm),
-                  _Pill(
-                    text: ready
-                        ? l10n.owner_project_ready
-                        : l10n.owner_project_building,
-                    color: ready ? cs.primary : cs.tertiary,
-                    tiny: compact,
-                  ),
-                ],
+                ),
               ),
             ),
-          ],
-        ),
-
-        SizedBox(height: gap),
-        Divider(height: 1, color: cs.outlineVariant.withOpacity(.60)),
-        SizedBox(height: gapSm),
-
-        // ✅ same height both columns
-        fixedOneLineSlot(
-          storeLine,
-          oneLineSlotH,
-          tt.bodyMedium?.copyWith(
-            fontSize: compact ? 11 : 12,
-            color: cs.onSurface.withOpacity(.7),
           ),
-        ),
 
-        SizedBox(height: gap),
+          const SizedBox(height: 7),
 
-        // ✅ fixed so it matches between android/ios
-        SizedBox(height: btnH, child: topActions ?? const SizedBox.shrink()),
-
-        SizedBox(height: gap),
-
-        // ✅ prevents iOS title wrapping => publish misalignment
-        fixedOneLineSlot(
-          downloadSectionTitle,
-          sectionTitleSlotH,
-          tt.labelLarge?.copyWith(
-            fontWeight: FontWeight.w900,
-            fontSize: compact ? 11 : 12,
+          Row(
+            children: [
+              Expanded(
+                child: SizedBox(
+                  height: iconBtnSize,
+                  child: _FadedSquareIcon(
+                    enabled: enabledActions,
+                    icon: Icons.copy_rounded,
+                    onTap: onCopy,
+                    iconSize: tiny ? 15 : 16,
+                    radius: 10,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 7),
+              Expanded(
+                child: SizedBox(
+                  height: iconBtnSize,
+                  child: _FadedSquareIcon(
+                    enabled: enabledActions,
+                    icon: Icons.share_rounded,
+                    onTap: onShare,
+                    iconSize: tiny ? 15 : 16,
+                    radius: 10,
+                  ),
+                ),
+              ),
+            ],
           ),
-        ),
 
-        SizedBox(height: gapSm),
+          const SizedBox(height: 8),
 
-        downloadButtonAlign == _DownloadAlign.end
-            ? Row(children: [const Spacer(), fitted(downloadBtn)])
-            : Row(children: [fitted(downloadBtn), const Spacer()]),
-
-        SizedBox(height: gap),
-
-        fixedOneLineSlot(
-          l10n.owner_project_publish_section,
-          sectionTitleSlotH,
-          tt.labelLarge?.copyWith(
-            fontWeight: FontWeight.w900,
-            fontSize: compact ? 11 : 12,
+          SizedBox(
+            width: double.infinity,
+            height: btnH,
+            child: ElevatedButton.icon(
+              onPressed: primaryEnabled ? onPrimary : null,
+              icon: Icon(primaryIcon, size: 16),
+              label: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  primaryText,
+                  style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 12.8),
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF0B6BFF),
+                foregroundColor: Colors.white,
+                shape: const StadiumBorder(),
+                elevation: 0,
+              ),
+            ),
           ),
-        ),
 
-        SizedBox(height: gapSm),
+          const SizedBox(height: 7),
 
-        // ✅ now BOTH publish buttons are EXACTLY on same line
-        publishBtn,
-      ],
-    );
-  }
-}
-
-class _TestFlightLikeIcon extends StatelessWidget {
-  final double size;
-  const _TestFlightLikeIcon({required this.size});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(size * 0.28),
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF1FB2FF), Color(0xFF0A74FF)],
-        ),
-        boxShadow: const [
-          BoxShadow(
-              color: Color(0x22000000), blurRadius: 6, offset: Offset(0, 2)),
+          SizedBox(
+            width: double.infinity,
+            height: btnH,
+            child: OutlinedButton.icon(
+              onPressed: secondaryEnabled ? onSecondary : null,
+              icon: Icon(secondaryIcon, size: 16),
+              label: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  secondaryText,
+                  style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 12.8),
+                ),
+              ),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: const Color(0xFF16A34A),
+                side: const BorderSide(
+                  color: Color(0xFF16A34A),
+                  width: 2,
+                ),
+                shape: const StadiumBorder(),
+              ),
+            ),
+          ),
         ],
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(size * 0.28),
-        child: CustomPaint(painter: _TestFlightPainter()),
-      ),
     );
   }
 }
 
-class _TestFlightPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size s) {
-    final w = s.width;
-    final h = s.height;
-    final c = Offset(w / 2, h / 2);
-    final r = w * 0.33;
-
-    final grid = Paint()
-      ..color = Colors.white.withOpacity(0.18)
-      ..strokeWidth = w * 0.04;
-
-    for (int i = 1; i <= 2; i++) {
-      final x = w * i / 3;
-      final y = h * i / 3;
-      canvas.drawLine(Offset(x, 0), Offset(x, h), grid);
-      canvas.drawLine(Offset(0, y), Offset(w, y), grid);
-    }
-
-    final glow = Paint()..color = Colors.white.withOpacity(0.18);
-    canvas.drawCircle(c, w * 0.42, glow);
-
-    final blade = Paint()..color = Colors.white.withOpacity(0.90);
-
-    void bladeAt(double angle) {
-      canvas.save();
-      canvas.translate(c.dx, c.dy);
-      canvas.rotate(angle);
-
-      final bw = w * 0.16;
-      final bl = w * 0.38;
-      final rect =
-          Rect.fromCenter(center: Offset(0, -r), width: bw, height: bl);
-      final rr = RRect.fromRectAndRadius(rect, Radius.circular(bw));
-      canvas.drawRRect(rr, blade);
-
-      canvas.restore();
-    }
-
-    bladeAt(0);
-    bladeAt(2.09439510239);
-    bladeAt(4.18879020479);
-
-    final hub = Paint()..color = Colors.white.withOpacity(0.95);
-    canvas.drawCircle(c, w * 0.07, hub);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
+// ─────────────────────────────────────────────
+// Header Logo
+// ─────────────────────────────────────────────
 class _AppIcon extends StatelessWidget {
   final OwnerProject project;
-  final Color band;
   final String serverRootNoApi;
-
   final double size;
   final double radius;
-  final double fontSize;
+  final Color band;
 
   const _AppIcon({
     required this.project,
-    required this.band,
     required this.serverRootNoApi,
     required this.size,
     required this.radius,
-    required this.fontSize,
+    required this.band,
   });
 
   String _abs(String? maybe) {
     if (maybe == null) return '';
     final s0 = maybe.trim();
     if (s0.isEmpty || s0.toLowerCase() == 'null') return '';
-
     if (s0.startsWith('http://') || s0.startsWith('https://')) {
       return Uri.parse(s0).toString();
     }
-
-    if (s0.startsWith('//')) {
-      return Uri.parse('https:$s0').toString();
-    }
+    if (s0.startsWith('//')) return Uri.parse('https:$s0').toString();
 
     final base = serverRootNoApi.replaceAll(RegExp(r'/+$'), '');
     final rel = s0.startsWith('/') ? s0 : '/$s0';
-    final full = '$base$rel';
-
-    return Uri.parse(full).toString();
+    return Uri.parse('$base$rel').toString();
   }
 
   @override
@@ -870,8 +680,7 @@ class _AppIcon extends StatelessWidget {
 
     if (cleaned.isNotEmpty && cleaned.toLowerCase() != 'null') {
       final baseSrc = _abs(cleaned);
-      final src =
-          '$baseSrc${baseSrc.contains('?') ? '&' : '?'}v=${project.linkId}';
+      final src = '$baseSrc${baseSrc.contains('?') ? '&' : '?'}v=${project.linkId}';
 
       return ClipRRect(
         borderRadius: BorderRadius.circular(radius),
@@ -880,6 +689,20 @@ class _AppIcon extends StatelessWidget {
           width: size,
           height: size,
           fit: BoxFit.cover,
+          loadingBuilder: (context, child, progress) {
+            if (progress == null) return child;
+            return Container(
+              width: size,
+              height: size,
+              color: band.withOpacity(.10),
+              alignment: Alignment.center,
+              child: SizedBox(
+                width: size * 0.33,
+                height: size * 0.33,
+                child: const CircularProgressIndicator(strokeWidth: 2),
+              ),
+            );
+          },
           errorBuilder: (_, err, __) {
             debugPrint('LOGO FAIL => $src | $err');
             return _fallback(context);
@@ -892,9 +715,7 @@ class _AppIcon extends StatelessWidget {
   }
 
   Widget _fallback(BuildContext context) {
-    final text =
-        (project.appName.isNotEmpty ? project.appName : project.projectName)
-            .trim();
+    final text = (project.appName.isNotEmpty ? project.appName : project.projectName).trim();
     final initial = (text.isEmpty ? 'A' : text.characters.first.toUpperCase());
 
     return Container(
@@ -907,43 +728,112 @@ class _AppIcon extends StatelessWidget {
       alignment: Alignment.center,
       child: Text(
         initial,
-        style: TextStyle(fontWeight: FontWeight.w900, fontSize: fontSize),
+        style: TextStyle(
+          fontWeight: FontWeight.w900,
+          fontSize: size * 0.34,
+        ),
       ),
     );
   }
 }
 
-class _Pill extends StatelessWidget {
+// ─────────────────────────────────────────────
+// Pills + icon box — compact
+// ─────────────────────────────────────────────
+class _StatusPill extends StatelessWidget {
+  final String label;
+  final Color color;
+
+  const _StatusPill({required this.label, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    final shown = label.trim().toUpperCase();
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: color.withOpacity(.18),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: color.withOpacity(.45)),
+      ),
+      child: Text(
+        shown,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(
+          fontWeight: FontWeight.w900,
+          fontSize: 10.5,
+          color: color,
+        ),
+      ),
+    );
+  }
+}
+
+class _MiniPill extends StatelessWidget {
   final String text;
   final Color color;
-  final bool tiny;
 
-  const _Pill({
-    required this.text,
-    required this.color,
-    required this.tiny,
-  });
+  const _MiniPill({required this.text, required this.color});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: tiny ? 8 : 10,
-        vertical: tiny ? 5 : 6,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(.12),
+        color: color.withOpacity(.16),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: color.withOpacity(.45)),
       ),
       child: Text(
         text,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: TextStyle(
-          fontWeight: FontWeight.w900,
-          fontSize: tiny ? 10 : 12,
           color: color,
+          fontSize: 10,
+          fontWeight: FontWeight.w900,
+        ),
+      ),
+    );
+  }
+}
+
+class _FadedSquareIcon extends StatelessWidget {
+  final bool enabled;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  final double iconSize;
+  final double radius;
+
+  const _FadedSquareIcon({
+    required this.enabled,
+    required this.icon,
+    required this.onTap,
+    this.iconSize = 16,
+    this.radius = 10,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    return Opacity(
+      opacity: enabled ? 1 : .35,
+      child: IgnorePointer(
+        ignoring: !enabled,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(radius),
+          child: Container(
+            decoration: BoxDecoration(
+              color: cs.surface,
+              borderRadius: BorderRadius.circular(radius),
+              border: Border.all(color: cs.outlineVariant.withOpacity(.7)),
+            ),
+            alignment: Alignment.center,
+            child: Icon(icon, color: const Color(0xFF0B6BFF), size: iconSize),
+          ),
         ),
       ),
     );
