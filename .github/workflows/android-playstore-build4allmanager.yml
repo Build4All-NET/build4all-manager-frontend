@@ -32,7 +32,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      PACKAGE_NAME: "com.build4all.build4allmanager"
+      PACKAGE_NAME: "com.buil4all.build4allmanager"
 
       PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
 
