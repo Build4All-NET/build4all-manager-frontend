@@ -3712,7 +3712,7 @@ abstract class AppLocalizations {
   /// No description provided for @owner_project_failed.
   ///
   /// In en, this message translates to:
-  /// **'Failed'**
+  /// **'Building'**
   String get owner_project_failed;
 
   /// No description provided for @owner_project_build_failed.
@@ -3768,6 +3768,168 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Publish'**
   String get owner_project_publish;
+
+  /// No description provided for @owner_proj_details_ecom_h5.
+  ///
+  /// In en, this message translates to:
+  /// **'AI-powered product discovery'**
+  String get owner_proj_details_ecom_h5;
+
+  /// No description provided for @owner_proj_details_ecom_h6.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin dashboard with order analytics'**
+  String get owner_proj_details_ecom_h6;
+
+  /// No description provided for @owner_proj_details_ecom_h7.
+  ///
+  /// In en, this message translates to:
+  /// **'Import products/orders from CSV/Excel'**
+  String get owner_proj_details_ecom_h7;
+
+  /// No description provided for @owner_proj_details_ecom_h8.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash on delivery + Stripe card payments'**
+  String get owner_proj_details_ecom_h8;
+
+  /// No description provided for @owner_proj_details_ecom_sf1_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign up & login'**
+  String get owner_proj_details_ecom_sf1_title;
+
+  /// No description provided for @owner_proj_details_ecom_sf1_sub.
+  ///
+  /// In en, this message translates to:
+  /// **'Email/phone auth, roles, and password reset.'**
+  String get owner_proj_details_ecom_sf1_sub;
+
+  /// No description provided for @owner_proj_details_ecom_sf2_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Catalog & search'**
+  String get owner_proj_details_ecom_sf2_title;
+
+  /// No description provided for @owner_proj_details_ecom_sf2_sub.
+  ///
+  /// In en, this message translates to:
+  /// **'Categories, filters, sorting, and fast search.'**
+  String get owner_proj_details_ecom_sf2_sub;
+
+  /// No description provided for @owner_proj_details_ecom_sf3_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Product details'**
+  String get owner_proj_details_ecom_sf3_title;
+
+  /// No description provided for @owner_proj_details_ecom_sf3_sub.
+  ///
+  /// In en, this message translates to:
+  /// **'Variants, media gallery, stock, and reviews.'**
+  String get owner_proj_details_ecom_sf3_sub;
+
+  /// No description provided for @owner_proj_details_ecom_sf4_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Cart management'**
+  String get owner_proj_details_ecom_sf4_title;
+
+  /// No description provided for @owner_proj_details_ecom_sf4_sub.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to cart, edit quantities, save items.'**
+  String get owner_proj_details_ecom_sf4_sub;
+
+  /// No description provided for @owner_proj_details_ecom_sf5_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Checkout flow'**
+  String get owner_proj_details_ecom_sf5_title;
+
+  /// No description provided for @owner_proj_details_ecom_sf5_sub.
+  ///
+  /// In en, this message translates to:
+  /// **'Addresses, coupons, shipping, taxes.'**
+  String get owner_proj_details_ecom_sf5_sub;
+
+  /// No description provided for @owner_proj_details_ecom_sf6_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Payments'**
+  String get owner_proj_details_ecom_sf6_title;
+
+  /// No description provided for @owner_proj_details_ecom_sf6_sub.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash on delivery + Stripe payments (cards).'**
+  String get owner_proj_details_ecom_sf6_sub;
+
+  /// No description provided for @owner_proj_details_ecom_sf7_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Orders & tracking'**
+  String get owner_proj_details_ecom_sf7_title;
+
+  /// No description provided for @owner_proj_details_ecom_sf7_sub.
+  ///
+  /// In en, this message translates to:
+  /// **'Order history, tracking, invoices, refunds.'**
+  String get owner_proj_details_ecom_sf7_sub;
+
+  /// No description provided for @owner_proj_details_ecom_sf8_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin & analytics'**
+  String get owner_proj_details_ecom_sf8_title;
+
+  /// No description provided for @owner_proj_details_ecom_sf8_sub.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage orders/products, import data, insights, AI tools.'**
+  String get owner_proj_details_ecom_sf8_sub;
+
+  /// No description provided for @owner_proj_details_ecom_m4.
+  ///
+  /// In en, this message translates to:
+  /// **'Stripe payments + Cash on Delivery'**
+  String get owner_proj_details_ecom_m4;
+
+  /// No description provided for @owner_proj_details_ecom_m5.
+  ///
+  /// In en, this message translates to:
+  /// **'Coupons, discounts, and loyalty points'**
+  String get owner_proj_details_ecom_m5;
+
+  /// No description provided for @owner_proj_details_ecom_m6.
+  ///
+  /// In en, this message translates to:
+  /// **'Wishlist + saved carts'**
+  String get owner_proj_details_ecom_m6;
+
+  /// No description provided for @owner_proj_details_ecom_m7.
+  ///
+  /// In en, this message translates to:
+  /// **'AI recommendations + AI chat assistant'**
+  String get owner_proj_details_ecom_m7;
+
+  /// No description provided for @owner_proj_details_ecom_m8.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin panel: orders, products, customers'**
+  String get owner_proj_details_ecom_m8;
+
+  /// No description provided for @owner_proj_details_ecom_m9.
+  ///
+  /// In en, this message translates to:
+  /// **'Analytics: revenue, conversion, AOV'**
+  String get owner_proj_details_ecom_m9;
+
+  /// No description provided for @owner_proj_details_ecom_m10.
+  ///
+  /// In en, this message translates to:
+  /// **'Import/export data (CSV/Excel)'**
+  String get owner_proj_details_ecom_m10;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

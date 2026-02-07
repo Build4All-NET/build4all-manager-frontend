@@ -1,6 +1,6 @@
 import 'package:build4all_manager/shared/themes/app_theme.dart';
 import 'package:build4all_manager/shared/widgets/search_input.dart';
-import 'package:build4all_manager/shared/widgets/app_toast.dart'; // ✅ NEW
+import 'package:build4all_manager/shared/widgets/app_toast.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -49,14 +49,22 @@ class OwnerHomeScreen extends StatelessWidget {
         getAppConfig: GetAppConfigUc(generalRepo),
         getAvailableKinds: getAvailableKinds,
       )..add(OwnerHomeStarted(ownerId)),
-      child: _HomeScaffold(ownerName: ownerName),
+      child: _HomeScaffold(
+        ownerId: ownerId,
+        ownerName: ownerName,
+      ),
     );
   }
 }
 
 class _HomeScaffold extends StatelessWidget {
+  final int ownerId;
   final String? ownerName;
-  const _HomeScaffold({this.ownerName});
+
+  const _HomeScaffold({
+    required this.ownerId,
+    this.ownerName,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -64,15 +72,23 @@ class _HomeScaffold extends StatelessWidget {
     return Scaffold(
       backgroundColor: cs.surface,
       body: SafeArea(
-        child: _HomeBody(ownerName: ownerName),
+        child: _HomeBody(
+          ownerId: ownerId,
+          ownerName: ownerName,
+        ),
       ),
     );
   }
 }
 
 class _HomeBody extends StatelessWidget {
+  final int ownerId;
   final String? ownerName;
-  const _HomeBody({this.ownerName});
+
+  const _HomeBody({
+    required this.ownerId,
+    this.ownerName,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -90,14 +106,10 @@ class _HomeBody extends StatelessWidget {
         ? l10n.owner_home_hello
         : '${l10n.owner_home_hello} $ownerName';
 
-    final ownerId =
-        (context.findAncestorWidgetOfExactType<OwnerHomeScreen>()!).ownerId;
-
     return Padding(
       padding: pagePad,
       child: BlocConsumer<OwnerHomeBloc, OwnerHomeState>(
         listenWhen: (prev, curr) {
-          // ✅ only react when error changes
           final prevErr = _errText(prev);
           final currErr = _errText(curr);
           return prevErr != currErr && (currErr?.isNotEmpty ?? false);
@@ -112,8 +124,6 @@ class _HomeBody extends StatelessWidget {
           return RefreshIndicator(
             onRefresh: () async {
               context.read<OwnerHomeBloc>().add(OwnerHomeRefreshed(ownerId));
-              // ✅ optional toast (small info)
-              AppToast.info(context, l10n.refresh);
             },
             child: CustomScrollView(
               physics: const BouncingScrollPhysics(
@@ -128,16 +138,6 @@ class _HomeBody extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              '',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: tt.labelSmall?.copyWith(
-                                letterSpacing: 1.2,
-                                color: cs.onSurface.withOpacity(.55),
-                              ),
-                            ),
-                            const SizedBox(height: 4),
                             Text(
                               greeting,
                               maxLines: 1,
@@ -181,14 +181,13 @@ class _HomeBody extends StatelessWidget {
                 ),
                 const SliverToBoxAdapter(child: SizedBox(height: 12)),
 
-                // ----- Projects grid (with toast) -----
+                // ----- Projects grid -----
                 SliverPadding(
                   padding: EdgeInsets.only(bottom: ux.radiusMd),
                   sliver: SliverLayoutBuilder(
                     builder: (context, constraints) {
                       final cross = constraints.crossAxisExtent;
 
-                      // ✅ better responsiveness: choose columns based on width
                       final cols = cross >= 900 ? 4 : (cross >= 600 ? 3 : 2);
                       const spacing = 12.0;
 
@@ -226,7 +225,7 @@ class _HomeBody extends StatelessWidget {
                                   '/owner/project/${tpl.id}',
                                   extra: {
                                     'canRequest': isAvailable,
-                                    'projectId': realProjectId, // ✅ nullable
+                                    'projectId': realProjectId,
                                   },
                                 );
                               },
@@ -253,11 +252,7 @@ class _HomeBody extends StatelessWidget {
                         ),
                       ),
                       TextButton(
-                        onPressed: () {
-                          // optional tiny toast
-                          // AppToast.info(context, l10n.owner_home_openingRequests);
-                          context.push('/owner/requests');
-                        },
+                        onPressed: () => context.push('/owner/requests'),
                         child: Text(l10n.owner_home_viewAll),
                       ),
                     ],
@@ -295,7 +290,6 @@ class _HomeBody extends StatelessWidget {
     );
   }
 
-  // ✅ supports multiple possible state shapes without breaking compile
   String? _errText(OwnerHomeState s) {
     try {
       final dynamic d = s;

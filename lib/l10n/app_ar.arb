@@ -736,7 +736,36 @@
 "errPhoneInvalid": "رقم الهاتف غير صالح",
 
 "lblPhone": "رقم الهاتف",
-"hintPhone": "70000000"
+"hintPhone": "70000000",
+"owner_proj_details_ecom_h5": "اكتشاف منتجات بالذكاء الاصطناعي",
+  "owner_proj_details_ecom_h6": "لوحة إدارة مع تحليلات الطلبات",
+  "owner_proj_details_ecom_h7": "استيراد المنتجات/الطلبات من CSV أو Excel",
+  "owner_proj_details_ecom_h8": "الدفع كاش أو عبر Stripe",
+
+  "owner_proj_details_ecom_sf1_title": "تسجيل وإنشاء حساب",
+  "owner_proj_details_ecom_sf1_sub": "تسجيل عبر ايميل/هاتف + أدوار + إعادة تعيين كلمة المرور.",
+  "owner_proj_details_ecom_sf2_title": "كتالوج وبحث",
+  "owner_proj_details_ecom_sf2_sub": "تصنيفات + فلاتر + ترتيب + بحث سريع.",
+  "owner_proj_details_ecom_sf3_title": "تفاصيل المنتج",
+  "owner_proj_details_ecom_sf3_sub": "صور وفيديو + خيارات/Variants + مخزون + تقييمات.",
+  "owner_proj_details_ecom_sf4_title": "سلة المشتريات",
+  "owner_proj_details_ecom_sf4_sub": "إضافة للسلة + تعديل الكمية + حفظ منتجات.",
+  "owner_proj_details_ecom_sf5_title": "مسار الدفع",
+  "owner_proj_details_ecom_sf5_sub": "عناوين + كوبونات + شحن + ضرائب.",
+  "owner_proj_details_ecom_sf6_title": "طرق الدفع",
+  "owner_proj_details_ecom_sf6_sub": "كاش عند الاستلام + Stripe (بطاقات).",
+  "owner_proj_details_ecom_sf7_title": "الطلبات والتتبع",
+  "owner_proj_details_ecom_sf7_sub": "سجل الطلبات + تتبع + فواتير + استرجاع/Refund.",
+  "owner_proj_details_ecom_sf8_title": "لوحة الإدارة والتحليلات",
+  "owner_proj_details_ecom_sf8_sub": "إدارة الطلبات والمنتجات + استيراد بيانات + تحليلات + أدوات AI.",
+
+  "owner_proj_details_ecom_m4": "Stripe + دفع كاش",
+  "owner_proj_details_ecom_m5": "كوبونات وخصومات ونقاط ولاء",
+  "owner_proj_details_ecom_m6": "Wishlist + سلات محفوظة",
+  "owner_proj_details_ecom_m7": "توصيات AI + مساعد دردشة AI",
+  "owner_proj_details_ecom_m8": "Admin: إدارة الطلبات والمنتجات والعملاء",
+  "owner_proj_details_ecom_m9": "Analytics: الإيرادات والتحويل ومتوسط الطلب",
+  "owner_proj_details_ecom_m10": "Import/Export بيانات (CSV/Excel)"
 
 }
 

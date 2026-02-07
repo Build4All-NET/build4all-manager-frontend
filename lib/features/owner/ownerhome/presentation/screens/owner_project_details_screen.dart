@@ -26,12 +26,12 @@ class OwnerProjectDetailsScreen extends StatelessWidget {
     final ux = Theme.of(context).extension<UiTokens>()!;
     final width = MediaQuery.of(context).size.width;
 
-    final spec = themedSpecFor(context, tpl.kind);
+    final kind = tpl.kind.toLowerCase();
+    final spec = themedSpecFor(context, kind);
 
-    // ✅ FORCE ECOMMERCE TO GYM GREEN (DETAILS TOO)
-    final tint = (tpl.kind.toLowerCase() == 'ecommerce')
-        ? ProjectPalette.gym
-        : (tpl.tint ?? _projectTint(tpl.kind, cs));
+    // ✅ Force ecommerce => gym green everywhere
+    final tint =
+        (kind == 'ecommerce') ? ProjectPalette.gym : (tpl.tint ?? spec.accent);
 
     final projectTitle = _projectTitle(tpl, l10n);
 
@@ -42,7 +42,7 @@ class OwnerProjectDetailsScreen extends StatelessWidget {
     final radiusLg = ux.radiusLg;
     final radiusMd = ux.radiusMd;
 
-    final String? initialAppName = _prefillName(tpl.kind);
+    final String? initialAppName = _prefillName(kind);
 
     final extra = GoRouterState.of(context).extra;
 
@@ -54,6 +54,8 @@ class OwnerProjectDetailsScreen extends StatelessWidget {
         ? extra['projectId'] as int
         : null;
 
+    final isSmall = width < 380;
+
     return Scaffold(
       backgroundColor: cs.surface,
       appBar: AppBar(
@@ -64,9 +66,14 @@ class OwnerProjectDetailsScreen extends StatelessWidget {
           icon: const Icon(Icons.arrow_back_rounded),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: Text(
+        title: _AutoShrinkText(
           projectTitle,
-          style: GoogleFonts.inter(fontWeight: FontWeight.w700),
+          maxLines: 1,
+          minFontSize: 14,
+          style: GoogleFonts.inter(
+            fontWeight: FontWeight.w700,
+            fontSize: 18,
+          ),
         ),
       ),
       body: SafeArea(
@@ -111,24 +118,29 @@ class OwnerProjectDetailsScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 14),
-                      Text(
+
+                      // ✅ NO MORE "..." — shrink instead
+                      _AutoShrinkText(
                         spec.headline(l10n),
+                        maxLines: 3,
+                        minFontSize: 16,
                         style: GoogleFonts.inter(
-                          fontSize: 22,
+                          fontSize: isSmall ? 20 : 22,
                           fontWeight: FontWeight.w800,
+                          color: Colors.white,
                         ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
                       ),
+
                       const SizedBox(height: 8),
-                      Text(
+
+                      _AutoShrinkText(
                         spec.subhead(l10n),
+                        maxLines: 4,
+                        minFontSize: 11,
                         style: GoogleFonts.inter(
-                          fontSize: 14,
+                          fontSize: isSmall ? 13 : 14,
                           color: Colors.white.withOpacity(.92),
                         ),
-                        maxLines: 3,
-                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
@@ -136,7 +148,8 @@ class OwnerProjectDetailsScreen extends StatelessWidget {
               ),
             ),
 
-            // Stats
+            // ✅ Stats row removed (COMMENTED OUT as requested)
+            /*
             SliverToBoxAdapter(
               child: Padding(
                 padding: EdgeInsets.fromLTRB(
@@ -148,6 +161,7 @@ class OwnerProjectDetailsScreen extends StatelessWidget {
                 child: _StatsRow(spec: spec, radius: radiusLg),
               ),
             ),
+            */
 
             // CTA
             SliverToBoxAdapter(
@@ -188,61 +202,47 @@ class OwnerProjectDetailsScreen extends StatelessWidget {
             ),
 
             // Highlights
+            // ✅ Highlights (compact horizontal scroll)
             _SectionTitle(
               padH: pagePad.horizontal / 2,
               title: spec.i18nHighlights(l10n),
             ),
             SliverToBoxAdapter(
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(
-                  pagePad.horizontal / 2,
-                  0,
-                  pagePad.horizontal / 2,
-                  0,
-                ),
-                child: Wrap(
-                  spacing: 10,
-                  runSpacing: 10,
-                  children: spec.highlights(l10n).map((txt) {
-                    return _ChipPill(
-                      text: txt,
-                      bg: tint.withOpacity(.10),
-                      fg: tint,
-                    );
-                  }).toList(),
-                ),
-              ),
-            ),
-
-            // Screens
-            _SectionTitle(
-              padH: pagePad.horizontal / 2,
-              title: spec.i18nScreens(l10n),
-            ),
-            SliverToBoxAdapter(
               child: SizedBox(
-                height: 148,
+                height: 44, // ✅ compact
                 child: ListView.separated(
                   padding:
                       EdgeInsets.symmetric(horizontal: pagePad.horizontal / 2),
                   scrollDirection: Axis.horizontal,
                   physics: const BouncingScrollPhysics(),
+                  itemCount: spec.highlights(l10n).length,
+                  separatorBuilder: (_, __) => const SizedBox(width: 10),
                   itemBuilder: (_, i) {
-                    final s = spec.screens(l10n)[i];
-                    return _MiniScreenCard(
-                      title: s.title,
-                      subtitle: s.subtitle,
-                      bg: s.bg,
-                      radius: radiusMd + 2,
+                    final txt = spec.highlights(l10n)[i];
+                    return _ChipPill(
+                      text: txt,
+                      bg: tint.withOpacity(.10),
+                      fg: tint,
                     );
                   },
-                  separatorBuilder: (_, __) => const SizedBox(width: 12),
-                  itemCount: spec.screens(l10n).length,
                 ),
               ),
             ),
 
+            // ✅ Screens & flows (horizontal scroll, 2 visible, tap opens details)
+            _SectionTitle(
+              padH: pagePad.horizontal / 2,
+              title: spec.i18nScreens(l10n),
+            ),
+            _ScreensFlowCarousel(
+              items: spec.screens(l10n),
+              padH: pagePad.horizontal / 2,
+              radius: radiusMd + 2,
+              tint: tint,
+            ),
+
             // Modules
+            // ✅ Modules (show 3 only + View all bottom sheet)
             _SectionTitle(
               padH: pagePad.horizontal / 2,
               title: spec.i18nModules(l10n),
@@ -255,11 +255,11 @@ class OwnerProjectDetailsScreen extends StatelessWidget {
                   pagePad.horizontal / 2,
                   0,
                 ),
-                child: Column(
-                  children: spec
-                      .modules(l10n)
-                      .map((m) => _ListTileCard(text: m, radius: radiusMd))
-                      .toList(),
+                child: _ModulesPreview(
+                  modules: spec.modules(l10n),
+                  radius: radiusMd,
+                  tint: tint,
+                  viewAllLabel: l10n.owner_home_viewAll, // ✅ reuse existing key
                 ),
               ),
             ),
@@ -297,6 +297,157 @@ class OwnerProjectDetailsScreen extends StatelessWidget {
   }
 }
 
+/* ---------------- Screens & flows carousel ---------------- */
+
+class _ScreensFlowCarousel extends StatelessWidget {
+  final List<MiniScreen> items;
+  final double padH;
+  final double radius;
+  final Color tint;
+
+  const _ScreensFlowCarousel({
+    required this.items,
+    required this.padH,
+    required this.radius,
+    required this.tint,
+  });
+
+  void _open(BuildContext context, MiniScreen s) {
+    final cs = Theme.of(context).colorScheme;
+    final ux = Theme.of(context).extension<UiTokens>()!;
+
+    showModalBottomSheet(
+      context: context,
+      showDragHandle: true,
+      backgroundColor: cs.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(ux.radiusLg + 6),
+        ),
+      ),
+      builder: (_) => _FlowDetailsSheet(
+        screen: s,
+        tint: tint,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverToBoxAdapter(
+      child: SizedBox(
+        height: 150,
+        child: LayoutBuilder(
+          builder: (ctx, c) {
+            const spacing = 12.0;
+
+            // ✅ 2 cards visible at a time
+            final available = c.maxWidth - (padH * 2) - spacing;
+            final cardW = (available / 2).clamp(140.0, 9999.0);
+
+            return ListView.separated(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              padding: EdgeInsets.symmetric(horizontal: padH),
+              itemCount: items.length,
+              separatorBuilder: (_, __) => const SizedBox(width: spacing),
+              itemBuilder: (_, i) {
+                final s = items[i];
+
+                return SizedBox(
+                  width: cardW,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(radius),
+                    onTap: () => _open(context, s),
+                    child: _MiniScreenCard(
+                      title: s.title,
+                      subtitle: s.subtitle,
+                      bg: s.bg,
+                      radius: radius,
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _FlowDetailsSheet extends StatelessWidget {
+  final MiniScreen screen;
+  final Color tint;
+
+  const _FlowDetailsSheet({
+    required this.screen,
+    required this.tint,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    final ux = Theme.of(context).extension<UiTokens>()!;
+
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        ux.pagePad.horizontal / 2,
+        10,
+        ux.pagePad.horizontal / 2,
+        20,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                height: 44,
+                width: 44,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: tint.withOpacity(.12),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Icon(Icons.layers_rounded, color: tint),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  screen.title,
+                  style: tt.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: cs.onSurface,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            screen.subtitle,
+            style: tt.bodyMedium?.copyWith(
+              color: cs.onSurface.withOpacity(.80),
+              height: 1.35,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(MaterialLocalizations.of(context).closeButtonLabel),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 /* ---------------- helpers ---------------- */
 
 String? _prefillName(String id) {
@@ -311,25 +462,6 @@ String? _prefillName(String id) {
       return 'My Services App';
     default:
       return null;
-  }
-}
-
-Color _projectTint(String kind, ColorScheme cs) {
-  switch (kind) {
-    case 'activities':
-      return ProjectPalette.activities;
-
-    case 'ecommerce':
-      return ProjectPalette.gym; // ✅ ecommerce = gym green
-
-    case 'gym':
-      return ProjectPalette.gym;
-
-    case 'services':
-      return ProjectPalette.services;
-
-    default:
-      return cs.primary;
   }
 }
 
@@ -348,7 +480,63 @@ String _projectTitle(ProjectTemplate tpl, AppLocalizations l10n) {
   }
 }
 
-/* ---------------- UI bits (unchanged) ---------------- */
+/* ---------------- auto shrink text ---------------- */
+
+class _AutoShrinkText extends StatelessWidget {
+  final String text;
+  final TextStyle style;
+  final int maxLines;
+  final double minFontSize;
+
+  const _AutoShrinkText(
+    this.text, {
+    required this.style,
+    required this.maxLines,
+    required this.minFontSize,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (ctx, constraints) {
+        final maxWidth = constraints.maxWidth;
+        final dir = Directionality.of(ctx);
+
+        double fontSize = style.fontSize ?? 14;
+        TextStyle s = style;
+
+        for (int i = 0; i < 30; i++) {
+          final tp = TextPainter(
+            text: TextSpan(text: text, style: s),
+            maxLines: maxLines,
+            textDirection: dir,
+          )..layout(maxWidth: maxWidth);
+
+          if (!tp.didExceedMaxLines) break;
+
+          if (fontSize <= minFontSize) {
+            fontSize = minFontSize;
+            s = style.copyWith(fontSize: fontSize);
+            break;
+          }
+
+          fontSize = (fontSize - 0.8).clamp(minFontSize, 999);
+          s = style.copyWith(fontSize: fontSize);
+        }
+
+        return Text(
+          text,
+          style: s,
+          maxLines: maxLines,
+          softWrap: true,
+          overflow: TextOverflow.clip, // ✅ no "..."
+        );
+      },
+    );
+  }
+}
+
+/* ---------------- UI bits ---------------- */
 
 class _SectionTitle extends StatelessWidget {
   final double padH;
@@ -362,12 +550,15 @@ class _SectionTitle extends StatelessWidget {
     return SliverToBoxAdapter(
       child: Padding(
         padding: EdgeInsets.fromLTRB(padH, 18, padH, 10),
-        child: Text(
+        child: _AutoShrinkText(
           title,
+          maxLines: 1,
+          minFontSize: 13,
           style: tt.titleMedium?.copyWith(
-            fontWeight: FontWeight.w800,
-            color: cs.onSurface,
-          ),
+                fontWeight: FontWeight.w800,
+                color: cs.onSurface,
+              ) ??
+              const TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
         ),
       ),
     );
@@ -455,7 +646,7 @@ class _MetricItem extends StatelessWidget {
                 top,
                 style: tt.bodyLarge?.copyWith(fontWeight: FontWeight.w800),
                 maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+                overflow: TextOverflow.clip,
               ),
               if (suffixStar) ...[
                 const SizedBox(width: 4),
@@ -469,7 +660,7 @@ class _MetricItem extends StatelessWidget {
           hint,
           style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
           maxLines: 1,
-          overflow: TextOverflow.ellipsis,
+          overflow: TextOverflow.clip,
         ),
       ],
     );
@@ -489,6 +680,8 @@ class _CreateCtaCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -516,18 +709,21 @@ class _CreateCtaCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    AppLocalizations.of(context)!
-                        .owner_proj_details_create_title,
+                  _AutoShrinkText(
+                    l10n.owner_proj_details_create_title,
+                    maxLines: 1,
+                    minFontSize: 12,
                     style: const TextStyle(
                       fontWeight: FontWeight.w800,
                       fontSize: 15,
+                      color: Colors.white,
                     ),
                   ),
                   const SizedBox(height: 4),
-                  Text(
-                    AppLocalizations.of(context)!
-                        .owner_proj_details_create_subtitle,
+                  _AutoShrinkText(
+                    l10n.owner_proj_details_create_subtitle,
+                    maxLines: 2,
+                    minFontSize: 10,
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.white.withOpacity(.86),
@@ -553,17 +749,20 @@ class _ChipPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+      padding:
+          const EdgeInsets.symmetric(horizontal: 12, vertical: 7), // ✅ smaller
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(12), // ✅ tighter
       ),
-      child: Text(
+      child: _AutoShrinkText(
         text,
+        maxLines: 1, // ✅ keeps height small
+        minFontSize: 9,
         style: TextStyle(
           color: fg,
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
         ),
       ),
     );
@@ -586,8 +785,8 @@ class _MiniScreenCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
     final cs = Theme.of(context).colorScheme;
+
     return Container(
-      width: 168,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: bg,
@@ -598,15 +797,20 @@ class _MiniScreenCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            _AutoShrinkText(
               title,
-              style: tt.bodyMedium?.copyWith(fontWeight: FontWeight.w800),
+              maxLines: 2,
+              minFontSize: 12,
+              style: tt.bodyMedium?.copyWith(fontWeight: FontWeight.w800) ??
+                  const TextStyle(fontSize: 14, fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 8),
-            Text(
+            _AutoShrinkText(
               subtitle,
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
+              maxLines: 4,
+              minFontSize: 10,
+              style: tt.bodySmall ??
+                  const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
             ),
           ],
         ),
@@ -618,24 +822,40 @@ class _MiniScreenCard extends StatelessWidget {
 class _ListTileCard extends StatelessWidget {
   final String text;
   final double radius;
-  const _ListTileCard({required this.text, required this.radius});
+  final bool dense;
+
+  const _ListTileCard({
+    required this.text,
+    required this.radius,
+    this.dense = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final ux = Theme.of(context).extension<UiTokens>()!;
+
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      margin: EdgeInsets.only(bottom: dense ? 8 : 10),
+      padding: EdgeInsets.symmetric(
+        horizontal: 14,
+        vertical: dense ? 10 : 14, // ✅ smaller height
+      ),
       decoration: BoxDecoration(
         color: cs.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(radius),
         boxShadow: ux.cardShadow,
       ),
-      child: Text(
+      child: _AutoShrinkText(
         text,
-        style: TextStyle(color: cs.onSurface.withOpacity(.9)),
+        maxLines: 1, // ✅ keeps it short
+        minFontSize: 10,
+        style: TextStyle(
+          color: cs.onSurface.withOpacity(.92),
+          fontWeight: FontWeight.w600,
+          fontSize: 13,
+        ),
       ),
     );
   }
@@ -723,6 +943,100 @@ class _Badge extends StatelessWidget {
         text,
         style: TextStyle(fontSize: fontSize, color: Colors.white),
       ),
+    );
+  }
+}
+
+class _ModulesPreview extends StatelessWidget {
+  final List<String> modules;
+  final double radius;
+  final Color tint;
+  final String viewAllLabel;
+
+  const _ModulesPreview({
+    required this.modules,
+    required this.radius,
+    required this.tint,
+    required this.viewAllLabel,
+  });
+
+  void _openAll(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final ux = Theme.of(context).extension<UiTokens>()!;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      backgroundColor: cs.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(ux.radiusLg + 6),
+        ),
+      ),
+      builder: (_) {
+        return SafeArea(
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(
+              ux.pagePad.horizontal / 2,
+              8,
+              ux.pagePad.horizontal / 2,
+              16,
+            ),
+            child: SizedBox(
+              height: MediaQuery.of(context).size.height * 0.70,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Modules included',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w800,
+                        ),
+                  ),
+                  const SizedBox(height: 10),
+                  Expanded(
+                    child: ListView.separated(
+                      physics: const BouncingScrollPhysics(),
+                      itemCount: modules.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 8),
+                      itemBuilder: (_, i) => _ListTileCard(
+                        text: modules[i],
+                        radius: radius,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final previewCount = modules.length > 3 ? 3 : modules.length;
+    final preview = modules.take(previewCount).toList();
+
+    return Column(
+      children: [
+        ...preview.map(
+          (m) => _ListTileCard(
+            text: m,
+            radius: radius,
+          ),
+        ),
+        if (modules.length > 3)
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              onPressed: () => _openAll(context),
+              child: Text(viewAllLabel),
+            ),
+          ),
+      ],
     );
   }
 }

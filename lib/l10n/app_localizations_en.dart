@@ -1843,7 +1843,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get phoneNumber => 'Phone Number';
 
   @override
-  String get owner_project_failed => 'Failed';
+  String get owner_project_failed => 'Building';
 
   @override
   String get owner_project_build_failed => 'Build failed';
@@ -1871,4 +1871,85 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get owner_project_publish => 'Publish';
+
+  @override
+  String get owner_proj_details_ecom_h5 => 'AI-powered product discovery';
+
+  @override
+  String get owner_proj_details_ecom_h6 => 'Admin dashboard with order analytics';
+
+  @override
+  String get owner_proj_details_ecom_h7 => 'Import products/orders from CSV/Excel';
+
+  @override
+  String get owner_proj_details_ecom_h8 => 'Cash on delivery + Stripe card payments';
+
+  @override
+  String get owner_proj_details_ecom_sf1_title => 'Sign up & login';
+
+  @override
+  String get owner_proj_details_ecom_sf1_sub => 'Email/phone auth, roles, and password reset.';
+
+  @override
+  String get owner_proj_details_ecom_sf2_title => 'Catalog & search';
+
+  @override
+  String get owner_proj_details_ecom_sf2_sub => 'Categories, filters, sorting, and fast search.';
+
+  @override
+  String get owner_proj_details_ecom_sf3_title => 'Product details';
+
+  @override
+  String get owner_proj_details_ecom_sf3_sub => 'Variants, media gallery, stock, and reviews.';
+
+  @override
+  String get owner_proj_details_ecom_sf4_title => 'Cart management';
+
+  @override
+  String get owner_proj_details_ecom_sf4_sub => 'Add to cart, edit quantities, save items.';
+
+  @override
+  String get owner_proj_details_ecom_sf5_title => 'Checkout flow';
+
+  @override
+  String get owner_proj_details_ecom_sf5_sub => 'Addresses, coupons, shipping, taxes.';
+
+  @override
+  String get owner_proj_details_ecom_sf6_title => 'Payments';
+
+  @override
+  String get owner_proj_details_ecom_sf6_sub => 'Cash on delivery + Stripe payments (cards).';
+
+  @override
+  String get owner_proj_details_ecom_sf7_title => 'Orders & tracking';
+
+  @override
+  String get owner_proj_details_ecom_sf7_sub => 'Order history, tracking, invoices, refunds.';
+
+  @override
+  String get owner_proj_details_ecom_sf8_title => 'Admin & analytics';
+
+  @override
+  String get owner_proj_details_ecom_sf8_sub => 'Manage orders/products, import data, insights, AI tools.';
+
+  @override
+  String get owner_proj_details_ecom_m4 => 'Stripe payments + Cash on Delivery';
+
+  @override
+  String get owner_proj_details_ecom_m5 => 'Coupons, discounts, and loyalty points';
+
+  @override
+  String get owner_proj_details_ecom_m6 => 'Wishlist + saved carts';
+
+  @override
+  String get owner_proj_details_ecom_m7 => 'AI recommendations + AI chat assistant';
+
+  @override
+  String get owner_proj_details_ecom_m8 => 'Admin panel: orders, products, customers';
+
+  @override
+  String get owner_proj_details_ecom_m9 => 'Analytics: revenue, conversion, AOV';
+
+  @override
+  String get owner_proj_details_ecom_m10 => 'Import/export data (CSV/Excel)';
 }

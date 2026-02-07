@@ -1,4 +1,6 @@
 // lib/features/owner/ownerprofile/presentation/screens/owner_profile_screen.dart
+
+import 'package:build4all_manager/core/localization/locale_cubit.dart'; // ✅
 import 'package:build4all_manager/features/auth/data/datasources/jwt_local_datasource.dart';
 import 'package:build4all_manager/features/owner/ownerprofile/data/repositories/owner_profile_repository_impl.dart';
 import 'package:build4all_manager/features/owner/ownerprofile/data/services/owner_profile_api.dart';
@@ -9,7 +11,7 @@ import 'package:build4all_manager/features/owner/ownerprofile/presentation/bloc/
 import 'package:build4all_manager/features/owner/ownerprofile/presentation/widgets/profile_header.dart';
 import 'package:build4all_manager/features/owner/ownerprofile/presentation/widgets/profile_info_card.dart';
 import 'package:build4all_manager/l10n/app_localizations.dart';
-import 'package:build4all_manager/shared/widgets/app_toast.dart'; // ✅ common toast
+import 'package:build4all_manager/shared/widgets/app_toast.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -103,10 +105,7 @@ class _OwnerProfileView extends StatelessWidget {
 
     if (!context.mounted) return;
 
-    // ✅ common toast instead of SnackBar
     AppToast.success(context, l10n.logged_out ?? 'Logged out');
-
-    // replace stack
     context.go('/login');
   }
 
@@ -126,8 +125,6 @@ class _OwnerProfileView extends StatelessWidget {
         }
 
         if (s.error != null) {
-          // optional: toast once on error instead of only text
-          // (keeping UI text is fine)
           return Scaffold(
             appBar: appBar,
             body: Center(
@@ -173,11 +170,20 @@ class _OwnerProfileView extends StatelessWidget {
                               width: wide ? maxCardWidth : double.infinity,
                               child: ProfileHeader(p: p),
                             ),
+
+                            // ✅ Put language neatly ABOVE the profile card
+                            const SizedBox(height: 14),
+                            SizedBox(
+                              width: wide ? maxCardWidth : double.infinity,
+                              child: _LanguageTile(l10n: l10n),
+                            ),
+
                             const SizedBox(height: 12),
                             SizedBox(
                               width: wide ? maxCardWidth : double.infinity,
                               child: ProfileInfoCard(p: p),
                             ),
+
                             const SizedBox(height: 20),
                             SizedBox(
                               width: wide ? maxCardWidth : double.infinity,
@@ -230,6 +236,69 @@ class _ProfileAppBar extends StatelessWidget implements PreferredSizeWidget {
           icon: Icon(Icons.logout_rounded, color: cs.onSurface),
         ),
       ],
+    );
+  }
+}
+
+// ✅ same dropdown as superadmin
+class _LanguageTile extends StatelessWidget {
+  final AppLocalizations l10n;
+  const _LanguageTile({required this.l10n});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 0,
+      clipBehavior: Clip.antiAlias,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+        child: Row(
+          children: [
+            const Icon(Icons.language_rounded),
+            const SizedBox(width: 12),
+            Expanded(child: Text(l10n.common_language)),
+            const SizedBox(width: 8),
+            BlocBuilder<LocaleCubit, Locale?>(
+              builder: (context, locale) {
+                final value = locale?.languageCode ?? 'system';
+
+                return DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    value: value,
+                    items: [
+                      DropdownMenuItem(
+                        value: 'system',
+                        child: Text(l10n.common_system_language),
+                      ),
+                      DropdownMenuItem(
+                        value: 'en',
+                        child: Text(l10n.lang_english),
+                      ),
+                      DropdownMenuItem(
+                        value: 'ar',
+                        child: Text(l10n.lang_arabic),
+                      ),
+                      DropdownMenuItem(
+                        value: 'fr',
+                        child: Text(l10n.lang_french),
+                      ),
+                    ],
+                    onChanged: (v) {
+                      if (v == null) return;
+                      final cubit = context.read<LocaleCubit>();
+                      if (v == 'system') {
+                        cubit.setLocale(null);
+                      } else {
+                        cubit.setLocale(Locale(v));
+                      }
+                    },
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
