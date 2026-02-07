@@ -1952,4 +1952,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get owner_proj_details_ecom_m10 => 'Import/export data (CSV/Excel)';
+
+  @override
+  String get download_ios => 'Install TestFlight to open';
 }

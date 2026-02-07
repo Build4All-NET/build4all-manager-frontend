@@ -1,7 +1,7 @@
 name: build4all_manager
 description: "A new Flutter project."
 publish_to: 'none'
-version: 1.0.0+1
+version: 1.0.0+2
 
 environment:
   sdk: ">=3.0.0 <4.0.0"
@@ -55,6 +55,7 @@ dependencies:
   file_picker: ^8.1.2
   flutter_colorpicker: ^1.1.0
   share_plus: ^10.0.2
+  font_awesome_flutter: ^10.7.0
  
 
   # Core

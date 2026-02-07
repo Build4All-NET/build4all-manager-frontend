@@ -838,6 +838,7 @@
   "owner_proj_details_ecom_m7": "AI recommendations + AI chat assistant",
   "owner_proj_details_ecom_m8": "Admin panel: orders, products, customers",
   "owner_proj_details_ecom_m9": "Analytics: revenue, conversion, AOV",
-  "owner_proj_details_ecom_m10": "Import/export data (CSV/Excel)"
+  "owner_proj_details_ecom_m10": "Import/export data (CSV/Excel)",
+  "download_ios":"Install TestFlight to open"
 
 }

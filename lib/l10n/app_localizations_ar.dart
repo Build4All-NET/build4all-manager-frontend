@@ -1873,83 +1873,86 @@ class AppLocalizationsAr extends AppLocalizations {
   String get owner_project_publish => 'Publish';
 
   @override
-  String get owner_proj_details_ecom_h5 => 'AI-powered product discovery';
+  String get owner_proj_details_ecom_h5 => 'اكتشاف منتجات بالذكاء الاصطناعي';
 
   @override
-  String get owner_proj_details_ecom_h6 => 'Admin dashboard with order analytics';
+  String get owner_proj_details_ecom_h6 => 'لوحة إدارة مع تحليلات الطلبات';
 
   @override
-  String get owner_proj_details_ecom_h7 => 'Import products/orders from CSV/Excel';
+  String get owner_proj_details_ecom_h7 => 'استيراد المنتجات/الطلبات من CSV أو Excel';
 
   @override
-  String get owner_proj_details_ecom_h8 => 'Cash on delivery + Stripe card payments';
+  String get owner_proj_details_ecom_h8 => 'الدفع كاش أو عبر Stripe';
 
   @override
-  String get owner_proj_details_ecom_sf1_title => 'Sign up & login';
+  String get owner_proj_details_ecom_sf1_title => 'تسجيل وإنشاء حساب';
 
   @override
-  String get owner_proj_details_ecom_sf1_sub => 'Email/phone auth, roles, and password reset.';
+  String get owner_proj_details_ecom_sf1_sub => 'تسجيل عبر ايميل/هاتف + أدوار + إعادة تعيين كلمة المرور.';
 
   @override
-  String get owner_proj_details_ecom_sf2_title => 'Catalog & search';
+  String get owner_proj_details_ecom_sf2_title => 'كتالوج وبحث';
 
   @override
-  String get owner_proj_details_ecom_sf2_sub => 'Categories, filters, sorting, and fast search.';
+  String get owner_proj_details_ecom_sf2_sub => 'تصنيفات + فلاتر + ترتيب + بحث سريع.';
 
   @override
-  String get owner_proj_details_ecom_sf3_title => 'Product details';
+  String get owner_proj_details_ecom_sf3_title => 'تفاصيل المنتج';
 
   @override
-  String get owner_proj_details_ecom_sf3_sub => 'Variants, media gallery, stock, and reviews.';
+  String get owner_proj_details_ecom_sf3_sub => 'صور وفيديو + خيارات/Variants + مخزون + تقييمات.';
 
   @override
-  String get owner_proj_details_ecom_sf4_title => 'Cart management';
+  String get owner_proj_details_ecom_sf4_title => 'سلة المشتريات';
 
   @override
-  String get owner_proj_details_ecom_sf4_sub => 'Add to cart, edit quantities, save items.';
+  String get owner_proj_details_ecom_sf4_sub => 'إضافة للسلة + تعديل الكمية + حفظ منتجات.';
 
   @override
-  String get owner_proj_details_ecom_sf5_title => 'Checkout flow';
+  String get owner_proj_details_ecom_sf5_title => 'مسار الدفع';
 
   @override
-  String get owner_proj_details_ecom_sf5_sub => 'Addresses, coupons, shipping, taxes.';
+  String get owner_proj_details_ecom_sf5_sub => 'عناوين + كوبونات + شحن + ضرائب.';
 
   @override
-  String get owner_proj_details_ecom_sf6_title => 'Payments';
+  String get owner_proj_details_ecom_sf6_title => 'طرق الدفع';
 
   @override
-  String get owner_proj_details_ecom_sf6_sub => 'Cash on delivery + Stripe payments (cards).';
+  String get owner_proj_details_ecom_sf6_sub => 'كاش عند الاستلام + Stripe (بطاقات).';
 
   @override
-  String get owner_proj_details_ecom_sf7_title => 'Orders & tracking';
+  String get owner_proj_details_ecom_sf7_title => 'الطلبات والتتبع';
 
   @override
-  String get owner_proj_details_ecom_sf7_sub => 'Order history, tracking, invoices, refunds.';
+  String get owner_proj_details_ecom_sf7_sub => 'سجل الطلبات + تتبع + فواتير + استرجاع/Refund.';
 
   @override
-  String get owner_proj_details_ecom_sf8_title => 'Admin & analytics';
+  String get owner_proj_details_ecom_sf8_title => 'لوحة الإدارة والتحليلات';
 
   @override
-  String get owner_proj_details_ecom_sf8_sub => 'Manage orders/products, import data, insights, AI tools.';
+  String get owner_proj_details_ecom_sf8_sub => 'إدارة الطلبات والمنتجات + استيراد بيانات + تحليلات + أدوات AI.';
 
   @override
-  String get owner_proj_details_ecom_m4 => 'Stripe payments + Cash on Delivery';
+  String get owner_proj_details_ecom_m4 => 'Stripe + دفع كاش';
 
   @override
-  String get owner_proj_details_ecom_m5 => 'Coupons, discounts, and loyalty points';
+  String get owner_proj_details_ecom_m5 => 'كوبونات وخصومات ونقاط ولاء';
 
   @override
-  String get owner_proj_details_ecom_m6 => 'Wishlist + saved carts';
+  String get owner_proj_details_ecom_m6 => 'Wishlist + سلات محفوظة';
 
   @override
-  String get owner_proj_details_ecom_m7 => 'AI recommendations + AI chat assistant';
+  String get owner_proj_details_ecom_m7 => 'توصيات AI + مساعد دردشة AI';
 
   @override
-  String get owner_proj_details_ecom_m8 => 'Admin panel: orders, products, customers';
+  String get owner_proj_details_ecom_m8 => 'Admin: إدارة الطلبات والمنتجات والعملاء';
 
   @override
-  String get owner_proj_details_ecom_m9 => 'Analytics: revenue, conversion, AOV';
+  String get owner_proj_details_ecom_m9 => 'Analytics: الإيرادات والتحويل ومتوسط الطلب';
 
   @override
-  String get owner_proj_details_ecom_m10 => 'Import/export data (CSV/Excel)';
+  String get owner_proj_details_ecom_m10 => 'Import/Export بيانات (CSV/Excel)';
+
+  @override
+  String get download_ios => 'Install TestFlight to open';
 }

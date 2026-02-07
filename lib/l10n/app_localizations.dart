@@ -3930,6 +3930,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Import/export data (CSV/Excel)'**
   String get owner_proj_details_ecom_m10;
+
+  /// No description provided for @download_ios.
+  ///
+  /// In en, this message translates to:
+  /// **'Install TestFlight to open'**
+  String get download_ios;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

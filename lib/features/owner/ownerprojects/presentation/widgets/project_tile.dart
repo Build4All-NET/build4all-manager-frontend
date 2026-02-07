@@ -11,11 +11,14 @@
 // - If NO link: ALL buttons become inactive (Copy/Share/Download/Publish)
 // - NO "Retry" label anywhere (iOS primary is always Download)
 
+import 'dart:math' as math;
+
 import 'package:build4all_manager/features/owner/common/domain/entities/owner_project.dart';
 import 'package:build4all_manager/l10n/app_localizations.dart';
 import 'package:build4all_manager/shared/widgets/app_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -409,10 +412,14 @@ class ProjectTile extends StatelessWidget {
                             },
 
                             // ✅ NO RETRY — always Download (disabled if no link)
-                            primaryText: l10n.common_download,
-                            primaryIcon: Icons.download_rounded,
-                            primaryEnabled: hasIosLink,
-                            onPrimary: () => _openUrl(context, iosUrl),
+                           primaryText: l10n.download_ios,
+primaryIcon: Icons
+                                .download_rounded, // required but will be ignored because primaryLeading exists
+                            primaryLeading: const _TestFlightLikeIcon(
+                                size:
+                                    18), // closest icon without using an image
+primaryEnabled: hasIosLink,
+onPrimary: () => _openUrl(context, iosUrl), // keeps your same behavior
 
                             // ✅ Publish ALSO disabled if no link (as requested)
                             secondaryText: publishText,
@@ -469,6 +476,8 @@ class _PlatformCard extends StatelessWidget {
 
   final String primaryText;
   final IconData primaryIcon;
+  final Widget? primaryLeading;
+
   final bool primaryEnabled;
   final VoidCallback onPrimary;
 
@@ -492,6 +501,8 @@ class _PlatformCard extends StatelessWidget {
     required this.onShare,
     required this.primaryText,
     required this.primaryIcon,
+    this.primaryLeading,
+
     required this.primaryEnabled,
     required this.onPrimary,
     required this.secondaryText,
@@ -635,7 +646,13 @@ class _PlatformCard extends StatelessWidget {
             height: btnH,
             child: ElevatedButton.icon(
               onPressed: primaryEnabled ? onPrimary : null,
-              icon: Icon(primaryIcon, size: 16),
+             icon: primaryLeading != null
+                  ? Opacity(
+                      opacity: primaryEnabled ? 1 : .35,
+                      child: primaryLeading!,
+                    )
+                  : Icon(primaryIcon, size: 16),
+
               label: FittedBox(
                 fit: BoxFit.scaleDown,
                 alignment: Alignment.center,
@@ -906,4 +923,89 @@ class _FadedSquareButton extends StatelessWidget {
       ),
     );
   }
+}
+
+class _TestFlightLikeIcon extends StatelessWidget {
+  final double size;
+  const _TestFlightLikeIcon({required this.size});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: size,
+      height: size,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(size * 0.25),
+        child: DecoratedBox(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF1FB2FF), Color(0xFF0A74FF)],
+            ),
+          ),
+          child: CustomPaint(painter: _TestFlightPainter()),
+        ),
+      ),
+    );
+  }
+}
+
+class _TestFlightPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size s) {
+    final w = s.width;
+    final h = s.height;
+    final c = Offset(w / 2, h / 2);
+
+    // grid
+    final grid = Paint()
+      ..color = Colors.white.withOpacity(0.18)
+      ..strokeWidth = w * 0.06;
+
+    for (int i = 1; i <= 2; i++) {
+      final x = w * i / 3;
+      final y = h * i / 3;
+      canvas.drawLine(Offset(x, 0), Offset(x, h), grid);
+      canvas.drawLine(Offset(0, y), Offset(w, y), grid);
+    }
+
+    // soft circle glow
+    final glow = Paint()..color = Colors.white.withOpacity(0.18);
+    canvas.drawCircle(c, w * 0.42, glow);
+
+    // 3 blades
+    final blade = Paint()..color = Colors.white.withOpacity(0.90);
+
+    void bladeAt(double angle) {
+      canvas.save();
+      canvas.translate(c.dx, c.dy);
+      canvas.rotate(angle);
+
+      final bw = w * 0.16;
+      final bl = w * 0.38;
+      final rect = Rect.fromCenter(
+        center: Offset(0, -w * 0.30),
+        width: bw,
+        height: bl,
+      );
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(rect, Radius.circular(bw)),
+        blade,
+      );
+
+      canvas.restore();
+    }
+
+    bladeAt(0);
+    bladeAt(2.09439510239);
+    bladeAt(4.18879020479);
+
+    // hub
+    final hub = Paint()..color = Colors.white.withOpacity(0.95);
+    canvas.drawCircle(c, w * 0.07, hub);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
