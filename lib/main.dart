@@ -2,6 +2,7 @@ import 'package:build4all_manager/core/localization/locale_cubit.dart';
 import 'package:build4all_manager/core/localization/locale_storage.dart';
 import 'package:build4all_manager/core/network/connecting/connection_banner.dart';
 import 'package:build4all_manager/core/network/connecting/connection_cubit.dart';
+import 'package:build4all_manager/core/network/connecting/server_down_overlay.dart';
 import 'package:build4all_manager/core/network/dio_client.dart';
 import 'package:build4all_manager/features/auth/data/datasources/jwt_local_datasource.dart';
 import 'package:build4all_manager/l10n/app_localizations.dart';
@@ -12,7 +13,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:build4all_manager/app/router/router.dart' as nav;
 import 'package:build4all_manager/features/theme_manager/data/local_theme_store.dart';
 import 'package:build4all_manager/features/theme_manager/presentation/theme_cubit.dart';
-
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,8 +41,6 @@ class Build4AllManagerApp extends StatelessWidget {
             baseUrl: DioClient.ensure().options.baseUrl,
           ),
         ),
-
-        // ✅ PROVIDE LOCALE CUBIT + load saved locale
         BlocProvider(
           create: (_) => LocaleCubit(LocaleStorage())..loadSavedLocale(),
         ),
@@ -58,22 +56,22 @@ class Build4AllManagerApp extends StatelessWidget {
                 darkTheme: vm.dark,
                 themeMode: vm.mode,
                 routerConfig: nav.router,
-
-                // ✅ THIS is the missing link
                 locale: locale,
-
                 builder: (context, child) {
                   return Stack(
                     children: [
                       child ?? const SizedBox.shrink(),
+
                       const Align(
                         alignment: Alignment.topCenter,
                         child: ConnectionBanner(),
                       ),
+
+                      // ✅ This is the persistent popup overlay
+                      const ServerDownOverlay(),
                     ],
                   );
                 },
-
                 supportedLocales: AppLocalizations.supportedLocales,
                 localizationsDelegates: const [
                   AppLocalizations.delegate,
@@ -81,7 +79,6 @@ class Build4AllManagerApp extends StatelessWidget {
                   GlobalCupertinoLocalizations.delegate,
                   GlobalWidgetsLocalizations.delegate,
                 ],
-
                 localeListResolutionCallback: (locales, supported) {
                   if (locales == null || locales.isEmpty) {
                     return supported.first;

@@ -3,6 +3,9 @@ import 'package:build4all_manager/core/network/api_config.dart';
 import 'package:build4all_manager/core/network/globals.dart' as g;
 import 'package:build4all_manager/core/network/api_client.dart';
 
+import 'global_error_interceptor.dart';
+import 'server_status_controller.dart';
+
 class DioClient {
   /// Call once in main() BEFORE runApp()
   static Future<void> init() async {
@@ -11,8 +14,19 @@ class DioClient {
     // baseUrl: http://host:8080/api
     g.appServerRoot = cfg.baseUrl;
 
+    // ✅ init server status controller (for the popup auto-retry)
+    ServerStatusController.init(baseUrl: cfg.baseUrl);
+
     final client = ApiClient(cfg);
     g.appDio = client.dio;
+
+    // ✅ Add global interceptor once
+    final dio = ensure();
+    final alreadyAdded =
+        dio.interceptors.any((i) => i is GlobalErrorInterceptor);
+    if (!alreadyAdded) {
+      dio.interceptors.add(GlobalErrorInterceptor());
+    }
   }
 
   static Dio ensure() {
@@ -23,7 +37,6 @@ class DioClient {
     return dio;
   }
 
-  /// Optional manual update (interceptor also reads from storage per-request)
   static void setToken(String token) {
     ensure().options.headers['Authorization'] = 'Bearer ${token.trim()}';
     g.authToken = token.trim();

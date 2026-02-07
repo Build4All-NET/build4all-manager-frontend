@@ -7,6 +7,9 @@
 // 3) Keeps same design + no functionality changes
 // ✅ FIX:
 // - Removes the 2px right overflow by removing fixed widths/clamp + using Expanded.
+// ✅ YOUR NEW RULES:
+// - If NO link: ALL buttons become inactive (Copy/Share/Download/Publish)
+// - NO "Retry" label anywhere (iOS primary is always Download)
 
 import 'package:build4all_manager/features/owner/common/domain/entities/owner_project.dart';
 import 'package:build4all_manager/l10n/app_localizations.dart';
@@ -186,7 +189,6 @@ class ProjectTile extends StatelessWidget {
         final double headerPad = small ? 10 : 12;
         final double gap = small ? 6 : 8;
 
-        // ✅ gap stays but row never overflows because cards are Expanded
         final double cardGap = small ? 8 : 10;
 
         final headerGradient = LinearGradient(
@@ -204,13 +206,10 @@ class ProjectTile extends StatelessWidget {
           decoration: BoxDecoration(
             color: cs.surface,
             borderRadius: BorderRadius.circular(16),
-
-            // ✅ gray border around whole tile
             border: Border.all(
               color: cs.outlineVariant.withOpacity(.85),
               width: 1,
             ),
-
             boxShadow: const [
               BoxShadow(
                 color: Color(0x12000000),
@@ -278,8 +277,6 @@ class ProjectTile extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 6),
-
-                      // ✅ prevent header overflow in long statuses
                       ConstrainedBox(
                         constraints:
                             BoxConstraints(maxWidth: small ? 120 : 150),
@@ -297,16 +294,20 @@ class ProjectTile extends StatelessWidget {
 
               Divider(height: 1, color: cs.outlineVariant.withOpacity(.7)),
 
-              // TWO CARDS ROW ✅ overflow-proof
+              // TWO CARDS ROW
               Padding(
                 padding: EdgeInsets.all(pad),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // ANDROID CARD
                     Expanded(
                       child: LayoutBuilder(
                         builder: (context, cc) {
                           final maxW = cc.maxWidth;
+
+                          final bool hasAndroidLink = androidUrl.isNotEmpty;
+
                           return _PlatformCard(
                             maxW: maxW,
                             title: l10n.owner_project_android,
@@ -314,12 +315,15 @@ class ProjectTile extends StatelessWidget {
                             iconColor: const Color(0xFF22C55E),
                             statusText: androidStatusText,
                             statusSubText: androidStatusSubText,
-                            statusColor: androidReady
+                            statusColor: hasAndroidLink
                                 ? const Color(0xFF22C55E)
                                 : const Color(0xFFEF4444),
                             showErrorBox: false,
                             errorBoxText: '',
-                            enabledActions: androidUrl.isNotEmpty,
+
+                            // ✅ inactive if no link
+                            enabledActions: hasAndroidLink,
+
                             copyLabel: copyText,
                             shareLabel: shareText,
                             onCopy: () => _copyLink(context, androidUrl),
@@ -336,13 +340,17 @@ class ProjectTile extends StatelessWidget {
                                 sharePositionOrigin: rect,
                               );
                             },
+
+                            // ✅ Download disabled if no link
                             primaryText: l10n.common_download,
                             primaryIcon: Icons.download_rounded,
-                            primaryEnabled: true,
+                            primaryEnabled: hasAndroidLink,
                             onPrimary: () => _openUrl(context, androidUrl),
+
+                            // ✅ Publish ALSO disabled if no link (as requested)
                             secondaryText: publishText,
                             secondaryIcon: Icons.upload_rounded,
-                            secondaryEnabled: true,
+                            secondaryEnabled: hasAndroidLink,
                             onSecondary: () => PublishWizardDialog.open(
                               context,
                               api: publishApi,
@@ -356,11 +364,17 @@ class ProjectTile extends StatelessWidget {
                         },
                       ),
                     ),
+
                     SizedBox(width: cardGap),
+
+                    // IOS CARD
                     Expanded(
                       child: LayoutBuilder(
                         builder: (context, cc) {
                           final maxW = cc.maxWidth;
+
+                          final bool hasIosLink = iosUrl.isNotEmpty;
+
                           return _PlatformCard(
                             maxW: maxW,
                             title: l10n.owner_project_ios,
@@ -368,12 +382,15 @@ class ProjectTile extends StatelessWidget {
                             iconColor: const Color(0xFF2563EB),
                             statusText: iosStatusText,
                             statusSubText: iosStatusSubText,
-                            statusColor: iosReady
+                            statusColor: hasIosLink
                                 ? const Color(0xFF22C55E)
                                 : const Color(0xFFEF4444),
                             showErrorBox: false,
                             errorBoxText: '',
-                            enabledActions: iosUrl.isNotEmpty,
+
+                            // ✅ inactive if no link
+                            enabledActions: hasIosLink,
+
                             copyLabel: copyText,
                             shareLabel: shareText,
                             onCopy: () => _copyLink(context, iosUrl),
@@ -390,17 +407,17 @@ class ProjectTile extends StatelessWidget {
                                 sharePositionOrigin: rect,
                               );
                             },
-                            primaryText: iosReady
-                                ? l10n.owner_project_open
-                                : l10n.owner_project_retry_build,
-                            primaryIcon: iosReady
-                                ? Icons.open_in_new_rounded
-                                : Icons.refresh_rounded,
-                            primaryEnabled: true,
+
+                            // ✅ NO RETRY — always Download (disabled if no link)
+                            primaryText: l10n.common_download,
+                            primaryIcon: Icons.download_rounded,
+                            primaryEnabled: hasIosLink,
                             onPrimary: () => _openUrl(context, iosUrl),
+
+                            // ✅ Publish ALSO disabled if no link (as requested)
                             secondaryText: publishText,
                             secondaryIcon: Icons.upload_rounded,
-                            secondaryEnabled: true,
+                            secondaryEnabled: hasIosLink,
                             onSecondary: () => PublishWizardDialog.open(
                               context,
                               api: publishApi,
@@ -524,8 +541,6 @@ class _PlatformCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 6),
-
-              // ✅ constrain pill so it never pushes layout
               ConstrainedBox(
                 constraints: BoxConstraints(maxWidth: tiny ? 85 : 100),
                 child: FittedBox(
