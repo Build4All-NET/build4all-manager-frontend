@@ -1,9 +1,7 @@
 // lib/features/owner/ownerprofile/presentation/widgets/profile_header.dart
+
 import 'package:build4all_manager/features/owner/ownerprofile/domain/entities/owner_profile.dart';
-import 'package:build4all_manager/l10n/app_localizations.dart';
-import 'package:build4all_manager/shared/widgets/app_toast.dart'; // ✅ common toast
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 class ProfileHeader extends StatelessWidget {
   final OwnerProfile p;
@@ -12,10 +10,26 @@ class ProfileHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final l10n = AppLocalizations.of(context)!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final name = (p.fullName.isEmpty ? p.username : p.fullName);
-    final email = p.email;
+    final name = (p.fullName.isEmpty ? p.username : p.fullName).trim();
+    final handle = p.username.trim().isEmpty ? '' : '@${p.username.trim()}';
+
+    final headerGradient = LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: isDark
+          ? [
+              Color.lerp(cs.surface, cs.primary, 0.14)!,
+              Color.lerp(cs.surface, cs.primary, 0.07)!,
+              Color.lerp(cs.surface, cs.secondary, 0.10)!,
+            ]
+          : [
+              Color.lerp(cs.surface, Colors.white, 0.75)!,
+              Color.lerp(cs.surface, cs.primary, 0.04)!,
+              Color.lerp(cs.surface, cs.secondary, 0.03)!,
+            ],
+    );
 
     return Card(
       elevation: 0,
@@ -25,28 +39,9 @@ class ProfileHeader extends StatelessWidget {
         side: BorderSide(color: cs.outlineVariant.withOpacity(.6)),
       ),
       child: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              cs.primary.withOpacity(.12),
-              cs.primaryContainer.withOpacity(.08),
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        child: _AvatarStrip(
-          name: name,
-          email: email,
-          onCopyEmail: () async {
-            await Clipboard.setData(ClipboardData(text: email));
-            if (!context.mounted) return;
-
-            // ✅ common toast instead of top_toast
-            AppToast.success(context, l10n.copied ?? 'Copied');
-          },
-        ),
+        decoration: BoxDecoration(gradient: headerGradient),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        child: _AvatarStrip(name: name, handle: handle),
       ),
     );
   }
@@ -54,13 +49,11 @@ class ProfileHeader extends StatelessWidget {
 
 class _AvatarStrip extends StatelessWidget {
   final String name;
-  final String email;
-  final VoidCallback onCopyEmail;
+  final String handle;
 
   const _AvatarStrip({
     required this.name,
-    required this.email,
-    required this.onCopyEmail,
+    required this.handle,
   });
 
   String _initials(String s) {
@@ -89,56 +82,44 @@ class _AvatarStrip extends StatelessWidget {
       child: Text(
         _initials(name),
         style: TextStyle(
-          fontWeight: FontWeight.w800,
+          fontWeight: FontWeight.w900,
           fontSize: 18,
           color: cs.primary,
         ),
       ),
     );
 
-    final info = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          name,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: tt.titleSmall?.copyWith(
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-        const SizedBox(height: 2),
-        Row(
-          children: [
-            Flexible(
-              child: Text(
-                email,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: tt.bodySmall?.copyWith(
-                  color: cs.onSurfaceVariant,
-                ),
-              ),
-            ),
-            const SizedBox(width: 4),
-            IconButton(
-              tooltip: 'Copy',
-              onPressed: onCopyEmail,
-              icon: const Icon(Icons.copy_rounded, size: 16),
-              visualDensity: VisualDensity.compact,
-              padding: EdgeInsets.zero,
-            ),
-          ],
-        ),
-      ],
-    );
-
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         avatar,
         const SizedBox(width: 12),
-        Expanded(child: info),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                name.isEmpty ? '—' : name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: tt.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              if (handle.isNotEmpty) ...[
+                const SizedBox(height: 4),
+                Text(
+                  handle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: tt.bodyMedium?.copyWith(
+                    color: cs.onSurfaceVariant,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
       ],
     );
   }

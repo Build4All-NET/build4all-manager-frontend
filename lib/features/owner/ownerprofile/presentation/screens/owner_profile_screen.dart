@@ -1,6 +1,6 @@
 // lib/features/owner/ownerprofile/presentation/screens/owner_profile_screen.dart
 
-import 'package:build4all_manager/core/localization/locale_cubit.dart'; // ✅
+import 'package:build4all_manager/core/localization/locale_cubit.dart';
 import 'package:build4all_manager/features/auth/data/datasources/jwt_local_datasource.dart';
 import 'package:build4all_manager/features/owner/ownerprofile/data/repositories/owner_profile_repository_impl.dart';
 import 'package:build4all_manager/features/owner/ownerprofile/data/services/owner_profile_api.dart';
@@ -53,6 +53,7 @@ class _OwnerProfileView extends StatelessWidget {
       builder: (ctx) {
         final cs = Theme.of(ctx).colorScheme;
         final tt = Theme.of(ctx).textTheme;
+
         return Padding(
           padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
           child: Column(
@@ -62,7 +63,7 @@ class _OwnerProfileView extends StatelessWidget {
                 contentPadding: EdgeInsets.zero,
                 title: Text(
                   l10n.logout_confirm ?? 'Do you want to log out?',
-                  style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+                  style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w900),
                 ),
                 subtitle: Text(
                   l10n.owner_nav_profile,
@@ -70,7 +71,7 @@ class _OwnerProfileView extends StatelessWidget {
                 ),
                 leading: CircleAvatar(
                   backgroundColor: cs.error.withOpacity(.12),
-                  child: Icon(Icons.logout, color: cs.error),
+                  child: Icon(Icons.logout_rounded, color: cs.error),
                 ),
               ),
               const SizedBox(height: 12),
@@ -170,36 +171,20 @@ class _OwnerProfileView extends StatelessWidget {
                               width: wide ? maxCardWidth : double.infinity,
                               child: ProfileHeader(p: p),
                             ),
-
-                            // ✅ Put language neatly ABOVE the profile card
-                            const SizedBox(height: 14),
-                            SizedBox(
-                              width: wide ? maxCardWidth : double.infinity,
-                              child: _LanguageTile(l10n: l10n),
-                            ),
-
                             const SizedBox(height: 12),
                             SizedBox(
                               width: wide ? maxCardWidth : double.infinity,
                               child: ProfileInfoCard(p: p),
                             ),
-
-                            const SizedBox(height: 20),
+                            const SizedBox(height: 12),
                             SizedBox(
                               width: wide ? maxCardWidth : double.infinity,
-                              child: FilledButton.icon(
-                                onPressed: () => _logoutFlow(context),
-                                icon: const Icon(Icons.logout_rounded),
-                                label: Text(l10n.logout ?? 'Logout'),
-                                style: FilledButton.styleFrom(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 12),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(14),
-                                  ),
-                                ),
+                              child: _PreferencesCard(
+                                l10n: l10n,
+                                onLogout: () => _logoutFlow(context),
                               ),
                             ),
+                            const SizedBox(height: 10),
                           ],
                         ),
                       ),
@@ -240,64 +225,129 @@ class _ProfileAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 }
 
-// ✅ same dropdown as superadmin
-class _LanguageTile extends StatelessWidget {
+class _PreferencesCard extends StatelessWidget {
   final AppLocalizations l10n;
-  const _LanguageTile({required this.l10n});
+  final VoidCallback onLogout;
+
+  const _PreferencesCard({
+    required this.l10n,
+    required this.onLogout,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Card(
       elevation: 0,
       clipBehavior: Clip.antiAlias,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-        child: Row(
-          children: [
-            const Icon(Icons.language_rounded),
-            const SizedBox(width: 12),
-            Expanded(child: Text(l10n.common_language)),
-            const SizedBox(width: 8),
-            BlocBuilder<LocaleCubit, Locale?>(
-              builder: (context, locale) {
-                final value = locale?.languageCode ?? 'system';
-
-                return DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
-                    value: value,
-                    items: [
-                      DropdownMenuItem(
-                        value: 'system',
-                        child: Text(l10n.common_system_language),
-                      ),
-                      DropdownMenuItem(
-                        value: 'en',
-                        child: Text(l10n.lang_english),
-                      ),
-                      DropdownMenuItem(
-                        value: 'ar',
-                        child: Text(l10n.lang_arabic),
-                      ),
-                      DropdownMenuItem(
-                        value: 'fr',
-                        child: Text(l10n.lang_french),
-                      ),
-                    ],
-                    onChanged: (v) {
-                      if (v == null) return;
-                      final cubit = context.read<LocaleCubit>();
-                      if (v == 'system') {
-                        cubit.setLocale(null);
-                      } else {
-                        cubit.setLocale(Locale(v));
-                      }
-                    },
-                  ),
-                );
-              },
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
+            child: Row(
+              children: [
+                Text(
+                  // If you don't have l10n.settings, fallback is fine
+                  l10n.settings ?? 'Settings',
+                  style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+          Divider(height: 1, color: cs.outlineVariant.withOpacity(.7)),
+
+          // ✅ language row (NO nested Card)
+          _LanguageRow(l10n: l10n),
+
+          Divider(height: 1, color: cs.outlineVariant.withOpacity(.7)),
+
+          ListTile(
+            onTap: onLogout,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+            leading: CircleAvatar(
+              radius: 18,
+              backgroundColor: cs.error.withOpacity(.12),
+              child: Icon(Icons.logout_rounded, color: cs.error, size: 18),
+            ),
+            title: Text(
+              l10n.logout ?? 'Logout',
+              style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w900),
+            ),
+            subtitle: Text(
+              l10n.logout_confirm ?? 'Sign out of this account',
+              style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
+            ),
+            trailing:
+                Icon(Icons.chevron_right_rounded, color: cs.onSurfaceVariant),
+          ),
+
+          const SizedBox(height: 6),
+        ],
+      ),
+    );
+  }
+}
+
+// ✅ Professional: row inside settings card (not a card on its own)
+class _LanguageRow extends StatelessWidget {
+  final AppLocalizations l10n;
+  const _LanguageRow({required this.l10n});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+      child: Row(
+        children: [
+          const CircleAvatar(
+            radius: 18,
+            backgroundColor: Color(0x1A000000),
+            child: Icon(Icons.language_rounded, size: 18),
+          ),
+          const SizedBox(width: 12),
+          Expanded(child: Text(l10n.common_language)),
+          const SizedBox(width: 8),
+          BlocBuilder<LocaleCubit, Locale?>(
+            builder: (context, locale) {
+              final value = locale?.languageCode ?? 'system';
+
+              return DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  value: value,
+                  items: [
+                    DropdownMenuItem(
+                      value: 'system',
+                      child: Text(l10n.common_system_language),
+                    ),
+                    DropdownMenuItem(
+                      value: 'en',
+                      child: Text(l10n.lang_english),
+                    ),
+                    DropdownMenuItem(
+                      value: 'ar',
+                      child: Text(l10n.lang_arabic),
+                    ),
+                    DropdownMenuItem(
+                      value: 'fr',
+                      child: Text(l10n.lang_french),
+                    ),
+                  ],
+                  onChanged: (v) {
+                    if (v == null) return;
+                    final cubit = context.read<LocaleCubit>();
+                    if (v == 'system') {
+                      cubit.setLocale(null);
+                    } else {
+                      cubit.setLocale(Locale(v));
+                    }
+                  },
+                ),
+              );
+            },
+          ),
+        ],
       ),
     );
   }

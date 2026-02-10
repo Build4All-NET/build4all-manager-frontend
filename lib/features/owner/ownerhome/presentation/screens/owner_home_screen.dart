@@ -39,7 +39,6 @@ class OwnerHomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final generalRepo = OwnerRepositoryImpl(OwnerApi(dio));
-
     final projectsRepo = OwnerProjectsRepositoryImpl(OwnerProjectsApi(dio));
     final getAvailableKinds = GetAvailableKindsFromActiveUc(projectsRepo);
 
@@ -51,6 +50,7 @@ class OwnerHomeScreen extends StatelessWidget {
       )..add(OwnerHomeStarted(ownerId)),
       child: _HomeScaffold(
         ownerId: ownerId,
+        dio: dio,
         ownerName: ownerName,
       ),
     );
@@ -59,10 +59,12 @@ class OwnerHomeScreen extends StatelessWidget {
 
 class _HomeScaffold extends StatelessWidget {
   final int ownerId;
+  final Dio dio;
   final String? ownerName;
 
   const _HomeScaffold({
     required this.ownerId,
+    required this.dio,
     this.ownerName,
   });
 
@@ -74,6 +76,7 @@ class _HomeScaffold extends StatelessWidget {
       body: SafeArea(
         child: _HomeBody(
           ownerId: ownerId,
+          dio: dio,
           ownerName: ownerName,
         ),
       ),
@@ -83,10 +86,12 @@ class _HomeScaffold extends StatelessWidget {
 
 class _HomeBody extends StatelessWidget {
   final int ownerId;
+  final Dio dio;
   final String? ownerName;
 
   const _HomeBody({
     required this.ownerId,
+    required this.dio,
     this.ownerName,
   });
 
@@ -102,9 +107,12 @@ class _HomeBody extends StatelessWidget {
         ? const EdgeInsets.symmetric(horizontal: 20, vertical: 16)
         : ux.pagePad;
 
-    final greeting = (ownerName == null || ownerName!.trim().isEmpty)
+    final firstName = _firstNameOrNull(ownerName);
+
+    // ✅ only show FIRST NAME if it's a real name
+    final greeting = (firstName == null)
         ? l10n.owner_home_hello
-        : '${l10n.owner_home_hello} $ownerName';
+        : '${l10n.owner_home_hello} $firstName';
 
     return Padding(
       padding: pagePad,
@@ -247,12 +255,18 @@ class _HomeBody extends StatelessWidget {
                           l10n.owner_home_recentRequests,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: tt.titleMedium
-                              ?.copyWith(fontWeight: FontWeight.w800),
+                          style: tt.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w800,
+                          ),
                         ),
                       ),
+
+                      // ✅ FIX: View all goes to LIST screen (not create)
                       TextButton(
-                        onPressed: () => context.push('/owner/requests'),
+                        onPressed: () => context.push(
+                          '/owner/requests/list',
+                          extra: {'ownerId': ownerId, 'dio': dio},
+                        ),
                         child: Text(l10n.owner_home_viewAll),
                       ),
                     ],
@@ -288,6 +302,24 @@ class _HomeBody extends StatelessWidget {
         },
       ),
     );
+  }
+
+  // ✅ Only accept real names. Never show username/email.
+  String? _firstNameOrNull(String? raw) {
+    if (raw == null) return null;
+    final s = raw.trim();
+    if (s.isEmpty) return null;
+
+    final isEmail = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(s);
+    final looksLikeUsername =
+        !s.contains(' ') && RegExp(r'^[a-zA-Z0-9._-]{3,}$').hasMatch(s);
+
+    if (isEmail || s.startsWith('@') || looksLikeUsername) {
+      return null; // 👈 refuse to display username/email
+    }
+
+    final first = s.split(RegExp(r'\s+')).first.trim();
+    return first.isEmpty ? null : first;
   }
 
   String? _errText(OwnerHomeState s) {

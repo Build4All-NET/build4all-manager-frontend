@@ -2,6 +2,7 @@ import 'package:build4all_manager/app/nav_key.dart';
 import 'package:build4all_manager/app/router/super_admin_entry_loader.dart';
 import 'package:build4all_manager/features/owner/ownerhome/data/static_project_models.dart';
 import 'package:build4all_manager/features/owner/ownerhome/presentation/screens/owner_project_details_screen.dart';
+import 'package:build4all_manager/features/owner/ownerhome/presentation/screens/owner_requests_list_screen.dart';
 import 'package:build4all_manager/features/owner/ownernav/presentation/controllers/owner_nav_cubit.dart';
 import 'package:build4all_manager/features/owner/ownerrequests/presentation/screens/owner_requests_screen.dart';
 import 'package:flutter/material.dart';
@@ -94,7 +95,25 @@ final router = GoRouter(
         );
         return _OwnerProjectDetailsBuilder(tpl: tpl);
       },
+
     ),
+    GoRoute(
+      path: '/owner/requests/list',
+      builder: (context, state) {
+        final extra = state.extra as Map<String, dynamic>?;
+        final ownerId = extra?['ownerId'] as int?;
+        final dio = extra?['dio'] as Dio?;
+
+        if (ownerId == null || dio == null) {
+          return const Scaffold(
+            body: Center(child: Text('Missing navigation params')),
+          );
+        }
+
+        return OwnerRequestsListScreen(ownerId: ownerId, dio: dio);
+      },
+    ),
+
     GoRoute(
       path: '/owner/requests',
       builder: (context, state) {

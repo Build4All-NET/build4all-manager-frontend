@@ -194,15 +194,29 @@ class ProjectTile extends StatelessWidget {
 
         final double cardGap = small ? 8 : 10;
 
+       final isDark = Theme.of(context).brightness == Brightness.dark;
+        Color mix(Color a, Color b, double t) => Color.lerp(a, b, t)!;
+
+        final base = cs.surface;
+
         final headerGradient = LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            const Color(0xFFF7F7F7),
-            Colors.white,
-            Colors.grey.shade100,
-          ],
+          colors: isDark
+              ? [
+                  // dark mode: subtle tint, NOT bright
+                  mix(base, cs.primary, 0.14),
+                  mix(base, cs.primary, 0.07),
+                  mix(base, cs.secondary, 0.10),
+                ]
+              : [
+                  // light mode: clean, soft, still “premium”
+                  mix(base, Colors.white, 0.80),
+                  mix(base, cs.primary, 0.03),
+                  mix(base, cs.secondary, 0.03),
+                ],
         );
+
 
         return Container(
           margin: const EdgeInsets.only(bottom: 12),
