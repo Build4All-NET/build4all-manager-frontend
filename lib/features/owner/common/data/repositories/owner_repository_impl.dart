@@ -37,9 +37,17 @@ class OwnerRepositoryImpl implements IOwnerRepository {
     return all.take(limit).toList();
   }
 
-    @override
-  Future<void> rebuildAppLink({required int ownerId, required int linkId}) {
-    return api.rebuildLink(linkId: linkId, ownerId: ownerId);
+   // ANDROID rebuild
+  @override
+  Future<void> rebuildAndroid({required int linkId}) {
+    return api.rebuildAndroid(linkId: linkId);
   }
+
+// IOS rebuild
+  @override
+  Future<void> rebuildIos({required int linkId}) {
+    return api.rebuildIos(linkId: linkId);
+  }
+
 
 }

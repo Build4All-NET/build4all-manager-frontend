@@ -57,9 +57,27 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
       await Future.delayed(const Duration(milliseconds: 250));
     }
 
-    Future<void> rebuildAndRefresh(BuildContext ctx, OwnerProject p) async {
+    Future<void> rebuildAndroid(BuildContext ctx, OwnerProject p) async {
       try {
-        await repo.rebuildAppLink(ownerId: widget.ownerId, linkId: p.linkId);
+        await repo.rebuildAndroid(linkId: p.linkId);
+
+        if (ctx.mounted) {
+          AppToast.success(ctx, 'Rebuild queued');
+        }
+
+        ctx
+            .read<OwnerProjectsBloc>()
+            .add(OwnerProjectsRefreshed(widget.ownerId));
+      } catch (e) {
+        if (ctx.mounted) {
+          AppToast.error(ctx, 'Rebuild failed: $e');
+        }
+      }
+    }
+
+    Future<void> rebuildIos(BuildContext ctx, OwnerProject p) async {
+      try {
+        await repo.rebuildIos(linkId: p.linkId);
 
         if (ctx.mounted) {
           AppToast.success(ctx, 'Rebuild queued');
@@ -227,6 +245,10 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
                                                 serverRootNoApi(widget.dio),
                                             publishApi:
                                                 OwnerPublishApi(widget.dio),
+                                            onRebuildAndroid: (ctx, p) =>
+                                                rebuildAndroid(ctx, p),
+                                            onRebuildIos: (ctx, p) =>
+                                                rebuildIos(ctx, p),
                                           ),
                                         );
                                       },

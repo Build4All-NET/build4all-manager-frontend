@@ -1,15 +1,4 @@
 // lib/features/owner/ownerprojects/presentation/widgets/project_tile.dart
-//
-// ✅ Same UI/behavior — just **MORE compact**
-// ✅ Fixes you asked for:
-// 1) Uses l10n language (Copy / Share / Publish)
-// 2) Smaller margin between READY pill and Copy/Share row (Android + iOS)
-// 3) Keeps same design + no functionality changes
-// ✅ FIX:
-// - Removes the 2px right overflow by removing fixed widths/clamp + using Expanded.
-// ✅ YOUR NEW RULES:
-// - If NO link: ALL buttons become inactive (Copy/Share/Download/Publish)
-// - NO "Retry" label anywhere (iOS primary is always Download)
 
 import 'dart:math' as math;
 
@@ -18,7 +7,6 @@ import 'package:build4all_manager/l10n/app_localizations.dart';
 import 'package:build4all_manager/shared/widgets/app_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -31,11 +19,18 @@ class ProjectTile extends StatelessWidget {
   final String serverRootNoApi;
   final OwnerPublishApi publishApi;
 
+  // ✅ NEW: rebuild callback (so tile can trigger rebuild)
+  final Future<void> Function(BuildContext ctx, OwnerProject p)?
+      onRebuildAndroid;
+  final Future<void> Function(BuildContext ctx, OwnerProject p)? onRebuildIos;
+
   const ProjectTile({
     super.key,
     required this.project,
     required this.serverRootNoApi,
     required this.publishApi,
+    this.onRebuildAndroid,
+    this.onRebuildIos,
   });
 
   String _abs(String? maybe) {
@@ -43,12 +38,9 @@ class ProjectTile extends StatelessWidget {
     final s0 = maybe.trim();
     if (s0.isEmpty || s0.toLowerCase() == 'null') return '';
 
-    if (s0.startsWith('http://') || s0.startsWith('https://')) {
+    if (s0.startsWith('http://') || s0.startsWith('https://'))
       return Uri.parse(s0).toString();
-    }
-    if (s0.startsWith('//')) {
-      return Uri.parse('https:$s0').toString();
-    }
+    if (s0.startsWith('//')) return Uri.parse('https:$s0').toString();
 
     final base = serverRootNoApi.replaceAll(RegExp(r'/+$'), '');
     final rel = s0.startsWith('/') ? s0 : '/$s0';
@@ -112,10 +104,42 @@ class ProjectTile extends StatelessWidget {
         subject: label,
         sharePositionOrigin: sharePositionOrigin,
       );
-    } catch (e) {
+    } catch (_) {
       AppToast.error(context, l10n.owner_project_err_share_failed);
-      debugPrint('Share error: $e');
     }
+  }
+
+  // ─────────────────────────────────────────────
+  // ✅ Build status helpers
+  // ─────────────────────────────────────────────
+
+  String _normalizeBuildStatus(String? raw, {required bool hasArtifact}) {
+    final s = (raw ?? '').trim();
+    if (s.isEmpty || s.toLowerCase() == 'null') {
+      return hasArtifact ? 'SUCCESS' : 'NOT_BUILT';
+    }
+    return s.toUpperCase();
+  }
+
+  bool _isRunning(String status) {
+    final low = status.toLowerCase();
+    return low.contains('queued') ||
+        low.contains('building') ||
+        low.contains('running') ||
+        low.contains('started');
+  }
+
+  Color _buildColor(ColorScheme cs, String status) {
+    final low = status.toLowerCase();
+    if (low.contains('success') || low.contains('done'))
+      return const Color(0xFF22C55E);
+    if (low.contains('fail') || low.contains('error') || low.contains('reject'))
+      return const Color(0xFFEF4444);
+    if (low.contains('queued')) return const Color(0xFFF59E0B);
+    if (low.contains('building') ||
+        low.contains('running') ||
+        low.contains('started')) return const Color(0xFF0B6BFF);
+    return cs.outline; // NOT_BUILT / UNKNOWN
   }
 
   String _statusLabel() {
@@ -129,16 +153,35 @@ class ProjectTile extends StatelessWidget {
   Color _statusColor(ColorScheme cs, String label) {
     final low = label.toLowerCase();
     if (low == 'unknown') return cs.outline;
-    if (low.contains('fail') ||
-        low.contains('error') ||
-        low.contains('reject')) {
+    if (low.contains('fail') || low.contains('error') || low.contains('reject'))
       return cs.error;
-    }
     if (low.contains('test')) return cs.secondary;
     if (low.contains('review')) return cs.primary;
     if (low.contains('prod') || low.contains('production')) return cs.tertiary;
     if (low.contains('local')) return cs.outlineVariant;
     return cs.primary;
+  }
+
+  Future<void> _handleRebuild(
+    BuildContext context,
+    String platformStatus, {
+    required bool isAndroid,
+  }) async {
+    // prevent spam if already running
+    if (_isRunning(platformStatus)) {
+      AppToast.success(context, 'Already queued / building');
+      return;
+    }
+
+    if (isAndroid) {
+      if (onRebuildAndroid != null) {
+        await onRebuildAndroid!(context, project);
+      }
+    } else {
+      if (onRebuildIos != null) {
+        await onRebuildIos!(context, project);
+      }
+    }
   }
 
   @override
@@ -153,23 +196,24 @@ class ProjectTile extends StatelessWidget {
     final statusLabel = _statusLabel();
     final statusColor = _statusColor(cs, statusLabel);
 
-    // Android
+    // Android URLs
     final apkUrl = _abs(project.apkUrl);
     final bundleUrl = _abs(project.bundleUrl);
     final androidUrl = apkUrl.isNotEmpty ? apkUrl : bundleUrl;
-    final androidReady = androidUrl.isNotEmpty;
+    final androidHasArtifact = androidUrl.isNotEmpty;
 
-    // iOS
+    // iOS URLs
     final iosUrl = _abs(project.ipaUrl);
-    final iosReady = iosUrl.isNotEmpty;
+    final iosHasArtifact = iosUrl.isNotEmpty;
 
-    final androidStatusText =
-        androidReady ? l10n.owner_project_ready : l10n.owner_project_failed;
-    final iosStatusText =
-        iosReady ? l10n.owner_project_ready : l10n.owner_project_failed;
+    // ✅ Build job statuses (from backend)
+    final androidBuild = _normalizeBuildStatus(project.androidBuildStatus,
+        hasArtifact: androidHasArtifact);
+    final iosBuild = _normalizeBuildStatus(project.iosBuildStatus,
+        hasArtifact: iosHasArtifact);
 
-    final androidStatusSubText = '';
-    final iosStatusSubText = '';
+    final androidBuildColor = _buildColor(cs, androidBuild);
+    final iosBuildColor = _buildColor(cs, iosBuild);
 
     final androidShareLabel = l10n.owner_project_share_android(
       appName,
@@ -191,10 +235,9 @@ class ProjectTile extends StatelessWidget {
         final double pad = small ? 8 : 10;
         final double headerPad = small ? 10 : 12;
         final double gap = small ? 6 : 8;
-
         final double cardGap = small ? 8 : 10;
 
-       final isDark = Theme.of(context).brightness == Brightness.dark;
+        final isDark = Theme.of(context).brightness == Brightness.dark;
         Color mix(Color a, Color b, double t) => Color.lerp(a, b, t)!;
 
         final base = cs.surface;
@@ -204,29 +247,24 @@ class ProjectTile extends StatelessWidget {
           end: Alignment.bottomRight,
           colors: isDark
               ? [
-                  // dark mode: subtle tint, NOT bright
                   mix(base, cs.primary, 0.14),
                   mix(base, cs.primary, 0.07),
                   mix(base, cs.secondary, 0.10),
                 ]
               : [
-                  // light mode: clean, soft, still “premium”
                   mix(base, Colors.white, 0.80),
                   mix(base, cs.primary, 0.03),
                   mix(base, cs.secondary, 0.03),
                 ],
         );
 
-
         return Container(
           margin: const EdgeInsets.only(bottom: 12),
           decoration: BoxDecoration(
             color: cs.surface,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: cs.outlineVariant.withOpacity(.85),
-              width: 1,
-            ),
+            border:
+                Border.all(color: cs.outlineVariant.withOpacity(.85), width: 1),
             boxShadow: const [
               BoxShadow(
                 color: Color(0x12000000),
@@ -323,24 +361,29 @@ class ProjectTile extends StatelessWidget {
                         builder: (context, cc) {
                           final maxW = cc.maxWidth;
 
-                          final bool hasAndroidLink = androidUrl.isNotEmpty;
+                          final enabledActions =
+                              androidHasArtifact; // download/share/copy
+                          final showErr =
+                              androidBuild.toLowerCase().contains('fail') &&
+                                  (project.androidBuildError ?? '')
+                                      .trim()
+                                      .isNotEmpty;
 
                           return _PlatformCard(
                             maxW: maxW,
                             title: l10n.owner_project_android,
                             icon: Icons.android_rounded,
                             iconColor: const Color(0xFF22C55E),
-                            statusText: androidStatusText,
-                            statusSubText: androidStatusSubText,
-                            statusColor: hasAndroidLink
-                                ? const Color(0xFF22C55E)
-                                : const Color(0xFFEF4444),
-                            showErrorBox: false,
-                            errorBoxText: '',
 
-                            // ✅ inactive if no link
-                            enabledActions: hasAndroidLink,
+                            // ✅ show build status (NOT guessed)
+                            statusText: androidBuild,
+                            statusColor: androidBuildColor,
 
+                            showErrorBox: showErr,
+                            errorBoxText:
+                                (project.androidBuildError ?? '').trim(),
+
+                            enabledActions: enabledActions,
                             copyLabel: copyText,
                             shareLabel: shareText,
                             onCopy: () => _copyLink(context, androidUrl),
@@ -351,23 +394,18 @@ class ProjectTile extends StatelessWidget {
                                   ? null
                                   : (box.localToGlobal(Offset.zero) & box.size);
                               await _shareLink(
-                                context,
-                                androidUrl,
-                                androidShareLabel,
-                                sharePositionOrigin: rect,
-                              );
+                                  context, androidUrl, androidShareLabel,
+                                  sharePositionOrigin: rect);
                             },
 
-                            // ✅ Download disabled if no link
                             primaryText: l10n.common_download,
                             primaryIcon: Icons.download_rounded,
-                            primaryEnabled: hasAndroidLink,
+                            primaryEnabled: androidHasArtifact,
                             onPrimary: () => _openUrl(context, androidUrl),
 
-                            // ✅ Publish ALSO disabled if no link (as requested)
                             secondaryText: publishText,
                             secondaryIcon: Icons.upload_rounded,
-                            secondaryEnabled: hasAndroidLink,
+                            secondaryEnabled: androidHasArtifact,
                             onSecondary: () => PublishWizardDialog.open(
                               context,
                               api: publishApi,
@@ -376,6 +414,17 @@ class ProjectTile extends StatelessWidget {
                               platform: PublishPlatform.android,
                               store: PublishStore.playStore,
                               androidPackageName: project.androidPackageName,
+                            ),
+
+                            // ✅ NEW: rebuild always clickable
+                            showRebuild: true,
+                            rebuildEnabled: true,
+                            rebuildText: 'Rebuild',
+                            rebuildColor: const Color(0xFFEF4444),
+                            onRebuild: () => _handleRebuild(
+                              context,
+                              androidBuild,
+                              isAndroid: true,
                             ),
                           );
                         },
@@ -390,24 +439,25 @@ class ProjectTile extends StatelessWidget {
                         builder: (context, cc) {
                           final maxW = cc.maxWidth;
 
-                          final bool hasIosLink = iosUrl.isNotEmpty;
+                          final enabledActions = iosHasArtifact;
+                          final showErr = iosBuild
+                                  .toLowerCase()
+                                  .contains('fail') &&
+                              (project.iosBuildError ?? '').trim().isNotEmpty;
 
                           return _PlatformCard(
                             maxW: maxW,
                             title: l10n.owner_project_ios,
                             icon: Icons.apple_rounded,
                             iconColor: const Color(0xFF2563EB),
-                            statusText: iosStatusText,
-                            statusSubText: iosStatusSubText,
-                            statusColor: hasIosLink
-                                ? const Color(0xFF22C55E)
-                                : const Color(0xFFEF4444),
-                            showErrorBox: false,
-                            errorBoxText: '',
 
-                            // ✅ inactive if no link
-                            enabledActions: hasIosLink,
+                            statusText: iosBuild,
+                            statusColor: iosBuildColor,
 
+                            showErrorBox: showErr,
+                            errorBoxText: (project.iosBuildError ?? '').trim(),
+
+                            enabledActions: enabledActions,
                             copyLabel: copyText,
                             shareLabel: shareText,
                             onCopy: () => _copyLink(context, iosUrl),
@@ -417,28 +467,19 @@ class ProjectTile extends StatelessWidget {
                               final rect = box == null
                                   ? null
                                   : (box.localToGlobal(Offset.zero) & box.size);
-                              await _shareLink(
-                                context,
-                                iosUrl,
-                                iosShareLabel,
-                                sharePositionOrigin: rect,
-                              );
+                              await _shareLink(context, iosUrl, iosShareLabel,
+                                  sharePositionOrigin: rect);
                             },
 
-                            // ✅ NO RETRY — always Download (disabled if no link)
-                           primaryText: l10n.download_ios,
-primaryIcon: Icons
-                                .download_rounded, // required but will be ignored because primaryLeading exists
-                            primaryLeading: const _TestFlightLikeIcon(
-                                size:
-                                    18), // closest icon without using an image
-primaryEnabled: hasIosLink,
-onPrimary: () => _openUrl(context, iosUrl), // keeps your same behavior
+                            primaryText: l10n.download_ios,
+                            primaryIcon: Icons.download_rounded,
+                            primaryLeading: const _TestFlightLikeIcon(size: 18),
+                            primaryEnabled: iosHasArtifact,
+                            onPrimary: () => _openUrl(context, iosUrl),
 
-                            // ✅ Publish ALSO disabled if no link (as requested)
                             secondaryText: publishText,
                             secondaryIcon: Icons.upload_rounded,
-                            secondaryEnabled: hasIosLink,
+                            secondaryEnabled: iosHasArtifact,
                             onSecondary: () => PublishWizardDialog.open(
                               context,
                               api: publishApi,
@@ -447,6 +488,17 @@ onPrimary: () => _openUrl(context, iosUrl), // keeps your same behavior
                               platform: PublishPlatform.ios,
                               store: PublishStore.appStore,
                               iosBundleId: project.iosBundleId,
+                            ),
+
+                            // ✅ NEW: rebuild always clickable
+                            showRebuild: true,
+                            rebuildEnabled: true,
+                            rebuildText: 'Rebuild',
+                            rebuildColor: const Color(0xFFEF4444),
+                            onRebuild: () => _handleRebuild(
+                              context,
+                              iosBuild,
+                              isAndroid: false,
                             ),
                           );
                         },
@@ -466,7 +518,7 @@ onPrimary: () => _openUrl(context, iosUrl), // keeps your same behavior
 }
 
 // ─────────────────────────────────────────────
-// Platform Card — EXTRA compact
+// Platform Card — compact + rebuild row
 // ─────────────────────────────────────────────
 class _PlatformCard extends StatelessWidget {
   final double maxW;
@@ -476,7 +528,6 @@ class _PlatformCard extends StatelessWidget {
   final Color iconColor;
 
   final String statusText;
-  final String statusSubText;
   final Color statusColor;
 
   final bool showErrorBox;
@@ -491,7 +542,6 @@ class _PlatformCard extends StatelessWidget {
   final String primaryText;
   final IconData primaryIcon;
   final Widget? primaryLeading;
-
   final bool primaryEnabled;
   final VoidCallback onPrimary;
 
@@ -500,13 +550,19 @@ class _PlatformCard extends StatelessWidget {
   final bool secondaryEnabled;
   final VoidCallback onSecondary;
 
+  // ✅ rebuild
+  final bool showRebuild;
+  final bool rebuildEnabled;
+  final String rebuildText;
+  final Color rebuildColor;
+  final VoidCallback onRebuild;
+
   const _PlatformCard({
     required this.maxW,
     required this.title,
     required this.icon,
     required this.iconColor,
     required this.statusText,
-    required this.statusSubText,
     required this.statusColor,
     required this.enabledActions,
     required this.copyLabel,
@@ -516,7 +572,6 @@ class _PlatformCard extends StatelessWidget {
     required this.primaryText,
     required this.primaryIcon,
     this.primaryLeading,
-
     required this.primaryEnabled,
     required this.onPrimary,
     required this.secondaryText,
@@ -525,6 +580,13 @@ class _PlatformCard extends StatelessWidget {
     required this.onSecondary,
     this.showErrorBox = false,
     this.errorBoxText = '',
+
+    // ✅ rebuild defaults
+    this.showRebuild = false,
+    this.rebuildEnabled = true,
+    this.rebuildText = 'Rebuild',
+    this.rebuildColor = const Color(0xFFEF4444),
+    required this.onRebuild,
   });
 
   @override
@@ -537,7 +599,6 @@ class _PlatformCard extends StatelessWidget {
     final double pad = tiny ? 8 : 9;
     final double btnH = tiny ? 34 : 36;
     final double actionBtnH = tiny ? 33 : 35;
-
     final double titleFont = tiny ? 13.5 : 14.5;
 
     return Container(
@@ -567,7 +628,7 @@ class _PlatformCard extends StatelessWidget {
               ),
               const SizedBox(width: 6),
               ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: tiny ? 85 : 100),
+                constraints: BoxConstraints(maxWidth: tiny ? 95 : 115),
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
                   alignment: Alignment.centerRight,
@@ -576,22 +637,9 @@ class _PlatformCard extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: tiny ? 3 : 4),
-          if (statusSubText.trim().isNotEmpty)
-            Text(
-              statusSubText,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: tt.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w900,
-                fontSize: tiny ? 11.5 : 12.5,
-                color: cs.onSurface.withOpacity(.70),
-              ),
-            )
-          else
-            SizedBox(height: tiny ? 8 : 10),
+
           if (showErrorBox) ...[
-            SizedBox(height: tiny ? 5 : 6),
+            SizedBox(height: tiny ? 6 : 7),
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 7),
@@ -619,8 +667,10 @@ class _PlatformCard extends StatelessWidget {
                 ],
               ),
             ),
-          ],
-          SizedBox(height: tiny ? 4 : 5),
+          ] else
+            SizedBox(height: tiny ? 8 : 10),
+
+          // copy/share row
           Row(
             children: [
               Expanded(
@@ -654,27 +704,56 @@ class _PlatformCard extends StatelessWidget {
               ),
             ],
           ),
+
           const SizedBox(height: 7),
+
+          // ✅ Rebuild (ALWAYS clickable)
+          if (showRebuild) ...[
+            SizedBox(
+              width: double.infinity,
+              height: btnH,
+              child: OutlinedButton.icon(
+                onPressed: rebuildEnabled
+                    ? onRebuild
+                    : onRebuild, // still clickable by request
+                icon:
+                    Icon(Icons.refresh_rounded, size: 16, color: rebuildColor),
+                label: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.center,
+                  child: Text(
+                    rebuildText,
+                    style: TextStyle(
+                        fontWeight: FontWeight.w900,
+                        fontSize: 12.8,
+                        color: rebuildColor),
+                  ),
+                ),
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: rebuildColor, width: 2),
+                  shape: const StadiumBorder(),
+                ),
+              ),
+            ),
+            const SizedBox(height: 6),
+          ],
+
+          // Download
           SizedBox(
             width: double.infinity,
             height: btnH,
             child: ElevatedButton.icon(
               onPressed: primaryEnabled ? onPrimary : null,
-             icon: primaryLeading != null
+              icon: primaryLeading != null
                   ? Opacity(
-                      opacity: primaryEnabled ? 1 : .35,
-                      child: primaryLeading!,
-                    )
+                      opacity: primaryEnabled ? 1 : .35, child: primaryLeading!)
                   : Icon(primaryIcon, size: 16),
-
               label: FittedBox(
                 fit: BoxFit.scaleDown,
                 alignment: Alignment.center,
-                child: Text(
-                  primaryText,
-                  style: const TextStyle(
-                      fontWeight: FontWeight.w900, fontSize: 12.8),
-                ),
+                child: Text(primaryText,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w900, fontSize: 12.8)),
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF0B6BFF),
@@ -684,7 +763,10 @@ class _PlatformCard extends StatelessWidget {
               ),
             ),
           ),
+
           const SizedBox(height: 6),
+
+          // Publish
           SizedBox(
             width: double.infinity,
             height: btnH,
@@ -694,11 +776,9 @@ class _PlatformCard extends StatelessWidget {
               label: FittedBox(
                 fit: BoxFit.scaleDown,
                 alignment: Alignment.center,
-                child: Text(
-                  secondaryText,
-                  style: const TextStyle(
-                      fontWeight: FontWeight.w900, fontSize: 12.8),
-                ),
+                child: Text(secondaryText,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w900, fontSize: 12.8)),
               ),
               style: OutlinedButton.styleFrom(
                 foregroundColor: const Color(0xFF16A34A),
@@ -735,9 +815,8 @@ class _AppIcon extends StatelessWidget {
     if (maybe == null) return '';
     final s0 = maybe.trim();
     if (s0.isEmpty || s0.toLowerCase() == 'null') return '';
-    if (s0.startsWith('http://') || s0.startsWith('https://')) {
+    if (s0.startsWith('http://') || s0.startsWith('https://'))
       return Uri.parse(s0).toString();
-    }
     if (s0.startsWith('//')) return Uri.parse('https:$s0').toString();
 
     final base = serverRootNoApi.replaceAll(RegExp(r'/+$'), '');
@@ -776,10 +855,7 @@ class _AppIcon extends StatelessWidget {
               ),
             );
           },
-          errorBuilder: (_, err, __) {
-            debugPrint('LOGO FAIL => $src | $err');
-            return _fallback(context);
-          },
+          errorBuilder: (_, err, __) => _fallback(context),
         ),
       );
     }
@@ -803,17 +879,14 @@ class _AppIcon extends StatelessWidget {
       alignment: Alignment.center,
       child: Text(
         initial,
-        style: TextStyle(
-          fontWeight: FontWeight.w900,
-          fontSize: size * 0.34,
-        ),
+        style: TextStyle(fontWeight: FontWeight.w900, fontSize: size * 0.34),
       ),
     );
   }
 }
 
 // ─────────────────────────────────────────────
-// Pills + action buttons — compact
+// Pills + buttons
 // ─────────────────────────────────────────────
 class _StatusPill extends StatelessWidget {
   final String label;
@@ -836,10 +909,7 @@ class _StatusPill extends StatelessWidget {
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: TextStyle(
-          fontWeight: FontWeight.w900,
-          fontSize: 10.5,
-          color: color,
-        ),
+            fontWeight: FontWeight.w900, fontSize: 10.5, color: color),
       ),
     );
   }
@@ -863,11 +933,8 @@ class _MiniPill extends StatelessWidget {
         text,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: TextStyle(
-          color: color,
-          fontSize: 10,
-          fontWeight: FontWeight.w900,
-        ),
+        style:
+            TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.w900),
       ),
     );
   }
@@ -972,7 +1039,6 @@ class _TestFlightPainter extends CustomPainter {
     final h = s.height;
     final c = Offset(w / 2, h / 2);
 
-    // grid
     final grid = Paint()
       ..color = Colors.white.withOpacity(0.18)
       ..strokeWidth = w * 0.06;
@@ -984,11 +1050,9 @@ class _TestFlightPainter extends CustomPainter {
       canvas.drawLine(Offset(0, y), Offset(w, y), grid);
     }
 
-    // soft circle glow
     final glow = Paint()..color = Colors.white.withOpacity(0.18);
     canvas.drawCircle(c, w * 0.42, glow);
 
-    // 3 blades
     final blade = Paint()..color = Colors.white.withOpacity(0.90);
 
     void bladeAt(double angle) {
@@ -998,15 +1062,10 @@ class _TestFlightPainter extends CustomPainter {
 
       final bw = w * 0.16;
       final bl = w * 0.38;
-      final rect = Rect.fromCenter(
-        center: Offset(0, -w * 0.30),
-        width: bw,
-        height: bl,
-      );
+      final rect =
+          Rect.fromCenter(center: Offset(0, -w * 0.30), width: bw, height: bl);
       canvas.drawRRect(
-        RRect.fromRectAndRadius(rect, Radius.circular(bw)),
-        blade,
-      );
+          RRect.fromRectAndRadius(rect, Radius.circular(bw)), blade);
 
       canvas.restore();
     }
@@ -1015,7 +1074,6 @@ class _TestFlightPainter extends CustomPainter {
     bladeAt(2.09439510239);
     bladeAt(4.18879020479);
 
-    // hub
     final hub = Paint()..color = Colors.white.withOpacity(0.95);
     canvas.drawCircle(c, w * 0.07, hub);
   }

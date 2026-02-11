@@ -116,7 +116,8 @@ class _OwnerProfileView extends StatelessWidget {
 
     return BlocBuilder<OwnerProfileBloc, OwnerProfileState>(
       builder: (context, s) {
-        final appBar = _ProfileAppBar(onLogout: () => _logoutFlow(context));
+        // ✅ AppBar now has NO logout button
+        const appBar = _ProfileAppBar();
 
         if (s.loading) {
           return Scaffold(
@@ -201,8 +202,7 @@ class _OwnerProfileView extends StatelessWidget {
 }
 
 class _ProfileAppBar extends StatelessWidget implements PreferredSizeWidget {
-  final VoidCallback? onLogout;
-  const _ProfileAppBar({this.onLogout});
+  const _ProfileAppBar();
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
@@ -210,17 +210,10 @@ class _ProfileAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final cs = Theme.of(context).colorScheme;
 
     return AppBar(
       title: Text(l10n.owner_nav_profile),
-      actions: [
-        IconButton(
-          tooltip: l10n.logout ?? 'Logout',
-          onPressed: onLogout,
-          icon: Icon(Icons.logout_rounded, color: cs.onSurface),
-        ),
-      ],
+      // ✅ No actions -> logout removed from top
     );
   }
 }
@@ -249,7 +242,6 @@ class _PreferencesCard extends StatelessWidget {
             child: Row(
               children: [
                 Text(
-                  // If you don't have l10n.settings, fallback is fine
                   l10n.settings ?? 'Settings',
                   style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w900),
                 ),
@@ -263,6 +255,7 @@ class _PreferencesCard extends StatelessWidget {
 
           Divider(height: 1, color: cs.outlineVariant.withOpacity(.7)),
 
+          // ✅ Logout stays only here (bottom)
           ListTile(
             onTap: onLogout,
             contentPadding: const EdgeInsets.symmetric(horizontal: 16),

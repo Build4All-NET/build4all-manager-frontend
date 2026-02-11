@@ -7,6 +7,7 @@ abstract class IOwnerRepository {
   Future<List<AppRequest>> getMyRequests({required int ownerId});
   Future<List<OwnerProject>> getMyApps({required int ownerId});
   Future<List<AppRequest>> getRecentRequests(int ownerId, {int limit = 5});
-    Future<void> rebuildAppLink({required int ownerId, required int linkId});
-
+ 
+  Future<void> rebuildAndroid({required int linkId});
+  Future<void> rebuildIos({required int linkId});
 }

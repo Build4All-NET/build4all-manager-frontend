@@ -13,7 +13,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 // splash / homes
 import 'package:build4all_manager/app/splash_gate.dart';
 import 'package:build4all_manager/features/auth/presentation/screens/app_login_screen.dart';
-import 'package:build4all_manager/features/auth/presentation/screens/super_admin_home_screen.dart';
 
 // owner shell + screens
 import 'package:build4all_manager/features/owner/ownernav/presentation/screens/owner_nav_shell.dart';
@@ -29,7 +28,6 @@ import 'package:build4all_manager/features/auth/domain/repositories/i_auth_repos
 import 'package:build4all_manager/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:build4all_manager/features/auth/data/services/auth_api.dart';
 import 'package:build4all_manager/features/auth/data/datasources/jwt_local_datasource.dart';
-import 'package:build4all_manager/features/auth/domain/usecases/get_role_usecase.dart';
 
 // owner register flow
 import 'package:build4all_manager/features/auth/domain/usecases/OwnerCompleteProfile.dart';
@@ -69,7 +67,7 @@ const _publicPaths = <String>{
 };
 
 final router = GoRouter(
-  navigatorKey: appNavKey, // ✅ THIS is the correct spot
+  navigatorKey: appNavKey,
   initialLocation: '/',
   routes: [
     GoRoute(path: '/', builder: (_, __) => const SplashGate()),
@@ -95,7 +93,6 @@ final router = GoRouter(
         );
         return _OwnerProjectDetailsBuilder(tpl: tpl);
       },
-
     ),
     GoRoute(
       path: '/owner/requests/list',
@@ -113,7 +110,6 @@ final router = GoRouter(
         return OwnerRequestsListScreen(ownerId: ownerId, dio: dio);
       },
     ),
-
     GoRoute(
       path: '/owner/requests',
       builder: (context, state) {
@@ -202,6 +198,53 @@ Future<int?> _loadOwnerIdFromJwt() async {
   }
 }
 
+/// ✅ Better: builds a display name from various claim keys.
+/// Refuses to return emails as "name".
+String? _extractDisplayName(Map<String, dynamic>? claims) {
+  if (claims == null) return null;
+
+  String? pick(dynamic v) {
+    final s = v?.toString().trim();
+    return (s == null || s.isEmpty) ? null : s;
+  }
+
+  final first = pick(claims['firstName']) ??
+      pick(claims['given_name']) ??
+      pick(claims['givenName']) ??
+      pick(claims['firstname']);
+
+  final last = pick(claims['lastName']) ??
+      pick(claims['family_name']) ??
+      pick(claims['familyName']) ??
+      pick(claims['lastname']);
+
+  // Prefer first + last if available
+  String? fullFromParts;
+  if (first != null && last != null) {
+    fullFromParts = '$first $last'.trim();
+  } else if (first != null) {
+    fullFromParts = first;
+  }
+
+  // Fallback keys
+  final raw = fullFromParts ??
+      pick(claims['name']) ??
+      pick(claims['fullName']) ??
+      pick(claims['displayName']) ??
+      pick(claims['ownerName']) ??
+      pick(claims['adminName']) ??
+      pick(claims['username']) ??
+      pick(claims['preferred_username']);
+
+  if (raw == null) return null;
+
+  // refuse email as a display name
+  final isEmail = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(raw);
+  if (isEmail) return null;
+
+  return raw;
+}
+
 Future<(int?, String?)> _loadOwnerProfileFromJwt() async {
   try {
     final store = JwtLocalDataSource();
@@ -215,12 +258,7 @@ Future<(int?, String?)> _loadOwnerProfileFromJwt() async {
       ['id', 'ownerId', 'adminId', 'sub'],
     );
 
-    final rawName =
-        (claims?['name'] ?? claims?['fullName'] ?? claims?['username'])
-            ?.toString()
-            .trim();
-
-    final name = (rawName == null || rawName.isEmpty) ? null : rawName;
+    final name = _extractDisplayName(claims);
 
     return (id, name);
   } catch (_) {
@@ -267,6 +305,7 @@ class _OwnerEntryLoader extends StatelessWidget {
 
 class _OwnerProjectsBuilder extends StatelessWidget {
   const _OwnerProjectsBuilder();
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<int?>(
@@ -361,15 +400,15 @@ class OwnerEntry extends StatelessWidget {
       ),
     ];
 
-  return BlocProvider(
-      create: (_) => OwnerNavCubit(initialIndex: 0),
+    // ✅ FIX: respect initialIndex (no more hardcoded 0)
+    return BlocProvider(
+      create: (_) => OwnerNavCubit(initialIndex: initialIndex),
       child: OwnerNavShell(
         backendMenuType: backendMenuType,
         destinations: destinations,
-        initialIndex: 0,
+        initialIndex: initialIndex,
       ),
     );
-
   }
 }
 
@@ -397,14 +436,14 @@ class _OwnerRequestsBuilder extends StatelessWidget {
               .addPostFrameCallback((_) => context.go('/login'));
           return const SizedBox.shrink();
         }
-       return OwnerRequestScreen(
+
+        return OwnerRequestScreen(
           baseUrl: DioClient.ensure().options.baseUrl,
           ownerId: ownerId,
           dio: DioClient.ensure(),
           initialProjectId: initialProjectId,
           initialAppName: initialAppName,
         );
-
       },
     );
   }

@@ -23,17 +23,21 @@ class OwnerApi {
   }
 
   Future<List<AppRequestDto>> getMyRequests({required int ownerId}) async {
-    final r = await dio
-        .get('/owner/app-requests', queryParameters: {'ownerId': ownerId});
+    final r = await dio.get(
+      '/owner/app-requests',
+      queryParameters: {'ownerId': ownerId},
+    );
+
     final list = (r.data as List).cast<Map<String, dynamic>>();
     return list.map(AppRequestDto.fromJson).toList();
   }
 
   Future<List<OwnerProjectDto>> getMyApps({required int ownerId}) async {
-    final r =
-        await dio.get('/owner/my-apps', queryParameters: {'ownerId': ownerId});
+    final r = await dio.get(
+      '/owner/my-apps',
+      queryParameters: {'ownerId': ownerId},
+    );
 
-    // ✅ debug raw response (only in debug mode)
     if (kDebugMode) {
       debugPrint('MY_APPS RAW => ${r.data}');
     }
@@ -42,9 +46,22 @@ class OwnerApi {
     return list.map(OwnerProjectDto.fromJson).toList();
   }
 
-  Future<void> rebuildLink({required int linkId, required int ownerId}) async {
-    await dio.post('/owner/links/$linkId/rebuild',
-        queryParameters: {'ownerId': ownerId});
+  // 🔴 REMOVE THIS WRONG METHOD
+  // Future<void> rebuildLink(...)
+
+  /// ✅ Rebuild ANDROID only
+  Future<void> rebuildAndroid({required int linkId}) async {
+    await dio.post('/owner/apps/$linkId/rebuild-bundle');
+  }
+
+  /// ✅ Rebuild IOS only
+  Future<void> rebuildIos({required int linkId}) async {
+    await dio.post('/owner/apps/$linkId/rebuild-ios');
+  }
+
+  /// ✅ Rebuild BOTH (optional)
+  Future<void> rebuildBoth({required int linkId}) async {
+    await dio.post('/owner/apps/$linkId/rebuild-both');
   }
 
   Future<List<AppRequest>> getRecentRequests(int ownerId,
@@ -57,6 +74,7 @@ class OwnerApi {
         'ownerId': ownerId,
       },
     );
+
     final list = (r.data as List).cast<Map<String, dynamic>>();
     return list.map((j) => AppRequestDto.fromJson(j).toEntity()).toList();
   }

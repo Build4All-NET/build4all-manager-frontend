@@ -22,7 +22,8 @@ class OwnerProjectsState extends Equatable {
       final matchesText = q.isEmpty ||
           p.projectName.toLowerCase().contains(q) ||
           p.slug.toLowerCase().contains(q);
-      final matchesReady = !onlyReady || p.isApkReady;
+      final matchesReady = !onlyReady ||
+          (p.androidBuildStatus == 'SUCCESS' || p.iosBuildStatus == 'SUCCESS');
       return matchesText && matchesReady;
     }).toList();
   }

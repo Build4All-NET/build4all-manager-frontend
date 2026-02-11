@@ -1,3 +1,5 @@
+// lib/features/owner/common/data/models/owner_project_dto.dart
+
 import '../../domain/entities/owner_project.dart';
 
 class OwnerProjectDto {
@@ -7,15 +9,20 @@ class OwnerProjectDto {
   final String? apkUrl;
 
   final int linkId;
-  final String status; // MUST come from backend
+  final String status;
   final String appName;
   final String? ipaUrl;
   final String? bundleUrl;
 
   final String? logoUrl;
-
   final String? androidPackageName;
   final String? iosBundleId;
+
+  // ✅ NEW
+  final String? androidBuildStatus;
+  final String? iosBuildStatus;
+  final String? androidBuildError;
+  final String? iosBuildError;
 
   OwnerProjectDto({
     required this.projectId,
@@ -30,6 +37,12 @@ class OwnerProjectDto {
     this.logoUrl,
     this.androidPackageName,
     this.iosBundleId,
+
+    // ✅ NEW
+    this.androidBuildStatus,
+    this.iosBuildStatus,
+    this.androidBuildError,
+    this.iosBuildError,
   });
 
   static int _asInt(dynamic v) {
@@ -52,7 +65,6 @@ class OwnerProjectDto {
   }
 
   factory OwnerProjectDto.fromJson(Map<String, dynamic> j) {
-    // logo key variations
     final logo = _asNullableString(
       j['logoUrl'] ??
           j['logo_url'] ??
@@ -62,13 +74,9 @@ class OwnerProjectDto {
           j['project_logo_url'],
     );
 
-    // linkId variations
-    final link = _asInt(
-      j['linkId'] ?? j['ownerProjectLinkId'] ?? j['aupId'] ?? j['id'],
-    );
+    final link =
+        _asInt(j['linkId'] ?? j['ownerProjectLinkId'] ?? j['aupId'] ?? j['id']);
 
-    // ✅ status variations (IMPORTANT)
-    // If backend uses a different key name, we still pick it.
     final statusVal = _asString(
       j['status'] ??
           j['appStatus'] ??
@@ -97,8 +105,13 @@ class OwnerProjectDto {
             j['packageName'],
       ),
       iosBundleId: _asNullableString(
-        j['iosBundleId'] ?? j['ios_bundle_id'] ?? j['bundleId'],
-      ),
+          j['iosBundleId'] ?? j['ios_bundle_id'] ?? j['bundleId']),
+
+      // ✅ IMPORTANT: these exist in your backend response (seen in logs)
+      androidBuildStatus: _asNullableString(j['androidBuildStatus']),
+      iosBuildStatus: _asNullableString(j['iosBuildStatus']),
+      androidBuildError: _asNullableString(j['androidBuildError']),
+      iosBuildError: _asNullableString(j['iosBuildError']),
     );
   }
 
@@ -115,5 +128,11 @@ class OwnerProjectDto {
         logoUrl: logoUrl,
         androidPackageName: androidPackageName,
         iosBundleId: iosBundleId,
+
+        // ✅ NEW
+        androidBuildStatus: androidBuildStatus,
+        iosBuildStatus: iosBuildStatus,
+        androidBuildError: androidBuildError,
+        iosBuildError: iosBuildError,
       );
 }

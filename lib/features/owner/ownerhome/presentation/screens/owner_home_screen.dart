@@ -24,6 +24,9 @@ import '../widgets/request_card.dart';
 import '../../data/static_project_models.dart';
 import '../widgets/project_template_card.dart';
 
+// ✅ SAME call style as Profile
+import 'package:build4all_manager/features/owner/ownerprofile/data/services/owner_profile_api.dart';
+
 class OwnerHomeScreen extends StatelessWidget {
   final int ownerId;
   final Dio dio;
@@ -84,7 +87,7 @@ class _HomeScaffold extends StatelessWidget {
   }
 }
 
-class _HomeBody extends StatelessWidget {
+class _HomeBody extends StatefulWidget {
   final int ownerId;
   final Dio dio;
   final String? ownerName;
@@ -94,6 +97,78 @@ class _HomeBody extends StatelessWidget {
     required this.dio,
     this.ownerName,
   });
+
+  @override
+  State<_HomeBody> createState() => _HomeBodyState();
+}
+
+class _HomeBodyState extends State<_HomeBody> {
+  late final Future<String?> _nameFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameFuture = _loadDisplayName();
+  }
+
+  Future<String?> _loadDisplayName() async {
+    // 1) if router passed something, use it
+    final passed = widget.ownerName?.trim();
+    if (passed != null && passed.isNotEmpty) return passed;
+
+    // 2) otherwise: SAME AS PROFILE -> /admin/users/me via OwnerProfileApi
+    try {
+      final api = OwnerProfileApi(widget.dio);
+      final dto = await api.getMe();
+
+      final first = dto.firstName.trim();
+      final last = dto.lastName.trim();
+      final fullName =
+          [first, last].where((e) => e.isNotEmpty).join(' ').trim();
+
+      if (fullName.isNotEmpty) return fullName;
+
+      // fallback to username (profile does that too in header)
+      final u = dto.username.trim();
+      return u.isNotEmpty ? u : null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  bool _isEmail(String s) =>
+      RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(s.trim());
+
+  /// ✅ picks a display-first-part:
+  /// - "Fatima Ali" -> "Fatima"
+  /// - "fatima.dev" -> "fatima.dev" (still shows something)
+  /// - email -> refuse
+  String _firstPartSafe(String? raw) {
+    if (raw == null) return '';
+    final s = raw.trim();
+    if (s.isEmpty) return '';
+    if (_isEmail(s)) return '';
+    if (s.startsWith('@'))
+      return s.substring(1).trim(); // "@fatima" -> "fatima"
+    return s.split(RegExp(r'\s+')).first.trim();
+  }
+
+  String _safe(String? s, String fallback) {
+    final t = (s ?? '').trim();
+    return t.isEmpty ? fallback : t;
+  }
+
+  String? _errText(OwnerHomeState s) {
+    try {
+      final dynamic d = s;
+      final e = d.error ?? d.errorMessage ?? d.message;
+      if (e == null) return null;
+      final t = e.toString();
+      return t.trim().isEmpty ? null : t;
+    } catch (_) {
+      return null;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -107,12 +182,8 @@ class _HomeBody extends StatelessWidget {
         ? const EdgeInsets.symmetric(horizontal: 20, vertical: 16)
         : ux.pagePad;
 
-    final firstName = _firstNameOrNull(ownerName);
-
-    // ✅ only show FIRST NAME if it's a real name
-    final greeting = (firstName == null)
-        ? l10n.owner_home_hello
-        : '${l10n.owner_home_hello} $firstName';
+    final hello = _safe(l10n.owner_home_hello, 'Hello');
+    final subtitle = _safe(l10n.owner_home_subtitle, 'Welcome back 👋');
 
     return Padding(
       padding: pagePad,
@@ -131,7 +202,12 @@ class _HomeBody extends StatelessWidget {
         builder: (context, state) {
           return RefreshIndicator(
             onRefresh: () async {
-              context.read<OwnerHomeBloc>().add(OwnerHomeRefreshed(ownerId));
+              context
+                  .read<OwnerHomeBloc>()
+                  .add(OwnerHomeRefreshed(widget.ownerId));
+              setState(() {
+                _nameFuture = _loadDisplayName();
+              });
             },
             child: CustomScrollView(
               physics: const BouncingScrollPhysics(
@@ -140,33 +216,44 @@ class _HomeBody extends StatelessWidget {
               slivers: [
                 // ----- Header -----
                 SliverToBoxAdapter(
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              greeting,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: tt.headlineSmall?.copyWith(
-                                fontWeight: FontWeight.w800,
-                              ),
+                  child: FutureBuilder<String?>(
+                    future: _nameFuture,
+                    builder: (context, snap) {
+                      final display = _firstPartSafe(snap.data);
+                      final greeting =
+                          display.isEmpty ? hello : '$hello $display';
+
+                      return Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  greeting,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  // ✅ forced readable color
+                                  style: tt.headlineSmall?.copyWith(
+                                    fontWeight: FontWeight.w800,
+                                    color: cs.onSurface,
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  subtitle,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: tt.bodyMedium?.copyWith(
+                                    color: cs.onSurfaceVariant,
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 6),
-                            Text(
-                              l10n.owner_home_subtitle,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: tt.bodyMedium?.copyWith(
-                                color: cs.onSurface.withOpacity(.7),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+                          ),
+                        ],
+                      );
+                    },
                   ),
                 ),
                 const SliverToBoxAdapter(child: SizedBox(height: 12)),
@@ -180,11 +267,13 @@ class _HomeBody extends StatelessWidget {
                 // ----- Choose your project -----
                 SliverToBoxAdapter(
                   child: Text(
-                    l10n.owner_home_chooseProject,
+                    _safe(l10n.owner_home_chooseProject, 'Choose your project'),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style:
-                        tt.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+                    style: tt.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      color: cs.onSurface,
+                    ),
                   ),
                 ),
                 const SliverToBoxAdapter(child: SizedBox(height: 12)),
@@ -252,22 +341,22 @@ class _HomeBody extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Text(
-                          l10n.owner_home_recentRequests,
+                          _safe(l10n.owner_home_recentRequests,
+                              'Recent requests'),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: tt.titleMedium?.copyWith(
                             fontWeight: FontWeight.w800,
+                            color: cs.onSurface,
                           ),
                         ),
                       ),
-
-                      // ✅ FIX: View all goes to LIST screen (not create)
                       TextButton(
                         onPressed: () => context.push(
                           '/owner/requests/list',
-                          extra: {'ownerId': ownerId, 'dio': dio},
+                          extra: {'ownerId': widget.ownerId, 'dio': widget.dio},
                         ),
-                        child: Text(l10n.owner_home_viewAll),
+                        child: Text(_safe(l10n.owner_home_viewAll, 'View all')),
                       ),
                     ],
                   ),
@@ -280,11 +369,11 @@ class _HomeBody extends StatelessWidget {
                     child: Padding(
                       padding: const EdgeInsets.only(top: 6, bottom: 12),
                       child: Text(
-                        l10n.owner_home_noRecent,
+                        _safe(l10n.owner_home_noRecent, 'No recent requests'),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: tt.bodyMedium?.copyWith(
-                          color: cs.onSurface.withOpacity(.7),
+                          color: cs.onSurfaceVariant,
                         ),
                       ),
                     ),
@@ -302,36 +391,6 @@ class _HomeBody extends StatelessWidget {
         },
       ),
     );
-  }
-
-  // ✅ Only accept real names. Never show username/email.
-  String? _firstNameOrNull(String? raw) {
-    if (raw == null) return null;
-    final s = raw.trim();
-    if (s.isEmpty) return null;
-
-    final isEmail = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(s);
-    final looksLikeUsername =
-        !s.contains(' ') && RegExp(r'^[a-zA-Z0-9._-]{3,}$').hasMatch(s);
-
-    if (isEmail || s.startsWith('@') || looksLikeUsername) {
-      return null; // 👈 refuse to display username/email
-    }
-
-    final first = s.split(RegExp(r'\s+')).first.trim();
-    return first.isEmpty ? null : first;
-  }
-
-  String? _errText(OwnerHomeState s) {
-    try {
-      final dynamic d = s;
-      final e = d.error ?? d.errorMessage ?? d.message;
-      if (e == null) return null;
-      final t = e.toString();
-      return t.trim().isEmpty ? null : t;
-    } catch (_) {
-      return null;
-    }
   }
 }
 
