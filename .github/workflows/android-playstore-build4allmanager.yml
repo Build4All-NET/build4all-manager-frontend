@@ -8,9 +8,10 @@ on:
         required: true
         default: "internal"
       release_status:
-        description: "completed | draft | inProgress"
+        description: "draft | inProgress | completed"
         required: true
-        default: "completed"
+        default: "draft"
+
       changelog:
         description: "Release notes"
         required: false
@@ -178,5 +179,6 @@ jobs:
           packageName: ${{ env.PACKAGE_NAME }}
           releaseFiles: build/app/outputs/bundle/release/*.aab
           track: ${{ github.event.inputs.track || 'internal' }}
-          status: ${{ github.event.inputs.release_status || 'completed' }}
+          status: ${{ github.event.inputs.release_status || 'draft' }}
+
           whatsNewDirectory: distribution/whatsnew
