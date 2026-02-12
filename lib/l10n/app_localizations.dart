@@ -1180,7 +1180,7 @@ abstract class AppLocalizations {
   /// No description provided for @owner_home_search_hint.
   ///
   /// In en, this message translates to:
-  /// **'Search apps, requests, guides'**
+  /// **'Search projects'**
   String get owner_home_search_hint;
 
   /// No description provided for @owner_home_chooseProject.
@@ -1192,7 +1192,7 @@ abstract class AppLocalizations {
   /// No description provided for @owner_proj_open.
   ///
   /// In en, this message translates to:
-  /// **'Open project'**
+  /// **'START APP SETUP'**
   String get owner_proj_open;
 
   /// No description provided for @owner_proj_activities_title.
@@ -1278,6 +1278,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Requested'**
   String get owner_request_requested;
+
+  /// No description provided for @publish_err_invalid_privacy_url.
+  ///
+  /// In en, this message translates to:
+  /// **'invalid privacy url'**
+  String get publish_err_invalid_privacy_url;
 
   /// No description provided for @timeago_days.
   ///

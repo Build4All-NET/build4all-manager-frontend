@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:build4all_manager/core/network/dio_client.dart';
 import 'package:build4all_manager/core/network/url_utils.dart' as g;
 import 'package:build4all_manager/l10n/app_localizations.dart';
+import 'package:build4all_manager/shared/themes/app_theme.dart'; // UiTokens
 import 'package:build4all_manager/shared/widgets/app_button.dart';
 import 'package:build4all_manager/shared/widgets/app_toast.dart';
 
@@ -40,6 +41,13 @@ class PublishRequestDetailScreen extends StatelessWidget {
 
 class _View extends StatelessWidget {
   const _View();
+
+  // ✅ Stops “text clipped” on some fonts/devices
+  static const _strut = StrutStyle(forceStrutHeight: true, height: 1.2);
+  static const _thb = TextHeightBehavior(
+    applyHeightToFirstAscent: true,
+    applyHeightToLastDescent: true,
+  );
 
   String _abs(String? maybe) {
     final dio = DioClient.ensure();
@@ -87,15 +95,16 @@ class _View extends StatelessWidget {
       builder: (context, state) {
         final item = state.item;
         final cs = Theme.of(context).colorScheme;
+        final tokens = Theme.of(context).extension<UiTokens>();
+        final rLg = tokens?.radiusLg ?? 18.0;
 
         final w = MediaQuery.of(context).size.width;
         final isTight = w < 360;
         final twoCols = w >= 880;
         final gap = twoCols ? 14.0 : 12.0;
 
-        final androidLine =
-            'ANDROID • PLAY • ${item.packageNameSnapshot ?? "-"}';
-        final iosLine = 'iOS • APP STORE • ${item.bundleIdSnapshot ?? "-"}';
+        final androidLine = 'PLAY • ${item.packageNameSnapshot ?? "-"}';
+        final iosLine = 'APP STORE • ${item.bundleIdSnapshot ?? "-"}';
 
         final headerIconUrl = _abs(
           _hasUrl(item.logoUrl) ? item.logoUrl : item.appIconUrl,
@@ -107,6 +116,8 @@ class _View extends StatelessWidget {
               item.appName ?? l10n.publish_details_title,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
+              strutStyle: _strut,
+              textHeightBehavior: _thb,
             ),
           ),
           body: ListView(
@@ -144,15 +155,17 @@ class _View extends StatelessWidget {
                           dense: true,
                         ),
                         rows: [
-                          _kvRow(
-                              'Package Name', item.packageNameSnapshot ?? '—'),
-                          _kvRow('Version', item.androidVersionName ?? '—'),
-                          _kvRow('Version Code',
+                          _kvRow(context, 'Package Name',
+                              item.packageNameSnapshot ?? '—'),
+                          _kvRow(context, 'Version',
+                              item.androidVersionName ?? '—'),
+                          _kvRow(context, 'Version Code',
                               item.androidVersionCode?.toString() ?? '—'),
-                          _kvRow('Last Build', _fmtDt(item.requestedAt) ?? '—'),
-                          _kvRow(
-                              'APK', _hasUrl(item.apkUrl) ? 'Available' : '—'),
-                          _kvRow('AAB',
+                          _kvRow(context, 'Last Build',
+                              _fmtDt(item.requestedAt) ?? '—'),
+                          _kvRow(context, 'APK',
+                              _hasUrl(item.apkUrl) ? 'Available' : '—'),
+                          _kvRow(context, 'AAB',
                               _hasUrl(item.bundleUrl) ? 'Available' : '—'),
                         ],
                         downloads: [
@@ -195,14 +208,16 @@ class _View extends StatelessWidget {
                           dense: true,
                         ),
                         rows: [
-                          _kvRow('Bundle Identifier',
+                          _kvRow(context, 'Bundle Identifier',
                               item.bundleIdSnapshot ?? '—'),
-                          _kvRow('Version', item.iosVersionName ?? '—'),
-                          _kvRow('Build Number',
-                              item.iosBuildNumber?.toString() ?? '—'),
-                          _kvRow('Last Build', _fmtDt(item.requestedAt) ?? '—'),
                           _kvRow(
-                              'IPA', _hasUrl(item.ipaUrl) ? 'Available' : '—'),
+                              context, 'Version', item.iosVersionName ?? '—'),
+                          _kvRow(context, 'Build Number',
+                              item.iosBuildNumber?.toString() ?? '—'),
+                          _kvRow(context, 'Last Build',
+                              _fmtDt(item.requestedAt) ?? '—'),
+                          _kvRow(context, 'IPA',
+                              _hasUrl(item.ipaUrl) ? 'Available' : '—'),
                         ],
                         downloads: [
                           _DownloadAction(
@@ -236,13 +251,17 @@ class _View extends StatelessWidget {
                     dense: true,
                   ),
                   rows: [
-                    _kvRow('Package Name', item.packageNameSnapshot ?? '—'),
-                    _kvRow('Version', _versionGuess(item, 'ANDROID')),
-                    _kvRow('Version Code',
+                    _kvRow(context, 'Package Name',
+                        item.packageNameSnapshot ?? '—'),
+                    _kvRow(context, 'Version', item.androidVersionName ?? '—'),
+                    _kvRow(context, 'Version Code',
                         item.androidVersionCode?.toString() ?? '—'),
-                    _kvRow('Last Build', _fmtDt(item.requestedAt) ?? '—'),
-                    _kvRow('APK', _hasUrl(item.apkUrl) ? 'Available' : '—'),
-                    _kvRow('AAB', _hasUrl(item.bundleUrl) ? 'Available' : '—'),
+                    _kvRow(
+                        context, 'Last Build', _fmtDt(item.requestedAt) ?? '—'),
+                    _kvRow(context, 'APK',
+                        _hasUrl(item.apkUrl) ? 'Available' : '—'),
+                    _kvRow(context, 'AAB',
+                        _hasUrl(item.bundleUrl) ? 'Available' : '—'),
                   ],
                   downloads: [
                     _DownloadAction(
@@ -278,12 +297,15 @@ class _View extends StatelessWidget {
                     dense: true,
                   ),
                   rows: [
-                    _kvRow('Bundle Identifier', item.bundleIdSnapshot ?? '—'),
-                    _kvRow('Version', _versionGuess(item, 'IOS')),
+                    _kvRow(context, 'Bundle Identifier',
+                        item.bundleIdSnapshot ?? '—'),
+                    _kvRow(context, 'Version', item.iosVersionName ?? '—'),
+                    _kvRow(context, 'Build Number',
+                        item.iosBuildNumber?.toString() ?? '—'),
                     _kvRow(
-                        'Build Number', item.iosBuildNumber?.toString() ?? '—'),
-                    _kvRow('Last Build', _fmtDt(item.requestedAt) ?? '—'),
-                    _kvRow('IPA', _hasUrl(item.ipaUrl) ? 'Available' : '—'),
+                        context, 'Last Build', _fmtDt(item.requestedAt) ?? '—'),
+                    _kvRow(context, 'IPA',
+                        _hasUrl(item.ipaUrl) ? 'Available' : '—'),
                   ],
                   downloads: [
                     _DownloadAction(
@@ -299,110 +321,6 @@ class _View extends StatelessWidget {
                   compact: isTight,
                 ),
               ],
-              const SizedBox(height: 12),
-              _Card(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Publishing Options',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w900,
-                          ),
-                    ),
-                    const SizedBox(height: 10),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Checkbox(
-                          value: false,
-                          onChanged: (_) => _comingSoon(context),
-                        ),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Publish automatically via CI/CD',
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyMedium
-                                    ?.copyWith(fontWeight: FontWeight.w800),
-                              ),
-                              const SizedBox(height: 6),
-                              Text(
-                                'When enabled, approved apps will be automatically published to Google Play Console and Apple App Store Connect using secure API integration.',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall
-                                    ?.copyWith(
-                                      color: cs.onSurface.withOpacity(.65),
-                                    ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    LayoutBuilder(
-                      builder: (ctx, c) {
-                        final stack = c.maxWidth < 520;
-                        final btnH = 46.0;
-
-                        final btn1 = _BigCta(
-                          label: 'Publish Android to Play Store',
-                          icon: Icons.play_arrow_rounded,
-                          enabled: false,
-                          height: btnH,
-                          onPressed: () => _comingSoon(context),
-                          variant: _BigCtaVariant.green,
-                        );
-                        final btn2 = _BigCta(
-                          label: 'Publish iOS to App Store',
-                          icon: Icons.apple_rounded,
-                          enabled: false,
-                          height: btnH,
-                          onPressed: () => _comingSoon(context),
-                          variant: _BigCtaVariant.dark,
-                        );
-                        final btn3 = _BigCta(
-                          label: 'Publish Both Platforms',
-                          icon: Icons.send_rounded,
-                          enabled: false,
-                          height: btnH,
-                          onPressed: () => _comingSoon(context),
-                          variant: _BigCtaVariant.blue,
-                        );
-
-                        if (stack) {
-                          return Column(
-                            children: [
-                              btn1,
-                              const SizedBox(height: 10),
-                              btn2,
-                              const SizedBox(height: 10),
-                              btn3,
-                            ],
-                          );
-                        }
-
-                        return Row(
-                          children: [
-                            Expanded(child: btn1),
-                            const SizedBox(width: 12),
-                            Expanded(child: btn2),
-                            const SizedBox(width: 12),
-                            Expanded(child: btn3),
-                          ],
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ),
               if ((item.shortDescription).trim().isNotEmpty ||
                   (item.fullDescription).trim().isNotEmpty) ...[
                 const SizedBox(height: 12),
@@ -415,7 +333,10 @@ class _View extends StatelessWidget {
                         style:
                             Theme.of(context).textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.w900,
+                                  height: 1.15,
                                 ),
+                        strutStyle: _strut,
+                        textHeightBehavior: _thb,
                       ),
                       const SizedBox(height: 10),
                       _label(context, l10n.publish_label_short),
@@ -441,7 +362,10 @@ class _View extends StatelessWidget {
                         style:
                             Theme.of(context).textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.w900,
+                                  height: 1.15,
                                 ),
+                        strutStyle: _strut,
+                        textHeightBehavior: _thb,
                       ),
                       const SizedBox(height: 10),
                       _label(context, l10n.publish_label_icon),
@@ -480,7 +404,10 @@ class _View extends StatelessWidget {
                         style:
                             Theme.of(context).textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.w900,
+                                  height: 1.15,
                                 ),
+                        strutStyle: _strut,
+                        textHeightBehavior: _thb,
                       ),
                       const SizedBox(height: 10),
                       _safeText(context, item.adminNotes!.trim()),
@@ -557,7 +484,7 @@ class _View extends StatelessWidget {
     AppToast.info(context, 'Coming soon 🚧');
   }
 
-  static Widget _kvRow(String k, String v) {
+  static Widget _kvRow(BuildContext context, String k, String v) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
@@ -569,7 +496,9 @@ class _View extends StatelessWidget {
               k,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontWeight: FontWeight.w900),
+              style: const TextStyle(fontWeight: FontWeight.w900, height: 1.15),
+              strutStyle: _strut,
+              textHeightBehavior: _thb,
             ),
           ),
           const SizedBox(width: 10),
@@ -578,6 +507,9 @@ class _View extends StatelessWidget {
               v,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
+              style: const TextStyle(height: 1.15),
+              strutStyle: _strut,
+              textHeightBehavior: _thb,
             ),
           ),
         ],
@@ -590,7 +522,10 @@ class _View extends StatelessWidget {
       t,
       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
             fontWeight: FontWeight.w900,
+            height: 1.15,
           ),
+      strutStyle: _strut,
+      textHeightBehavior: _thb,
     );
   }
 
@@ -598,6 +533,8 @@ class _View extends StatelessWidget {
     return Text(
       t,
       style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.35),
+      strutStyle: _strut,
+      textHeightBehavior: _thb,
     );
   }
 
@@ -619,14 +556,37 @@ class _View extends StatelessWidget {
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(16),
-      child: Image.network(url, height: 64, width: 64, fit: BoxFit.cover),
+      child: Image.network(
+        url,
+        height: 64,
+        width: 64,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => Container(
+          height: 64,
+          width: 64,
+          color: cs.surfaceContainerHighest,
+          alignment: Alignment.center,
+          child: Icon(Icons.broken_image_rounded, color: cs.onSurfaceVariant),
+        ),
+      ),
     );
   }
 
   static Widget _thumb(String url, double size) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(16),
-      child: Image.network(url, height: size, width: size, fit: BoxFit.cover),
+      child: Image.network(
+        url,
+        height: size,
+        width: size,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => Container(
+          height: size,
+          width: size,
+          alignment: Alignment.center,
+          child: const Icon(Icons.broken_image_rounded),
+        ),
+      ),
     );
   }
 
@@ -658,16 +618,9 @@ class _View extends StatelessWidget {
     if (x == 'APPROVED') return _StatusType.success;
     return _StatusType.info;
   }
-
-  static String _versionGuess(AppPublishRequestAdmin item, String platform) {
-    final p = platform.toUpperCase();
-    if (p == 'ANDROID') return item.androidVersionName ?? '—';
-    return item.iosVersionName ?? '—';
-  }
 }
 
-// ----------------- inline platforms line (NO overflow, SAME LINE) -----------------
-
+// ✅ NEW: ZERO emoji + responsive 1-line/2-line + no text clipping
 class InlinePlatformsLine extends StatelessWidget {
   final String androidText;
   final String iosText;
@@ -680,44 +633,101 @@ class InlinePlatformsLine extends StatelessWidget {
     this.dense = false,
   });
 
+  static const _strut = StrutStyle(forceStrutHeight: true, height: 1.2);
+  static const _thb = TextHeightBehavior(
+    applyHeightToFirstAscent: true,
+    applyHeightToLastDescent: true,
+  );
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
 
+    final textStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
+          fontWeight: FontWeight.w900,
+          height: 1.15,
+        );
+
+    Widget line({
+      required IconData icon,
+      required Color iconColor,
+      required String text,
+    }) {
+      return Row(
+        children: [
+          Icon(icon, size: dense ? 14 : 16, color: iconColor),
+          const SizedBox(width: 6),
+          Flexible(
+            child: Text(
+              text,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: textStyle,
+              strutStyle: _strut,
+              textHeightBehavior: _thb,
+            ),
+          ),
+        ],
+      );
+    }
+
     return LayoutBuilder(
       builder: (ctx, c) {
-        final tight = c.maxWidth < 360;
-        final font = dense ? (tight ? 10.5 : 11.5) : (tight ? 11.2 : 12.2);
+        final narrow = c.maxWidth < (dense ? 420 : 480);
 
         return Container(
           padding: EdgeInsets.symmetric(
-            horizontal: dense ? 10 : 10,
-            vertical: dense ? 6 : 8,
+            horizontal: dense ? 10 : 12,
+            vertical: dense ? 8 : 10,
           ),
           decoration: BoxDecoration(
             color: cs.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(999),
             border: Border.all(color: cs.outlineVariant.withOpacity(.35)),
           ),
-          child: Row(
-            children: [
-              Expanded(
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    '🤖 $androidText   |    $iosText',
-                    maxLines: 1,
-                    overflow: TextOverflow.clip,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w900,
-                          fontSize: font,
-                        ),
-                  ),
+          child: narrow
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    line(
+                      icon: Icons.android_rounded,
+                      iconColor: const Color(0xFF16A34A),
+                      text: androidText,
+                    ),
+                    const SizedBox(height: 6),
+                    line(
+                      icon: Icons.apple_rounded,
+                      iconColor: const Color(0xFF111827),
+                      text: iosText,
+                    ),
+                  ],
+                )
+              : Row(
+                  children: [
+                    Expanded(
+                      child: line(
+                        icon: Icons.android_rounded,
+                        iconColor: const Color(0xFF16A34A),
+                        text: androidText,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      child: Container(
+                        width: 1,
+                        height: 16,
+                        color: cs.outlineVariant.withOpacity(.55),
+                      ),
+                    ),
+                    Expanded(
+                      child: line(
+                        icon: Icons.apple_rounded,
+                        iconColor: const Color(0xFF111827),
+                        text: iosText,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
-          ),
         );
       },
     );
@@ -733,12 +743,17 @@ class _Card extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final tokens = Theme.of(context).extension<UiTokens>();
+    final r = tokens?.radiusLg ?? 18.0;
+    final shadow = tokens?.cardShadow ?? const <BoxShadow>[];
+
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: cs.surface,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(r),
         border: Border.all(color: cs.outlineVariant.withOpacity(.35)),
+        boxShadow: shadow,
       ),
       child: child,
     );
@@ -776,8 +791,20 @@ class _TopHeaderCard extends StatelessWidget {
                     color: cs.surfaceContainerHighest,
                     child: Icon(Icons.apps_rounded, color: cs.primary),
                   )
-                : Image.network(iconUrl,
-                    width: 58, height: 58, fit: BoxFit.cover),
+                : Image.network(
+                    iconUrl,
+                    width: 58,
+                    height: 58,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      width: 58,
+                      height: 58,
+                      color: cs.surfaceContainerHighest,
+                      alignment: Alignment.center,
+                      child: Icon(Icons.broken_image_rounded,
+                          color: cs.onSurfaceVariant),
+                    ),
+                  ),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -790,6 +817,7 @@ class _TopHeaderCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.w900,
+                        height: 1.15,
                       ),
                 ),
                 const SizedBox(height: 8),
@@ -834,6 +862,7 @@ class _TopHeaderCard extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     fontWeight: FontWeight.w800,
+                    height: 1.15,
                   ),
             ),
           ),
@@ -878,6 +907,8 @@ class _PlatformCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final tokens = Theme.of(context).extension<UiTokens>();
+    final r = tokens?.radiusLg ?? 18.0;
 
     final headerBg = tone == _PlatformTone.android
         ? const Color(0xFFECFDF3)
@@ -890,7 +921,7 @@ class _PlatformCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: cs.surface,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(r),
         border: Border.all(color: cs.outlineVariant.withOpacity(.35)),
       ),
       child: Column(
@@ -899,8 +930,7 @@ class _PlatformCard extends StatelessWidget {
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
               color: headerBg,
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(18)),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(r)),
               border: Border(
                 bottom: BorderSide(color: cs.outlineVariant.withOpacity(.25)),
               ),
@@ -924,6 +954,7 @@ class _PlatformCard extends StatelessWidget {
                                 .titleMedium
                                 ?.copyWith(
                                   fontWeight: FontWeight.w900,
+                                  height: 1.15,
                                 ),
                           ),
                           const SizedBox(height: 4),
@@ -962,6 +993,7 @@ class _PlatformCard extends StatelessWidget {
                         fontWeight: FontWeight.w900,
                         letterSpacing: .3,
                         color: cs.onSurface.withOpacity(.7),
+                        height: 1.15,
                       ),
                 ),
                 const SizedBox(height: 10),
@@ -1031,7 +1063,7 @@ class _PlatformCard extends StatelessWidget {
                   height: 46,
                   width: double.infinity,
                   child: FilledButton.icon(
-                    onPressed: onPrimaryCta,
+                    onPressed: primaryCtaEnabled ? onPrimaryCta : null,
                     icon:
                         Icon(Icons.play_arrow_rounded, size: compact ? 18 : 20),
                     label: FittedBox(
@@ -1043,6 +1075,7 @@ class _PlatformCard extends StatelessWidget {
                         style: TextStyle(
                           fontWeight: FontWeight.w900,
                           fontSize: compact ? 12.5 : 13.5,
+                          height: 1.15,
                         ),
                       ),
                     ),
@@ -1062,6 +1095,7 @@ class _PlatformCard extends StatelessWidget {
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               fontWeight: FontWeight.w800,
                               color: cs.onSurface.withOpacity(.75),
+                              height: 1.15,
                             ),
                       ),
                       const SizedBox(width: 6),
@@ -1132,7 +1166,7 @@ class _AdaptiveIconButton extends StatelessWidget {
           return SizedBox(
             height: compact ? 38 : 40,
             child: OutlinedButton(
-              onPressed: enabled ? onPressed : null, // ✅ REAL disable
+              onPressed: enabled ? onPressed : null,
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 side: BorderSide(color: cs.outlineVariant.withOpacity(.55)),
@@ -1148,7 +1182,7 @@ class _AdaptiveIconButton extends StatelessWidget {
         return SizedBox(
           height: compact ? 38 : 40,
           child: OutlinedButton(
-            onPressed: enabled ? onPressed : null, // ✅ REAL disable
+            onPressed: enabled ? onPressed : null,
             style: OutlinedButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 12),
               side: BorderSide(color: cs.outlineVariant.withOpacity(.55)),
@@ -1171,6 +1205,7 @@ class _AdaptiveIconButton extends StatelessWidget {
                       style: TextStyle(
                         fontWeight: FontWeight.w900,
                         fontSize: compact ? 12 : 13,
+                        height: 1.15,
                       ),
                     ),
                   ),
@@ -1233,70 +1268,10 @@ class _StatusPill extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   fontWeight: FontWeight.w900,
+                  height: 1.15,
                 ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-enum _BigCtaVariant { green, dark, blue }
-
-class _BigCta extends StatelessWidget {
-  final String label;
-  final IconData icon;
-  final bool enabled;
-  final double height;
-  final VoidCallback onPressed;
-  final _BigCtaVariant variant;
-
-  const _BigCta({
-    required this.label,
-    required this.icon,
-    required this.enabled,
-    required this.height,
-    required this.onPressed,
-    required this.variant,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    Color bg;
-    const fg = Colors.white;
-
-    switch (variant) {
-      case _BigCtaVariant.green:
-        bg = const Color(0xFF16A34A);
-        break;
-      case _BigCtaVariant.dark:
-        bg = const Color(0xFF111827);
-        break;
-      default:
-        bg = const Color(0xFF2563EB);
-    }
-
-    return SizedBox(
-      height: height,
-      width: double.infinity,
-      child: ElevatedButton.icon(
-        onPressed: enabled ? onPressed : null,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: bg,
-          foregroundColor: fg,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-        ),
-        icon: Icon(icon, size: 18),
-        label: FittedBox(
-          fit: BoxFit.scaleDown,
-          alignment: Alignment.centerLeft,
-          child: Text(
-            label,
-            maxLines: 1,
-            style: const TextStyle(fontWeight: FontWeight.w900),
-          ),
-        ),
       ),
     );
   }

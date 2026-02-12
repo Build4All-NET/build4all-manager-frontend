@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:build4all_manager/shared/themes/app_theme.dart';
 import 'package:build4all_manager/shared/widgets/search_input.dart';
 import 'package:build4all_manager/shared/widgets/app_toast.dart';
@@ -103,7 +104,8 @@ class _HomeBody extends StatefulWidget {
 }
 
 class _HomeBodyState extends State<_HomeBody> {
-  late final Future<String?> _nameFuture;
+  // ✅ FIX: must NOT be final if you're going to re-assign it in setState()
+  late Future<String?> _nameFuture;
 
   @override
   void initState() {
@@ -229,20 +231,23 @@ class _HomeBodyState extends State<_HomeBody> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
+                                AutoSizeText(
                                   greeting,
                                   maxLines: 1,
+                                  minFontSize: 16,
+                                  stepGranularity: 0.5,
                                   overflow: TextOverflow.ellipsis,
-                                  // ✅ forced readable color
                                   style: tt.headlineSmall?.copyWith(
                                     fontWeight: FontWeight.w800,
                                     color: cs.onSurface,
                                   ),
                                 ),
                                 const SizedBox(height: 6),
-                                Text(
+                                AutoSizeText(
                                   subtitle,
                                   maxLines: 2,
+                                  minFontSize: 12,
+                                  stepGranularity: 0.5,
                                   overflow: TextOverflow.ellipsis,
                                   style: tt.bodyMedium?.copyWith(
                                     color: cs.onSurfaceVariant,
@@ -260,15 +265,21 @@ class _HomeBodyState extends State<_HomeBody> {
 
                 // ----- Search -----
                 const SliverToBoxAdapter(
-                  child: AppSearchInput(hintKey: 'owner_home_search_hint'),
+                  child: AppSearchInput(
+                    hintKey: 'owner_home_search_hint',
+                    showFilter: false, //  remove filter icon only here
+                  ),
                 ),
+
                 const SliverToBoxAdapter(child: SizedBox(height: 16)),
 
                 // ----- Choose your project -----
                 SliverToBoxAdapter(
-                  child: Text(
+                  child: AutoSizeText(
                     _safe(l10n.owner_home_chooseProject, 'Choose your project'),
                     maxLines: 1,
+                    minFontSize: 14,
+                    stepGranularity: 0.5,
                     overflow: TextOverflow.ellipsis,
                     style: tt.titleMedium?.copyWith(
                       fontWeight: FontWeight.w800,
@@ -340,10 +351,12 @@ class _HomeBodyState extends State<_HomeBody> {
                   child: Row(
                     children: [
                       Expanded(
-                        child: Text(
+                        child: AutoSizeText(
                           _safe(l10n.owner_home_recentRequests,
                               'Recent requests'),
                           maxLines: 1,
+                          minFontSize: 14,
+                          stepGranularity: 0.5,
                           overflow: TextOverflow.ellipsis,
                           style: tt.titleMedium?.copyWith(
                             fontWeight: FontWeight.w800,
@@ -356,7 +369,13 @@ class _HomeBodyState extends State<_HomeBody> {
                           '/owner/requests/list',
                           extra: {'ownerId': widget.ownerId, 'dio': widget.dio},
                         ),
-                        child: Text(_safe(l10n.owner_home_viewAll, 'View all')),
+                        child: AutoSizeText(
+                          _safe(l10n.owner_home_viewAll, 'View all'),
+                          maxLines: 1,
+                          minFontSize: 12,
+                          stepGranularity: 0.5,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                     ],
                   ),
@@ -368,9 +387,11 @@ class _HomeBodyState extends State<_HomeBody> {
                   SliverToBoxAdapter(
                     child: Padding(
                       padding: const EdgeInsets.only(top: 6, bottom: 12),
-                      child: Text(
+                      child: AutoSizeText(
                         _safe(l10n.owner_home_noRecent, 'No recent requests'),
                         maxLines: 2,
+                        minFontSize: 12,
+                        stepGranularity: 0.5,
                         overflow: TextOverflow.ellipsis,
                         style: tt.bodyMedium?.copyWith(
                           color: cs.onSurfaceVariant,

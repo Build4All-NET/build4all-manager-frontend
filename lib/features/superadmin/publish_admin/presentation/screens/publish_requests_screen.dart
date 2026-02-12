@@ -1,3 +1,5 @@
+// publish_requests_screen.dart
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -66,16 +68,7 @@ class _View extends StatelessWidget {
       },
       builder: (context, state) {
         return Scaffold(
-          appBar: AppBar(
-            titleSpacing: pad.left,
-            title: Text(
-              l10n.nav_publish_requests,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-
-          // ✅ ONE scroll for the whole page
+       
           body: RefreshIndicator.adaptive(
             onRefresh: () async {
               context.read<PublishRequestsBloc>().add(PublishRequestsRefresh());
@@ -83,7 +76,6 @@ class _View extends StatelessWidget {
             child: CustomScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
               slivers: [
-                // top padding
                 SliverPadding(
                   padding: EdgeInsets.fromLTRB(pad.left, 12, pad.right, 0),
                   sliver: SliverToBoxAdapter(
@@ -94,8 +86,6 @@ class _View extends StatelessWidget {
                     ),
                   ),
                 ),
-
-                // search + filter row
                 SliverPadding(
                   padding: EdgeInsets.fromLTRB(pad.left, 10, pad.right, 12),
                   sliver: SliverToBoxAdapter(
@@ -122,8 +112,6 @@ class _View extends StatelessWidget {
                     ),
                   ),
                 ),
-
-                // content
                 if (state.loading)
                   SliverFillRemaining(
                     hasScrollBody: false,
@@ -141,7 +129,6 @@ class _View extends StatelessWidget {
                     ),
                   )
                 else
-                  // ✅ responsive width awareness INSIDE sliver
                   SliverLayoutBuilder(
                     builder: (ctx, constraints) {
                       final w = constraints.crossAxisExtent;
@@ -172,9 +159,6 @@ class _View extends StatelessWidget {
                                   height: 1,
                                   color: cs.outlineVariant.withOpacity(.35),
                                 ),
-
-                                // ✅ IMPORTANT:
-                                // No ListView here. We render rows directly so the WHOLE page scrolls.
                                 ...List.generate(state.filtered.length, (i) {
                                   final item = state.filtered[i];
                                   final isLast = i == state.filtered.length - 1;
@@ -223,8 +207,6 @@ class _View extends StatelessWidget {
                       );
                     },
                   ),
-
-                // bottom breathing room (so last row doesn’t stick to bottom)
                 const SliverToBoxAdapter(child: SizedBox(height: 10)),
               ],
             ),
@@ -238,7 +220,7 @@ class _View extends StatelessWidget {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => PublisherProfilesScreen(),
+        builder: (_) => const PublisherProfilesScreen(),
       ),
     );
   }
@@ -282,6 +264,25 @@ class _PublisherProfilesProCard extends StatelessWidget {
     final rLg = tokens?.radiusLg ?? 18;
     final shadow = tokens?.cardShadow ?? const <BoxShadow>[];
 
+    final titleStyle = Theme.of(context).textTheme.titleMedium?.copyWith(
+          fontWeight: FontWeight.w900,
+          height: 1.15, // ✅ prevents “cut” look
+        );
+
+    final subtitleStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
+          color: cs.onSurface.withOpacity(.65),
+          height: 1.25, // ✅ smoother lines
+        );
+
+    final actionBtn = IconButton(
+      tooltip: 'Open',
+      onPressed: onOpen,
+      icon: const Icon(Icons.settings_rounded),
+      visualDensity: VisualDensity.compact,
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints.tightFor(width: 40, height: 40),
+    );
+
     return Material(
       color: cs.surface,
       borderRadius: BorderRadius.circular(rLg),
@@ -289,15 +290,18 @@ class _PublisherProfilesProCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(rLg),
         onTap: onOpen,
         child: Container(
+          constraints: const BoxConstraints(minHeight: 86), // ✅ no cramped card
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(rLg),
             border: Border.all(color: cs.outlineVariant.withOpacity(.35)),
             boxShadow: shadow,
           ),
-          child: Row(
-            children: [
-              Container(
+          child: LayoutBuilder(
+            builder: (ctx, c) {
+              final tight = c.maxWidth < 380;
+
+              final iconBox = Container(
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
@@ -305,46 +309,81 @@ class _PublisherProfilesProCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: Icon(Icons.storefront_rounded, color: cs.primary),
-              ),
-              const SizedBox(width: 12),
+              );
 
-              // ✅ no overflow (ellipsis)
-              Expanded(
-                child: Column(
+              if (tight) {
+                // ✅ PHONE LAYOUT: title can be 2 lines, subtitle below (NO ugly truncation)
+                return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w900,
+                    Row(
+                      children: [
+                        iconBox,
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            title,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: titleStyle,
+                            textHeightBehavior: const TextHeightBehavior(
+                              applyHeightToFirstAscent: false,
+                              applyHeightToLastDescent: false,
+                            ),
                           ),
+                        ),
+                        const SizedBox(width: 10),
+                        actionBtn,
+                      ],
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      subtitle,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: cs.onSurface.withOpacity(.65),
-                          ),
+                    const SizedBox(height: 6),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 56), // 44 + 12
+                      child: Text(
+                        subtitle,
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                        style: subtitleStyle,
+                        textHeightBehavior: const TextHeightBehavior(
+                          applyHeightToFirstAscent: false,
+                          applyHeightToLastDescent: false,
+                        ),
+                      ),
                     ),
                   ],
-                ),
-              ),
+                );
+              }
 
-              const SizedBox(width: 10),
-
-              // ✅ safe + responsive action (no big button overflow)
-              Tooltip(
-                message: 'Open',
-                child: IconButton(
-                  onPressed: onOpen,
-                  icon: const Icon(Icons.settings_rounded),
-                ),
-              ),
-            ],
+              // ✅ WIDE LAYOUT: keep row style
+              return Row(
+                children: [
+                  iconBox,
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: titleStyle,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          subtitle,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: subtitleStyle,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  actionBtn,
+                ],
+              );
+            },
           ),
         ),
       ),

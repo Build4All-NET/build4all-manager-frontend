@@ -63,12 +63,6 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
               child: ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
-                  Text(
-                    l10n.super_create_project_title,
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.w800,
-                        ),
-                  ),
                   const SizedBox(height: 6),
                   Text(
                     l10n.super_create_project_subtitle,

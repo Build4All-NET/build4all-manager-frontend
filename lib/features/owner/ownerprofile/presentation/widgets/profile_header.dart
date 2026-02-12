@@ -1,5 +1,6 @@
 // lib/features/owner/ownerprofile/presentation/widgets/profile_header.dart
 
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:build4all_manager/features/owner/ownerprofile/domain/entities/owner_profile.dart';
 import 'package:flutter/material.dart';
 
@@ -41,7 +42,12 @@ class ProfileHeader extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(gradient: headerGradient),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        child: _AvatarStrip(name: name, handle: handle),
+        child: LayoutBuilder(
+          builder: (context, c) {
+            final compact = c.maxWidth < 340;
+            return _AvatarStrip(name: name, handle: handle, compact: compact);
+          },
+        ),
       ),
     );
   }
@@ -50,10 +56,12 @@ class ProfileHeader extends StatelessWidget {
 class _AvatarStrip extends StatelessWidget {
   final String name;
   final String handle;
+  final bool compact;
 
   const _AvatarStrip({
     required this.name,
     required this.handle,
+    required this.compact,
   });
 
   String _initials(String s) {
@@ -71,8 +79,8 @@ class _AvatarStrip extends StatelessWidget {
     final tt = Theme.of(context).textTheme;
 
     final avatar = Container(
-      width: 54,
-      height: 54,
+      width: compact ? 48 : 54,
+      height: compact ? 48 : 54,
       decoration: BoxDecoration(
         color: cs.primary.withOpacity(.10),
         border: Border.all(color: cs.primary.withOpacity(.4)),
@@ -83,7 +91,7 @@ class _AvatarStrip extends StatelessWidget {
         _initials(name),
         style: TextStyle(
           fontWeight: FontWeight.w900,
-          fontSize: 18,
+          fontSize: compact ? 16 : 18,
           color: cs.primary,
         ),
       ),
@@ -97,19 +105,22 @@ class _AvatarStrip extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              AutoSizeText(
                 name.isEmpty ? '—' : name,
-                maxLines: 1,
+                maxLines: compact ? 2 : 1,
+                minFontSize: 12,
+                stepGranularity: 0.5,
                 overflow: TextOverflow.ellipsis,
-                style: tt.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w900,
-                ),
+                style: tt.titleMedium
+                    ?.copyWith(fontWeight: FontWeight.w900, height: 1.05),
               ),
               if (handle.isNotEmpty) ...[
                 const SizedBox(height: 4),
-                Text(
+                AutoSizeText(
                   handle,
                   maxLines: 1,
+                  minFontSize: 11,
+                  stepGranularity: 0.5,
                   overflow: TextOverflow.ellipsis,
                   style: tt.bodyMedium?.copyWith(
                     color: cs.onSurfaceVariant,

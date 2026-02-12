@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:build4all_manager/features/owner/common/data/repositories/owner_repository_impl.dart';
 import 'package:build4all_manager/features/owner/common/data/services/owner_api.dart';
 import 'package:build4all_manager/features/owner/common/domain/entities/owner_project.dart';
@@ -9,6 +10,7 @@ import 'package:build4all_manager/shared/widgets/app_toast.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../bloc/owner_projects_bloc.dart';
 import '../bloc/owner_projects_event.dart';
@@ -41,6 +43,12 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
 
   bool _showFilters = false;
 
+  // ✅ overrides so status updates instantly per-tile (no refresh)
+  final Map<int, String> _androidBuildOverride = {};
+  final Map<int, String> _iosBuildOverride = {};
+  final Map<int, String> _androidErrOverride = {};
+  final Map<int, String> _iosErrOverride = {};
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
@@ -58,38 +66,56 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
     }
 
     Future<void> rebuildAndroid(BuildContext ctx, OwnerProject p) async {
-      try {
-        await repo.rebuildAndroid(linkId: p.linkId);
+      final id = p.linkId;
 
-        if (ctx.mounted) {
-          AppToast.success(ctx, 'Rebuild queued');
-        }
+      setState(() {
+        _androidBuildOverride[id] = 'QUEUED';
+        _androidErrOverride.remove(id);
+      });
+
+      try {
+        await repo.rebuildAndroid(linkId: id);
+
+        if (ctx.mounted) AppToast.success(ctx, 'Rebuild queued');
 
         ctx
             .read<OwnerProjectsBloc>()
             .add(OwnerProjectsRefreshed(widget.ownerId));
       } catch (e) {
-        if (ctx.mounted) {
-          AppToast.error(ctx, 'Rebuild failed: $e');
+        if (mounted) {
+          setState(() {
+            _androidBuildOverride.remove(id);
+            _androidErrOverride.remove(id);
+          });
         }
+        if (ctx.mounted) AppToast.error(ctx, 'Rebuild failed: $e');
       }
     }
 
     Future<void> rebuildIos(BuildContext ctx, OwnerProject p) async {
-      try {
-        await repo.rebuildIos(linkId: p.linkId);
+      final id = p.linkId;
 
-        if (ctx.mounted) {
-          AppToast.success(ctx, 'Rebuild queued');
-        }
+      setState(() {
+        _iosBuildOverride[id] = 'QUEUED';
+        _iosErrOverride.remove(id);
+      });
+
+      try {
+        await repo.rebuildIos(linkId: id);
+
+        if (ctx.mounted) AppToast.success(ctx, 'Rebuild queued');
 
         ctx
             .read<OwnerProjectsBloc>()
             .add(OwnerProjectsRefreshed(widget.ownerId));
       } catch (e) {
-        if (ctx.mounted) {
-          AppToast.error(ctx, 'Rebuild failed: $e');
+        if (mounted) {
+          setState(() {
+            _iosBuildOverride.remove(id);
+            _iosErrOverride.remove(id);
+          });
         }
+        if (ctx.mounted) AppToast.error(ctx, 'Rebuild failed: $e');
       }
     }
 
@@ -118,7 +144,7 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
     bool matchEnv(OwnerProject p) {
       if (_env == _EnvironmentFilter.all) return true;
 
-      final s = p.status.toLowerCase(); // ✅ FIX (status non-nullable)
+      final s = p.status.toLowerCase();
       if (_env == _EnvironmentFilter.local) return s.contains('local');
       if (_env == _EnvironmentFilter.test) return s.contains('test');
       if (_env == _EnvironmentFilter.production) {
@@ -145,7 +171,43 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
                   constraints: BoxConstraints(maxWidth: maxContentWidth),
                   child: Padding(
                     padding: EdgeInsets.symmetric(horizontal: hPad),
-                    child: BlocBuilder<OwnerProjectsBloc, OwnerProjectsState>(
+                    child: BlocConsumer<OwnerProjectsBloc, OwnerProjectsState>(
+                      listener: (context, state) {
+                        if (_androidBuildOverride.isEmpty &&
+                            _iosBuildOverride.isEmpty) return;
+
+                        final removeAndroid = <int>[];
+                        final removeIos = <int>[];
+
+                        for (final p in state.filtered) {
+                          final id = p.linkId;
+
+                          final a = (p.androidBuildStatus ?? '').trim();
+                          final i = (p.iosBuildStatus ?? '').trim();
+
+                          if (_androidBuildOverride.containsKey(id) &&
+                              a.isNotEmpty) {
+                            removeAndroid.add(id);
+                          }
+                          if (_iosBuildOverride.containsKey(id) &&
+                              i.isNotEmpty) {
+                            removeIos.add(id);
+                          }
+                        }
+
+                        if (removeAndroid.isEmpty && removeIos.isEmpty) return;
+
+                        setState(() {
+                          for (final id in removeAndroid) {
+                            _androidBuildOverride.remove(id);
+                            _androidErrOverride.remove(id);
+                          }
+                          for (final id in removeIos) {
+                            _iosBuildOverride.remove(id);
+                            _iosErrOverride.remove(id);
+                          }
+                        });
+                      },
                       builder: (context, state) {
                         final l10n = AppLocalizations.of(context)!;
                         final double bottomPad = 12;
@@ -236,6 +298,7 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
                                     delegate: SliverChildBuilderDelegate(
                                       (context, index) {
                                         final item = filtered[index];
+
                                         return Padding(
                                           padding:
                                               const EdgeInsets.only(bottom: 6),
@@ -249,6 +312,16 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
                                                 rebuildAndroid(ctx, p),
                                             onRebuildIos: (ctx, p) =>
                                                 rebuildIos(ctx, p),
+                                            androidBuildStatusOverride:
+                                                _androidBuildOverride[
+                                                    item.linkId],
+                                            iosBuildStatusOverride:
+                                                _iosBuildOverride[item.linkId],
+                                            androidBuildErrorOverride:
+                                                _androidErrOverride[
+                                                    item.linkId],
+                                            iosBuildErrorOverride:
+                                                _iosErrOverride[item.linkId],
                                           ),
                                         );
                                       },
@@ -260,9 +333,7 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
                                   SliverToBoxAdapter(
                                     child: Padding(
                                       padding: EdgeInsets.only(
-                                        bottom: bottomPad,
-                                        top: 2,
-                                      ),
+                                          bottom: bottomPad, top: 2),
                                       child: Center(
                                         child: OutlinedButton.icon(
                                           onPressed: () {
@@ -319,7 +390,6 @@ class _Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
 
     return Padding(
@@ -327,18 +397,15 @@ class _Header extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          AutoSizeText(
             l10n.owner_projects_title,
             maxLines: 1,
+            minFontSize: 16,
+            stepGranularity: 0.5,
             overflow: TextOverflow.ellipsis,
             style: tt.headlineSmall?.copyWith(fontWeight: FontWeight.w900),
           ),
           const SizedBox(height: 4),
-          Text(
-            l10n.owner_projects_searchHint,
-            style:
-                tt.bodyMedium?.copyWith(color: cs.onSurface.withOpacity(.65)),
-          ),
         ],
       ),
     );
@@ -529,9 +596,11 @@ class _PillSeg extends StatelessWidget {
           borderRadius: BorderRadius.circular(999),
           border: Border.all(color: border),
         ),
-        child: Text(
+        child: AutoSizeText(
           text,
           maxLines: 1,
+          minFontSize: 10.5,
+          stepGranularity: 0.5,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
             fontWeight: FontWeight.w900,
@@ -578,6 +647,15 @@ class _SearchField extends StatelessWidget {
             borderRadius: BorderRadius.circular(14),
             borderSide: BorderSide(color: cs.outlineVariant),
           ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: BorderSide(color: cs.outlineVariant),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide:
+                BorderSide(color: cs.primary.withOpacity(.85), width: 1.3),
+          ),
           suffixIcon: IconButton(
             onPressed: onToggleFilters,
             icon: Icon(
@@ -616,9 +694,13 @@ class _CenteredMessage extends StatelessWidget {
           children: [
             Icon(icon, size: 56, color: color ?? cs.onSurfaceVariant),
             const SizedBox(height: 12),
-            Text(
+            AutoSizeText(
               label,
               textAlign: TextAlign.center,
+              maxLines: 3,
+              minFontSize: 12,
+              stepGranularity: 0.5,
+              overflow: TextOverflow.ellipsis,
               style: tt.bodyLarge?.copyWith(color: (color ?? cs.onSurface)),
             ),
           ],
@@ -644,23 +726,36 @@ class _EmptyProjects extends StatelessWidget {
         children: [
           Icon(Icons.widgets_outlined, size: 60, color: cs.outline),
           const SizedBox(height: 10),
-          Text(
+          AutoSizeText(
             l10n.owner_projects_emptyTitle,
             textAlign: TextAlign.center,
+            maxLines: 2,
+            minFontSize: 13,
+            stepGranularity: 0.5,
+            overflow: TextOverflow.ellipsis,
             style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 6),
-          Text(
+          AutoSizeText(
             l10n.owner_projects_emptyBody,
             textAlign: TextAlign.center,
+            maxLines: 4,
+            minFontSize: 12,
+            stepGranularity: 0.5,
+            overflow: TextOverflow.ellipsis,
             style: tt.bodyMedium?.copyWith(color: cs.onSurface.withOpacity(.7)),
           ),
           const SizedBox(height: 14),
           FilledButton.icon(
-            onPressed: () =>
-                Navigator.of(context).pushNamed('/owner/request-new'),
+            onPressed: () => context.push('/owner/requests'),
             icon: const Icon(Icons.bolt_rounded),
-            label: Text(l10n.owner_home_requestApp),
+            label: AutoSizeText(
+              l10n.owner_home_requestApp,
+              maxLines: 1,
+              minFontSize: 12,
+              stepGranularity: 0.5,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
         ],
       ),

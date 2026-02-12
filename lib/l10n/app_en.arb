@@ -261,9 +261,9 @@
   "cancel": "Cancel",
   "owner_nav_myapps": "My Apps",
   "common_search_hint": "Search...",
-  "owner_home_search_hint": "Search apps, requests, guides",
+  "owner_home_search_hint": "Search projects",
   "owner_home_chooseProject": "Choose your project",
-  "owner_proj_open": "Open project",
+  "owner_proj_open": "START APP SETUP",
   "owner_proj_activities_title": "Activities",
   "owner_proj_activities_desc": "Ticketing, schedules, and event highlights crafted for experiences on the go.",
   "owner_proj_ecom_title": "E-commerce",
@@ -284,6 +284,7 @@
   "owner_home_subtitle": "Ready to launch your next app build?",
   "owner_home_requestApp": "Request My App",
   "owner_request_requested": "Requested",
+  "publish_err_invalid_privacy_url":"invalid privacy url",
   "timeago_days": "{count}d ago",
   "@timeago_days": {
     "placeholders": {

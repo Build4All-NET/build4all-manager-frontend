@@ -6,9 +6,8 @@ import 'package:build4all_manager/shared/widgets/app_text_field.dart';
 import '../../presentation/bloc/profile_bloc.dart';
 import '../../presentation/bloc/profile_state.dart';
 
-
 class ChangePasswordSheet extends StatefulWidget {
-  final bool busy; // from parent state
+  final bool busy;
   final Future<void> Function(String current, String next) onSubmit;
 
   const ChangePasswordSheet({
@@ -41,7 +40,6 @@ class _ChangePasswordSheetState extends State<ChangePasswordSheet> {
 
   void _submit(AppLocalizations l10n) async {
     if (_formKey.currentState?.validate() != true) return;
-    // Dispatch event via onSubmit; DO NOT close here.
     await widget.onSubmit(_currentCtl.text.trim(), _nextCtl.text.trim());
   }
 
@@ -56,10 +54,6 @@ class _ChangePasswordSheetState extends State<ChangePasswordSheet> {
           p.error != c.error ||
           p.success != c.success,
       listener: (ctx, st) {
-        // Show any backend error as toast (keeps sheet open)
-        if (st.error?.isNotEmpty == true) {
-          
-        }
         // Close only on success
         if (!st.savingPassword && st.success?.isNotEmpty == true) {
           if (Navigator.of(ctx).canPop()) Navigator.of(ctx).pop(true);
@@ -68,9 +62,11 @@ class _ChangePasswordSheetState extends State<ChangePasswordSheet> {
       builder: (context, state) {
         final disabled = state.savingPassword;
 
+        final viewInsets = MediaQuery.of(context).viewInsets;
+
         return SafeArea(
           child: Padding(
-            padding: MediaQuery.of(context).viewInsets,
+            padding: EdgeInsets.only(bottom: viewInsets.bottom),
             child: Container(
               margin: const EdgeInsets.all(12),
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
@@ -80,124 +76,122 @@ class _ChangePasswordSheetState extends State<ChangePasswordSheet> {
                     const BorderRadius.vertical(top: Radius.circular(16)),
                 boxShadow: kElevationToShadow[3],
               ),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 44,
-                      height: 4,
-                      margin: const EdgeInsets.only(bottom: 12),
-                      decoration: BoxDecoration(
-                        color: cs.outlineVariant,
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                    ),
-                    Text(l10n.profile_change_password,
-                        style: Theme.of(context).textTheme.titleMedium),
-                    const SizedBox(height: 12),
-
-                    // Current
-                    AppTextField(
-                      label: l10n.profile_current_password,
-                      controller: _currentCtl,
-                      obscure: !_showCurrent,
-                      prefix: const Icon(Icons.lock_clock_outlined),
-                      suffix: IconButton(
-                        icon: Icon(
-                          _showCurrent
-                              ? Icons.visibility_off_rounded
-                              : Icons.visibility_rounded,
+              child: SingleChildScrollView(
+                // ✅ prevents keyboard overflow / clipped buttons
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 44,
+                        height: 4,
+                        margin: const EdgeInsets.only(bottom: 12),
+                        decoration: BoxDecoration(
+                          color: cs.outlineVariant,
+                          borderRadius: BorderRadius.circular(999),
                         ),
-                        onPressed: disabled
-                            ? null
-                            : () =>
-                                setState(() => _showCurrent = !_showCurrent),
                       ),
-                      validator: (v) =>
-                          (v == null || v.isEmpty) ? l10n.err_required : null,
-                      enabled: !disabled,
-                    ),
-                    const SizedBox(height: 12),
-
-                    // New
-                    AppTextField(
-                      label: l10n.profile_new_password,
-                      controller: _nextCtl,
-                      obscure: !_showNext,
-                      prefix: const Icon(Icons.lock_outline),
-                      suffix: IconButton(
-                        icon: Icon(
-                          _showNext
-                              ? Icons.visibility_off_rounded
-                              : Icons.visibility_rounded,
-                        ),
-                        onPressed: disabled
-                            ? null
-                            : () => setState(() => _showNext = !_showNext),
+                      Text(
+                        l10n.profile_change_password,
+                        style: Theme.of(context).textTheme.titleMedium,
                       ),
-                      validator: (v) {
-                        final t = (v ?? '').trim();
-                        if (t.isEmpty) return l10n.err_required;
-                        if (t.length < 6) return l10n.errPasswordRequired;
-                        return null;
-                      },
-                      enabled: !disabled,
-                    ),
-                    const SizedBox(height: 12),
-
-                    // Confirm
-                    AppTextField(
-                      label: l10n.profile_confirm_password,
-                      controller: _confirmCtl,
-                      obscure: !_showConfirm,
-                      prefix: const Icon(Icons.lock_outline),
-                      suffix: IconButton(
-                        icon: Icon(
-                          _showConfirm
-                              ? Icons.visibility_off_rounded
-                              : Icons.visibility_rounded,
-                        ),
-                        onPressed: disabled
-                            ? null
-                            : () =>
-                                setState(() => _showConfirm = !_showConfirm),
-                      ),
-                      validator: (v) {
-                        if ((v ?? '').trim().isEmpty) return l10n.err_required;
-                        if (v != _nextCtl.text) {
-                          return l10n.errPasswordMismatch;
-                        }
-                        return null;
-                      },
-                      enabled: !disabled,
-                    ),
-                    const SizedBox(height: 16),
-
-                    Row(
-                      children: [
-                        Expanded(
-                          child: AppButton(
-                            label: l10n.common_cancel,
-                            type: AppButtonType.text,
-                            onPressed: disabled
-                                ? null
-                                : () => Navigator.pop(context, false),
+                      const SizedBox(height: 12),
+                      AppTextField(
+                        label: l10n.profile_current_password,
+                        controller: _currentCtl,
+                        obscure: !_showCurrent,
+                        prefix: const Icon(Icons.lock_clock_outlined),
+                        suffix: IconButton(
+                          icon: Icon(
+                            _showCurrent
+                                ? Icons.visibility_off_rounded
+                                : Icons.visibility_rounded,
                           ),
+                          onPressed: disabled
+                              ? null
+                              : () =>
+                                  setState(() => _showCurrent = !_showCurrent),
                         ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: AppButton(
-                            label: l10n.common_save,
-                            type: AppButtonType.primary,
-                            isBusy: disabled,
-                            onPressed: disabled ? null : () => _submit(l10n),
+                        validator: (v) =>
+                            (v == null || v.isEmpty) ? l10n.err_required : null,
+                        enabled: !disabled,
+                      ),
+                      const SizedBox(height: 12),
+                      AppTextField(
+                        label: l10n.profile_new_password,
+                        controller: _nextCtl,
+                        obscure: !_showNext,
+                        prefix: const Icon(Icons.lock_outline),
+                        suffix: IconButton(
+                          icon: Icon(
+                            _showNext
+                                ? Icons.visibility_off_rounded
+                                : Icons.visibility_rounded,
                           ),
+                          onPressed: disabled
+                              ? null
+                              : () => setState(() => _showNext = !_showNext),
                         ),
-                      ],
-                    ),
-                  ],
+                        validator: (v) {
+                          final t = (v ?? '').trim();
+                          if (t.isEmpty) return l10n.err_required;
+                          if (t.length < 6) return l10n.errPasswordRequired;
+                          return null;
+                        },
+                        enabled: !disabled,
+                      ),
+                      const SizedBox(height: 12),
+                      AppTextField(
+                        label: l10n.profile_confirm_password,
+                        controller: _confirmCtl,
+                        obscure: !_showConfirm,
+                        prefix: const Icon(Icons.lock_outline),
+                        suffix: IconButton(
+                          icon: Icon(
+                            _showConfirm
+                                ? Icons.visibility_off_rounded
+                                : Icons.visibility_rounded,
+                          ),
+                          onPressed: disabled
+                              ? null
+                              : () =>
+                                  setState(() => _showConfirm = !_showConfirm),
+                        ),
+                        validator: (v) {
+                          if ((v ?? '').trim().isEmpty)
+                            return l10n.err_required;
+                          if (v != _nextCtl.text)
+                            return l10n.errPasswordMismatch;
+                          return null;
+                        },
+                        enabled: !disabled,
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: AppButton(
+                              label: l10n.common_cancel,
+                              type: AppButtonType.text,
+                              onPressed: disabled
+                                  ? null
+                                  : () => Navigator.pop(context, false),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: AppButton(
+                              label: l10n.common_save,
+                              type: AppButtonType.primary,
+                              isBusy: disabled,
+                              onPressed: disabled ? null : () => _submit(l10n),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

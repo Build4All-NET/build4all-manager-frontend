@@ -19,6 +19,12 @@ class AppSearchBar extends StatefulWidget {
   final EdgeInsetsGeometry? margin;
   final double? height;
 
+  // ✅ NEW: control the left icon (search) per screen
+  final bool showSearchIcon;
+
+  // ✅ NEW: optional custom leading widget (per screen)
+  final Widget? leading;
+
   const AppSearchBar({
     super.key,
     this.initialQuery,
@@ -34,6 +40,10 @@ class AppSearchBar extends StatefulWidget {
     this.onBack,
     this.margin,
     this.height,
+
+    // ✅ NEW
+    this.showSearchIcon = true,
+    this.leading,
   });
 
   @override
@@ -94,7 +104,12 @@ class _AppSearchBarState extends State<AppSearchBar> {
     final containerColor = cs.surfaceContainerHighest;
     final stroke = cs.outlineVariant.withOpacity(.6);
 
-    final prefix = widget.showBack
+    // ✅ prefix logic:
+    // 1) showBack => back arrow
+    // 2) leading != null => use it
+    // 3) showSearchIcon => search icon
+    // 4) otherwise => reserve same width so layout stays aligned
+    final Widget prefix = widget.showBack
         ? InkWell(
             borderRadius: BorderRadius.circular(999),
             onTap: widget.onBack ?? () => Navigator.maybePop(context),
@@ -103,11 +118,14 @@ class _AppSearchBarState extends State<AppSearchBar> {
               child: Icon(Icons.arrow_back, color: cs.onSurface, size: 22),
             ),
           )
-        : Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: Icon(Icons.search_rounded,
-                color: cs.onSurfaceVariant, size: 22),
-          );
+        : (widget.leading ??
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: widget.showSearchIcon
+                  ? Icon(Icons.search_rounded,
+                      color: cs.onSurfaceVariant, size: 22)
+                  : const SizedBox(width: 22), // ✅ keeps spacing consistent
+            ));
 
     final suffix = Row(
       mainAxisSize: MainAxisSize.min,
@@ -131,7 +149,9 @@ class _AppSearchBarState extends State<AppSearchBar> {
       color: containerColor,
       elevation: 0,
       shape: RoundedRectangleBorder(
-          borderRadius: radius, side: BorderSide(color: stroke)),
+        borderRadius: radius,
+        side: BorderSide(color: stroke),
+      ),
       child: ConstrainedBox(
         constraints: BoxConstraints(minHeight: h),
         child: Row(
@@ -193,6 +213,10 @@ class AppSearchAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool showBack;
   final VoidCallback? onBack;
 
+  // ✅ NEW: pass-through controls
+  final bool showSearchIcon;
+  final Widget? leading;
+
   const AppSearchAppBar({
     super.key,
     this.initialQuery,
@@ -206,6 +230,10 @@ class AppSearchAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.debounceMs = 220,
     this.showBack = true,
     this.onBack,
+
+    // ✅ NEW
+    this.showSearchIcon = true,
+    this.leading,
   });
 
   @override
@@ -233,6 +261,10 @@ class AppSearchAppBar extends StatelessWidget implements PreferredSizeWidget {
         showBack: showBack,
         onBack: onBack,
         margin: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+
+        // ✅ pass-through
+        showSearchIcon: showSearchIcon,
+        leading: leading,
       ),
     );
   }

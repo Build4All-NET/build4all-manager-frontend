@@ -43,6 +43,7 @@ class _ProfileFormState extends State<ProfileForm> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final disabled = widget.busy;
 
     return Form(
       key: _form,
@@ -53,6 +54,7 @@ class _ProfileFormState extends State<ProfileForm> {
             hint: l10n.profile_first_name_hint,
             prefix: const Icon(Icons.badge_outlined),
             controller: _first,
+            enabled: !disabled,
             validator: (v) =>
                 (v == null || v.trim().isEmpty) ? l10n.err_required : null,
           ),
@@ -62,6 +64,7 @@ class _ProfileFormState extends State<ProfileForm> {
             hint: l10n.profile_last_name_hint,
             prefix: const Icon(Icons.badge_rounded),
             controller: _last,
+            enabled: !disabled,
             validator: (v) =>
                 (v == null || v.trim().isEmpty) ? l10n.err_required : null,
           ),
@@ -71,6 +74,7 @@ class _ProfileFormState extends State<ProfileForm> {
             hint: l10n.profile_username_hint,
             prefix: const Icon(Icons.alternate_email),
             controller: _user,
+            enabled: !disabled,
             validator: (v) =>
                 (v == null || v.trim().isEmpty) ? l10n.err_required : null,
           ),
@@ -80,6 +84,7 @@ class _ProfileFormState extends State<ProfileForm> {
             hint: l10n.profile_email_hint,
             prefix: const Icon(Icons.mail_outline),
             controller: _email,
+            enabled: !disabled,
             keyboardType: TextInputType.emailAddress,
             validator: (v) {
               if (v == null || v.trim().isEmpty) return l10n.err_required;

@@ -551,13 +551,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get common_search_hint => 'Search...';
 
   @override
-  String get owner_home_search_hint => 'Search apps, requests, guides';
+  String get owner_home_search_hint => 'Search projects';
 
   @override
   String get owner_home_chooseProject => 'Choose your project';
 
   @override
-  String get owner_proj_open => 'Open project';
+  String get owner_proj_open => 'START APP SETUP';
 
   @override
   String get owner_proj_activities_title => 'Activities';
@@ -600,6 +600,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get owner_request_requested => 'Requested';
+
+  @override
+  String get publish_err_invalid_privacy_url => 'invalid privacy url';
 
   @override
   String timeago_days(int count) {

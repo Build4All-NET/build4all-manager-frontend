@@ -26,9 +26,8 @@ class _NotificationsTileState extends State<NotificationsTile> {
   @override
   void didUpdateWidget(covariant NotificationsTile oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.notifyItems != widget.notifyItems) {
+    if (oldWidget.notifyItems != widget.notifyItems)
       _items = widget.notifyItems;
-    }
     if (oldWidget.notifyFeedback != widget.notifyFeedback) {
       _fb = widget.notifyFeedback;
     }
@@ -42,36 +41,34 @@ class _NotificationsTileState extends State<NotificationsTile> {
       elevation: 0,
       clipBehavior: Clip.antiAlias,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 10, 8, 10),
-        child: Row(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              child: Column(
-                children: [
-                  SwitchListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(l10n.profile_notify_items),
-                    subtitle: Text(l10n.profile_notify_items_sub),
-                    value: _items,
-                    onChanged:
-                        widget.busy ? null : (v) => setState(() => _items = v),
-                  ),
-                  SwitchListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(l10n.profile_notify_feedback),
-                    subtitle: Text(l10n.profile_notify_feedback_sub),
-                    value: _fb,
-                    onChanged:
-                        widget.busy ? null : (v) => setState(() => _fb = v),
-                  ),
-                ],
-              ),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text(l10n.profile_notify_items),
+              subtitle: Text(l10n.profile_notify_items_sub),
+              value: _items,
+              onChanged: widget.busy ? null : (v) => setState(() => _items = v),
             ),
-            const SizedBox(width: 8),
-            FilledButton.icon(
-              onPressed: widget.busy ? null : () => widget.onSave(_items, _fb),
-              icon: const Icon(Icons.save_outlined),
-              label: Text(l10n.profile_update_notifications),
+            const SizedBox(height: 6),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text(l10n.profile_notify_feedback),
+              subtitle: Text(l10n.profile_notify_feedback_sub),
+              value: _fb,
+              onChanged: widget.busy ? null : (v) => setState(() => _fb = v),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed:
+                    widget.busy ? null : () => widget.onSave(_items, _fb),
+                icon: const Icon(Icons.save_outlined),
+                label: Text(l10n.profile_update_notifications),
+              ),
             ),
           ],
         ),

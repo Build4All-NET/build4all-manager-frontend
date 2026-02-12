@@ -1,5 +1,6 @@
 // lib/features/owner/ownerprofile/presentation/widgets/profile_info_card.dart
 
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:build4all_manager/features/owner/ownerprofile/domain/entities/owner_profile.dart';
 import 'package:build4all_manager/l10n/app_localizations.dart';
 import 'package:build4all_manager/shared/widgets/app_toast.dart';
@@ -34,6 +35,7 @@ class ProfileInfoCard extends StatelessWidget {
       Widget? trailing,
     }) {
       final color = tint ?? cs.primary;
+      final shown = value.isEmpty ? '—' : value;
 
       return ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16),
@@ -42,13 +44,19 @@ class ProfileInfoCard extends StatelessWidget {
           backgroundColor: color.withOpacity(.12),
           child: Icon(icon, color: color, size: 18),
         ),
-        title: Text(
+        title: AutoSizeText(
           label,
+          maxLines: 1,
+          minFontSize: 12,
+          stepGranularity: 0.5,
+          overflow: TextOverflow.ellipsis,
           style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w900),
         ),
-        subtitle: Text(
-          value.isEmpty ? '—' : value,
+        subtitle: AutoSizeText(
+          shown,
           maxLines: 1,
+          minFontSize: 10.5,
+          stepGranularity: 0.5,
           overflow: TextOverflow.ellipsis,
           style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
         ),
@@ -72,16 +80,23 @@ class ProfileInfoCard extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
             child: Row(
               children: [
-                Text(
-                  l10n.owner_nav_profile,
-                  style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+                Expanded(
+                  child: AutoSizeText(
+                    l10n.owner_nav_profile,
+                    maxLines: 1,
+                    minFontSize: 14,
+                    stepGranularity: 0.5,
+                    overflow: TextOverflow.ellipsis,
+                    style:
+                        tt.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+                  ),
                 ),
               ],
             ),
           ),
           Divider(height: 1, color: cs.outlineVariant.withOpacity(.7)),
 
-          // ✅ Email ONCE
+          // ✅ Email
           row(
             icon: Icons.mail_outline_rounded,
             label: l10n.owner_profile_email,

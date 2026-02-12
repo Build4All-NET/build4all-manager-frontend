@@ -285,12 +285,12 @@
   "logout_confirm": "Voulez-vous vous déconnecter ?",
   "logged_out": "Déconnecté",
   "cancel": "Annuler",
-
+ "publish_err_invalid_privacy_url":"invalid privacy url",
   "owner_nav_myapps": "Mes apps",
   "common_search_hint": "Rechercher...",
   "owner_home_search_hint": "Rechercher des apps, demandes, guides",
   "owner_home_chooseProject": "Choisissez votre projet",
-  "owner_proj_open": "Ouvrir le projet",
+  "owner_proj_open": "Configurer l’app",
 
   "owner_proj_activities_title": "Activités",
   "owner_proj_activities_desc": "Billetterie, plannings et temps forts d’événements pensés pour le mobile.",

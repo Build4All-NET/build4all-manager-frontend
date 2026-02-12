@@ -1,5 +1,6 @@
 // lib/features/owner/ownerprofile/presentation/screens/owner_profile_screen.dart
 
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:build4all_manager/core/localization/locale_cubit.dart';
 import 'package:build4all_manager/features/auth/data/datasources/jwt_local_datasource.dart';
 import 'package:build4all_manager/features/owner/ownerprofile/data/repositories/owner_profile_repository_impl.dart';
@@ -61,12 +62,20 @@ class _OwnerProfileView extends StatelessWidget {
             children: [
               ListTile(
                 contentPadding: EdgeInsets.zero,
-                title: Text(
+                title: AutoSizeText(
                   l10n.logout_confirm ?? 'Do you want to log out?',
+                  maxLines: 2,
+                  minFontSize: 12,
+                  stepGranularity: 0.5,
+                  overflow: TextOverflow.ellipsis,
                   style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w900),
                 ),
-                subtitle: Text(
+                subtitle: AutoSizeText(
                   l10n.owner_nav_profile,
+                  maxLines: 1,
+                  minFontSize: 11,
+                  stepGranularity: 0.5,
+                  overflow: TextOverflow.ellipsis,
                   style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
                 ),
                 leading: CircleAvatar(
@@ -80,14 +89,26 @@ class _OwnerProfileView extends StatelessWidget {
                   Expanded(
                     child: OutlinedButton(
                       onPressed: () => Navigator.of(ctx).pop(false),
-                      child: Text(l10n.cancel ?? 'Cancel'),
+                      child: AutoSizeText(
+                        l10n.cancel ?? 'Cancel',
+                        maxLines: 1,
+                        minFontSize: 12,
+                        stepGranularity: 0.5,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: FilledButton(
                       onPressed: () => Navigator.of(ctx).pop(true),
-                      child: Text(l10n.logout ?? 'Logout'),
+                      child: AutoSizeText(
+                        l10n.logout ?? 'Logout',
+                        maxLines: 1,
+                        minFontSize: 12,
+                        stepGranularity: 0.5,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                   ),
                 ],
@@ -116,7 +137,6 @@ class _OwnerProfileView extends StatelessWidget {
 
     return BlocBuilder<OwnerProfileBloc, OwnerProfileState>(
       builder: (context, s) {
-        // ✅ AppBar now has NO logout button
         const appBar = _ProfileAppBar();
 
         if (s.loading) {
@@ -132,7 +152,14 @@ class _OwnerProfileView extends StatelessWidget {
             body: Center(
               child: Padding(
                 padding: const EdgeInsets.all(16),
-                child: Text(s.error!, textAlign: TextAlign.center),
+                child: AutoSizeText(
+                  s.error!,
+                  textAlign: TextAlign.center,
+                  maxLines: 6,
+                  minFontSize: 12,
+                  stepGranularity: 0.5,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ),
           );
@@ -142,7 +169,15 @@ class _OwnerProfileView extends StatelessWidget {
         if (p == null) {
           return Scaffold(
             appBar: appBar,
-            body: Center(child: Text(l10n.owner_nav_profile)),
+            body: Center(
+              child: AutoSizeText(
+                l10n.owner_nav_profile,
+                maxLines: 1,
+                minFontSize: 12,
+                stepGranularity: 0.5,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
           );
         }
 
@@ -212,8 +247,13 @@ class _ProfileAppBar extends StatelessWidget implements PreferredSizeWidget {
     final l10n = AppLocalizations.of(context)!;
 
     return AppBar(
-      title: Text(l10n.owner_nav_profile),
-      // ✅ No actions -> logout removed from top
+      title: AutoSizeText(
+        l10n.owner_nav_profile,
+        maxLines: 1,
+        minFontSize: 14,
+        stepGranularity: 0.5,
+        overflow: TextOverflow.ellipsis,
+      ),
     );
   }
 }
@@ -241,21 +281,23 @@ class _PreferencesCard extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
             child: Row(
               children: [
-                Text(
-                  l10n.settings ?? 'Settings',
-                  style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+                Expanded(
+                  child: AutoSizeText(
+                    l10n.settings ?? 'Settings',
+                    maxLines: 1,
+                    minFontSize: 14,
+                    stepGranularity: 0.5,
+                    overflow: TextOverflow.ellipsis,
+                    style:
+                        tt.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+                  ),
                 ),
               ],
             ),
           ),
           Divider(height: 1, color: cs.outlineVariant.withOpacity(.7)),
-
-          // ✅ language row (NO nested Card)
           _LanguageRow(l10n: l10n),
-
           Divider(height: 1, color: cs.outlineVariant.withOpacity(.7)),
-
-          // ✅ Logout stays only here (bottom)
           ListTile(
             onTap: onLogout,
             contentPadding: const EdgeInsets.symmetric(horizontal: 16),
@@ -264,18 +306,25 @@ class _PreferencesCard extends StatelessWidget {
               backgroundColor: cs.error.withOpacity(.12),
               child: Icon(Icons.logout_rounded, color: cs.error, size: 18),
             ),
-            title: Text(
+            title: AutoSizeText(
               l10n.logout ?? 'Logout',
+              maxLines: 1,
+              minFontSize: 12,
+              stepGranularity: 0.5,
+              overflow: TextOverflow.ellipsis,
               style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w900),
             ),
-            subtitle: Text(
+            subtitle: AutoSizeText(
               l10n.logout_confirm ?? 'Sign out of this account',
+              maxLines: 2,
+              minFontSize: 11,
+              stepGranularity: 0.5,
+              overflow: TextOverflow.ellipsis,
               style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
             ),
             trailing:
                 Icon(Icons.chevron_right_rounded, color: cs.onSurfaceVariant),
           ),
-
           const SizedBox(height: 6),
         ],
       ),
@@ -283,13 +332,29 @@ class _PreferencesCard extends StatelessWidget {
   }
 }
 
-// ✅ Professional: row inside settings card (not a card on its own)
 class _LanguageRow extends StatelessWidget {
   final AppLocalizations l10n;
   const _LanguageRow({required this.l10n});
 
+  String _labelFor(String code) {
+    switch (code) {
+      case 'system':
+        return l10n.common_system_language;
+      case 'en':
+        return l10n.lang_english;
+      case 'ar':
+        return l10n.lang_arabic;
+      case 'fr':
+        return l10n.lang_french;
+      default:
+        return l10n.common_system_language;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
       child: Row(
@@ -300,42 +365,64 @@ class _LanguageRow extends StatelessWidget {
             child: Icon(Icons.language_rounded, size: 18),
           ),
           const SizedBox(width: 12),
-          Expanded(child: Text(l10n.common_language)),
+          Expanded(
+            child: AutoSizeText(
+              l10n.common_language,
+              maxLines: 1,
+              minFontSize: 12,
+              stepGranularity: 0.5,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
           const SizedBox(width: 8),
           BlocBuilder<LocaleCubit, Locale?>(
             builder: (context, locale) {
               final value = locale?.languageCode ?? 'system';
 
-              return DropdownButtonHideUnderline(
-                child: DropdownButton<String>(
-                  value: value,
-                  items: [
-                    DropdownMenuItem(
-                      value: 'system',
-                      child: Text(l10n.common_system_language),
+              return ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 180),
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      value: value,
+                      isDense: true,
+                      iconEnabledColor: cs.onSurfaceVariant,
+                      items: const ['system', 'en', 'ar', 'fr']
+                          .map(
+                            (code) => DropdownMenuItem<String>(
+                              value: code,
+                              child: Text(
+                                '', // replaced by selectedItemBuilder
+                              ),
+                            ),
+                          )
+                          .toList(),
+                      selectedItemBuilder: (ctx) {
+                        return const ['system', 'en', 'ar', 'fr'].map((code) {
+                          return Align(
+                            alignment: Alignment.centerRight,
+                            child: AutoSizeText(
+                              _labelFor(code),
+                              maxLines: 1,
+                              minFontSize: 11,
+                              stepGranularity: 0.5,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          );
+                        }).toList();
+                      },
+                      onChanged: (v) {
+                        if (v == null) return;
+                        final cubit = context.read<LocaleCubit>();
+                        if (v == 'system') {
+                          cubit.setLocale(null);
+                        } else {
+                          cubit.setLocale(Locale(v));
+                        }
+                      },
                     ),
-                    DropdownMenuItem(
-                      value: 'en',
-                      child: Text(l10n.lang_english),
-                    ),
-                    DropdownMenuItem(
-                      value: 'ar',
-                      child: Text(l10n.lang_arabic),
-                    ),
-                    DropdownMenuItem(
-                      value: 'fr',
-                      child: Text(l10n.lang_french),
-                    ),
-                  ],
-                  onChanged: (v) {
-                    if (v == null) return;
-                    final cubit = context.read<LocaleCubit>();
-                    if (v == 'system') {
-                      cubit.setLocale(null);
-                    } else {
-                      cubit.setLocale(Locale(v));
-                    }
-                  },
+                  ),
                 ),
               );
             },

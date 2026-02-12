@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:build4all_manager/l10n/app_localizations.dart';
 import '../../data/static_project_models.dart';
@@ -43,6 +44,7 @@ class ProjectTemplateCard extends StatelessWidget {
         final comfy = cardW >= 230;
 
         final pad = compact ? 12.0 : (comfy ? 16.0 : 14.0);
+
         final titleStyle = (compact ? tt.titleSmall : tt.titleMedium)?.copyWith(
           fontWeight: FontWeight.w800,
           color: isAvailable ? cs.onSurface : cs.onSurface.withOpacity(.75),
@@ -82,22 +84,26 @@ class ProjectTemplateCard extends StatelessWidget {
 
                   SizedBox(height: compact ? 8 : 10),
 
-                  // ✅ Title
-                  Text(
+                  // ✅ Title (auto-shrinks)
+                  AutoSizeText(
                     _tr(l10n, tpl.titleKey),
                     style: titleStyle,
                     maxLines: 1,
+                    minFontSize: compact ? 12 : 14,
+                    stepGranularity: 0.5,
                     overflow: TextOverflow.ellipsis,
                   ),
 
                   SizedBox(height: compact ? 6 : 8),
 
-                  // ✅ Description (won't destroy layout)
+                  // ✅ Description (auto-shrinks across languages)
                   Flexible(
-                    child: Text(
+                    child: AutoSizeText(
                       _tr(l10n, tpl.descKey),
                       style: descStyle,
                       maxLines: descLines,
+                      minFontSize: compact ? 9 : 10.5,
+                      stepGranularity: 0.5,
                       overflow: TextOverflow.ellipsis,
                       softWrap: true,
                     ),
@@ -105,7 +111,7 @@ class ProjectTemplateCard extends StatelessWidget {
 
                   SizedBox(height: compact ? 10 : 12),
 
-                  // ✅ CTA button (fixed height, never weird shrink)
+                  // ✅ CTA button (fixed height, auto-shrinks text)
                   SizedBox(
                     width: double.infinity,
                     height: compact ? 40 : 44,
@@ -117,18 +123,19 @@ class ProjectTemplateCard extends StatelessWidget {
                         side: BorderSide(
                           color: tint.withOpacity(isAvailable ? .35 : .18),
                         ),
-                        padding: EdgeInsets.symmetric(
-                          horizontal: compact ? 10 : 12,
-                        ),
+                        padding:
+                            EdgeInsets.symmetric(horizontal: compact ? 10 : 12),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
                         ),
                         textStyle: (compact ? tt.bodySmall : tt.bodyMedium)
                             ?.copyWith(fontWeight: FontWeight.w700),
                       ),
-                      child: Text(
+                      child: AutoSizeText(
                         '$ctaText →',
                         maxLines: 1,
+                        minFontSize: compact ? 10 : 11.5,
+                        stepGranularity: 0.5,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),

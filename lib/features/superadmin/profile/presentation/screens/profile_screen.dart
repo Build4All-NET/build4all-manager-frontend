@@ -1,31 +1,26 @@
 import 'package:build4all_manager/core/localization/locale_cubit.dart';
 import 'package:build4all_manager/core/network/dio_client.dart';
-import 'package:build4all_manager/shared/widgets/app_toast.dart'; 
+import 'package:build4all_manager/features/auth/data/datasources/jwt_local_datasource.dart';
+import 'package:build4all_manager/l10n/app_localizations.dart';
+import 'package:build4all_manager/shared/widgets/app_toast.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-//  keep YOUR l10n import (since your main.dart uses it)
-import 'package:build4all_manager/l10n/app_localizations.dart';
-
 import '../../data/repositories/admin_repository_impl.dart';
 import '../../data/services/admin_api.dart';
+import '../../domain/entities/admin_profile.dart';
 import '../../domain/usecases/get_me.dart';
-import '../../domain/usecases/update_profile.dart';
-import '../../domain/usecases/update_password.dart';
 import '../../domain/usecases/update_notifications.dart';
+import '../../domain/usecases/update_password.dart';
+import '../../domain/usecases/update_profile.dart';
 import '../bloc/profile_bloc.dart';
 import '../bloc/profile_event.dart';
 import '../bloc/profile_state.dart';
-import '../widgets/profile_header.dart';
-import '../widgets/profile_form.dart';
-import '../widgets/notifications_tile.dart';
 import '../widgets/change_password_sheet.dart';
-import 'package:build4all_manager/shared/widgets/app_button.dart';
-
-// local storage for clearing token on logout
-import 'package:build4all_manager/features/auth/data/datasources/jwt_local_datasource.dart';
+import '../widgets/notifications_tile.dart';
+import '../widgets/profile_form.dart';
 
 class SuperAdminProfileScreen extends StatelessWidget {
   const SuperAdminProfileScreen({super.key});
@@ -58,12 +53,8 @@ class _ProfileView extends StatelessWidget {
     return BlocConsumer<ProfileBloc, ProfileState>(
       listenWhen: (p, c) => p.error != c.error || p.success != c.success,
       listener: (ctx, st) {
-        if (st.error?.isNotEmpty == true) {
-          AppToast.error(ctx, st.error!);
-        }
-        if (st.success?.isNotEmpty == true) {
-          AppToast.success(ctx, st.success!);
-        }
+        if (st.error?.isNotEmpty == true) AppToast.error(ctx, st.error!);
+        if (st.success?.isNotEmpty == true) AppToast.success(ctx, st.success!);
       },
       builder: (context, state) {
         if (state.loading && state.me == null) {
@@ -75,174 +66,209 @@ class _ProfileView extends StatelessWidget {
         if (state.me == null) {
           return Scaffold(
             body: Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.error_outline, color: cs.error, size: 42),
-                  const SizedBox(height: 8),
-                  Text(l10n.err_unknown),
-                  const SizedBox(height: 12),
-                  FilledButton(
-                    onPressed: () =>
-                        context.read<ProfileBloc>().add(LoadProfile()),
-                    child: Text(l10n.common_retry),
-                  ),
-                ],
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.error_outline, color: cs.error, size: 46),
+                    const SizedBox(height: 10),
+                    Text(l10n.err_unknown),
+                    const SizedBox(height: 14),
+                    FilledButton.icon(
+                      onPressed: () =>
+                          context.read<ProfileBloc>().add(LoadProfile()),
+                      icon: const Icon(Icons.refresh_rounded),
+                      label: Text(l10n.common_retry),
+                    ),
+                  ],
+                ),
               ),
             ),
           );
         }
 
-        final me = state.me!;
+        final AdminProfile me = state.me!;
+        final bottomSafe = MediaQuery.of(context).padding.bottom;
+        final bottomPad = 16.0 + bottomSafe;
+
+        final busyAny = state.loading ||
+            state.savingProfile ||
+            state.savingNotifications ||
+            state.savingPassword;
+
         return Scaffold(
-          appBar: AppBar(title: Text(l10n.nav_profile)),
           body: RefreshIndicator.adaptive(
-            onRefresh: () async =>
-                context.read<ProfileBloc>().add(RefreshProfile()),
-            child: ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
-                ProfileHeader(me: me),
-                const SizedBox(height: 14),
-
-                // ✅ Language switcher (this is what was missing)
-                _LanguageTile(l10n: l10n),
-                const SizedBox(height: 12),
-
-                // Profile form
-                Card(
+            onRefresh: () async => context.read<ProfileBloc>().add(
+                  RefreshProfile(),
+                ),
+            child: CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              slivers: [
+                SliverAppBar(
+                  pinned: false,
+                  expandedHeight: 190,
                   elevation: 0,
-                  clipBehavior: Clip.antiAlias,
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          l10n.profile_details,
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                        const SizedBox(height: 12),
-                        ProfileForm(
-                          me: me,
-                          busy: state.savingProfile,
-                          onSubmit: (p) =>
-                              context.read<ProfileBloc>().add(SubmitProfile(p)),
-                        ),
-                      ],
-                    ),
+                  scrolledUnderElevation: 1,
+                  backgroundColor: cs.primary,
+                  foregroundColor: cs.onPrimary,
+                  
+                 
+                  flexibleSpace: FlexibleSpaceBar(
+                    collapseMode: CollapseMode.parallax,
+                    background: _ProfileHero(me: me),
                   ),
                 ),
 
-                const SizedBox(height: 12),
-
-                // Notifications
-                NotificationsTile(
-                  notifyItems: me.notifyItemUpdates,
-                  notifyFeedback: me.notifyUserFeedback,
-                  busy: state.savingNotifications,
-                  onSave: (items, fb) => context
-                      .read<ProfileBloc>()
-                      .add(SubmitNotifications(items, fb)),
-                ),
-
-                const SizedBox(height: 12),
-
-                // Password
-                Card(
-                  elevation: 0,
-                  clipBehavior: Clip.antiAlias,
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.password_outlined),
-                        const SizedBox(width: 12),
-                        Expanded(child: Text(l10n.profile_password_hint)),
-                        const SizedBox(width: 8),
-                        AppButton(
-                          label: l10n.profile_change_password,
-                          type: AppButtonType.outline,
-                          trailing: const Icon(Icons.edit_rounded),
-                          isBusy: state.savingPassword,
-                          onPressed: state.savingPassword
-                              ? null
-                              : () async {
-                                  final profileBloc =
-                                      context.read<ProfileBloc>();
-                                  await showModalBottomSheet<bool>(
-                                    context: context,
-                                    isScrollControlled: true,
-                                    useSafeArea: true,
-                                    backgroundColor: Colors.transparent,
-                                    builder: (_) => BlocProvider.value(
-                                      value: profileBloc,
-                                      child: ChangePasswordSheet(
-                                        busy: state.savingPassword,
-                                        onSubmit: (c, n) async {
-                                          profileBloc.add(SubmitPassword(c, n));
-                                        },
-                                      ),
-                                    ),
-                                  );
-                                },
-                        ),
-                      ],
-                    ),
+                // ✅ subtle progress bar without breaking layout
+                SliverToBoxAdapter(
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 160),
+                    child: busyAny
+                        ? const LinearProgressIndicator(minHeight: 2)
+                        : const SizedBox(height: 2),
                   ),
                 ),
 
-                const SizedBox(height: 20),
-
-                // ===== Logout Card (destructive) =====
-                Card(
-                  elevation: 0,
-                  clipBehavior: Clip.antiAlias,
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          l10n.common_security,
-                          style: Theme.of(context).textTheme.titleMedium,
+                SliverPadding(
+                  padding: EdgeInsets.fromLTRB(16, 16, 16, bottomPad),
+                  sliver: SliverList(
+                    delegate: SliverChildListDelegate(
+                      [
+                        // ===== Language =====
+                        _SectionTitle(
+                          icon: Icons.language_rounded,
+                          title: l10n.common_language,
                         ),
                         const SizedBox(height: 10),
-                        DecoratedBox(
-                          decoration: BoxDecoration(
-                            color: cs.errorContainer.withOpacity(.18),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: cs.error.withOpacity(.35),
+                        _LanguageTile(l10n: l10n),
+                        const SizedBox(height: 16),
+
+                        // ===== Profile Details =====
+                        _SectionTitle(
+                          icon: Icons.badge_rounded,
+                          title: l10n.profile_details,
+                        ),
+                        const SizedBox(height: 10),
+                        Card(
+                          elevation: 0,
+                          clipBehavior: Clip.antiAlias,
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+                            child: ProfileForm(
+                              me: me,
+                              busy: state.savingProfile,
+                              onSubmit: (p) => context
+                                  .read<ProfileBloc>()
+                                  .add(SubmitProfile(p)),
                             ),
                           ),
+                        ),
+                        const SizedBox(height: 16),
+
+                        // ===== Notifications =====
+                        _SectionTitle(
+                          icon: Icons.notifications_active_rounded,
+                          title: l10n.profile_update_notifications,
+                        ),
+                        const SizedBox(height: 10),
+                        NotificationsTile(
+                          notifyItems: me.notifyItemUpdates,
+                          notifyFeedback: me.notifyUserFeedback,
+                          busy: state.savingNotifications,
+                          onSave: (items, fb) => context
+                              .read<ProfileBloc>()
+                              .add(SubmitNotifications(items, fb)),
+                        ),
+                        const SizedBox(height: 16),
+
+                        // ===== Security =====
+                        _SectionTitle(
+                          icon: Icons.lock_rounded,
+                          title: l10n.common_security,
+                        ),
+                        const SizedBox(height: 10),
+
+                        // ✅ No long trailing button (prevents cut). Clean icon action.
+                        Card(
+                          elevation: 0,
+                          clipBehavior: Clip.antiAlias,
                           child: ListTile(
                             contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 2),
-                            leading: CircleAvatar(
-                              radius: 18,
-                              backgroundColor: cs.error.withOpacity(.12),
-                              child:
-                                  Icon(Icons.logout_rounded, color: cs.error),
+                              horizontal: 16,
+                              vertical: 6,
                             ),
-                            title: Text(
-                              l10n.common_sign_out,
-                              style: TextStyle(
-                                color: cs.error,
-                                fontWeight: FontWeight.w700,
-                              ),
+                            leading: const Icon(Icons.password_rounded),
+                            title: Text(l10n.profile_change_password),
+                            subtitle: Text(l10n.profile_password_hint),
+                            trailing: IconButton(
+                              tooltip: l10n.profile_change_password,
+                              onPressed: state.savingPassword
+                                  ? null
+                                  : () async {
+                                      final profileBloc =
+                                          context.read<ProfileBloc>();
+                                      await showModalBottomSheet<bool>(
+                                        context: context,
+                                        isScrollControlled: true,
+                                        useSafeArea: true,
+                                        backgroundColor: Colors.transparent,
+                                        builder: (_) => BlocProvider.value(
+                                          value: profileBloc,
+                                          child: ChangePasswordSheet(
+                                            busy: state.savingPassword,
+                                            onSubmit: (c, n) async {
+                                              profileBloc.add(
+                                                SubmitPassword(c, n),
+                                              );
+                                            },
+                                          ),
+                                        ),
+                                      );
+                                    },
+                              icon: const Icon(Icons.edit_rounded),
                             ),
-                            subtitle: Text(
-                              l10n.common_sign_out_hint,
-                              style: TextStyle(color: cs.onSurfaceVariant),
-                            ),
-                            trailing: TextButton.icon(
-                              onPressed: () => _confirmLogout(context, l10n),
-                              icon: const Icon(Icons.logout_rounded),
-                              label: Text(l10n.common_sign_out),
-                              style: TextButton.styleFrom(
-                                foregroundColor: cs.error,
-                              ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+
+                        // ===== Logout =====
+                        Card(
+                          elevation: 0,
+                          clipBehavior: Clip.antiAlias,
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  l10n.common_sign_out,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleSmall
+                                      ?.copyWith(fontWeight: FontWeight.w800),
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  l10n.common_sign_out_hint,
+                                  style: TextStyle(color: cs.onSurfaceVariant),
+                                ),
+                                const SizedBox(height: 12),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: FilledButton.icon(
+                                    style: FilledButton.styleFrom(
+                                      backgroundColor: cs.error,
+                                      foregroundColor: cs.onError,
+                                    ),
+                                    onPressed: () =>
+                                        _confirmLogout(context, l10n),
+                                    icon: const Icon(Icons.logout_rounded),
+                                    label: Text(l10n.common_sign_out),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
@@ -250,7 +276,6 @@ class _ProfileView extends StatelessWidget {
                     ),
                   ),
                 ),
-                // ===== end logout card =====
               ],
             ),
           ),
@@ -260,9 +285,7 @@ class _ProfileView extends StatelessWidget {
   }
 
   Future<void> _confirmLogout(
-    BuildContext context,
-    AppLocalizations l10n,
-  ) async {
+      BuildContext context, AppLocalizations l10n) async {
     final cs = Theme.of(context).colorScheme;
 
     final ok = await showModalBottomSheet<bool>(
@@ -275,20 +298,129 @@ class _ProfileView extends StatelessWidget {
 
     if (ok != true) return;
 
-    // 1) clear token from prefs
     final store = JwtLocalDataSource();
     await store.clear();
 
-    // 2) remove Authorization header from Dio
     final dio = DioClient.ensure();
     dio.options.headers.remove('Authorization');
 
     if (!context.mounted) return;
 
     AppToast.info(context, l10n.common_signed_out);
-
-    // 3) route to /login
     context.go('/login');
+  }
+}
+
+class _ProfileHero extends StatelessWidget {
+  final AdminProfile me;
+  const _ProfileHero({required this.me});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
+
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [cs.primary, cs.secondary],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 56, 16, 14),
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: 30,
+                backgroundColor: cs.onPrimary.withOpacity(.14),
+                child: Text(
+                  _initials(me.firstName, me.lastName),
+                  style: TextStyle(
+                    color: cs.onPrimary,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 18,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: DefaultTextStyle(
+                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                        color: cs.onPrimary,
+                      ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${me.firstName} ${me.lastName}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        softWrap: false,
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  color: cs.onPrimary,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '@${me.username} • ${l10n.nav_super_admin}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        softWrap: false,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        me.email,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        softWrap: false,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  static String _initials(String f, String l) =>
+      '${(f.isNotEmpty ? f[0] : 'A')}${(l.isNotEmpty ? l[0] : 'U')}'
+          .toUpperCase();
+}
+
+class _SectionTitle extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  const _SectionTitle({required this.icon, required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Row(
+      children: [
+        Icon(icon, size: 18, color: cs.primary),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
+          ),
+        ),
+      ],
+    );
   }
 }
 
@@ -302,47 +434,73 @@ class _LanguageTile extends StatelessWidget {
       elevation: 0,
       clipBehavior: Clip.antiAlias,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
         child: Row(
           children: [
             const Icon(Icons.language_rounded),
             const SizedBox(width: 12),
-            Expanded(child: Text(l10n.common_language)),
-            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                l10n.common_language,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const SizedBox(width: 10),
             BlocBuilder<LocaleCubit, Locale?>(
               builder: (context, locale) {
                 final value = locale?.languageCode ?? 'system';
 
-                return DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
-                    value: value,
-                    items: [
-                      DropdownMenuItem(
-                        value: 'system',
-                        child: Text(l10n.common_system_language),
-                      ),
-                      DropdownMenuItem(
-                        value: 'en',
-                        child: Text(l10n.lang_english),
-                      ),
-                      DropdownMenuItem(
-                        value: 'ar',
-                        child: Text(l10n.lang_arabic),
-                      ),
-                      DropdownMenuItem(
-                        value: 'fr',
-                        child: Text(l10n.lang_french),
-                      ),
-                    ],
-                    onChanged: (v) {
-                      if (v == null) return;
-                      final cubit = context.read<LocaleCubit>();
-                      if (v == 'system') {
-                        cubit.setLocale(null);
-                      } else {
-                        cubit.setLocale(Locale(v));
-                      }
-                    },
+                return ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 170),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      isExpanded: true,
+                      value: value,
+                      items: [
+                        DropdownMenuItem(
+                          value: 'system',
+                          child: Text(
+                            l10n.common_system_language,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        DropdownMenuItem(
+                          value: 'en',
+                          child: Text(
+                            l10n.lang_english,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        DropdownMenuItem(
+                          value: 'ar',
+                          child: Text(
+                            l10n.lang_arabic,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        DropdownMenuItem(
+                          value: 'fr',
+                          child: Text(
+                            l10n.lang_french,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                      onChanged: (v) {
+                        if (v == null) return;
+                        final cubit = context.read<LocaleCubit>();
+                        if (v == 'system') {
+                          cubit.setLocale(null);
+                        } else {
+                          cubit.setLocale(Locale(v));
+                        }
+                      },
+                    ),
                   ),
                 );
               },
