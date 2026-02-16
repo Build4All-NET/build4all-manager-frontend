@@ -1285,6 +1285,24 @@ abstract class AppLocalizations {
   /// **'invalid privacy url'**
   String get publish_err_invalid_privacy_url;
 
+  /// No description provided for @dash_super_admin.
+  ///
+  /// In en, this message translates to:
+  /// **'Super Admin'**
+  String get dash_super_admin;
+
+  /// No description provided for @dash_hero_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage projects, requests, and your profile.'**
+  String get dash_hero_subtitle;
+
+  /// No description provided for @dash_hero_badge.
+  ///
+  /// In en, this message translates to:
+  /// **'Dashboard Overview'**
+  String get dash_hero_badge;
+
   /// No description provided for @timeago_days.
   ///
   /// In en, this message translates to:

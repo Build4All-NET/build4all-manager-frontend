@@ -277,7 +277,9 @@
   "owner_profile_notify_feedback": "Notifier les avis utilisateurs",
   "owner_profile_not_set": "Non défini",
   "owner_profile_tips": "Gardez vos informations de profil à jour pour personnaliser votre expérience.",
-
+  "dash_super_admin": "Super administrateur",
+  "dash_hero_subtitle": "Gérez les projets, les demandes et votre profil.",
+  "dash_hero_badge": "Aperçu du tableau de bord",
   "yes": "Oui",
   "no": "Non",
   "refresh": "Rafraîchir",

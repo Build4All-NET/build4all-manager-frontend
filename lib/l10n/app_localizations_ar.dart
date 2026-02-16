@@ -605,6 +605,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get publish_err_invalid_privacy_url => 'invalid privacy url';
 
   @override
+  String get dash_super_admin => 'سوبر أدمن';
+
+  @override
+  String get dash_hero_subtitle => 'إدارة المشاريع والطلبات والملف الشخصي.';
+
+  @override
+  String get dash_hero_badge => 'نظرة عامة';
+
+  @override
   String timeago_days(int count) {
     return 'منذ $count يوم';
   }

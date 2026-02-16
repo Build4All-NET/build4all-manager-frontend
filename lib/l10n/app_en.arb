@@ -285,6 +285,9 @@
   "owner_home_requestApp": "Request My App",
   "owner_request_requested": "Requested",
   "publish_err_invalid_privacy_url":"invalid privacy url",
+   "dash_super_admin": "Super Admin",
+  "dash_hero_subtitle": "Manage projects, requests, and your profile.",
+  "dash_hero_badge": "Dashboard Overview",
   "timeago_days": "{count}d ago",
   "@timeago_days": {
     "placeholders": {

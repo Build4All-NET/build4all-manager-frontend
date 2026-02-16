@@ -266,6 +266,9 @@
   "status_rejected": "مرفوض",
   "owner_request_requested": "تم الطلب",
   "timeago_days": "منذ {count} يوم",
+    "dash_super_admin": "سوبر أدمن",
+  "dash_hero_subtitle": "إدارة المشاريع والطلبات والملف الشخصي.",
+  "dash_hero_badge": "نظرة عامة",
   "@timeago_days": {
     "placeholders": {
       "count": {
