@@ -1,14 +1,17 @@
-import 'package:build4all_manager/features/auth/presentation/bloc/register/OwnerRegisterBloc.dart';
-import 'package:build4all_manager/features/auth/presentation/bloc/register/owner_register_event.dart';
-import 'package:build4all_manager/features/auth/presentation/bloc/register/owner_register_state.dart';
+
 import 'package:build4all_manager/shared/widgets/app_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:intl_phone_field/intl_phone_field.dart';
+
 import '../../../../../l10n/app_localizations.dart';
 import '../../../../../shared/widgets/app_text_field.dart';
 import '../../../../../shared/widgets/app_button.dart';
+import '../../bloc/register/OwnerRegisterBloc.dart';
+import '../../bloc/register/owner_register_event.dart';
+import '../../bloc/register/owner_register_state.dart';
 
 class OwnerRegisterProfileScreen extends StatefulWidget {
   final String registrationToken;
@@ -23,38 +26,37 @@ class OwnerRegisterProfileScreen extends StatefulWidget {
       _OwnerRegisterProfileScreenState();
 }
 
-class _OwnerRegisterProfileScreenState
-    extends State<OwnerRegisterProfileScreen> {
+class _OwnerRegisterProfileScreenState extends State<OwnerRegisterProfileScreen> {
   final _form = GlobalKey<FormState>();
   final _username = TextEditingController();
   final _first = TextEditingController();
   final _last = TextEditingController();
-  final _phone = TextEditingController();
+
+  String? _fullPhone; // ✅ +96170123456
 
   @override
   void dispose() {
     _username.dispose();
     _first.dispose();
     _last.dispose();
-    _phone.dispose();
     super.dispose();
   }
 
   String? _required(String? v, String msg) =>
       (v == null || v.trim().isEmpty) ? msg : null;
 
-  String? _phoneValidator(String? v, AppLocalizations l10n) {
-    final s = (v ?? '').trim();
-    if (s.isEmpty) return l10n.errPhoneRequired;
-    final ok = RegExp(r'^\+?[0-9]{7,15}$').hasMatch(s);
-    if (!ok) return l10n.errPhoneInvalid;
-    return null;
-  }
-
   void _submit(AppLocalizations l10n) {
     final form = _form.currentState;
     if (form == null) return;
+
     if (!form.validate()) return;
+
+    // ✅ extra guard
+    final phone = (_fullPhone ?? '').trim();
+    if (phone.isEmpty) {
+      AppToast.info(context, l10n.errPhoneRequired);
+      return;
+    }
 
     FocusScope.of(context).unfocus();
 
@@ -64,15 +66,37 @@ class _OwnerRegisterProfileScreenState
             _username.text.trim(),
             _first.text.trim(),
             _last.text.trim(),
-            _phone.text.trim(),
+            phone, // ✅ send full phone (with country code)
           ),
         );
   }
 
   void _goToLogin() {
-    // ✅ go to login and clear register stack
-    // (change route to your real login route)
     context.go('/owner/login');
+  }
+
+  InputDecoration _phoneDecoration(BuildContext context, AppLocalizations l10n) {
+    final cs = Theme.of(context).colorScheme;
+
+    return InputDecoration(
+      labelText: l10n.lblPhone,
+      hintText: l10n.hintPhone,
+      prefixIcon: const Icon(Icons.phone_outlined),
+      filled: true,
+      fillColor: cs.surface,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: cs.outlineVariant.withOpacity(0.5)),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: cs.outlineVariant.withOpacity(0.5)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: cs.primary, width: 1.4),
+      ),
+    );
   }
 
   @override
@@ -89,10 +113,6 @@ class _OwnerRegisterProfileScreenState
 
         if (state.completed) {
           AppToast.success(context, l10n.msgOwnerRegistered);
-
-          // ✅ IMPORTANT: reset bloc state if needed (optional)
-          // context.read<OwnerRegisterBloc>().add(OwnerRegisterReset());
-
           _goToLogin();
         }
       },
@@ -114,8 +134,7 @@ class _OwnerRegisterProfileScreenState
                         label: l10n.lblUsername,
                         hint: l10n.hintUsername,
                         prefix: const Icon(Icons.alternate_email),
-                        validator: (v) =>
-                            _required(v, l10n.errUsernameRequired),
+                        validator: (v) => _required(v, l10n.errUsernameRequired),
                       ),
                       const SizedBox(height: 14),
                       AppTextField(
@@ -123,8 +142,7 @@ class _OwnerRegisterProfileScreenState
                         label: l10n.lblFirstName,
                         hint: l10n.hintFirstName,
                         prefix: const Icon(Icons.person_outline),
-                        validator: (v) =>
-                            _required(v, l10n.errFirstNameRequired),
+                        validator: (v) => _required(v, l10n.errFirstNameRequired),
                       ),
                       const SizedBox(height: 14),
                       AppTextField(
@@ -132,18 +150,29 @@ class _OwnerRegisterProfileScreenState
                         label: l10n.lblLastName,
                         hint: l10n.hintLastName,
                         prefix: const Icon(Icons.person_outline),
-                        validator: (v) =>
-                            _required(v, l10n.errLastNameRequired),
+                        validator: (v) => _required(v, l10n.errLastNameRequired),
                       ),
                       const SizedBox(height: 14),
-                      AppTextField(
-                        controller: _phone,
-                        label: l10n.lblPhone,
-                        hint: l10n.hintPhone,
-                        keyboardType: TextInputType.phone,
-                        prefix: const Icon(Icons.phone_outlined),
-                        validator: (v) => _phoneValidator(v, l10n),
+
+                      // ✅ NEW: phone with country code
+                      IntlPhoneField(
+                        initialCountryCode: 'LB',
+                        decoration: _phoneDecoration(context, l10n),
+                        onChanged: (phone) {
+                          // phone.completeNumber => +96170123456
+                          _fullPhone = phone.completeNumber;
+                        },
+                        validator: (phone) {
+                          if (phone == null || phone.number.trim().isEmpty) {
+                            return l10n.errPhoneRequired;
+                          }
+                          if (phone.number.trim().length < 6) {
+                            return l10n.errPhoneInvalid;
+                          }
+                          return null;
+                        },
                       ),
+
                       const SizedBox(height: 20),
                       AppButton(
                         label: l10n.btnCreateAccount,
@@ -153,8 +182,6 @@ class _OwnerRegisterProfileScreenState
                         onPressed: state.loading ? null : () => _submit(l10n),
                       ),
                       const SizedBox(height: 10),
-
-                      // ✅ nice UX: manual back to login button
                       TextButton(
                         onPressed: _goToLogin,
                         child: Text(l10n.alreadyHaveAccountLogin),

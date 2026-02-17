@@ -17,7 +17,6 @@ import '../bloc/owner_projects_event.dart';
 import '../bloc/owner_projects_state.dart';
 
 enum _PlatformReadyFilter { all, android, ios }
-
 enum _EnvironmentFilter { all, local, test, production }
 
 class OwnerProjectsScreen extends StatefulWidget {
@@ -49,324 +48,147 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
   final Map<int, String> _androidErrOverride = {};
   final Map<int, String> _iosErrOverride = {};
 
+  // ✅ IMPORTANT: create repo + bloc ONCE (NOT inside build)
+  late final OwnerRepositoryImpl _repo;
+  late final OwnerProjectsBloc _bloc;
+  late final OwnerPublishApi _publishApi;
+
+  bool _cleanupScheduled = false;
+
   @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final repo = OwnerRepositoryImpl(OwnerApi(widget.dio));
+  void initState() {
+    super.initState();
+    _repo = OwnerRepositoryImpl(OwnerApi(widget.dio));
+    _publishApi = OwnerPublishApi(widget.dio);
 
-    String serverRootNoApi(Dio d) {
-      final base = d.options.baseUrl; // e.g. http://host:8080/api
-      return base.replaceFirst(RegExp(r'/api/?$'), '');
-    }
+    _bloc = OwnerProjectsBloc(getMyApps: GetMyAppsUc(_repo))
+      ..add(OwnerProjectsStarted(widget.ownerId));
+  }
 
-    Future<void> refresh(BuildContext ctx) async {
-      ctx.read<OwnerProjectsBloc>().add(OwnerProjectsStarted(widget.ownerId));
-      setState(() => _visibleCount = _pageSize);
-      await Future.delayed(const Duration(milliseconds: 250));
-    }
+  @override
+  void dispose() {
+    _bloc.close();
+    super.dispose();
+  }
 
-    Future<void> rebuildAndroid(BuildContext ctx, OwnerProject p) async {
-      final id = p.linkId;
+  // ---------------- Helpers ----------------
 
+  String _serverRootNoApi(Dio d) {
+    final base = d.options.baseUrl; // e.g. http://host:8080/api
+    return base.replaceFirst(RegExp(r'/api/?$'), '');
+  }
+
+  Future<void> _refresh() async {
+    _bloc.add(OwnerProjectsStarted(widget.ownerId));
+    if (mounted) setState(() => _visibleCount = _pageSize);
+    await Future.delayed(const Duration(milliseconds: 250));
+  }
+
+  Future<void> _rebuildAndroid(BuildContext ctx, OwnerProject p) async {
+    final id = p.linkId;
+
+    if (mounted) {
       setState(() {
         _androidBuildOverride[id] = 'QUEUED';
         _androidErrOverride.remove(id);
       });
-
-      try {
-        await repo.rebuildAndroid(linkId: id);
-
-        if (ctx.mounted) AppToast.success(ctx, 'Rebuild queued');
-
-        ctx
-            .read<OwnerProjectsBloc>()
-            .add(OwnerProjectsRefreshed(widget.ownerId));
-      } catch (e) {
-        if (mounted) {
-          setState(() {
-            _androidBuildOverride.remove(id);
-            _androidErrOverride.remove(id);
-          });
-        }
-        if (ctx.mounted) AppToast.error(ctx, 'Rebuild failed: $e');
-      }
     }
 
-    Future<void> rebuildIos(BuildContext ctx, OwnerProject p) async {
-      final id = p.linkId;
+    try {
+      await _repo.rebuildAndroid(linkId: id);
 
+      if (ctx.mounted) AppToast.success(ctx, 'Rebuild queued');
+      _bloc.add(OwnerProjectsRefreshed(widget.ownerId));
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _androidBuildOverride.remove(id);
+          _androidErrOverride.remove(id);
+        });
+      }
+      if (ctx.mounted) AppToast.error(ctx, 'Rebuild failed: $e');
+    }
+  }
+
+  Future<void> _rebuildIos(BuildContext ctx, OwnerProject p) async {
+    final id = p.linkId;
+
+    if (mounted) {
       setState(() {
         _iosBuildOverride[id] = 'QUEUED';
         _iosErrOverride.remove(id);
       });
+    }
 
-      try {
-        await repo.rebuildIos(linkId: id);
+    try {
+      await _repo.rebuildIos(linkId: id);
 
-        if (ctx.mounted) AppToast.success(ctx, 'Rebuild queued');
+      if (ctx.mounted) AppToast.success(ctx, 'Rebuild queued');
+      _bloc.add(OwnerProjectsRefreshed(widget.ownerId));
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _iosBuildOverride.remove(id);
+          _iosErrOverride.remove(id);
+        });
+      }
+      if (ctx.mounted) AppToast.error(ctx, 'Rebuild failed: $e');
+    }
+  }
 
-        ctx
-            .read<OwnerProjectsBloc>()
-            .add(OwnerProjectsRefreshed(widget.ownerId));
-      } catch (e) {
-        if (mounted) {
-          setState(() {
-            _iosBuildOverride.remove(id);
-            _iosErrOverride.remove(id);
-          });
+  bool _androidReady(OwnerProject p) {
+    final apk = (p.apkUrl ?? '').trim();
+    final aab = (p.bundleUrl ?? '').trim();
+    return apk.isNotEmpty || aab.isNotEmpty;
+  }
+
+  bool _iosReady(OwnerProject p) {
+    final ipa = (p.ipaUrl ?? '').trim();
+    return ipa.isNotEmpty;
+  }
+
+  bool _matchPlatform(OwnerProject p) {
+    switch (_platform) {
+      case _PlatformReadyFilter.all:
+        return true;
+      case _PlatformReadyFilter.android:
+        return _androidReady(p);
+      case _PlatformReadyFilter.ios:
+        return _iosReady(p);
+    }
+  }
+
+  bool _matchEnv(OwnerProject p) {
+    if (_env == _EnvironmentFilter.all) return true;
+
+    final s = p.status.toLowerCase();
+    if (_env == _EnvironmentFilter.local) return s.contains('local');
+    if (_env == _EnvironmentFilter.test) return s.contains('test');
+    if (_env == _EnvironmentFilter.production) {
+      return s.contains('prod') || s.contains('production');
+    }
+    return true;
+  }
+
+  void _scheduleOverrideCleanup(List<int> removeAndroid, List<int> removeIos) {
+    if (_cleanupScheduled) return;
+    _cleanupScheduled = true;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _cleanupScheduled = false;
+      if (!mounted) return;
+
+      setState(() {
+        for (final id in removeAndroid) {
+          _androidBuildOverride.remove(id);
+          _androidErrOverride.remove(id);
         }
-        if (ctx.mounted) AppToast.error(ctx, 'Rebuild failed: $e');
-      }
-    }
-
-    bool androidReady(OwnerProject p) {
-      final apk = (p.apkUrl ?? '').trim();
-      final aab = (p.bundleUrl ?? '').trim();
-      return apk.isNotEmpty || aab.isNotEmpty;
-    }
-
-    bool iosReady(OwnerProject p) {
-      final ipa = (p.ipaUrl ?? '').trim();
-      return ipa.isNotEmpty;
-    }
-
-    bool matchPlatform(OwnerProject p) {
-      switch (_platform) {
-        case _PlatformReadyFilter.all:
-          return true;
-        case _PlatformReadyFilter.android:
-          return androidReady(p);
-        case _PlatformReadyFilter.ios:
-          return iosReady(p);
-      }
-    }
-
-    bool matchEnv(OwnerProject p) {
-      if (_env == _EnvironmentFilter.all) return true;
-
-      final s = p.status.toLowerCase();
-      if (_env == _EnvironmentFilter.local) return s.contains('local');
-      if (_env == _EnvironmentFilter.test) return s.contains('test');
-      if (_env == _EnvironmentFilter.production) {
-        return s.contains('prod') || s.contains('production');
-      }
-      return true;
-    }
-
-    return BlocProvider(
-      create: (_) => OwnerProjectsBloc(getMyApps: GetMyAppsUc(repo))
-        ..add(OwnerProjectsStarted(widget.ownerId)),
-      child: Scaffold(
-        backgroundColor: cs.surface,
-        body: SafeArea(
-          child: LayoutBuilder(
-            builder: (context, viewport) {
-              final double maxContentWidth =
-                  _maxContentWidth(viewport.maxWidth);
-              final double hPad = _contentHPad(viewport.maxWidth);
-
-              return Align(
-                alignment: Alignment.topCenter,
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: maxContentWidth),
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: hPad),
-                    child: BlocConsumer<OwnerProjectsBloc, OwnerProjectsState>(
-                      listener: (context, state) {
-                        if (_androidBuildOverride.isEmpty &&
-                            _iosBuildOverride.isEmpty) return;
-
-                        final removeAndroid = <int>[];
-                        final removeIos = <int>[];
-
-                        for (final p in state.filtered) {
-                          final id = p.linkId;
-
-                          final a = (p.androidBuildStatus ?? '').trim();
-                          final i = (p.iosBuildStatus ?? '').trim();
-
-                          if (_androidBuildOverride.containsKey(id) &&
-                              a.isNotEmpty) {
-                            removeAndroid.add(id);
-                          }
-                          if (_iosBuildOverride.containsKey(id) &&
-                              i.isNotEmpty) {
-                            removeIos.add(id);
-                          }
-                        }
-
-                        if (removeAndroid.isEmpty && removeIos.isEmpty) return;
-
-                        setState(() {
-                          for (final id in removeAndroid) {
-                            _androidBuildOverride.remove(id);
-                            _androidErrOverride.remove(id);
-                          }
-                          for (final id in removeIos) {
-                            _iosBuildOverride.remove(id);
-                            _iosErrOverride.remove(id);
-                          }
-                        });
-                      },
-                      builder: (context, state) {
-                        final l10n = AppLocalizations.of(context)!;
-                        final double bottomPad = 12;
-
-                        final filtered = state.filtered
-                            .where(matchPlatform)
-                            .where(matchEnv)
-                            .toList();
-
-                        final int total = filtered.length;
-                        final int visible =
-                            total == 0 ? 0 : _visibleCount.clamp(0, total);
-
-                        return RefreshIndicator(
-                          onRefresh: () => refresh(context),
-                          child: CustomScrollView(
-                            physics: const BouncingScrollPhysics(
-                              parent: AlwaysScrollableScrollPhysics(),
-                            ),
-                            slivers: [
-                              const SliverToBoxAdapter(child: _Header()),
-                              const SliverToBoxAdapter(
-                                  child: SizedBox(height: 10)),
-                              SliverToBoxAdapter(
-                                child: _SearchField(
-                                  l10n: l10n,
-                                  showFilters: _showFilters,
-                                  onToggleFilters: () {
-                                    setState(
-                                        () => _showFilters = !_showFilters);
-                                  },
-                                ),
-                              ),
-                              SliverToBoxAdapter(
-                                child: AnimatedSize(
-                                  duration: const Duration(milliseconds: 220),
-                                  curve: Curves.easeOutCubic,
-                                  alignment: Alignment.topCenter,
-                                  child: _showFilters
-                                      ? Padding(
-                                          padding:
-                                              const EdgeInsets.only(top: 10),
-                                          child: _FiltersBar(
-                                            platform: _platform,
-                                            env: _env,
-                                            onPlatform: (v) {
-                                              setState(() {
-                                                _platform = v;
-                                                _visibleCount = _pageSize;
-                                              });
-                                            },
-                                            onEnv: (v) {
-                                              setState(() {
-                                                _env = v;
-                                                _visibleCount = _pageSize;
-                                              });
-                                            },
-                                          ),
-                                        )
-                                      : const SizedBox(height: 0),
-                                ),
-                              ),
-                              const SliverToBoxAdapter(
-                                  child: SizedBox(height: 10)),
-                              if (state.loading) ...[
-                                SliverPadding(
-                                  padding: EdgeInsets.only(bottom: bottomPad),
-                                  sliver: const _ListSkeleton(count: 6),
-                                ),
-                              ] else if (state.error != null) ...[
-                                SliverFillRemaining(
-                                  hasScrollBody: false,
-                                  child: _CenteredMessage(
-                                    icon: Icons.error_outline_rounded,
-                                    label: state.error!,
-                                    color: Theme.of(context).colorScheme.error,
-                                  ),
-                                ),
-                              ] else if (total == 0) ...[
-                                SliverFillRemaining(
-                                  hasScrollBody: false,
-                                  child: _EmptyProjects(l10n: l10n),
-                                ),
-                              ] else ...[
-                                SliverPadding(
-                                  padding: const EdgeInsets.only(bottom: 8),
-                                  sliver: SliverList(
-                                    delegate: SliverChildBuilderDelegate(
-                                      (context, index) {
-                                        final item = filtered[index];
-
-                                        return Padding(
-                                          padding:
-                                              const EdgeInsets.only(bottom: 6),
-                                          child: ProjectTile(
-                                            project: item,
-                                            serverRootNoApi:
-                                                serverRootNoApi(widget.dio),
-                                            publishApi:
-                                                OwnerPublishApi(widget.dio),
-                                            onRebuildAndroid: (ctx, p) =>
-                                                rebuildAndroid(ctx, p),
-                                            onRebuildIos: (ctx, p) =>
-                                                rebuildIos(ctx, p),
-                                            androidBuildStatusOverride:
-                                                _androidBuildOverride[
-                                                    item.linkId],
-                                            iosBuildStatusOverride:
-                                                _iosBuildOverride[item.linkId],
-                                            androidBuildErrorOverride:
-                                                _androidErrOverride[
-                                                    item.linkId],
-                                            iosBuildErrorOverride:
-                                                _iosErrOverride[item.linkId],
-                                          ),
-                                        );
-                                      },
-                                      childCount: visible,
-                                    ),
-                                  ),
-                                ),
-                                if (visible < total)
-                                  SliverToBoxAdapter(
-                                    child: Padding(
-                                      padding: EdgeInsets.only(
-                                          bottom: bottomPad, top: 2),
-                                      child: Center(
-                                        child: OutlinedButton.icon(
-                                          onPressed: () {
-                                            setState(() {
-                                              _visibleCount =
-                                                  (_visibleCount + _pageSize)
-                                                      .clamp(0, total);
-                                            });
-                                          },
-                                          icon: const Icon(
-                                              Icons.expand_more_rounded),
-                                          label: const Text('Load more'),
-                                        ),
-                                      ),
-                                    ),
-                                  )
-                                else
-                                  SliverToBoxAdapter(
-                                      child: SizedBox(height: bottomPad)),
-                              ],
-                            ],
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-      ),
-    );
+        for (final id in removeIos) {
+          _iosBuildOverride.remove(id);
+          _iosErrOverride.remove(id);
+        }
+      });
+    });
   }
 
   double _maxContentWidth(double viewportWidth) {
@@ -382,7 +204,212 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
     if (viewportWidth < 600) return 12;
     return 16;
   }
+
+  // ---------------- UI ----------------
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    return BlocProvider.value(
+      value: _bloc,
+      child: BlocListener<OwnerProjectsBloc, OwnerProjectsState>(
+        // ✅ Cleanup overrides AFTER frame (safe)
+        listener: (context, state) {
+          if (_androidBuildOverride.isEmpty && _iosBuildOverride.isEmpty) return;
+
+          final removeAndroid = <int>[];
+          final removeIos = <int>[];
+
+          for (final p in state.filtered) {
+            final id = p.linkId;
+
+            final a = (p.androidBuildStatus ?? '').trim();
+            final i = (p.iosBuildStatus ?? '').trim();
+
+            if (_androidBuildOverride.containsKey(id) && a.isNotEmpty) {
+              removeAndroid.add(id);
+            }
+            if (_iosBuildOverride.containsKey(id) && i.isNotEmpty) {
+              removeIos.add(id);
+            }
+          }
+
+          if (removeAndroid.isEmpty && removeIos.isEmpty) return;
+          _scheduleOverrideCleanup(removeAndroid, removeIos);
+        },
+        child: Scaffold(
+          backgroundColor: cs.surface,
+          body: SafeArea(
+            child: LayoutBuilder(
+              builder: (context, viewport) {
+                final double maxContentWidth =
+                    _maxContentWidth(viewport.maxWidth);
+                final double hPad = _contentHPad(viewport.maxWidth);
+
+                return Align(
+                  alignment: Alignment.topCenter,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: maxContentWidth),
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: hPad),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const _Header(),
+                          const SizedBox(height: 10),
+
+                          // Search
+                          BlocBuilder<OwnerProjectsBloc, OwnerProjectsState>(
+                            builder: (context, state) {
+                              final l10n = AppLocalizations.of(context)!;
+                              return _SearchField(
+                                l10n: l10n,
+                                showFilters: _showFilters,
+                                onToggleFilters: () {
+                                  setState(() => _showFilters = !_showFilters);
+                                },
+                              );
+                            },
+                          ),
+
+                          // Filters (NO AnimatedSize = NO semantics drama)
+                          if (_showFilters) ...[
+                            const SizedBox(height: 10),
+                            _FiltersBar(
+                              platform: _platform,
+                              env: _env,
+                              onPlatform: (v) {
+                                setState(() {
+                                  _platform = v;
+                                  _visibleCount = _pageSize;
+                                });
+                              },
+                              onEnv: (v) {
+                                setState(() {
+                                  _env = v;
+                                  _visibleCount = _pageSize;
+                                });
+                              },
+                            ),
+                          ],
+                          const SizedBox(height: 10),
+
+                          // Content
+                          Expanded(
+                            child: BlocBuilder<OwnerProjectsBloc, OwnerProjectsState>(
+                              builder: (context, state) {
+                                final l10n = AppLocalizations.of(context)!;
+
+                                final filtered = state.filtered
+                                    .where(_matchPlatform)
+                                    .where(_matchEnv)
+                                    .toList();
+
+                                final int total = filtered.length;
+                                final int visible =
+                                    total == 0 ? 0 : _visibleCount.clamp(0, total);
+
+                                // ✅ Always scrollable so RefreshIndicator works even on empty/error
+                                return RefreshIndicator(
+                                  onRefresh: _refresh,
+                                  child: () {
+                                    if (state.loading) {
+                                      return _ListSkeleton(count: 6);
+                                    }
+
+                                    if (state.error != null) {
+                                      return ListView(
+                                        physics: const AlwaysScrollableScrollPhysics(),
+                                        children: [
+                                          const SizedBox(height: 80),
+                                          _CenteredMessage(
+                                            icon: Icons.error_outline_rounded,
+                                            label: state.error!,
+                                            color: Theme.of(context).colorScheme.error,
+                                          ),
+                                        ],
+                                      );
+                                    }
+
+                                    if (total == 0) {
+                                      return ListView(
+                                        physics: const AlwaysScrollableScrollPhysics(),
+                                        children: [
+                                          const SizedBox(height: 60),
+                                          _EmptyProjects(l10n: l10n),
+                                        ],
+                                      );
+                                    }
+
+                                    // ✅ normal ListView (stable)
+                                    return ListView.separated(
+                                      physics: const AlwaysScrollableScrollPhysics(),
+                                      padding: const EdgeInsets.only(bottom: 12),
+                                      itemCount: visible + 1, // + footer
+                                      separatorBuilder: (_, __) => const SizedBox(height: 6),
+                                      itemBuilder: (context, index) {
+                                        // Footer
+                                        if (index == visible) {
+                                          if (visible < total) {
+                                            return Padding(
+                                              padding: const EdgeInsets.only(top: 2),
+                                              child: Center(
+                                                child: OutlinedButton.icon(
+                                                  onPressed: () {
+                                                    setState(() {
+                                                      _visibleCount =
+                                                          (_visibleCount + _pageSize).clamp(0, total);
+                                                    });
+                                                  },
+                                                  icon: const Icon(Icons.expand_more_rounded),
+                                                  label: const Text('Load more'),
+                                                ),
+                                              ),
+                                            );
+                                          }
+                                          return const SizedBox(height: 6);
+                                        }
+
+                                        final item = filtered[index];
+
+                                        return ProjectTile(
+                                          project: item,
+                                          serverRootNoApi: _serverRootNoApi(widget.dio),
+                                          publishApi: _publishApi,
+                                          onRebuildAndroid: (ctx, p) => _rebuildAndroid(ctx, p),
+                                          onRebuildIos: (ctx, p) => _rebuildIos(ctx, p),
+                                          androidBuildStatusOverride:
+                                              _androidBuildOverride[item.linkId],
+                                          iosBuildStatusOverride: _iosBuildOverride[item.linkId],
+                                          androidBuildErrorOverride:
+                                              _androidErrOverride[item.linkId],
+                                          iosBuildErrorOverride: _iosErrOverride[item.linkId],
+                                        );
+                                      },
+                                    );
+                                  }(),
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
+
+// ─────────────────────────────────────────────
+// UI widgets (mostly same as yours)
+// ─────────────────────────────────────────────
 
 class _Header extends StatelessWidget {
   const _Header();
@@ -641,8 +668,7 @@ class _SearchField extends StatelessWidget {
           hintText: l10n.owner_projects_searchHint,
           filled: true,
           fillColor: cs.surface,
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
             borderSide: BorderSide(color: cs.outlineVariant),
@@ -653,8 +679,7 @@ class _SearchField extends StatelessWidget {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
-            borderSide:
-                BorderSide(color: cs.primary.withOpacity(.85), width: 1.3),
+            borderSide: BorderSide(color: cs.primary.withOpacity(.85), width: 1.3),
           ),
           suffixIcon: IconButton(
             onPressed: onToggleFilters,
@@ -771,19 +796,19 @@ class _ListSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
 
-    return SliverList(
-      delegate: SliverChildBuilderDelegate(
-        (context, index) => Padding(
-          padding: const EdgeInsets.only(bottom: 6),
-          child: Container(
-            height: 154,
-            decoration: BoxDecoration(
-              color: cs.surfaceContainerHighest.withOpacity(.5),
-              borderRadius: BorderRadius.circular(14),
-            ),
+    return ListView.builder(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.only(bottom: 12),
+      itemCount: count,
+      itemBuilder: (context, index) => Padding(
+        padding: const EdgeInsets.only(bottom: 6),
+        child: Container(
+          height: 154,
+          decoration: BoxDecoration(
+            color: cs.surfaceContainerHighest.withOpacity(.5),
+            borderRadius: BorderRadius.circular(14),
           ),
         ),
-        childCount: count,
       ),
     );
   }
