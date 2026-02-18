@@ -78,7 +78,7 @@ jobs:
           set -euo pipefail
           flutter --version
           flutter pub get
-          
+
       - name: Setup iOS signing certificate (P12 -> keychain)
         shell: bash
         run: |
@@ -105,32 +105,86 @@ jobs:
           CNT=$(security find-identity -v -p codesigning | grep -c "Apple Distribution" || true)
           [ "$CNT" -ge 1 ] || { echo "❌ Apple Distribution identity not found"; exit 1; }
 
-      - uses: ruby/setup-ruby@v1
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
         with:
           ruby-version: "3.2"
-          
-      - name: Force iOS minimum deployment target (Pods)
+
+      - name: Create CI wrappers (fastlane/pod/ruby)
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          cat > ci_fastlane <<'BASH'
+          #!/usr/bin/env bash
+          set -euo pipefail
+          if [ -f Gemfile ]; then
+            bundle exec fastlane "$@"
+          else
+            fastlane "$@"
+          fi
+          BASH
+          chmod +x ci_fastlane
+
+          cat > ci_pod <<'BASH'
+          #!/usr/bin/env bash
+          set -euo pipefail
+          if [ -f Gemfile ]; then
+            bundle exec pod "$@"
+          else
+            pod "$@"
+          fi
+          BASH
+          chmod +x ci_pod
+
+          cat > ci_ruby <<'BASH'
+          #!/usr/bin/env bash
+          set -euo pipefail
+          if [ -f Gemfile ]; then
+            bundle exec ruby "$@"
+          else
+            ruby "$@"
+          fi
+          BASH
+          chmod +x ci_ruby
+
+      - name: Force iOS minimum deployment target (Podfile)
         shell: bash
         run: |
           set -euo pipefail
           PODFILE="ios/Podfile"
-      
-          if ! grep -q "platform :ios" "$PODFILE"; then
+
+          if ! grep -q "^platform :ios" "$PODFILE"; then
             sed -i '' '1s;^;platform :ios, '\''14.0'\''\n\n;' "$PODFILE"
           else
             sed -i '' "s/platform :ios, '[0-9.]\\+'/platform :ios, '14.0'/" "$PODFILE"
           fi
-      
-          echo "✅ Podfile iOS platform forced to 14.0"
 
-      - name: Install CocoaPods + fastlane
+          echo "✅ Podfile iOS platform forced to 14.0"
+          head -n 5 "$PODFILE"
+
+      - name: Install Ruby tooling (Bundler if available, else fallback gem install)
         shell: bash
         run: |
           set -euo pipefail
-          gem install cocoapods -N
-          gem install fastlane -N --force
-          pod --version
-          fastlane --version
+
+          if [ -f Gemfile ]; then
+            echo "✅ Gemfile found → using Bundler (recommended)"
+            gem install bundler -N || true
+            bundle --version
+            bundle config set path vendor/bundle
+            bundle install --jobs 4 --retry 3
+            ./ci_pod --version
+            ./ci_fastlane --version
+          else
+            echo "⚠️ No Gemfile → fallback to gem install (with --force to avoid console conflicts)"
+            gem install cocoapods -N
+            gem install fastlane -N --force
+            # xcodeproj is usually pulled by cocoapods, but keep this to guarantee patch step works:
+            gem install xcodeproj -N || true
+            pod --version
+            fastlane --version
+          fi
 
       - name: Create App Store Connect api_key.json (inline key for fastlane)
         shell: bash
@@ -142,7 +196,6 @@ jobs:
           [ -n "${ASC_ISSUER_ID:-}" ] || { echo "❌ ASC_ISSUER_ID empty"; exit 1; }
           [ -n "${ASC_KEY_P8_B64:-}" ] || { echo "❌ ASC_KEY_P8_B64 empty"; exit 1; }
 
-          # decode ASC_KEY_P8_B64 safely (strip whitespace, add padding)
           python3 - <<'PY'
           import os, re, base64, pathlib, json, binascii
 
@@ -153,14 +206,11 @@ jobs:
           p8_path = pathlib.Path(".private") / f"AuthKey_{key_id}.p8"
           p8_path.parent.mkdir(parents=True, exist_ok=True)
 
-          # Remove whitespace and surrounding quotes
           s = re.sub(r"\s+", "", raw).strip().strip('"').strip("'")
 
-          # If raw PEM was stored by mistake, write it directly
           if "BEGIN" in raw and "PRIVATE" in raw:
               p8_path.write_text(raw.strip(), encoding="utf-8")
           else:
-              # Fix padding
               s += "=" * ((-len(s)) % 4)
               try:
                   p8_path.write_bytes(base64.b64decode(s))
@@ -168,19 +218,16 @@ jobs:
                   raise SystemExit(f"❌ ASC_KEY_P8_B64 invalid base64: {e}")
 
           key_content = p8_path.read_text(encoding="utf-8")
-
           api_key_data = {
               "key_id": key_id,
               "issuer_id": issuer_id,
               "key": key_content,
               "in_house": False
           }
-
           pathlib.Path(".private/api_key.json").write_text(
               json.dumps(api_key_data, indent=2),
               encoding="utf-8"
           )
-
           print("✅ api_key.json created with inline key")
           PY
 
@@ -191,11 +238,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-
           PROFILE_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
           mkdir -p "$PROFILE_DIR"
 
-          fastlane run sigh \
+          ./ci_fastlane run sigh \
             app_identifier:"$BUNDLE_ID" \
             team_id:"${IOS_TEAM_ID}" \
             api_key_path:"$GITHUB_WORKSPACE/.private/api_key.json" \
@@ -272,12 +318,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          gem install xcodeproj -N
-
           PROFILE_NAME="$(tr -d '\r\n' < ci_profile_name.txt)"
 
           cat > patch_runner_signing.rb <<'RUBY'
           require "xcodeproj"
+
           bundle_id = ENV.fetch("BUNDLE_ID")
           profile   = ENV.fetch("PROFILE_NAME")
           team_id   = ENV.fetch("TEAM_ID")
@@ -301,31 +346,14 @@ jobs:
           project.save
           RUBY
 
-          BUNDLE_ID="${BUNDLE_ID}" PROFILE_NAME="${PROFILE_NAME}" TEAM_ID="${IOS_TEAM_ID}" ruby patch_runner_signing.rb
-          
-      - name: Force iOS minimum deployment target (Podfile)
-        shell: bash
-        run: |
-          set -euo pipefail
-          PODFILE="ios/Podfile"
-      
-          echo "🔧 Patching Podfile iOS platform → 14.0"
-      
-          if ! grep -q "^platform :ios" "$PODFILE"; then
-            sed -i '' '1s;^;platform :ios, '\''14.0'\''\n\n;' "$PODFILE"
-          else
-            sed -i '' "s/platform :ios, '[0-9.]\\+'/platform :ios, '14.0'/" "$PODFILE"
-          fi
-      
-          echo "📄 Podfile (top):"
-          head -n 5 "$PODFILE"
+          BUNDLE_ID="${BUNDLE_ID}" PROFILE_NAME="${PROFILE_NAME}" TEAM_ID="${IOS_TEAM_ID}" ./ci_ruby patch_runner_signing.rb
 
       - name: Install iOS Pods
         shell: bash
         run: |
           set -euo pipefail
           cd ios
-          pod install || { pod repo update; pod install; }
+          ../ci_pod install || { ../ci_pod repo update; ../ci_pod install; }
 
       - name: Force iOS deployment target for all Pods
         shell: bash
@@ -334,35 +362,35 @@ jobs:
           PODS_PROJECT="ios/Pods/Pods.xcodeproj/project.pbxproj"
           echo "🔧 Forcing IPHONEOS_DEPLOYMENT_TARGET = 14.0 for Pods"
           perl -pi -e 's/IPHONEOS_DEPLOYMENT_TARGET = [0-9.]+;/IPHONEOS_DEPLOYMENT_TARGET = 14.0;/g' "$PODS_PROJECT"
-          
+
       - name: Add required privacy purpose strings (Info.plist)
         shell: bash
         run: |
           set -euo pipefail
           INFO_PLIST="ios/Runner/Info.plist"
-      
+
           echo "🔧 Updating privacy keys in $INFO_PLIST"
-      
+
           /usr/libexec/PlistBuddy -c "Add :NSPhotoLibraryUsageDescription string 'This app needs access to your photo library to let you choose and upload images.'" "$INFO_PLIST" 2>/dev/null || \
           /usr/libexec/PlistBuddy -c "Set :NSPhotoLibraryUsageDescription 'This app needs access to your photo library to let you choose and upload images.'" "$INFO_PLIST"
-      
+
           /usr/libexec/PlistBuddy -c "Add :NSCameraUsageDescription string 'This app needs access to your camera to let you take and upload photos.'" "$INFO_PLIST" 2>/dev/null || \
           /usr/libexec/PlistBuddy -c "Set :NSCameraUsageDescription 'This app needs access to your camera to let you take and upload photos.'" "$INFO_PLIST"
-      
+
           /usr/libexec/PlistBuddy -c "Add :NSLocationWhenInUseUsageDescription string 'This app may use your location to show relevant content such as nearby services or map features.'" "$INFO_PLIST" 2>/dev/null || \
           /usr/libexec/PlistBuddy -c "Set :NSLocationWhenInUseUsageDescription 'This app may use your location to show relevant content such as nearby services or map features.'" "$INFO_PLIST"
-      
+
           /usr/libexec/PlistBuddy -c "Add :NSLocationAlwaysAndWhenInUseUsageDescription string 'This app may use your location to support features that rely on maps and location-based results.'" "$INFO_PLIST" 2>/dev/null || \
           /usr/libexec/PlistBuddy -c "Set :NSLocationAlwaysAndWhenInUseUsageDescription 'This app may use your location to support features that rely on maps and location-based results.'" "$INFO_PLIST"
-      
+
           echo "✅ Verifying:"
           /usr/libexec/PlistBuddy -c "Print :NSPhotoLibraryUsageDescription" "$INFO_PLIST"
           /usr/libexec/PlistBuddy -c "Print :NSCameraUsageDescription" "$INFO_PLIST"
+
       - name: Compute build name/number
         shell: bash
         run: |
           set -euo pipefail
-          # Build name = version before the +
           BUILD_NAME="$(python3 - <<'PY'
           import re
           t=open("pubspec.yaml","r",encoding="utf-8").read()
@@ -370,13 +398,12 @@ jobs:
           print(m.group(1) if m else "1.0.0")
           PY
           )"
-          # Build number must be an integer and strictly increasing
           BUILD_NUMBER="${GITHUB_RUN_NUMBER}"
 
           echo "BUILD_NAME=$BUILD_NAME" >> $GITHUB_ENV
           echo "BUILD_NUMBER=$BUILD_NUMBER" >> $GITHUB_ENV
           echo "✅ Using BUILD_NAME=$BUILD_NAME BUILD_NUMBER=$BUILD_NUMBER"
-           
+
       - name: Build iOS (flutter)
         shell: bash
         run: |
@@ -450,7 +477,6 @@ jobs:
           API_KEY_JSON="$GITHUB_WORKSPACE/.private/api_key.json"
           IPA_PATH="$(find "$GITHUB_WORKSPACE/build/ios/ipa" -type f -name "*.ipa" | head -n 1)"
 
-          # On push, github.event.inputs.* doesn't exist -> default to internal
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             DIST_EXT="${{ github.event.inputs.distribute_external }}"
             CHANGELOG="${{ github.event.inputs.changelog }}"
@@ -463,7 +489,7 @@ jobs:
 
           if [ "$DIST_EXT" = "true" ]; then
             echo "📤 Uploading to TestFlight (External)..."
-            fastlane pilot upload \
+            ./ci_fastlane pilot upload \
               --ipa "$IPA_PATH" \
               --api_key_path "$API_KEY_JSON" \
               --app_identifier "${BUNDLE_ID}" \
@@ -473,7 +499,7 @@ jobs:
               --changelog "$CHANGELOG"
           else
             echo "📤 Uploading to TestFlight (Internal)..."
-            fastlane pilot upload \
+            ./ci_fastlane pilot upload \
               --ipa "$IPA_PATH" \
               --api_key_path "$API_KEY_JSON" \
               --app_identifier "${BUNDLE_ID}" \
