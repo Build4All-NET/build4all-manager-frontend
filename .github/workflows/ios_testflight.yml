@@ -128,7 +128,7 @@ jobs:
         run: |
           set -euo pipefail
           gem install cocoapods -N
-          gem install fastlane -N
+          gem install fastlane -N --force
           pod --version
           fastlane --version
 
