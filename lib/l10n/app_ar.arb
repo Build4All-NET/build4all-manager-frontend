@@ -779,5 +779,31 @@
   "owner_proj_details_ecom_m8": "لوحة إدارة: طلبات، منتجات، عملاء",
   "owner_proj_details_ecom_m9": "تحليلات: الإيرادات، التحويل، متوسط قيمة الطلب",
   "owner_proj_details_ecom_m10": "استيراد/تصدير بيانات (CSV/Excel)",
-  "download_ios": "ثبّت TestFlight لفتح التطبيق"
+  "download_ios": "ثبّت TestFlight لفتح التطبيق",
+   "owner_profile_edit_title": "تعديل الملف الشخصي",
+  "owner_profile_edit_save": "حفظ",
+  "owner_profile_edit_saved": "تم تحديث الملف الشخصي",
+  "owner_profile_edit_invalid_email": "البريد الإلكتروني غير صالح",
+  "owner_profile_edit_need_current_password": "أدخل كلمة المرور الحالية لتغييرها",
+
+  "owner_profile_edit_basic": "المعلومات الأساسية",
+  "owner_profile_first_name": "الاسم",
+  "owner_profile_last_name": "الكنية",
+
+  "owner_profile_edit_preferences": "التفضيلات",
+  "owner_profile_edit_notify_items": "تحديثات العناصر",
+  "owner_profile_edit_notify_items_hint": "تلقي إشعارات عند تغيير العناصر",
+  "owner_profile_edit_notify_feedback": "آراء المستخدمين",
+  "owner_profile_edit_notify_feedback_hint": "تلقي إشعارات حول التقييمات/الآراء",
+  "owner_profile_edit_ai": "مساعد الذكاء الاصطناعي",
+  "owner_profile_edit_ai_hint": "تفعيل ميزات الذكاء الاصطناعي لهذا الحساب",
+
+  "owner_profile_edit_security": "الأمان",
+  "owner_profile_edit_current_password": "كلمة المرور الحالية",
+  "owner_profile_edit_new_password": "كلمة المرور الجديدة",
+  "owner_profile_edit_password_hint": "اتركه فارغاً للاحتفاظ بكلمة المرور.",
+    "owner_profile_edit_username_used": "اسم المستخدم مستخدم بالفعل",
+  "owner_profile_edit_email_used": "البريد الإلكتروني مستخدم بالفعل",
+  "owner_profile_edit_wrong_current_password": "كلمة المرور الحالية غير صحيحة",
+  "common_clear": "مسح"
 }

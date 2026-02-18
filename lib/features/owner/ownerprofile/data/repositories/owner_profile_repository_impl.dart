@@ -28,4 +28,8 @@ class OwnerProfileRepositoryImpl implements IOwnerProfileRepository {
   @override
   Future<OwnerProfile> getById(int adminId) async =>
       _map(await api.getById(adminId));
+
+  @override
+  Future<OwnerProfile> updateMe(Map<String, dynamic> body) async =>
+      _map(await api.updateMe(body));
 }

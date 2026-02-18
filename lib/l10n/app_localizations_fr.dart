@@ -605,13 +605,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get publish_err_invalid_privacy_url => 'invalid privacy url';
 
   @override
-  String get dash_super_admin => 'Super Admin';
+  String get dash_super_admin => 'Super administrateur';
 
   @override
-  String get dash_hero_subtitle => 'Manage projects, requests, and your profile.';
+  String get dash_hero_subtitle => 'Gérez les projets, les demandes et votre profil.';
 
   @override
-  String get dash_hero_badge => 'Dashboard Overview';
+  String get dash_hero_badge => 'Aperçu du tableau de bord';
 
   @override
   String timeago_days(int count) {
@@ -1967,4 +1967,73 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get download_ios => 'Installez TestFlight pour ouvrir l’application';
+
+  @override
+  String get owner_profile_edit_title => 'Modifier le profil';
+
+  @override
+  String get owner_profile_edit_save => 'Enregistrer';
+
+  @override
+  String get owner_profile_edit_saved => 'Profil mis à jour';
+
+  @override
+  String get owner_profile_edit_invalid_email => 'Email invalide';
+
+  @override
+  String get owner_profile_edit_need_current_password => 'Entrez le mot de passe actuel pour le modifier';
+
+  @override
+  String get owner_profile_edit_basic => 'Informations de base';
+
+  @override
+  String get owner_profile_first_name => 'Prénom';
+
+  @override
+  String get owner_profile_last_name => 'Nom';
+
+  @override
+  String get owner_profile_edit_preferences => 'Préférences';
+
+  @override
+  String get owner_profile_edit_notify_items => 'Mises à jour des items';
+
+  @override
+  String get owner_profile_edit_notify_items_hint => 'Recevoir des notifications quand les items changent';
+
+  @override
+  String get owner_profile_edit_notify_feedback => 'Avis des utilisateurs';
+
+  @override
+  String get owner_profile_edit_notify_feedback_hint => 'Recevoir des notifications sur les avis/feedback';
+
+  @override
+  String get owner_profile_edit_ai => 'Assistant IA';
+
+  @override
+  String get owner_profile_edit_ai_hint => 'Activer les fonctionnalités IA pour ce compte admin';
+
+  @override
+  String get owner_profile_edit_security => 'Sécurité';
+
+  @override
+  String get owner_profile_edit_current_password => 'Mot de passe actuel';
+
+  @override
+  String get owner_profile_edit_new_password => 'Nouveau mot de passe';
+
+  @override
+  String get owner_profile_edit_password_hint => 'Laissez vide pour garder le mot de passe.';
+
+  @override
+  String get owner_profile_edit_username_used => 'Nom d’utilisateur déjà utilisé';
+
+  @override
+  String get owner_profile_edit_email_used => 'E-mail déjà utilisé';
+
+  @override
+  String get owner_profile_edit_wrong_current_password => 'Le mot de passe actuel est incorrect';
+
+  @override
+  String get common_clear => 'Effacer';
 }

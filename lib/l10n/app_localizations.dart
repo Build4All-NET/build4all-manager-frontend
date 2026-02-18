@@ -3960,6 +3960,144 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Install TestFlight to open'**
   String get download_ios;
+
+  /// No description provided for @owner_profile_edit_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit profile'**
+  String get owner_profile_edit_title;
+
+  /// No description provided for @owner_profile_edit_save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get owner_profile_edit_save;
+
+  /// No description provided for @owner_profile_edit_saved.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile updated'**
+  String get owner_profile_edit_saved;
+
+  /// No description provided for @owner_profile_edit_invalid_email.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid email'**
+  String get owner_profile_edit_invalid_email;
+
+  /// No description provided for @owner_profile_edit_need_current_password.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter current password to change it'**
+  String get owner_profile_edit_need_current_password;
+
+  /// No description provided for @owner_profile_edit_basic.
+  ///
+  /// In en, this message translates to:
+  /// **'Basic info'**
+  String get owner_profile_edit_basic;
+
+  /// No description provided for @owner_profile_first_name.
+  ///
+  /// In en, this message translates to:
+  /// **'First name'**
+  String get owner_profile_first_name;
+
+  /// No description provided for @owner_profile_last_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Last name'**
+  String get owner_profile_last_name;
+
+  /// No description provided for @owner_profile_edit_preferences.
+  ///
+  /// In en, this message translates to:
+  /// **'Preferences'**
+  String get owner_profile_edit_preferences;
+
+  /// No description provided for @owner_profile_edit_notify_items.
+  ///
+  /// In en, this message translates to:
+  /// **'Item updates'**
+  String get owner_profile_edit_notify_items;
+
+  /// No description provided for @owner_profile_edit_notify_items_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Get notified when items change'**
+  String get owner_profile_edit_notify_items_hint;
+
+  /// No description provided for @owner_profile_edit_notify_feedback.
+  ///
+  /// In en, this message translates to:
+  /// **'User feedback'**
+  String get owner_profile_edit_notify_feedback;
+
+  /// No description provided for @owner_profile_edit_notify_feedback_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Get notified about reviews/feedback'**
+  String get owner_profile_edit_notify_feedback_hint;
+
+  /// No description provided for @owner_profile_edit_ai.
+  ///
+  /// In en, this message translates to:
+  /// **'AI assistant'**
+  String get owner_profile_edit_ai;
+
+  /// No description provided for @owner_profile_edit_ai_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable AI features for your admin account'**
+  String get owner_profile_edit_ai_hint;
+
+  /// No description provided for @owner_profile_edit_security.
+  ///
+  /// In en, this message translates to:
+  /// **'Security'**
+  String get owner_profile_edit_security;
+
+  /// No description provided for @owner_profile_edit_current_password.
+  ///
+  /// In en, this message translates to:
+  /// **'Current password'**
+  String get owner_profile_edit_current_password;
+
+  /// No description provided for @owner_profile_edit_new_password.
+  ///
+  /// In en, this message translates to:
+  /// **'New password'**
+  String get owner_profile_edit_new_password;
+
+  /// No description provided for @owner_profile_edit_password_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave blank to keep your password.'**
+  String get owner_profile_edit_password_hint;
+
+  /// No description provided for @owner_profile_edit_username_used.
+  ///
+  /// In en, this message translates to:
+  /// **'Username already used'**
+  String get owner_profile_edit_username_used;
+
+  /// No description provided for @owner_profile_edit_email_used.
+  ///
+  /// In en, this message translates to:
+  /// **'Email already used'**
+  String get owner_profile_edit_email_used;
+
+  /// No description provided for @owner_profile_edit_wrong_current_password.
+  ///
+  /// In en, this message translates to:
+  /// **'Current password is not correct'**
+  String get owner_profile_edit_wrong_current_password;
+
+  /// No description provided for @common_clear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get common_clear;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

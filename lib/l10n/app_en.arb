@@ -844,5 +844,31 @@
   "owner_proj_details_ecom_m9": "Analytics: revenue, conversion, AOV",
   "owner_proj_details_ecom_m10": "Import/export data (CSV/Excel)",
   "download_ios":"Install TestFlight to open"
+, "owner_profile_edit_title": "Edit profile",
+  "owner_profile_edit_save": "Save",
+  "owner_profile_edit_saved": "Profile updated",
+  "owner_profile_edit_invalid_email": "Invalid email",
+  "owner_profile_edit_need_current_password": "Enter current password to change it",
 
+  "owner_profile_edit_basic": "Basic info",
+  "owner_profile_first_name": "First name",
+  "owner_profile_last_name": "Last name",
+
+  "owner_profile_edit_preferences": "Preferences",
+  "owner_profile_edit_notify_items": "Item updates",
+  "owner_profile_edit_notify_items_hint": "Get notified when items change",
+  "owner_profile_edit_notify_feedback": "User feedback",
+  "owner_profile_edit_notify_feedback_hint": "Get notified about reviews/feedback",
+  "owner_profile_edit_ai": "AI assistant",
+  "owner_profile_edit_ai_hint": "Enable AI features for your admin account",
+
+  "owner_profile_edit_security": "Security",
+  "owner_profile_edit_current_password": "Current password",
+  "owner_profile_edit_new_password": "New password",
+  "owner_profile_edit_password_hint": "Leave blank to keep your password.",
+  "owner_profile_edit_username_used": "Username already used",
+  "owner_profile_edit_email_used": "Email already used",
+  "owner_profile_edit_wrong_current_password": "Current password is not correct",
+  "common_clear": "Clear"
+ 
 }

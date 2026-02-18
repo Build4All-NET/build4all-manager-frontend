@@ -18,8 +18,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import 'owner_edit_profile_screen.dart';
+
 class OwnerProfileScreen extends StatelessWidget {
-  final int? ownerId; // optional: if provided, fetch by id; else /me
+  final int? ownerId; // if provided, fetch by id; else /me
   final Dio dio;
 
   const OwnerProfileScreen({super.key, required this.dio, this.ownerId});
@@ -32,13 +34,22 @@ class OwnerProfileScreen extends StatelessWidget {
     return BlocProvider(
       create: (_) => OwnerProfileBloc(getProfile: uc)
         ..add(OwnerProfileStarted(adminId: ownerId)),
-      child: const _OwnerProfileView(),
+      child: _OwnerProfileView(dio: dio, ownerId: ownerId),
     );
   }
 }
 
 class _OwnerProfileView extends StatelessWidget {
-  const _OwnerProfileView();
+  final Dio dio;
+  final int? ownerId;
+
+  const _OwnerProfileView({required this.dio, this.ownerId});
+
+  int? _normalizeOwnerId(int? id) {
+    if (id == null) return null;
+    if (id <= 0) return null; // ✅ treat 0 / -1 as "me"
+    return id;
+  }
 
   Future<void> _logoutFlow(BuildContext context) async {
     final l10n = AppLocalizations.of(context)!;
@@ -131,13 +142,40 @@ class _OwnerProfileView extends StatelessWidget {
     context.go('/login');
   }
 
+  Future<void> _editFlow(BuildContext context, dynamic p) async {
+    final ok = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) => OwnerEditProfileScreen(dio: dio, initial: p),
+      ),
+    );
+
+    if (ok == true && context.mounted) {
+      context.read<OwnerProfileBloc>().add(OwnerProfileRefreshed());
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
     return BlocBuilder<OwnerProfileBloc, OwnerProfileState>(
       builder: (context, s) {
-        const appBar = _ProfileAppBar();
+        final p = s.profile;
+
+        final normalizedOwnerId = _normalizeOwnerId(ownerId);
+
+        // ✅ now this behaves correctly even if router passes ownerId=0
+        final bool canEdit = normalizedOwnerId == null && p != null && !s.loading;
+
+        final appBar = AppBar(
+          title: AutoSizeText(
+            l10n.owner_nav_profile,
+            maxLines: 1,
+            minFontSize: 14,
+            stepGranularity: 0.5,
+            overflow: TextOverflow.ellipsis,
+          ),
+        );
 
         if (s.loading) {
           return Scaffold(
@@ -152,20 +190,31 @@ class _OwnerProfileView extends StatelessWidget {
             body: Center(
               child: Padding(
                 padding: const EdgeInsets.all(16),
-                child: AutoSizeText(
-                  s.error!,
-                  textAlign: TextAlign.center,
-                  maxLines: 6,
-                  minFontSize: 12,
-                  stepGranularity: 0.5,
-                  overflow: TextOverflow.ellipsis,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    AutoSizeText(
+                      s.error!,
+                      textAlign: TextAlign.center,
+                      maxLines: 6,
+                      minFontSize: 12,
+                      stepGranularity: 0.5,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 12),
+                    FilledButton(
+                      onPressed: () => context
+                          .read<OwnerProfileBloc>()
+                          .add(OwnerProfileStarted(adminId: ownerId)),
+                      child: Text(l10n.retry ?? 'Retry'),
+                    ),
+                  ],
                 ),
               ),
             ),
           );
         }
 
-        final p = s.profile;
         if (p == null) {
           return Scaffold(
             appBar: appBar,
@@ -194,8 +243,7 @@ class _OwnerProfileView extends StatelessWidget {
                 return SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
                   child: ConstrainedBox(
-                    constraints:
-                        BoxConstraints(minHeight: constraints.maxHeight),
+                    constraints: BoxConstraints(minHeight: constraints.maxHeight),
                     child: Align(
                       alignment: Alignment.topCenter,
                       child: Padding(
@@ -217,6 +265,8 @@ class _OwnerProfileView extends StatelessWidget {
                               width: wide ? maxCardWidth : double.infinity,
                               child: _PreferencesCard(
                                 l10n: l10n,
+                                canEdit: canEdit,
+                                onEdit: () => _editFlow(context, p),
                                 onLogout: () => _logoutFlow(context),
                               ),
                             ),
@@ -236,35 +286,18 @@ class _OwnerProfileView extends StatelessWidget {
   }
 }
 
-class _ProfileAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const _ProfileAppBar();
-
-  @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-
-    return AppBar(
-      title: AutoSizeText(
-        l10n.owner_nav_profile,
-        maxLines: 1,
-        minFontSize: 14,
-        stepGranularity: 0.5,
-        overflow: TextOverflow.ellipsis,
-      ),
-    );
-  }
-}
-
 class _PreferencesCard extends StatelessWidget {
   final AppLocalizations l10n;
   final VoidCallback onLogout;
 
+  final bool canEdit;
+  final VoidCallback onEdit;
+
   const _PreferencesCard({
     required this.l10n,
     required this.onLogout,
+    required this.canEdit,
+    required this.onEdit,
   });
 
   @override
@@ -288,16 +321,54 @@ class _PreferencesCard extends StatelessWidget {
                     minFontSize: 14,
                     stepGranularity: 0.5,
                     overflow: TextOverflow.ellipsis,
-                    style:
-                        tt.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+                    style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w900),
                   ),
                 ),
               ],
             ),
           ),
+
           Divider(height: 1, color: cs.outlineVariant.withOpacity(.7)),
+
+          // ✅ ALWAYS SHOW IT (no more "where is it??")
+          Opacity(
+            opacity: canEdit ? 1 : 0.45,
+            child: ListTile(
+              onTap: canEdit ? onEdit : null,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+              leading: CircleAvatar(
+                radius: 18,
+                backgroundColor: cs.primary.withOpacity(.12),
+                child: Icon(Icons.edit_rounded, color: cs.primary, size: 18),
+              ),
+              title: AutoSizeText(
+                l10n.owner_profile_edit_title ?? 'Edit profile',
+                maxLines: 1,
+                minFontSize: 12,
+                stepGranularity: 0.5,
+                overflow: TextOverflow.ellipsis,
+                style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w900),
+              ),
+              subtitle: AutoSizeText(
+                canEdit
+                    ? (l10n.owner_profile_edit_basic ?? 'Update your account info')
+                    :"",
+                maxLines: 2,
+                minFontSize: 11,
+                stepGranularity: 0.5,
+                overflow: TextOverflow.ellipsis,
+                style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
+              ),
+              trailing: Icon(Icons.chevron_right_rounded, color: cs.onSurfaceVariant),
+            ),
+          ),
+
+          Divider(height: 1, color: cs.outlineVariant.withOpacity(.7)),
+
           _LanguageRow(l10n: l10n),
+
           Divider(height: 1, color: cs.outlineVariant.withOpacity(.7)),
+
           ListTile(
             onTap: onLogout,
             contentPadding: const EdgeInsets.symmetric(horizontal: 16),
@@ -322,9 +393,9 @@ class _PreferencesCard extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
             ),
-            trailing:
-                Icon(Icons.chevron_right_rounded, color: cs.onSurfaceVariant),
+            trailing: Icon(Icons.chevron_right_rounded, color: cs.onSurfaceVariant),
           ),
+
           const SizedBox(height: 6),
         ],
       ),
@@ -359,10 +430,10 @@ class _LanguageRow extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
       child: Row(
         children: [
-          const CircleAvatar(
+          CircleAvatar(
             radius: 18,
-            backgroundColor: Color(0x1A000000),
-            child: Icon(Icons.language_rounded, size: 18),
+            backgroundColor: cs.primary.withOpacity(.12),
+            child: Icon(Icons.language_rounded, size: 18, color: cs.primary),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -378,6 +449,7 @@ class _LanguageRow extends StatelessWidget {
           BlocBuilder<LocaleCubit, Locale?>(
             builder: (context, locale) {
               final value = locale?.languageCode ?? 'system';
+              final codes = const ['system', 'en', 'ar', 'fr'];
 
               return ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 180),
@@ -388,30 +460,20 @@ class _LanguageRow extends StatelessWidget {
                       value: value,
                       isDense: true,
                       iconEnabledColor: cs.onSurfaceVariant,
-                      items: const ['system', 'en', 'ar', 'fr']
+                      items: codes
                           .map(
                             (code) => DropdownMenuItem<String>(
                               value: code,
-                              child: Text(
-                                '', // replaced by selectedItemBuilder
+                              child: AutoSizeText(
+                                _labelFor(code),
+                                maxLines: 1,
+                                minFontSize: 11,
+                                stepGranularity: 0.5,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
                           )
                           .toList(),
-                      selectedItemBuilder: (ctx) {
-                        return const ['system', 'en', 'ar', 'fr'].map((code) {
-                          return Align(
-                            alignment: Alignment.centerRight,
-                            child: AutoSizeText(
-                              _labelFor(code),
-                              maxLines: 1,
-                              minFontSize: 11,
-                              stepGranularity: 0.5,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          );
-                        }).toList();
-                      },
                       onChanged: (v) {
                         if (v == null) return;
                         final cubit = context.read<LocaleCubit>();

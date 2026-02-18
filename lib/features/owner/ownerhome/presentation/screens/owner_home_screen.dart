@@ -1,4 +1,5 @@
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:build4all_manager/shared/state/owner_me_store.dart';
 import 'package:build4all_manager/shared/themes/app_theme.dart';
 import 'package:build4all_manager/shared/widgets/search_input.dart';
 import 'package:build4all_manager/shared/widgets/app_toast.dart';
@@ -25,7 +26,7 @@ import '../widgets/request_card.dart';
 import '../../data/static_project_models.dart';
 import '../widgets/project_template_card.dart';
 
-// ✅ SAME call style as Profile
+// ✅ SAME call style as Profile -> /admin/users/me
 import 'package:build4all_manager/features/owner/ownerprofile/data/services/owner_profile_api.dart';
 
 class OwnerHomeScreen extends StatelessWidget {
@@ -104,54 +105,63 @@ class _HomeBody extends StatefulWidget {
 }
 
 class _HomeBodyState extends State<_HomeBody> {
-  // ✅ FIX: must NOT be final if you're going to re-assign it in setState()
-  late Future<String?> _nameFuture;
-
   @override
   void initState() {
     super.initState();
-    _nameFuture = _loadDisplayName();
+
+    // ✅ only use router name if store is empty (avoid forcing old value forever)
+    final current = OwnerMeStore.I.displayName.value;
+    if ((current ?? '').trim().isEmpty) {
+      final passed = widget.ownerName?.trim();
+      if (passed != null && passed.isNotEmpty) {
+        OwnerMeStore.I.setName(passed);
+      }
+    }
+
+    // ✅ always sync from API after first frame (real source of truth)
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final fresh = await _loadDisplayName();
+      if (!mounted) return;
+      if ((fresh ?? '').trim().isNotEmpty) {
+        OwnerMeStore.I.setName(fresh);
+      }
+    });
   }
 
   Future<String?> _loadDisplayName() async {
-    // 1) if router passed something, use it
-    final passed = widget.ownerName?.trim();
-    if (passed != null && passed.isNotEmpty) return passed;
-
-    // 2) otherwise: SAME AS PROFILE -> /admin/users/me via OwnerProfileApi
+    // ✅ API FIRST (so edited name shows)
     try {
       final api = OwnerProfileApi(widget.dio);
       final dto = await api.getMe();
 
       final first = dto.firstName.trim();
       final last = dto.lastName.trim();
-      final fullName =
-          [first, last].where((e) => e.isNotEmpty).join(' ').trim();
+      final fullName = [first, last].where((e) => e.isNotEmpty).join(' ').trim();
 
       if (fullName.isNotEmpty) return fullName;
 
-      // fallback to username (profile does that too in header)
       final u = dto.username.trim();
       return u.isNotEmpty ? u : null;
     } catch (_) {
-      return null;
+      // fallback 1: store
+      final store = OwnerMeStore.I.displayName.value;
+      if ((store ?? '').trim().isNotEmpty) return store;
+
+      // fallback 2: router passed
+      final passed = widget.ownerName?.trim();
+      return (passed != null && passed.isNotEmpty) ? passed : null;
     }
   }
 
   bool _isEmail(String s) =>
       RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(s.trim());
 
-  /// ✅ picks a display-first-part:
-  /// - "Fatima Ali" -> "Fatima"
-  /// - "fatima.dev" -> "fatima.dev" (still shows something)
-  /// - email -> refuse
   String _firstPartSafe(String? raw) {
     if (raw == null) return '';
     final s = raw.trim();
     if (s.isEmpty) return '';
     if (_isEmail(s)) return '';
-    if (s.startsWith('@'))
-      return s.substring(1).trim(); // "@fatima" -> "fatima"
+    if (s.startsWith('@')) return s.substring(1).trim();
     return s.split(RegExp(r'\s+')).first.trim();
   }
 
@@ -204,12 +214,13 @@ class _HomeBodyState extends State<_HomeBody> {
         builder: (context, state) {
           return RefreshIndicator(
             onRefresh: () async {
-              context
-                  .read<OwnerHomeBloc>()
-                  .add(OwnerHomeRefreshed(widget.ownerId));
-              setState(() {
-                _nameFuture = _loadDisplayName();
-              });
+              context.read<OwnerHomeBloc>().add(OwnerHomeRefreshed(widget.ownerId));
+
+              final fresh = await _loadDisplayName();
+              if (!mounted) return;
+              if ((fresh ?? '').trim().isNotEmpty) {
+                OwnerMeStore.I.setName(fresh);
+              }
             },
             child: CustomScrollView(
               physics: const BouncingScrollPhysics(
@@ -218,12 +229,11 @@ class _HomeBodyState extends State<_HomeBody> {
               slivers: [
                 // ----- Header -----
                 SliverToBoxAdapter(
-                  child: FutureBuilder<String?>(
-                    future: _nameFuture,
-                    builder: (context, snap) {
-                      final display = _firstPartSafe(snap.data);
-                      final greeting =
-                          display.isEmpty ? hello : '$hello $display';
+                  child: ValueListenableBuilder<String?>(
+                    valueListenable: OwnerMeStore.I.displayName,
+                    builder: (context, storedName, _) {
+                      final display = _firstPartSafe(storedName);
+                      final greeting = display.isEmpty ? hello : '$hello $display';
 
                       return Row(
                         children: [
@@ -267,10 +277,9 @@ class _HomeBodyState extends State<_HomeBody> {
                 const SliverToBoxAdapter(
                   child: AppSearchInput(
                     hintKey: 'owner_home_search_hint',
-                    showFilter: false, //  remove filter icon only here
+                    showFilter: false,
                   ),
                 ),
-
                 const SliverToBoxAdapter(child: SizedBox(height: 16)),
 
                 // ----- Choose your project -----
@@ -300,8 +309,7 @@ class _HomeBodyState extends State<_HomeBody> {
                       const spacing = 12.0;
 
                       final cardW = (cross - (spacing * (cols - 1))) / cols;
-                      final aspect =
-                          cardW < 190 ? 0.86 : (cardW < 230 ? 0.95 : 1.05);
+                      final aspect = cardW < 190 ? 0.86 : (cardW < 230 ? 0.95 : 1.05);
 
                       return SliverGrid(
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -315,18 +323,15 @@ class _HomeBodyState extends State<_HomeBody> {
                             final tpl = projectTemplates[i];
                             final kind = tpl.kind.toLowerCase();
 
-                            final isAvailable =
-                                state.availableKinds.contains(kind);
-                            final int? realProjectId =
-                                state.kindToProjectId[kind];
+                            final isAvailable = state.availableKinds.contains(kind);
+                            final int? realProjectId = state.kindToProjectId[kind];
 
                             return ProjectTemplateCard(
                               tpl: tpl,
                               isAvailable: isAvailable,
                               onOpen: () {
                                 if (!isAvailable) {
-                                  AppToast.info(
-                                      context, l10n.owner_proj_comingSoon);
+                                  AppToast.info(context, l10n.owner_proj_comingSoon);
                                 }
 
                                 context.push(
@@ -352,8 +357,7 @@ class _HomeBodyState extends State<_HomeBody> {
                     children: [
                       Expanded(
                         child: AutoSizeText(
-                          _safe(l10n.owner_home_recentRequests,
-                              'Recent requests'),
+                          _safe(l10n.owner_home_recentRequests, 'Recent requests'),
                           maxLines: 1,
                           minFontSize: 14,
                           stepGranularity: 0.5,

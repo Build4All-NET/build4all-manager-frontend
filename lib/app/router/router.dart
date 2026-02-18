@@ -396,7 +396,7 @@ class OwnerEntry extends StatelessWidget {
         icon: Icons.person_outline,
         selectedIcon: Icons.person,
         label: l10n.owner_nav_profile,
-        page: OwnerProfileScreen(ownerId: ownerId, dio: dio),
+        page: OwnerProfileScreen( dio: dio),
       ),
     ];
 

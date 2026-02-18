@@ -1967,4 +1967,73 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get download_ios => 'Install TestFlight to open';
+
+  @override
+  String get owner_profile_edit_title => 'Edit profile';
+
+  @override
+  String get owner_profile_edit_save => 'Save';
+
+  @override
+  String get owner_profile_edit_saved => 'Profile updated';
+
+  @override
+  String get owner_profile_edit_invalid_email => 'Invalid email';
+
+  @override
+  String get owner_profile_edit_need_current_password => 'Enter current password to change it';
+
+  @override
+  String get owner_profile_edit_basic => 'Basic info';
+
+  @override
+  String get owner_profile_first_name => 'First name';
+
+  @override
+  String get owner_profile_last_name => 'Last name';
+
+  @override
+  String get owner_profile_edit_preferences => 'Preferences';
+
+  @override
+  String get owner_profile_edit_notify_items => 'Item updates';
+
+  @override
+  String get owner_profile_edit_notify_items_hint => 'Get notified when items change';
+
+  @override
+  String get owner_profile_edit_notify_feedback => 'User feedback';
+
+  @override
+  String get owner_profile_edit_notify_feedback_hint => 'Get notified about reviews/feedback';
+
+  @override
+  String get owner_profile_edit_ai => 'AI assistant';
+
+  @override
+  String get owner_profile_edit_ai_hint => 'Enable AI features for your admin account';
+
+  @override
+  String get owner_profile_edit_security => 'Security';
+
+  @override
+  String get owner_profile_edit_current_password => 'Current password';
+
+  @override
+  String get owner_profile_edit_new_password => 'New password';
+
+  @override
+  String get owner_profile_edit_password_hint => 'Leave blank to keep your password.';
+
+  @override
+  String get owner_profile_edit_username_used => 'Username already used';
+
+  @override
+  String get owner_profile_edit_email_used => 'Email already used';
+
+  @override
+  String get owner_profile_edit_wrong_current_password => 'Current password is not correct';
+
+  @override
+  String get common_clear => 'Clear';
 }

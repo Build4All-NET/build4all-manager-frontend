@@ -1967,4 +1967,73 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get download_ios => 'ثبّت TestFlight لفتح التطبيق';
+
+  @override
+  String get owner_profile_edit_title => 'تعديل الملف الشخصي';
+
+  @override
+  String get owner_profile_edit_save => 'حفظ';
+
+  @override
+  String get owner_profile_edit_saved => 'تم تحديث الملف الشخصي';
+
+  @override
+  String get owner_profile_edit_invalid_email => 'البريد الإلكتروني غير صالح';
+
+  @override
+  String get owner_profile_edit_need_current_password => 'أدخل كلمة المرور الحالية لتغييرها';
+
+  @override
+  String get owner_profile_edit_basic => 'المعلومات الأساسية';
+
+  @override
+  String get owner_profile_first_name => 'الاسم';
+
+  @override
+  String get owner_profile_last_name => 'الكنية';
+
+  @override
+  String get owner_profile_edit_preferences => 'التفضيلات';
+
+  @override
+  String get owner_profile_edit_notify_items => 'تحديثات العناصر';
+
+  @override
+  String get owner_profile_edit_notify_items_hint => 'تلقي إشعارات عند تغيير العناصر';
+
+  @override
+  String get owner_profile_edit_notify_feedback => 'آراء المستخدمين';
+
+  @override
+  String get owner_profile_edit_notify_feedback_hint => 'تلقي إشعارات حول التقييمات/الآراء';
+
+  @override
+  String get owner_profile_edit_ai => 'مساعد الذكاء الاصطناعي';
+
+  @override
+  String get owner_profile_edit_ai_hint => 'تفعيل ميزات الذكاء الاصطناعي لهذا الحساب';
+
+  @override
+  String get owner_profile_edit_security => 'الأمان';
+
+  @override
+  String get owner_profile_edit_current_password => 'كلمة المرور الحالية';
+
+  @override
+  String get owner_profile_edit_new_password => 'كلمة المرور الجديدة';
+
+  @override
+  String get owner_profile_edit_password_hint => 'اتركه فارغاً للاحتفاظ بكلمة المرور.';
+
+  @override
+  String get owner_profile_edit_username_used => 'اسم المستخدم مستخدم بالفعل';
+
+  @override
+  String get owner_profile_edit_email_used => 'البريد الإلكتروني مستخدم بالفعل';
+
+  @override
+  String get owner_profile_edit_wrong_current_password => 'كلمة المرور الحالية غير صحيحة';
+
+  @override
+  String get common_clear => 'مسح';
 }

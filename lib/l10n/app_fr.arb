@@ -930,5 +930,31 @@
   "owner_proj_details_ecom_m9": "Analytics : revenus, conversion, panier moyen",
   "owner_proj_details_ecom_m10": "Import/export des données (CSV/Excel)",
 
-  "download_ios": "Installez TestFlight pour ouvrir l’application"
+  "download_ios": "Installez TestFlight pour ouvrir l’application",
+  "owner_profile_edit_title": "Modifier le profil",
+  "owner_profile_edit_save": "Enregistrer",
+  "owner_profile_edit_saved": "Profil mis à jour",
+  "owner_profile_edit_invalid_email": "Email invalide",
+  "owner_profile_edit_need_current_password": "Entrez le mot de passe actuel pour le modifier",
+
+  "owner_profile_edit_basic": "Informations de base",
+  "owner_profile_first_name": "Prénom",
+  "owner_profile_last_name": "Nom",
+
+  "owner_profile_edit_preferences": "Préférences",
+  "owner_profile_edit_notify_items": "Mises à jour des items",
+  "owner_profile_edit_notify_items_hint": "Recevoir des notifications quand les items changent",
+  "owner_profile_edit_notify_feedback": "Avis des utilisateurs",
+  "owner_profile_edit_notify_feedback_hint": "Recevoir des notifications sur les avis/feedback",
+  "owner_profile_edit_ai": "Assistant IA",
+  "owner_profile_edit_ai_hint": "Activer les fonctionnalités IA pour ce compte admin",
+
+  "owner_profile_edit_security": "Sécurité",
+  "owner_profile_edit_current_password": "Mot de passe actuel",
+  "owner_profile_edit_new_password": "Nouveau mot de passe",
+  "owner_profile_edit_password_hint": "Laissez vide pour garder le mot de passe.",
+    "owner_profile_edit_username_used": "Nom d’utilisateur déjà utilisé",
+  "owner_profile_edit_email_used": "E-mail déjà utilisé",
+  "owner_profile_edit_wrong_current_password": "Le mot de passe actuel est incorrect",
+  "common_clear": "Effacer"
 }
