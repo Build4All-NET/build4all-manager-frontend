@@ -956,5 +956,27 @@
     "owner_profile_edit_username_used": "Nom d’utilisateur déjà utilisé",
   "owner_profile_edit_email_used": "E-mail déjà utilisé",
   "owner_profile_edit_wrong_current_password": "Le mot de passe actuel est incorrect",
-  "common_clear": "Effacer"
+  "common_clear": "Effacer",
+   "dash_upgrade_requests": "Demandes d’upgrade",
+  "upgrade_requests_title": "Demandes d’upgrade en attente",
+  "upgrade_requests_hint": "Vérifiez puis approuvez ou rejetez",
+  "upgrade_requests_empty": "Aucune demande en attente",
+  "upgrade_requests_empty_sub": "Tout est à jour. Les nouvelles demandes apparaîtront ici.",
+  "upgrade_requests_request": "Demande",
+  "upgrade_requests_aup": "AUP",
+  "upgrade_requests_users_override": "Override utilisateurs",
+  "upgrade_requests_requested_at": "Demandé le",
+  "upgrade_requests_reject_title": "Rejeter la demande",
+  "upgrade_requests_reject_hint": "Vous pouvez ajouter une note optionnelle pour le propriétaire.",
+  "upgrade_requests_note_optional": "Note (optionnelle)",
+  "upgrade_requests_approve_success": "Demande approuvée",
+  "upgrade_requests_reject_success": "Demande rejetée",
+  "common_approve": "Approuver",
+  "common_reject": "Rejeter",
+  "common_cancel": "Annuler",
+  "common_submit": "Envoyer",
+   "errPasswordLen6to8": "Le mot de passe doit contenir entre 6 et 8 caractères.",
+  "errPasswordNeedSpecial": "Le mot de passe doit contenir au moins 1 caractère spécial (ex: !@#).",
+  "hintPasswordRuleOwner": "Mot de passe : 6–8 caractères + au moins 1 caractère spécial."
+  
 }

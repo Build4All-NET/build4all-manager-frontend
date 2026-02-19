@@ -92,9 +92,10 @@ class PhonePreview extends StatelessWidget {
                     appName: appName,
                     headerColor: _headerBlue(draft.primary),
                     menuType: menuType,
+                    logoFile: logoFile,
                   ),
 
-                  // Body (dynamic sections + feature row)
+                  // Body
                   Expanded(
                     child: _Body(
                       draft: draft,
@@ -138,60 +139,96 @@ class PhonePreview extends StatelessWidget {
   List<_NavItem> _tryParseNav(String navJson) {
     try {
       final d = jsonDecode(navJson);
-      if (d is List) {
-        return d.map((e) {
-          final m = (e as Map).cast<String, dynamic>();
-          final label = (m['label'] ?? '').toString();
-          final icon = (m['icon'] ?? '').toString();
-          return _NavItem(
-            label: label.isEmpty ? 'Tab' : label,
-            icon: _icon(icon),
-          );
-        }).toList();
-      }
-    } catch (_) {}
-    return const [];
+
+      // supports: [ ... ] OR { "items": [ ... ] }
+      final list = (d is List)
+          ? d
+          : (d is Map && d['items'] is List)
+              ? (d['items'] as List)
+              : null;
+
+      if (list == null) return const [];
+
+      return list.map((e) {
+        final m = (e as Map).cast<String, dynamic>();
+        final label = (m['label'] ?? '').toString();
+        final icon = (m['icon'] ?? '').toString();
+
+        return _NavItem(
+          label: label.isEmpty ? 'Tab' : label,
+          icon: _icon(icon),
+        );
+      }).toList();
+    } catch (_) {
+      return const [];
+    }
   }
 
   List<String> _tryParseFeatures(String enabledFeaturesJson) {
     try {
       final d = jsonDecode(enabledFeaturesJson);
-      if (d is List) {
-        return d.map((e) => e.toString()).toList();
-      }
+      if (d is List) return d.map((e) => e.toString()).toList();
     } catch (_) {}
     return const [];
   }
 
+  /// Supports:
+  /// - [ {type, layout, limit}, ... ]
+  /// - { "sections": [ {type, layout, limit}, ... ] }
   List<_HomeSection> _tryParseHome(String homeJson) {
     try {
       final d = jsonDecode(homeJson);
-      if (d is List) {
-        return d.map((e) {
-          final m = (e as Map).cast<String, dynamic>();
-          return _HomeSection(
-            type: (m['type'] ?? '').toString(),
-            layout: (m['layout'] ?? '').toString(),
-            limit: int.tryParse('${m['limit']}') ?? 6,
-          );
-        }).toList();
-      }
+
+      final list = (d is List)
+          ? d
+          : (d is Map && d['sections'] is List)
+              ? (d['sections'] as List)
+              : null;
+
+      if (list == null) return const [];
+
+      return list.map((e) {
+        final m = (e as Map).cast<String, dynamic>();
+        return _HomeSection(
+          type: (m['type'] ?? '').toString(),
+          layout: (m['layout'] ?? '').toString(),
+          limit: int.tryParse('${m['limit']}') ?? 6,
+        );
+      }).toList();
     } catch (_) {}
     return const [];
   }
 
   /// Returns: "bottom" or "hamburger"
+  /// Accepts: bottom | hamburger | drawer
   String _tryBrandingMenuType(String brandingJson) {
     try {
-      final m = jsonDecode(brandingJson);
-      if (m is Map) {
-        final v = (m['menuType'] ?? '').toString().toLowerCase().trim();
-        if (v == 'hamburger') return 'hamburger';
-        if (v == 'drawer') return 'hamburger'; // backward compat
-        return 'bottom';
+      final raw = jsonDecode(brandingJson);
+
+      // supports direct map OR nested { "BRANDING": { ... } }
+      Map<String, dynamic>? m;
+      if (raw is Map) {
+        m = raw.cast<String, dynamic>();
+        if (m['BRANDING'] is Map) {
+          m = (m['BRANDING'] as Map).cast<String, dynamic>();
+        }
       }
-    } catch (_) {}
-    return 'bottom';
+
+      if (m == null) return 'bottom';
+
+      final v = (m['menuType'] ?? m['menu_type'] ?? '')
+          .toString()
+          .toLowerCase()
+          .trim();
+
+      if (v == 'hamburger') return 'hamburger';
+      if (v == 'drawer') return 'hamburger'; // backward compat
+      if (v == 'side') return 'hamburger';
+
+      return 'bottom';
+    } catch (_) {
+      return 'bottom';
+    }
   }
 
   IconData _icon(String raw) {
@@ -229,17 +266,33 @@ class _Header extends StatelessWidget {
   final String appName;
   final Color headerColor;
   final String menuType;
+  final File? logoFile;
 
   const _Header({
     required this.appName,
     required this.headerColor,
     required this.menuType,
+    required this.logoFile,
   });
 
   @override
   Widget build(BuildContext context) {
     final onHeader = PhonePreview._on(headerColor);
     final isHamburger = menuType == 'hamburger';
+
+    Widget? logo;
+    if (logoFile != null) {
+      logo = ClipRRect(
+        borderRadius: BorderRadius.circular(10),
+        child: Image.file(
+          logoFile!,
+          width: 28,
+          height: 28,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+        ),
+      );
+    }
 
     return Container(
       color: headerColor,
@@ -250,6 +303,10 @@ class _Header extends StatelessWidget {
             children: [
               if (isHamburger) ...[
                 Icon(Icons.menu_rounded, color: onHeader, size: 22),
+                const SizedBox(width: 10),
+              ],
+              if (logo != null) ...[
+                logo,
                 const SizedBox(width: 10),
               ],
               Expanded(
@@ -342,7 +399,6 @@ class _Body extends StatelessWidget {
       child: ListView(
         physics: const BouncingScrollPhysics(),
         children: [
-          // ✅ Features row affects preview
           if (features.isNotEmpty) ...[
             Wrap(
               spacing: 8,
@@ -355,8 +411,7 @@ class _Body extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: draft.primary.withOpacity(.12),
                       borderRadius: BorderRadius.circular(999),
-                      border:
-                          Border.all(color: draft.primary.withOpacity(.35)),
+                      border: Border.all(color: draft.primary.withOpacity(.35)),
                     ),
                     child: Text(
                       f,
@@ -372,7 +427,6 @@ class _Body extends StatelessWidget {
             const SizedBox(height: 12),
           ],
 
-          // ✅ Render home sections in order
           for (final s in list) ..._renderSection(context, s, on, money),
         ],
       ),

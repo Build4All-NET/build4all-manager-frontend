@@ -1,4 +1,8 @@
+import 'package:dio/dio.dart';
+import 'package:build4all_manager/core/network/dio_client.dart';
 import 'package:build4all_manager/shared/utils/ApiErrorHandler.dart';
+
+import 'package:build4all_manager/core/exceptions/auth_failure.dart';
 
 import '../../domain/entities/app_user.dart';
 import '../../domain/entities/auth_token.dart';
@@ -7,11 +11,11 @@ import '../datasources/jwt_local_datasource.dart';
 import '../models/login_request_dto.dart';
 import '../models/login_response_dto.dart';
 import '../services/auth_api.dart';
-import 'package:build4all_manager/core/network/dio_client.dart';
 
 class AuthRepositoryImpl implements IAuthRepository {
   final AuthApi api;
   final JwtLocalDataSource jwtStore;
+
   AuthRepositoryImpl({required this.api, required this.jwtStore});
 
   @override
@@ -25,14 +29,16 @@ class AuthRepositoryImpl implements IAuthRepository {
       );
 
       final dto = LoginResponseDto.fromJson(res.data as Map<String, dynamic>);
-      final role = dto.role.toUpperCase();
 
+      final role = (dto.role).toString().toUpperCase();
+
+      final userOrAdmin = dto.userOrAdmin;
       final user = AppUser(
-        id: (dto.userOrAdmin['id'] as num?)?.toInt() ?? 0,
-        username: (dto.userOrAdmin['username'] ?? '').toString(),
-        firstName: (dto.userOrAdmin['firstName'] ?? '').toString(),
-        lastName: (dto.userOrAdmin['lastName'] ?? '').toString(),
-        email: (dto.userOrAdmin['email'] ?? '').toString(),
+        id: (userOrAdmin['id'] as num?)?.toInt() ?? 0,
+        username: (userOrAdmin['username'] ?? '').toString(),
+        firstName: (userOrAdmin['firstName'] ?? '').toString(),
+        lastName: (userOrAdmin['lastName'] ?? '').toString(),
+        email: (userOrAdmin['email'] ?? '').toString(),
         role: role,
       );
 
@@ -40,8 +46,25 @@ class AuthRepositoryImpl implements IAuthRepository {
       DioClient.setToken(dto.token);
 
       return (AuthToken(dto.token), user);
-    } catch (e) {
-      throw Exception(ApiErrorHandler.message(e));
+    }
+
+    // ✅ IMPORTANT: parse {code, error} coming from backend
+    on DioException catch (e) {
+      final data = e.response?.data;
+
+      if (data is Map) {
+        final code = (data['code'] ?? 'AUTH_ERROR').toString();
+        final msg = (data['error'] ?? ApiErrorHandler.message(e)).toString();
+        throw AuthFailure(code: code, message: msg);
+      }
+
+      // no body => network / timeout / etc.
+      throw AuthFailure(code: 'NETWORK_ERROR', message: ApiErrorHandler.message(e));
+    }
+
+    // ✅ fallback
+    catch (e) {
+      throw AuthFailure(code: 'AUTH_ERROR', message: ApiErrorHandler.message(e));
     }
   }
 
@@ -67,6 +90,7 @@ class AuthRepositoryImpl implements IAuthRepository {
   }
 
   // -------- OWNER REGISTER OTP FLOW --------
+
   @override
   Future<void> ownerSendOtp({
     required String email,
@@ -74,8 +98,16 @@ class AuthRepositoryImpl implements IAuthRepository {
   }) async {
     try {
       await api.ownerSendOtp(email: email, password: password);
+    } on DioException catch (e) {
+      final data = e.response?.data;
+      if (data is Map) {
+        final code = (data['code'] ?? 'OTP_ERROR').toString();
+        final msg = (data['error'] ?? ApiErrorHandler.message(e)).toString();
+        throw AuthFailure(code: code, message: msg);
+      }
+      throw AuthFailure(code: 'NETWORK_ERROR', message: ApiErrorHandler.message(e));
     } catch (e) {
-      throw Exception(ApiErrorHandler.message(e));
+      throw AuthFailure(code: 'OTP_ERROR', message: ApiErrorHandler.message(e));
     }
   }
 
@@ -91,10 +123,18 @@ class AuthRepositoryImpl implements IAuthRepository {
         password: password,
         code: code,
       );
-      // returns { registrationToken: "..." }
+
       return (res.data['registrationToken'] ?? '').toString();
+    } on DioException catch (e) {
+      final data = e.response?.data;
+      if (data is Map) {
+        final c = (data['code'] ?? 'OTP_ERROR').toString();
+        final msg = (data['error'] ?? ApiErrorHandler.message(e)).toString();
+        throw AuthFailure(code: c, message: msg);
+      }
+      throw AuthFailure(code: 'NETWORK_ERROR', message: ApiErrorHandler.message(e));
     } catch (e) {
-      throw Exception(ApiErrorHandler.message(e));
+      throw AuthFailure(code: 'OTP_ERROR', message: ApiErrorHandler.message(e));
     }
   }
 
@@ -125,15 +165,22 @@ class AuthRepositoryImpl implements IAuthRepository {
         lastName: (admin['lastName'] ?? '').toString(),
         email: (admin['email'] ?? '').toString(),
         role: 'OWNER',
-        // ✅ if AppUser doesn’t have phone yet, either ignore or add it (see section 6)
       );
 
       await jwtStore.save(token: token, role: 'OWNER');
       DioClient.setToken(token);
 
       return (AuthToken(token), user);
+    } on DioException catch (e) {
+      final data = e.response?.data;
+      if (data is Map) {
+        final c = (data['code'] ?? 'PROFILE_ERROR').toString();
+        final msg = (data['error'] ?? ApiErrorHandler.message(e)).toString();
+        throw AuthFailure(code: c, message: msg);
+      }
+      throw AuthFailure(code: 'NETWORK_ERROR', message: ApiErrorHandler.message(e));
     } catch (e) {
-      throw Exception(ApiErrorHandler.message(e));
+      throw AuthFailure(code: 'PROFILE_ERROR', message: ApiErrorHandler.message(e));
     }
   }
 }

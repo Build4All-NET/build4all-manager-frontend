@@ -2036,4 +2036,64 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get common_clear => 'Clear';
+
+  @override
+  String get dash_upgrade_requests => 'Upgrade requests';
+
+  @override
+  String get upgrade_requests_title => 'Pending upgrade requests';
+
+  @override
+  String get upgrade_requests_hint => 'Review and approve/reject plan upgrades';
+
+  @override
+  String get upgrade_requests_empty => 'No pending requests';
+
+  @override
+  String get upgrade_requests_empty_sub => 'You\'re all caught up. New requests will appear here.';
+
+  @override
+  String get upgrade_requests_request => 'Request';
+
+  @override
+  String get upgrade_requests_aup => 'AUP';
+
+  @override
+  String get upgrade_requests_users_override => 'Users override';
+
+  @override
+  String get upgrade_requests_requested_at => 'Requested at';
+
+  @override
+  String get upgrade_requests_reject_title => 'Reject request';
+
+  @override
+  String get upgrade_requests_reject_hint => 'Optionally add a note for the owner.';
+
+  @override
+  String get upgrade_requests_note_optional => 'Note (optional)';
+
+  @override
+  String get upgrade_requests_approve_success => 'Request approved';
+
+  @override
+  String get upgrade_requests_reject_success => 'Request rejected';
+
+  @override
+  String get common_approve => 'Approve';
+
+  @override
+  String get common_reject => 'Reject';
+
+  @override
+  String get common_submit => 'Submit';
+
+  @override
+  String get errPasswordLen6to8 => 'Password must be 6 to 8 characters.';
+
+  @override
+  String get errPasswordNeedSpecial => 'Password must include at least 1 special character (e.g. !@#).';
+
+  @override
+  String get hintPasswordRuleOwner => 'Password: 6–8 chars + at least 1 special character.';
 }

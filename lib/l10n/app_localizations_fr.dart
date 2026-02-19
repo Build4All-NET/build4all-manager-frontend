@@ -2036,4 +2036,64 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get common_clear => 'Effacer';
+
+  @override
+  String get dash_upgrade_requests => 'Demandes d’upgrade';
+
+  @override
+  String get upgrade_requests_title => 'Demandes d’upgrade en attente';
+
+  @override
+  String get upgrade_requests_hint => 'Vérifiez puis approuvez ou rejetez';
+
+  @override
+  String get upgrade_requests_empty => 'Aucune demande en attente';
+
+  @override
+  String get upgrade_requests_empty_sub => 'Tout est à jour. Les nouvelles demandes apparaîtront ici.';
+
+  @override
+  String get upgrade_requests_request => 'Demande';
+
+  @override
+  String get upgrade_requests_aup => 'AUP';
+
+  @override
+  String get upgrade_requests_users_override => 'Override utilisateurs';
+
+  @override
+  String get upgrade_requests_requested_at => 'Demandé le';
+
+  @override
+  String get upgrade_requests_reject_title => 'Rejeter la demande';
+
+  @override
+  String get upgrade_requests_reject_hint => 'Vous pouvez ajouter une note optionnelle pour le propriétaire.';
+
+  @override
+  String get upgrade_requests_note_optional => 'Note (optionnelle)';
+
+  @override
+  String get upgrade_requests_approve_success => 'Demande approuvée';
+
+  @override
+  String get upgrade_requests_reject_success => 'Demande rejetée';
+
+  @override
+  String get common_approve => 'Approuver';
+
+  @override
+  String get common_reject => 'Rejeter';
+
+  @override
+  String get common_submit => 'Envoyer';
+
+  @override
+  String get errPasswordLen6to8 => 'Le mot de passe doit contenir entre 6 et 8 caractères.';
+
+  @override
+  String get errPasswordNeedSpecial => 'Le mot de passe doit contenir au moins 1 caractère spécial (ex: !@#).';
+
+  @override
+  String get hintPasswordRuleOwner => 'Mot de passe : 6–8 caractères + au moins 1 caractère spécial.';
 }

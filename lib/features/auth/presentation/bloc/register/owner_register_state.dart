@@ -13,16 +13,21 @@ class OwnerRegisterState extends Equatable {
     this.completed = false,
   });
 
+  // Sentinel to allow "set to null" vs "don't change"
+  static const Object _unset = Object();
+
   OwnerRegisterState copyWith({
     bool? loading,
-    String? error,
-    String? registrationToken,
+    Object? error = _unset,
+    Object? registrationToken = _unset,
     bool? completed,
   }) {
     return OwnerRegisterState(
       loading: loading ?? this.loading,
-      error: error,
-      registrationToken: registrationToken ?? this.registrationToken,
+      error: identical(error, _unset) ? this.error : error as String?,
+      registrationToken: identical(registrationToken, _unset)
+          ? this.registrationToken
+          : registrationToken as String?,
       completed: completed ?? this.completed,
     );
   }

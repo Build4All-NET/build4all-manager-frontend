@@ -4098,6 +4098,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Clear'**
   String get common_clear;
+
+  /// No description provided for @dash_upgrade_requests.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade requests'**
+  String get dash_upgrade_requests;
+
+  /// No description provided for @upgrade_requests_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending upgrade requests'**
+  String get upgrade_requests_title;
+
+  /// No description provided for @upgrade_requests_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Review and approve/reject plan upgrades'**
+  String get upgrade_requests_hint;
+
+  /// No description provided for @upgrade_requests_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No pending requests'**
+  String get upgrade_requests_empty;
+
+  /// No description provided for @upgrade_requests_empty_sub.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re all caught up. New requests will appear here.'**
+  String get upgrade_requests_empty_sub;
+
+  /// No description provided for @upgrade_requests_request.
+  ///
+  /// In en, this message translates to:
+  /// **'Request'**
+  String get upgrade_requests_request;
+
+  /// No description provided for @upgrade_requests_aup.
+  ///
+  /// In en, this message translates to:
+  /// **'AUP'**
+  String get upgrade_requests_aup;
+
+  /// No description provided for @upgrade_requests_users_override.
+  ///
+  /// In en, this message translates to:
+  /// **'Users override'**
+  String get upgrade_requests_users_override;
+
+  /// No description provided for @upgrade_requests_requested_at.
+  ///
+  /// In en, this message translates to:
+  /// **'Requested at'**
+  String get upgrade_requests_requested_at;
+
+  /// No description provided for @upgrade_requests_reject_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject request'**
+  String get upgrade_requests_reject_title;
+
+  /// No description provided for @upgrade_requests_reject_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Optionally add a note for the owner.'**
+  String get upgrade_requests_reject_hint;
+
+  /// No description provided for @upgrade_requests_note_optional.
+  ///
+  /// In en, this message translates to:
+  /// **'Note (optional)'**
+  String get upgrade_requests_note_optional;
+
+  /// No description provided for @upgrade_requests_approve_success.
+  ///
+  /// In en, this message translates to:
+  /// **'Request approved'**
+  String get upgrade_requests_approve_success;
+
+  /// No description provided for @upgrade_requests_reject_success.
+  ///
+  /// In en, this message translates to:
+  /// **'Request rejected'**
+  String get upgrade_requests_reject_success;
+
+  /// No description provided for @common_approve.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve'**
+  String get common_approve;
+
+  /// No description provided for @common_reject.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject'**
+  String get common_reject;
+
+  /// No description provided for @common_submit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit'**
+  String get common_submit;
+
+  /// No description provided for @errPasswordLen6to8.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must be 6 to 8 characters.'**
+  String get errPasswordLen6to8;
+
+  /// No description provided for @errPasswordNeedSpecial.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must include at least 1 special character (e.g. !@#).'**
+  String get errPasswordNeedSpecial;
+
+  /// No description provided for @hintPasswordRuleOwner.
+  ///
+  /// In en, this message translates to:
+  /// **'Password: 6–8 chars + at least 1 special character.'**
+  String get hintPasswordRuleOwner;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

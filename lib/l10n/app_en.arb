@@ -869,6 +869,27 @@
   "owner_profile_edit_username_used": "Username already used",
   "owner_profile_edit_email_used": "Email already used",
   "owner_profile_edit_wrong_current_password": "Current password is not correct",
-  "common_clear": "Clear"
+  "common_clear": "Clear",
+  "dash_upgrade_requests": "Upgrade requests",
+  "upgrade_requests_title": "Pending upgrade requests",
+  "upgrade_requests_hint": "Review and approve/reject plan upgrades",
+  "upgrade_requests_empty": "No pending requests",
+  "upgrade_requests_empty_sub": "You're all caught up. New requests will appear here.",
+  "upgrade_requests_request": "Request",
+  "upgrade_requests_aup": "AUP",
+  "upgrade_requests_users_override": "Users override",
+  "upgrade_requests_requested_at": "Requested at",
+  "upgrade_requests_reject_title": "Reject request",
+  "upgrade_requests_reject_hint": "Optionally add a note for the owner.",
+  "upgrade_requests_note_optional": "Note (optional)",
+  "upgrade_requests_approve_success": "Request approved",
+  "upgrade_requests_reject_success": "Request rejected",
+  "common_approve": "Approve",
+  "common_reject": "Reject",
+  "common_cancel": "Cancel",
+  "common_submit": "Submit",
+   "errPasswordLen6to8": "Password must be 6 to 8 characters.",
+  "errPasswordNeedSpecial": "Password must include at least 1 special character (e.g. !@#).",
+  "hintPasswordRuleOwner": "Password: 6–8 chars + at least 1 special character."
  
 }

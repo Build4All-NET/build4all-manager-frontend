@@ -2036,4 +2036,64 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get common_clear => 'مسح';
+
+  @override
+  String get dash_upgrade_requests => 'طلبات الترقية';
+
+  @override
+  String get upgrade_requests_title => 'طلبات الترقية المعلّقة';
+
+  @override
+  String get upgrade_requests_hint => 'راجع الطلبات ثم وافق أو ارفض';
+
+  @override
+  String get upgrade_requests_empty => 'لا توجد طلبات معلّقة';
+
+  @override
+  String get upgrade_requests_empty_sub => 'كل شيء تمام. أي طلب جديد سيظهر هنا.';
+
+  @override
+  String get upgrade_requests_request => 'طلب';
+
+  @override
+  String get upgrade_requests_aup => 'AUP';
+
+  @override
+  String get upgrade_requests_users_override => 'تعديل عدد المستخدمين';
+
+  @override
+  String get upgrade_requests_requested_at => 'تاريخ الطلب';
+
+  @override
+  String get upgrade_requests_reject_title => 'رفض الطلب';
+
+  @override
+  String get upgrade_requests_reject_hint => 'يمكنك إضافة ملاحظة اختيارية للمالك.';
+
+  @override
+  String get upgrade_requests_note_optional => 'ملاحظة (اختياري)';
+
+  @override
+  String get upgrade_requests_approve_success => 'تمت الموافقة على الطلب';
+
+  @override
+  String get upgrade_requests_reject_success => 'تم رفض الطلب';
+
+  @override
+  String get common_approve => 'موافقة';
+
+  @override
+  String get common_reject => 'رفض';
+
+  @override
+  String get common_submit => 'إرسال';
+
+  @override
+  String get errPasswordLen6to8 => 'كلمة المرور يجب أن تكون بين 6 و8 أحرف.';
+
+  @override
+  String get errPasswordNeedSpecial => 'كلمة المرور يجب أن تحتوي على حرف خاص واحد على الأقل (مثل !@#).';
+
+  @override
+  String get hintPasswordRuleOwner => 'كلمة المرور: من 6 إلى 8 أحرف + حرف خاص واحد على الأقل.';
 }
