@@ -1,3 +1,4 @@
+import 'package:build4all_manager/core/config/app_boot_guard.dart';
 import 'package:build4all_manager/core/localization/locale_cubit.dart';
 import 'package:build4all_manager/core/localization/locale_storage.dart';
 import 'package:build4all_manager/core/network/connecting/connection_banner.dart';
@@ -19,6 +20,12 @@ Future<void> main() async {
 
   await DioClient.init();
 
+  //  Boot guard BEFORE reading token (kills stale tokens after DB reset / env switch)
+  await AppBootGuard.run(
+    currentApiBaseUrl: DioClient.ensure().options.baseUrl,
+  );
+
+  //  Read token normally
   final jwt = JwtLocalDataSource();
   final (token, _) = await jwt.read();
   if (token.isNotEmpty) {
@@ -61,13 +68,10 @@ class Build4AllManagerApp extends StatelessWidget {
                   return Stack(
                     children: [
                       child ?? const SizedBox.shrink(),
-
                       const Align(
                         alignment: Alignment.topCenter,
                         child: ConnectionBanner(),
                       ),
-
-                      // ✅ This is the persistent popup overlay
                       const ServerDownOverlay(),
                     ],
                   );
