@@ -888,8 +888,8 @@
   "common_reject": "Reject",
   "common_cancel": "Cancel",
   "common_submit": "Submit",
-   "errPasswordLen6to8": "Password must be 6 to 8 characters.",
+   "errPasswordLen6to8": "Password must be at least 8 characters",
   "errPasswordNeedSpecial": "Password must include at least 1 special character (e.g. !@#).",
-  "hintPasswordRuleOwner": "Password: 6–8 chars + at least 1 special character."
+  "hintPasswordRuleOwner": "Password: 8 chars + at least 1 special character."
  
 }

@@ -62,7 +62,7 @@ class _OwnerRegisterEmailScreenState extends State<OwnerRegisterEmailScreen> {
     if (val.isEmpty) return l10n.errPasswordRequired;
 
     // ✅ length 6..8
-    if (val.length < 6 || val.length > 8) {
+    if (val.length < 8) {
       return l10n.errPasswordLen6to8; // NEW KEY
     }
 

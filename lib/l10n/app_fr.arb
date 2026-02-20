@@ -975,8 +975,8 @@
   "common_reject": "Rejeter",
   "common_cancel": "Annuler",
   "common_submit": "Envoyer",
-   "errPasswordLen6to8": "Le mot de passe doit contenir entre 6 et 8 caractères.",
+   "errPasswordLen6to8": "Le mot de passe doit contenir  8 caractères.",
   "errPasswordNeedSpecial": "Le mot de passe doit contenir au moins 1 caractère spécial (ex: !@#).",
-  "hintPasswordRuleOwner": "Mot de passe : 6–8 caractères + au moins 1 caractère spécial."
+  "hintPasswordRuleOwner": "Mot de passe : 8 caractères + au moins 1 caractère spécial."
   
 }
