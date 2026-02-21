@@ -2089,11 +2089,11 @@ class AppLocalizationsAr extends AppLocalizations {
   String get common_submit => 'إرسال';
 
   @override
-  String get errPasswordLen6to8 => 'كلمة المرور يجب أن تكون بين 6 و8 أحرف.';
+  String get errPasswordLen6to8 => 'كلمة المرور يجب أن تكون على الأقل 6 أحرف.';
 
   @override
   String get errPasswordNeedSpecial => 'كلمة المرور يجب أن تحتوي على حرف خاص واحد على الأقل (مثل !@#).';
 
   @override
-  String get hintPasswordRuleOwner => 'كلمة المرور: من 6 إلى 8 أحرف + حرف خاص واحد على الأقل.';
+  String get hintPasswordRuleOwner => 'كلمة المرور يجب أن تكون على الأقل 6 أحرف.';
 }

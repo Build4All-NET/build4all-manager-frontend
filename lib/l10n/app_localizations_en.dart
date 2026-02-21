@@ -2089,11 +2089,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get common_submit => 'Submit';
 
   @override
-  String get errPasswordLen6to8 => 'Password must be 6 to 8 characters.';
+  String get errPasswordLen6to8 => 'Password must be at least 6 characters';
 
   @override
   String get errPasswordNeedSpecial => 'Password must include at least 1 special character (e.g. !@#).';
 
   @override
-  String get hintPasswordRuleOwner => 'Password: 6–8 chars + at least 1 special character.';
+  String get hintPasswordRuleOwner => 'Password must be at least 6 characters';
 }

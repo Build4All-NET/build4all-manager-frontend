@@ -57,26 +57,17 @@ class _OwnerRegisterEmailScreenState extends State<OwnerRegisterEmailScreen> {
   }
 
   String? _passwordValidator(String? v, AppLocalizations l10n) {
-    final val = (v ?? '').trim();
+  final val = (v ?? '').trim();
 
-    if (val.isEmpty) return l10n.errPasswordRequired;
+  if (val.isEmpty) return l10n.errPasswordRequired;
 
-    // ✅ length 6..8
-    if (val.length < 8) {
-      return l10n.errPasswordLen6to8; // NEW KEY
-    }
-
-    // ✅ must contain at least 1 special char
-    final hasSpecial = RegExp(
-      r'[!@#$%^&*()_\+\-=\{\}\[\]:;"\|\\<>,\.\?\/]',
-    ).hasMatch(val);
-
-    if (!hasSpecial) {
-      return l10n.errPasswordNeedSpecial; // NEW KEY
-    }
-
-    return null;
+  // ONLY RULE: at least 6 characters (no special, no number)
+  if (val.length < 6) {
+    return l10n.hintPasswordRuleOwner; // NEW KEY
   }
+
+  return null;
+}
 
   void _submit(AppLocalizations l10n) {
     final form = _form.currentState;
