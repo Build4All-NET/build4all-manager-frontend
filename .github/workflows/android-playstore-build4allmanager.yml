@@ -66,6 +66,36 @@ jobs:
           channel: stable
           cache: true
 
+      # --------------------------------------------------
+      # Android SDK — accept licences & pre-install
+      # platforms so Gradle never attempts a mid-build
+      # download (which fails with corrupt ZIP errors)
+      # --------------------------------------------------
+      - name: Accept Android SDK licenses
+        shell: bash
+        run: |
+          set -euo pipefail
+          yes | "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --licenses || true
+
+      - name: Pre-install Android SDK platforms & build-tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          SDKMANAGER="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
+
+          echo "📦 Installing Android SDK components..."
+
+          "$SDKMANAGER" --install \
+            "platforms;android-33" \
+            "platforms;android-34" \
+            "build-tools;33.0.2" \
+            "build-tools;34.0.0"
+
+          echo "✅ SDK components installed"
+
+      # --------------------------------------------------
+      # Flutter deps
+      # --------------------------------------------------
       - name: Flutter pub get
         run: flutter pub get
 
@@ -180,5 +210,4 @@ jobs:
           releaseFiles: build/app/outputs/bundle/release/*.aab
           track: ${{ github.event.inputs.track || 'internal' }}
           status: ${{ github.event.inputs.release_status || 'draft' }}
-
           whatsNewDirectory: distribution/whatsnew
