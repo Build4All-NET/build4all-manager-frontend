@@ -2096,4 +2096,48 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get hintPasswordRuleOwner => 'كلمة المرور يجب أن تكون على الأقل 6 أحرف.';
+
+  @override
+  String get owner_projects_filter_platform_ready => 'جاهزية المنصة';
+
+  @override
+  String get owner_projects_filter_environment => 'البيئة';
+
+  @override
+  String get owner_projects_filter_all => 'الكل';
+
+  @override
+  String get owner_projects_filter_android => 'أندرويد';
+
+  @override
+  String get owner_projects_filter_ios => 'iOS';
+
+  @override
+  String get owner_projects_filter_local => 'محلي';
+
+  @override
+  String get owner_projects_filter_test => 'اختبار';
+
+  @override
+  String get owner_projects_filter_production => 'إنتاج';
+
+  @override
+  String get owner_projects_filters_show => 'إظهار الفلاتر';
+
+  @override
+  String get owner_projects_filters_hide => 'إخفاء الفلاتر';
+
+  @override
+  String get owner_projects_load_more => 'تحميل المزيد';
+
+  @override
+  String get owner_projects_rebuild_queued => 'تمت إضافة إعادة البناء إلى قائمة الانتظار';
+
+  @override
+  String owner_projects_rebuild_failed(String error) {
+    return 'فشل إعادة البناء: $error';
+  }
+
+  @override
+  String get owner_projects_pick_template_first => 'اختر قالب مشروع أولاً ';
 }

@@ -4218,6 +4218,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Password must be at least 6 characters'**
   String get hintPasswordRuleOwner;
+
+  /// No description provided for @owner_projects_filter_platform_ready.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform Ready'**
+  String get owner_projects_filter_platform_ready;
+
+  /// No description provided for @owner_projects_filter_environment.
+  ///
+  /// In en, this message translates to:
+  /// **'Environment'**
+  String get owner_projects_filter_environment;
+
+  /// No description provided for @owner_projects_filter_all.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get owner_projects_filter_all;
+
+  /// No description provided for @owner_projects_filter_android.
+  ///
+  /// In en, this message translates to:
+  /// **'Android'**
+  String get owner_projects_filter_android;
+
+  /// No description provided for @owner_projects_filter_ios.
+  ///
+  /// In en, this message translates to:
+  /// **'iOS'**
+  String get owner_projects_filter_ios;
+
+  /// No description provided for @owner_projects_filter_local.
+  ///
+  /// In en, this message translates to:
+  /// **'Local'**
+  String get owner_projects_filter_local;
+
+  /// No description provided for @owner_projects_filter_test.
+  ///
+  /// In en, this message translates to:
+  /// **'Test'**
+  String get owner_projects_filter_test;
+
+  /// No description provided for @owner_projects_filter_production.
+  ///
+  /// In en, this message translates to:
+  /// **'Production'**
+  String get owner_projects_filter_production;
+
+  /// No description provided for @owner_projects_filters_show.
+  ///
+  /// In en, this message translates to:
+  /// **'Show filters'**
+  String get owner_projects_filters_show;
+
+  /// No description provided for @owner_projects_filters_hide.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide filters'**
+  String get owner_projects_filters_hide;
+
+  /// No description provided for @owner_projects_load_more.
+  ///
+  /// In en, this message translates to:
+  /// **'Load more'**
+  String get owner_projects_load_more;
+
+  /// No description provided for @owner_projects_rebuild_queued.
+  ///
+  /// In en, this message translates to:
+  /// **'Rebuild queued'**
+  String get owner_projects_rebuild_queued;
+
+  /// No description provided for @owner_projects_rebuild_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Rebuild failed: {error}'**
+  String owner_projects_rebuild_failed(String error);
+
+  /// No description provided for @owner_projects_pick_template_first.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a project template first '**
+  String get owner_projects_pick_template_first;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

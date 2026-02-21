@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:build4all_manager/l10n/app_localizations.dart';
 
 import 'package:build4all_manager/features/owner/ownernav/presentation/controllers/owner_nav_cubit.dart';
+import 'package:go_router/go_router.dart';
 import '../widgets/owner_pill_nav_bar.dart';
 
 enum OwnerMenuType { top, bottom, drawer }
@@ -25,34 +26,35 @@ class OwnerDestination {
   final IconData icon;
   final IconData selectedIcon;
   final String label;
-  final Widget page;
+  final String route; // ✅ add route
 
   const OwnerDestination({
     required this.icon,
     required this.selectedIcon,
     required this.label,
-    required this.page,
+    required this.route,
   });
 }
 
 class OwnerNavShell extends StatefulWidget {
-  final String? backendMenuType; // "top" | "bottom" | "drawer"
-  final OwnerMenuType? override; // force locally
+  final String? backendMenuType;
+  final OwnerMenuType? override;
   final List<OwnerDestination> destinations;
-
-  /// Default tab index if cubit not yet set
   final int initialIndex;
+
+  // ✅ NEW: the routed page
+  final Widget child;
 
   const OwnerNavShell({
     super.key,
     required this.destinations,
+    required this.child,
     this.backendMenuType,
     this.override,
     this.initialIndex = 0,
   });
 
-
-
+ 
   State<OwnerNavShell> createState() => _OwnerNavShellState();
 }
 
@@ -80,6 +82,21 @@ class _OwnerNavShellState extends State<OwnerNavShell>
       _attachTabIfNeeded(idx);
     }
   }
+
+  void _goTo(int i) {
+  final pages = widget.destinations;
+  if (pages.isEmpty) return;
+
+  final safe = i.clamp(0, pages.length - 1);
+  final dest = pages[safe];
+
+  context.read<OwnerNavCubit>().setIndex(safe);
+
+  final loc = GoRouterState.of(context).uri.toString();
+  if (!loc.startsWith(dest.route)) {
+    context.go(dest.route);
+  }
+}
 
   void _attachTabIfNeeded(int currentIndex) {
     _tab?.dispose();
@@ -128,14 +145,13 @@ class _OwnerNavShellState extends State<OwnerNavShell>
           _tab!.index = index;
         }
 
-        final body = AnimatedSwitcher(
-          duration: const Duration(milliseconds: 220),
-          child: IndexedStack(
-            key: ValueKey(index),
-            index: index,
-            children: [for (final d in pages) d.page],
-          ),
-        );
+    final body = AnimatedSwitcher(
+  duration: const Duration(milliseconds: 220),
+  child: KeyedSubtree(
+    key: ValueKey(GoRouterState.of(context).uri.toString()),
+    child: widget.child,
+  ),
+);
 
         switch (_mode) {
           case OwnerMenuType.top:
@@ -182,8 +198,7 @@ class _OwnerNavShellState extends State<OwnerNavShell>
                     children: [
                       _OwnerRail(
                         index: index,
-                        onSelect: (i) =>
-                            context.read<OwnerNavCubit>().setIndex(i),
+                        onSelect: (i) => _goTo(i),
                         pages: pages,
                       ),
                       const VerticalDivider(width: 1),
@@ -197,24 +212,24 @@ class _OwnerNavShellState extends State<OwnerNavShell>
             return Scaffold(
               key: _scaffoldKey,
               body: SafeArea(child: body),
-              bottomNavigationBar: OwnerPillNavBar(
-                currentIndex: index,
-                onTap: (i) => context.read<OwnerNavCubit>().setIndex(i),
-                items: [
-                  OwnerPillNavItem(
-                    icon: const Text('🏠', style: TextStyle(fontSize: 22)),
-                    label: l10n.owner_nav_home,
-                  ),
-                  OwnerPillNavItem(
-                    icon: const Text('🧮', style: TextStyle(fontSize: 22)),
-                    label: l10n.owner_nav_projects,
-                  ),
-                  OwnerPillNavItem(
-                    icon: const Text('👤', style: TextStyle(fontSize: 22)),
-                    label: l10n.owner_nav_profile,
-                  ),
-                ],
-              ),
+             bottomNavigationBar: OwnerPillNavBar(
+  currentIndex: index,
+  onTap: (i) => _goTo(i),
+  items: [
+    OwnerPillNavItem(
+      icon: const Text('🏠', style: TextStyle(fontSize: 22)),
+      label: l10n.owner_nav_home,
+    ),
+    OwnerPillNavItem(
+      icon: const Text('🧮', style: TextStyle(fontSize: 22)),
+      label: l10n.owner_nav_projects,
+    ),
+    OwnerPillNavItem(
+      icon: const Text('👤', style: TextStyle(fontSize: 22)),
+      label: l10n.owner_nav_profile,
+    ),
+  ],
+),
             );
         }
       },
@@ -231,10 +246,10 @@ class _OwnerNavShellState extends State<OwnerNavShell>
 
     return NavigationDrawer(
       selectedIndex: index,
-      onDestinationSelected: (i) {
-        context.read<OwnerNavCubit>().setIndex(i);
-        Navigator.of(context).maybePop();
-      },
+    onDestinationSelected: (i) {
+  _goTo(i);
+  Navigator.of(context).maybePop();
+},
       children: [
         DrawerHeader(
           decoration: BoxDecoration(

@@ -890,6 +890,30 @@
   "common_submit": "Submit",
    "errPasswordLen6to8": "Password must be at least 6 characters",
   "errPasswordNeedSpecial": "Password must include at least 1 special character (e.g. !@#).",
-  "hintPasswordRuleOwner": "Password must be at least 6 characters"
+  "hintPasswordRuleOwner": "Password must be at least 6 characters",
+   "owner_projects_filter_platform_ready": "Platform Ready",
+  "owner_projects_filter_environment": "Environment",
+
+  "owner_projects_filter_all": "All",
+  "owner_projects_filter_android": "Android",
+  "owner_projects_filter_ios": "iOS",
+  "owner_projects_filter_local": "Local",
+  "owner_projects_filter_test": "Test",
+  "owner_projects_filter_production": "Production",
+
+  "owner_projects_filters_show": "Show filters",
+  "owner_projects_filters_hide": "Hide filters",
+
+  "owner_projects_load_more": "Load more",
+
+  "owner_projects_rebuild_queued": "Rebuild queued",
+  "owner_projects_rebuild_failed": "Rebuild failed: {error}",
+  "@owner_projects_rebuild_failed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+
+  "owner_projects_pick_template_first": "Pick a project template first "
  
 }

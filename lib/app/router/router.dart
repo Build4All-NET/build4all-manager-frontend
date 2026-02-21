@@ -1,10 +1,12 @@
 import 'package:build4all_manager/app/nav_key.dart';
 import 'package:build4all_manager/app/router/super_admin_entry_loader.dart';
+
 import 'package:build4all_manager/features/owner/ownerhome/data/static_project_models.dart';
 import 'package:build4all_manager/features/owner/ownerhome/presentation/screens/owner_project_details_screen.dart';
 import 'package:build4all_manager/features/owner/ownerhome/presentation/screens/owner_requests_list_screen.dart';
 import 'package:build4all_manager/features/owner/ownernav/presentation/controllers/owner_nav_cubit.dart';
 import 'package:build4all_manager/features/owner/ownerrequests/presentation/screens/owner_requests_screen.dart';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:dio/dio.dart';
@@ -44,6 +46,51 @@ import 'package:build4all_manager/core/network/dio_client.dart';
 // JWT helpers
 import 'package:build4all_manager/core/auth/jwt_claims.dart';
 
+/// ===============================================================
+/// Owner session scope (ownerId/dio available everywhere under shell)
+/// ===============================================================
+class OwnerSessionScope extends InheritedWidget {
+  final int ownerId;
+  final String? ownerName;
+  final Dio dio;
+  final String backendMenuType;
+
+  const OwnerSessionScope({
+    super.key,
+    required this.ownerId,
+    required this.dio,
+    required this.backendMenuType,
+    this.ownerName,
+    required super.child,
+  });
+
+  static OwnerSessionScope of(BuildContext context) {
+    final s = context.dependOnInheritedWidgetOfExactType<OwnerSessionScope>();
+    assert(s != null, 'OwnerSessionScope not found in context');
+    return s!;
+  }
+
+  @override
+  bool updateShouldNotify(covariant OwnerSessionScope oldWidget) => false;
+}
+
+int? _asInt(dynamic v) {
+  if (v == null) return null;
+  if (v is int) return v;
+  if (v is num) return v.toInt();
+  final s = v.toString().trim();
+  if (s.isEmpty) return null;
+  return int.tryParse(s) ?? num.tryParse(s)?.toInt();
+}
+
+String? _asNonEmptyStr(dynamic v) {
+  final s = (v ?? '').toString().trim();
+  return s.isEmpty ? null : s;
+}
+
+/// ===============================================================
+/// Owner Register Bloc wrapper
+/// ===============================================================
 Widget _withOwnerRegBloc(Widget child) {
   final IAuthRepository repo =
       AuthRepositoryImpl(api: AuthApi(), jwtStore: JwtLocalDataSource());
@@ -57,6 +104,9 @@ Widget _withOwnerRegBloc(Widget child) {
   );
 }
 
+/// ===============================================================
+/// Public paths (no token)
+/// ===============================================================
 const _publicPaths = <String>{
   '/',
   '/login',
@@ -66,6 +116,8 @@ const _publicPaths = <String>{
   '/owner/register/profile',
 };
 
+final _ownerShellKey = GlobalKey<NavigatorState>(debugLabel: 'owner-shell');
+
 final router = GoRouter(
   navigatorKey: appNavKey,
   initialLocation: '/',
@@ -73,59 +125,84 @@ final router = GoRouter(
     GoRoute(path: '/', builder: (_, __) => const SplashGate()),
     GoRoute(path: '/login', builder: (_, __) => const AppLoginScreen()),
     GoRoute(path: '/loginScreen', builder: (_, __) => const AppLoginScreen()),
-    GoRoute(
-      path: '/manager',
-      builder: (_, __) => const SuperAdminEntryLoader(),
-    ),
-    GoRoute(path: '/owner', builder: (_, __) => const _OwnerEntryLoader()),
-    GoRoute(
-      path: '/owner/projects',
-      builder: (_, __) => const _OwnerProjectsBuilder(),
-    ),
-    GoRoute(
-      path: '/owner/project/:id',
-      builder: (context, state) {
-        final idStr = state.pathParameters['id']!;
-        final id = int.tryParse(idStr) ?? projectTemplates.first.id;
-        final tpl = projectTemplates.firstWhere(
-          (t) => t.id == id,
-          orElse: () => projectTemplates.first,
-        );
-        return _OwnerProjectDetailsBuilder(tpl: tpl);
-      },
-    ),
-    GoRoute(
-      path: '/owner/requests/list',
-      builder: (context, state) {
-        final extra = state.extra as Map<String, dynamic>?;
-        final ownerId = extra?['ownerId'] as int?;
-        final dio = extra?['dio'] as Dio?;
+    GoRoute(path: '/manager', builder: (_, __) => const SuperAdminEntryLoader()),
 
-        if (ownerId == null || dio == null) {
-          return const Scaffold(
-            body: Center(child: Text('Missing navigation params')),
-          );
-        }
+    // keep /owner stable (redirect into shell)
+    GoRoute(path: '/owner', redirect: (_, __) => '/owner/home'),
 
-        return OwnerRequestsListScreen(ownerId: ownerId, dio: dio);
-      },
+    // ✅ OWNER SHELL: nav stays on all /owner/... pages
+    ShellRoute(
+      navigatorKey: _ownerShellKey,
+      builder: (context, state, child) => _OwnerShellLoader(child: child),
+      routes: [
+        GoRoute(
+          path: '/owner/home',
+          builder: (context, state) {
+            final s = OwnerSessionScope.of(context);
+            return OwnerHomeScreen(
+              ownerId: s.ownerId,
+              dio: s.dio,
+              ownerName: s.ownerName,
+            );
+          },
+        ),
+        GoRoute(
+          path: '/owner/projects',
+          builder: (context, state) {
+            final s = OwnerSessionScope.of(context);
+            return OwnerProjectsScreen(ownerId: s.ownerId, dio: s.dio);
+          },
+        ),
+        GoRoute(
+          path: '/owner/profile',
+          builder: (context, state) {
+            final s = OwnerSessionScope.of(context);
+            return OwnerProfileScreen(dio: s.dio);
+          },
+        ),
+        GoRoute(
+          path: '/owner/project/:id',
+          builder: (context, state) {
+            final s = OwnerSessionScope.of(context);
+
+            final idStr =
+                state.pathParameters['id'] ?? '${projectTemplates.first.id}';
+            final id = int.tryParse(idStr) ?? projectTemplates.first.id;
+
+            final tpl = projectTemplates.firstWhere(
+              (t) => t.id == id,
+              orElse: () => projectTemplates.first,
+            );
+
+            return OwnerProjectDetailsScreen(tpl: tpl, ownerId: s.ownerId);
+          },
+        ),
+        GoRoute(
+          path: '/owner/requests/list',
+          builder: (context, state) {
+            final s = OwnerSessionScope.of(context);
+            return OwnerRequestsListScreen(ownerId: s.ownerId, dio: s.dio);
+          },
+        ),
+        GoRoute(
+          path: '/owner/requests',
+          builder: (context, state) {
+            final s = OwnerSessionScope.of(context);
+            final extra = (state.extra is Map) ? state.extra as Map : const {};
+
+            return OwnerRequestScreen(
+              baseUrl: s.dio.options.baseUrl,
+              ownerId: s.ownerId,
+              dio: s.dio,
+              initialProjectId: _asInt(extra['projectId']),
+              initialAppName: _asNonEmptyStr(extra['appName']),
+            );
+          },
+        ),
+      ],
     ),
-    GoRoute(
-      path: '/owner/requests',
-      builder: (context, state) {
-        final extra = (state.extra ?? const {}) as Map;
-        final int? initialProjectId = extra['projectId'] as int?;
-        final String? initialAppName = extra['appName'] as String?;
-        return _OwnerRequestsBuilder(
-          initialProjectId: initialProjectId,
-          initialAppName: initialAppName,
-        );
-      },
-    ),
-    GoRoute(
-      path: '/owner/profile',
-      builder: (_, __) => const _OwnerEntryLoader(initialIndex: 2),
-    ),
+
+    // ✅ owner register is OUTSIDE shell (public)
     GoRoute(
       path: '/owner/register',
       builder: (_, __) => _withOwnerRegBloc(const OwnerRegisterEmailScreen()),
@@ -156,6 +233,9 @@ final router = GoRouter(
   redirect: _authRedirect,
 );
 
+/// ===============================================================
+/// Auth Redirect
+/// ===============================================================
 Future<String?> _authRedirect(BuildContext context, GoRouterState state) async {
   final store = JwtLocalDataSource();
   final (token, roleRaw) = await store.read();
@@ -168,38 +248,22 @@ Future<String?> _authRedirect(BuildContext context, GoRouterState state) async {
     return isPublic ? null : '/login';
   }
 
-  final goingToAuth =
-      loc.startsWith('/login') || loc.startsWith('/owner/register');
+  final goingToAuth = loc.startsWith('/login') || loc.startsWith('/owner/register');
+  if (goingToAuth) return role == 'SUPER_ADMIN' ? '/manager' : '/owner/home';
 
-  if (goingToAuth) return role == 'SUPER_ADMIN' ? '/manager' : '/owner';
-
-  if (role == 'SUPER_ADMIN' && (loc == '/owner' || loc == '/home')) {
+  if (role == 'SUPER_ADMIN' && (loc.startsWith('/owner') || loc == '/home')) {
     return '/manager';
   }
-  if (role != 'SUPER_ADMIN' && (loc == '/manager' || loc == '/home')) {
-    return '/owner';
+  if (role != 'SUPER_ADMIN' && (loc.startsWith('/manager') || loc == '/home')) {
+    return '/owner/home';
   }
 
   return null;
 }
 
-Future<int?> _loadOwnerIdFromJwt() async {
-  try {
-    final store = JwtLocalDataSource();
-    final (token, _) = await store.read();
-    if (token.isEmpty) return null;
-
-    final claims = JwtClaims.decode(token);
-    final id =
-        JwtClaims.extractInt(claims, ['id', 'ownerId', 'adminId', 'sub']);
-    return id;
-  } catch (_) {
-    return null;
-  }
-}
-
-/// ✅ Better: builds a display name from various claim keys.
-/// Refuses to return emails as "name".
+/// ===============================================================
+/// JWT helpers
+/// ===============================================================
 String? _extractDisplayName(Map<String, dynamic>? claims) {
   if (claims == null) return null;
 
@@ -218,7 +282,6 @@ String? _extractDisplayName(Map<String, dynamic>? claims) {
       pick(claims['familyName']) ??
       pick(claims['lastname']);
 
-  // Prefer first + last if available
   String? fullFromParts;
   if (first != null && last != null) {
     fullFromParts = '$first $last'.trim();
@@ -226,7 +289,6 @@ String? _extractDisplayName(Map<String, dynamic>? claims) {
     fullFromParts = first;
   }
 
-  // Fallback keys
   final raw = fullFromParts ??
       pick(claims['name']) ??
       pick(claims['fullName']) ??
@@ -238,7 +300,6 @@ String? _extractDisplayName(Map<String, dynamic>? claims) {
 
   if (raw == null) return null;
 
-  // refuse email as a display name
   final isEmail = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(raw);
   if (isEmail) return null;
 
@@ -266,183 +327,120 @@ Future<(int?, String?)> _loadOwnerProfileFromJwt() async {
   }
 }
 
-class _OwnerEntryLoader extends StatelessWidget {
-  final int initialIndex;
-  const _OwnerEntryLoader({this.initialIndex = 0});
+/// ===============================================================
+/// Owner Shell Loader
+/// - builds OwnerNavShell once
+/// - keeps nav visible always
+/// - syncs selected tab with route
+/// - navigates when tab changes
+/// ===============================================================
+class _OwnerShellLoader extends StatefulWidget {
+  final Widget child;
+  const _OwnerShellLoader({required this.child});
+
+  @override
+  State<_OwnerShellLoader> createState() => _OwnerShellLoaderState();
+}
+
+class _OwnerShellLoaderState extends State<_OwnerShellLoader> {
+  late final OwnerNavCubit _nav;
+
+  @override
+  void initState() {
+    super.initState();
+    _nav = OwnerNavCubit(initialIndex: 0);
+  }
+
+  @override
+  void dispose() {
+    _nav.close();
+    super.dispose();
+  }
+
+  int _indexForLoc(String loc) {
+    if (loc.startsWith('/owner/projects')) return 1;
+    if (loc.startsWith('/owner/profile')) return 2;
+    return 0; // home + requests + details
+  }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+
     return FutureBuilder<(int?, String?)>(
       future: _loadOwnerProfileFromJwt(),
       builder: (context, snap) {
         if (snap.connectionState != ConnectionState.done) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
+          return const Scaffold(body: Center(child: CircularProgressIndicator()));
         }
 
         final (ownerId, ownerName) = snap.data ?? (null, null);
-
         if (ownerId == null) {
-          WidgetsBinding.instance
-              .addPostFrameCallback((_) => context.go('/login'));
-          return Scaffold(body: Center(child: Text(l10n.owner_nav_profile)));
+          WidgetsBinding.instance.addPostFrameCallback((_) => context.go('/login'));
+          return Scaffold(body: Center(child: Text(l10n.owner_nav_home)));
         }
 
         final Dio dio = DioClient.ensure();
-        return OwnerEntry(
-          ownerId: ownerId,
-          ownerName: ownerName,
-          dio: dio,
-          backendMenuType: 'bottom',
-          initialIndex: initialIndex,
-        );
-      },
-    );
-  }
-}
 
-class _OwnerProjectsBuilder extends StatelessWidget {
-  const _OwnerProjectsBuilder();
+        // if you later fetch menu type from backend config, plug it here
+        final backendMenuType = 'bottom';
 
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<int?>(
-      future: _loadOwnerIdFromJwt(),
-      builder: (context, snap) {
-        if (snap.connectionState != ConnectionState.done) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
-        }
-        final ownerId = snap.data;
-        if (ownerId == null) {
-          WidgetsBinding.instance
-              .addPostFrameCallback((_) => context.go('/login'));
-          return const SizedBox.shrink();
-        }
-        final Dio dio = DioClient.ensure();
-        return OwnerProjectsScreen(ownerId: ownerId, dio: dio);
-      },
-    );
-  }
-}
+        final loc = GoRouterState.of(context).uri.toString();
+        final idx = _indexForLoc(loc);
 
-class _OwnerProjectDetailsBuilder extends StatelessWidget {
-  final ProjectTemplate tpl;
-  const _OwnerProjectDetailsBuilder({required this.tpl});
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<int?>(
-      future: _loadOwnerIdFromJwt(),
-      builder: (context, snap) {
-        if (snap.connectionState != ConnectionState.done) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
-        }
-        final ownerId = snap.data;
-        if (ownerId == null) {
-          WidgetsBinding.instance
-              .addPostFrameCallback((_) => context.go('/login'));
-          return const SizedBox.shrink();
-        }
-        return OwnerProjectDetailsScreen(tpl: tpl, ownerId: ownerId);
-      },
-    );
-  }
-}
-
-class OwnerEntry extends StatelessWidget {
-  final String? backendMenuType;
-  final int ownerId;
-  final String? ownerName;
-  final Dio dio;
-  final int initialIndex;
-
-  const OwnerEntry({
-    super.key,
-    required this.ownerId,
-    required this.dio,
-    this.backendMenuType,
-    this.ownerName,
-    this.initialIndex = 0,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-
-    final destinations = <OwnerDestination>[
-      OwnerDestination(
-        icon: Icons.home_outlined,
-        selectedIcon: Icons.home_rounded,
-        label: l10n.owner_nav_home,
-        page: OwnerHomeScreen(
-          ownerId: ownerId,
-          dio: dio,
-          ownerName: ownerName,
-        ),
-      ),
-      OwnerDestination(
-        icon: Icons.apps_outlined,
-        selectedIcon: Icons.apps_rounded,
-        label: l10n.owner_nav_projects,
-        page: OwnerProjectsScreen(ownerId: ownerId, dio: dio),
-      ),
-      OwnerDestination(
-        icon: Icons.person_outline,
-        selectedIcon: Icons.person,
-        label: l10n.owner_nav_profile,
-        page: OwnerProfileScreen( dio: dio),
-      ),
-    ];
-
-    // ✅ FIX: respect initialIndex (no more hardcoded 0)
-    return BlocProvider(
-      create: (_) => OwnerNavCubit(initialIndex: initialIndex),
-      child: OwnerNavShell(
-        backendMenuType: backendMenuType,
-        destinations: destinations,
-        initialIndex: initialIndex,
-      ),
-    );
-  }
-}
-
-class _OwnerRequestsBuilder extends StatelessWidget {
-  final int? initialProjectId;
-  final String? initialAppName;
-  const _OwnerRequestsBuilder({
-    this.initialProjectId,
-    this.initialAppName,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<int?>(
-      future: _loadOwnerIdFromJwt(),
-      builder: (context, snap) {
-        if (snap.connectionState != ConnectionState.done) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
-        }
-        final ownerId = snap.data;
-        if (ownerId == null) {
-          WidgetsBinding.instance
-              .addPostFrameCallback((_) => context.go('/login'));
-          return const SizedBox.shrink();
+        // keep cubit synced with current route
+        if (_nav.state.index != idx) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+            if (_nav.state.index != idx) _nav.setIndex(idx);
+          });
         }
 
-        return OwnerRequestScreen(
-          baseUrl: DioClient.ensure().options.baseUrl,
-          ownerId: ownerId,
-          dio: DioClient.ensure(),
-          initialProjectId: initialProjectId,
-          initialAppName: initialAppName,
+        // ✅ must match your NEW OwnerDestination signature (route required)
+        final destinations = <OwnerDestination>[
+          OwnerDestination(
+            icon: Icons.home_outlined,
+            selectedIcon: Icons.home_rounded,
+            label: l10n.owner_nav_home,
+            route: '/owner/home',
+          ),
+          OwnerDestination(
+            icon: Icons.apps_outlined,
+            selectedIcon: Icons.apps_rounded,
+            label: l10n.owner_nav_projects,
+            route: '/owner/projects',
+          ),
+          OwnerDestination(
+            icon: Icons.person_outline,
+            selectedIcon: Icons.person,
+            label: l10n.owner_nav_profile,
+            route: '/owner/profile',
+          ),
+        ];
+
+        return BlocProvider.value(
+          value: _nav,
+          child: BlocListener<OwnerNavCubit, OwnerNavState>(
+            listenWhen: (p, c) => p.index != c.index,
+            listener: (context, st) {
+              final i = st.index.clamp(0, destinations.length - 1);
+              final target = destinations[i].route;
+              final current = GoRouterState.of(context).uri.toString();
+              if (!current.startsWith(target)) context.go(target);
+            },
+            child: OwnerSessionScope(
+              ownerId: ownerId,
+              ownerName: ownerName,
+              dio: dio,
+              backendMenuType: backendMenuType,
+              child: OwnerNavShell(
+                backendMenuType: backendMenuType,
+                destinations: destinations,
+                initialIndex: idx,
+                child: widget.child, // ✅ required by your updated shell
+              ),
+            ),
+          ),
         );
       },
     );

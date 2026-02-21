@@ -2096,4 +2096,48 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get hintPasswordRuleOwner => 'Le mot de passe doit contenir au moins 6 caractères.';
+
+  @override
+  String get owner_projects_filter_platform_ready => 'Plateforme prête';
+
+  @override
+  String get owner_projects_filter_environment => 'Environnement';
+
+  @override
+  String get owner_projects_filter_all => 'Tous';
+
+  @override
+  String get owner_projects_filter_android => 'Android';
+
+  @override
+  String get owner_projects_filter_ios => 'iOS';
+
+  @override
+  String get owner_projects_filter_local => 'Local';
+
+  @override
+  String get owner_projects_filter_test => 'Test';
+
+  @override
+  String get owner_projects_filter_production => 'Production';
+
+  @override
+  String get owner_projects_filters_show => 'Afficher les filtres';
+
+  @override
+  String get owner_projects_filters_hide => 'Masquer les filtres';
+
+  @override
+  String get owner_projects_load_more => 'Charger plus';
+
+  @override
+  String get owner_projects_rebuild_queued => 'Rebuild mis en file d’attente';
+
+  @override
+  String owner_projects_rebuild_failed(String error) {
+    return 'Échec du rebuild : $error';
+  }
+
+  @override
+  String get owner_projects_pick_template_first => 'Choisissez d’abord un modèle de projet ';
 }

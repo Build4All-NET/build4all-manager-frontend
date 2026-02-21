@@ -2096,4 +2096,48 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get hintPasswordRuleOwner => 'Password must be at least 6 characters';
+
+  @override
+  String get owner_projects_filter_platform_ready => 'Platform Ready';
+
+  @override
+  String get owner_projects_filter_environment => 'Environment';
+
+  @override
+  String get owner_projects_filter_all => 'All';
+
+  @override
+  String get owner_projects_filter_android => 'Android';
+
+  @override
+  String get owner_projects_filter_ios => 'iOS';
+
+  @override
+  String get owner_projects_filter_local => 'Local';
+
+  @override
+  String get owner_projects_filter_test => 'Test';
+
+  @override
+  String get owner_projects_filter_production => 'Production';
+
+  @override
+  String get owner_projects_filters_show => 'Show filters';
+
+  @override
+  String get owner_projects_filters_hide => 'Hide filters';
+
+  @override
+  String get owner_projects_load_more => 'Load more';
+
+  @override
+  String get owner_projects_rebuild_queued => 'Rebuild queued';
+
+  @override
+  String owner_projects_rebuild_failed(String error) {
+    return 'Rebuild failed: $error';
+  }
+
+  @override
+  String get owner_projects_pick_template_first => 'Pick a project template first ';
 }

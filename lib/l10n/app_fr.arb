@@ -977,6 +977,30 @@
   "common_submit": "Envoyer",
    "errPasswordLen6to8": "Le mot de passe doit contenir au moins 6 caractères.",
   "errPasswordNeedSpecial": "Le mot de passe doit contenir au moins 1 caractère spécial (ex: !@#).",
-  "hintPasswordRuleOwner": "Le mot de passe doit contenir au moins 6 caractères."
+  "hintPasswordRuleOwner": "Le mot de passe doit contenir au moins 6 caractères.",
+  "owner_projects_filter_platform_ready": "Plateforme prête",
+  "owner_projects_filter_environment": "Environnement",
+
+  "owner_projects_filter_all": "Tous",
+  "owner_projects_filter_android": "Android",
+  "owner_projects_filter_ios": "iOS",
+  "owner_projects_filter_local": "Local",
+  "owner_projects_filter_test": "Test",
+  "owner_projects_filter_production": "Production",
+
+  "owner_projects_filters_show": "Afficher les filtres",
+  "owner_projects_filters_hide": "Masquer les filtres",
+
+  "owner_projects_load_more": "Charger plus",
+
+  "owner_projects_rebuild_queued": "Rebuild mis en file d’attente",
+  "owner_projects_rebuild_failed": "Échec du rebuild : {error}",
+  "@owner_projects_rebuild_failed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+
+  "owner_projects_pick_template_first": "Choisissez d’abord un modèle de projet "
   
 }

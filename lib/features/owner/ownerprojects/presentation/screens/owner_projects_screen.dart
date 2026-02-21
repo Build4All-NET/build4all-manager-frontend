@@ -3,6 +3,7 @@ import 'package:build4all_manager/features/owner/common/data/repositories/owner_
 import 'package:build4all_manager/features/owner/common/data/services/owner_api.dart';
 import 'package:build4all_manager/features/owner/common/domain/entities/owner_project.dart';
 import 'package:build4all_manager/features/owner/common/domain/usecases/get_my_apps_uc.dart';
+import 'package:build4all_manager/features/owner/ownernav/presentation/controllers/owner_nav_cubit.dart';
 import 'package:build4all_manager/features/owner/ownerprojects/presentation/widgets/project_tile.dart';
 import 'package:build4all_manager/features/owner/publish/data/services/owner_publish_api.dart';
 import 'package:build4all_manager/l10n/app_localizations.dart';
@@ -86,6 +87,7 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
 
   Future<void> _rebuildAndroid(BuildContext ctx, OwnerProject p) async {
     final id = p.linkId;
+    final l10n = AppLocalizations.of(ctx)!;
 
     if (mounted) {
       setState(() {
@@ -97,7 +99,7 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
     try {
       await _repo.rebuildAndroid(linkId: id);
 
-      if (ctx.mounted) AppToast.success(ctx, 'Rebuild queued');
+      if (ctx.mounted) AppToast.success(ctx, l10n.owner_projects_rebuild_queued);
       _bloc.add(OwnerProjectsRefreshed(widget.ownerId));
     } catch (e) {
       if (mounted) {
@@ -106,12 +108,15 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
           _androidErrOverride.remove(id);
         });
       }
-      if (ctx.mounted) AppToast.error(ctx, 'Rebuild failed: $e');
+      if (ctx.mounted) {
+        AppToast.error(ctx, l10n.owner_projects_rebuild_failed(e.toString()));
+      }
     }
   }
 
   Future<void> _rebuildIos(BuildContext ctx, OwnerProject p) async {
     final id = p.linkId;
+    final l10n = AppLocalizations.of(ctx)!;
 
     if (mounted) {
       setState(() {
@@ -123,7 +128,7 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
     try {
       await _repo.rebuildIos(linkId: id);
 
-      if (ctx.mounted) AppToast.success(ctx, 'Rebuild queued');
+      if (ctx.mounted) AppToast.success(ctx, l10n.owner_projects_rebuild_queued);
       _bloc.add(OwnerProjectsRefreshed(widget.ownerId));
     } catch (e) {
       if (mounted) {
@@ -132,7 +137,9 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
           _iosErrOverride.remove(id);
         });
       }
-      if (ctx.mounted) AppToast.error(ctx, 'Rebuild failed: $e');
+      if (ctx.mounted) {
+        AppToast.error(ctx, l10n.owner_projects_rebuild_failed(e.toString()));
+      }
     }
   }
 
@@ -243,8 +250,7 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
           body: SafeArea(
             child: LayoutBuilder(
               builder: (context, viewport) {
-                final double maxContentWidth =
-                    _maxContentWidth(viewport.maxWidth);
+                final double maxContentWidth = _maxContentWidth(viewport.maxWidth);
                 final double hPad = _contentHPad(viewport.maxWidth);
 
                 return Align(
@@ -273,10 +279,11 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
                             },
                           ),
 
-                          // Filters (NO AnimatedSize = NO semantics drama)
+                          // Filters
                           if (_showFilters) ...[
                             const SizedBox(height: 10),
                             _FiltersBar(
+                              l10n: AppLocalizations.of(context)!,
                               platform: _platform,
                               env: _env,
                               onPlatform: (v) {
@@ -310,12 +317,11 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
                                 final int visible =
                                     total == 0 ? 0 : _visibleCount.clamp(0, total);
 
-                                // ✅ Always scrollable so RefreshIndicator works even on empty/error
                                 return RefreshIndicator(
                                   onRefresh: _refresh,
                                   child: () {
                                     if (state.loading) {
-                                      return _ListSkeleton(count: 6);
+                                      return const _ListSkeleton(count: 6);
                                     }
 
                                     if (state.error != null) {
@@ -342,11 +348,10 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
                                       );
                                     }
 
-                                    // ✅ normal ListView (stable)
                                     return ListView.separated(
                                       physics: const AlwaysScrollableScrollPhysics(),
                                       padding: const EdgeInsets.only(bottom: 12),
-                                      itemCount: visible + 1, // + footer
+                                      itemCount: visible + 1,
                                       separatorBuilder: (_, __) => const SizedBox(height: 6),
                                       itemBuilder: (context, index) {
                                         // Footer
@@ -359,11 +364,12 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
                                                   onPressed: () {
                                                     setState(() {
                                                       _visibleCount =
-                                                          (_visibleCount + _pageSize).clamp(0, total);
+                                                          (_visibleCount + _pageSize)
+                                                              .clamp(0, total);
                                                     });
                                                   },
                                                   icon: const Icon(Icons.expand_more_rounded),
-                                                  label: const Text('Load more'),
+                                                  label: Text(l10n.owner_projects_load_more),
                                                 ),
                                               ),
                                             );
@@ -377,14 +383,17 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
                                           project: item,
                                           serverRootNoApi: _serverRootNoApi(widget.dio),
                                           publishApi: _publishApi,
-                                          onRebuildAndroid: (ctx, p) => _rebuildAndroid(ctx, p),
+                                          onRebuildAndroid: (ctx, p) =>
+                                              _rebuildAndroid(ctx, p),
                                           onRebuildIos: (ctx, p) => _rebuildIos(ctx, p),
                                           androidBuildStatusOverride:
                                               _androidBuildOverride[item.linkId],
-                                          iosBuildStatusOverride: _iosBuildOverride[item.linkId],
+                                          iosBuildStatusOverride:
+                                              _iosBuildOverride[item.linkId],
                                           androidBuildErrorOverride:
                                               _androidErrOverride[item.linkId],
-                                          iosBuildErrorOverride: _iosErrOverride[item.linkId],
+                                          iosBuildErrorOverride:
+                                              _iosErrOverride[item.linkId],
                                         );
                                       },
                                     );
@@ -408,7 +417,7 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
 }
 
 // ─────────────────────────────────────────────
-// UI widgets (mostly same as yours)
+// UI widgets
 // ─────────────────────────────────────────────
 
 class _Header extends StatelessWidget {
@@ -440,12 +449,15 @@ class _Header extends StatelessWidget {
 }
 
 class _FiltersBar extends StatelessWidget {
+  final AppLocalizations l10n;
+
   final _PlatformReadyFilter platform;
   final _EnvironmentFilter env;
   final ValueChanged<_PlatformReadyFilter> onPlatform;
   final ValueChanged<_EnvironmentFilter> onEnv;
 
   const _FiltersBar({
+    required this.l10n,
     required this.platform,
     required this.env,
     required this.onPlatform,
@@ -486,10 +498,10 @@ class _FiltersBar extends StatelessWidget {
     }
 
     final platformGroup = group(
-      title: 'Platform Ready',
+      title: l10n.owner_projects_filter_platform_ready,
       pills: [
         _PillSeg(
-          text: 'All',
+          text: l10n.owner_projects_filter_all,
           selected: platform == _PlatformReadyFilter.all,
           onTap: () => onPlatform(_PlatformReadyFilter.all),
           hPad: pillHPad,
@@ -497,7 +509,7 @@ class _FiltersBar extends StatelessWidget {
           fontSize: fontSize,
         ),
         _PillSeg(
-          text: 'Android',
+          text: l10n.owner_projects_filter_android,
           selected: platform == _PlatformReadyFilter.android,
           onTap: () => onPlatform(_PlatformReadyFilter.android),
           hPad: pillHPad,
@@ -505,7 +517,7 @@ class _FiltersBar extends StatelessWidget {
           fontSize: fontSize,
         ),
         _PillSeg(
-          text: 'iOS',
+          text: l10n.owner_projects_filter_ios,
           selected: platform == _PlatformReadyFilter.ios,
           onTap: () => onPlatform(_PlatformReadyFilter.ios),
           hPad: pillHPad,
@@ -516,10 +528,10 @@ class _FiltersBar extends StatelessWidget {
     );
 
     final envGroup = group(
-      title: 'Environment',
+      title: l10n.owner_projects_filter_environment,
       pills: [
         _PillSeg(
-          text: 'All',
+          text: l10n.owner_projects_filter_all,
           selected: env == _EnvironmentFilter.all,
           onTap: () => onEnv(_EnvironmentFilter.all),
           hPad: pillHPad,
@@ -527,7 +539,7 @@ class _FiltersBar extends StatelessWidget {
           fontSize: fontSize,
         ),
         _PillSeg(
-          text: 'Local',
+          text: l10n.owner_projects_filter_local,
           selected: env == _EnvironmentFilter.local,
           onTap: () => onEnv(_EnvironmentFilter.local),
           hPad: pillHPad,
@@ -535,7 +547,7 @@ class _FiltersBar extends StatelessWidget {
           fontSize: fontSize,
         ),
         _PillSeg(
-          text: 'Test',
+          text: l10n.owner_projects_filter_test,
           selected: env == _EnvironmentFilter.test,
           onTap: () => onEnv(_EnvironmentFilter.test),
           hPad: pillHPad,
@@ -543,7 +555,7 @@ class _FiltersBar extends StatelessWidget {
           fontSize: fontSize,
         ),
         _PillSeg(
-          text: 'Production',
+          text: l10n.owner_projects_filter_production,
           selected: env == _EnvironmentFilter.production,
           onTap: () => onEnv(_EnvironmentFilter.production),
           hPad: pillHPad,
@@ -659,9 +671,8 @@ class _SearchField extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4),
       child: TextField(
-        onChanged: (v) => context
-            .read<OwnerProjectsBloc>()
-            .add(OwnerProjectsSearchChanged(v)),
+        onChanged: (v) =>
+            context.read<OwnerProjectsBloc>().add(OwnerProjectsSearchChanged(v)),
         style: tt.bodyMedium,
         decoration: InputDecoration(
           prefixIcon: const Icon(Icons.search_rounded),
@@ -687,7 +698,9 @@ class _SearchField extends StatelessWidget {
               showFilters ? Icons.close_rounded : Icons.tune_rounded,
               color: cs.onSurface.withOpacity(.75),
             ),
-            tooltip: showFilters ? 'Hide filters' : 'Show filters',
+            tooltip: showFilters
+                ? l10n.owner_projects_filters_hide
+                : l10n.owner_projects_filters_show,
           ),
         ),
       ),
@@ -772,7 +785,11 @@ class _EmptyProjects extends StatelessWidget {
           ),
           const SizedBox(height: 14),
           FilledButton.icon(
-            onPressed: () => context.push('/owner/requests'),
+            onPressed: () {
+              context.read<OwnerNavCubit>().setIndex(0);
+              context.go('/owner/home');
+              AppToast.info(context, l10n.owner_projects_pick_template_first);
+            },
             icon: const Icon(Icons.bolt_rounded),
             label: AutoSizeText(
               l10n.owner_home_requestApp,
