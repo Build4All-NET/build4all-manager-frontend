@@ -14,6 +14,15 @@ import '../bloc/create_project_event.dart';
 import '../bloc/create_project_state.dart';
 import '../widgets/project_type_chip.dart';
 
+import '../bloc/tutorial_video_bloc.dart';
+import '../bloc/tutorial_video_event.dart';
+import '../widgets/tutorial_video_card.dart';
+
+import '../../data/services/tutorial_api.dart';
+import '../../data/repositories/tutorial_repository_impl.dart';
+import '../../domain/usecases/get_owner_guide_video.dart';
+import '../../domain/usecases/upload_owner_guide_video.dart';
+
 class CreateProjectScreen extends StatefulWidget {
   final Dio dio;
   final String baseUrl;
@@ -51,173 +60,198 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
     final repo = ProjectsRepositoryImpl(api);
     final usecase = CreateProjectUseCase(repo);
 
-    return BlocProvider(
-      create: (_) => CreateProjectBloc(
-        usecase: usecase,
-        tokenProvider: widget.tokenProvider,
-      ),
-      child: Builder(
-        builder: (context) {
-          return Scaffold(
-            body: SafeArea(
-              child: ListView(
-                padding: const EdgeInsets.all(16),
-                children: [
-                  const SizedBox(height: 6),
-                  Text(
-                    l10n.super_create_project_subtitle,
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                  const SizedBox(height: 16),
-                  BlocConsumer<CreateProjectBloc, CreateProjectState>(
-                    listener: (context, state) {
-                      if (state is CreateProjectSuccess) {
-                        AppToast.success(
-                          context,
-                          l10n.super_create_project_success(
-                              state.project.projectName),
-                        );
-                      }
-                      if (state is CreateProjectFailure) {
-                        AppToast.error(context, state.message);
-                      }
-                    },
-                    builder: (context, state) {
-                      final loading = state is CreateProjectLoading;
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (_) => CreateProjectBloc(
+            usecase: usecase,
+            tokenProvider: widget.tokenProvider,
+          ),
+        ),
+        BlocProvider(
+          create: (_) {
+            final tutorialApi = TutorialApi(widget.dio);
+            final tutorialRepo = TutorialRepositoryImpl(tutorialApi);
+            final getGuide = GetOwnerGuideVideo(tutorialRepo);
+            final uploadGuide = UploadOwnerGuideVideo(tutorialRepo);
 
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (state is CreateProjectFailure)
-                            _InlineBanner(
-                              kind: _BannerKind.error,
-                              text: _prettyError(context, state.message),
-                            ),
-                          if (state is CreateProjectSuccess)
-                            _InlineBanner(
-                              kind: _BannerKind.success,
-                              text: l10n.super_create_project_created_id(
-                                state.project.id.toString(),
-                              ),
-                            ),
-                          const SizedBox(height: 12),
-                          TextField(
-                            controller: _name,
-                            textInputAction: TextInputAction.next,
-                            decoration: InputDecoration(
-                              labelText: l10n.super_project_name,
-                              hintText: l10n.super_project_name_hint,
-                              border: const OutlineInputBorder(),
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          TextField(
-                            controller: _desc,
-                            minLines: 3,
-                            maxLines: 6,
-                            decoration: InputDecoration(
-                              labelText: l10n.super_project_description,
-                              hintText: l10n.super_project_description_hint,
-                              border: const OutlineInputBorder(),
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            l10n.super_project_type,
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium
-                                ?.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                ),
-                          ),
-                          const SizedBox(height: 8),
-                          Wrap(
-                            spacing: 10,
-                            runSpacing: 10,
-                            children: [
-                              ProjectTypeChip(
-                                type: ProjectType.ECOMMERCE,
-                                selected: _type == ProjectType.ECOMMERCE,
-                                label: l10n.project_type_ecommerce,
-                                onTap: () => setState(
-                                    () => _type = ProjectType.ECOMMERCE),
-                              ),
-                              ProjectTypeChip(
-                                type: ProjectType.SERVICES,
-                                selected: _type == ProjectType.SERVICES,
-                                label: l10n.project_type_services,
-                                onTap: () => setState(
-                                    () => _type = ProjectType.SERVICES),
-                              ),
-                              ProjectTypeChip(
-                                type: ProjectType.ACTIVITIES,
-                                selected: _type == ProjectType.ACTIVITIES,
-                                label: l10n.project_type_activities,
-                                onTap: () => setState(
-                                    () => _type = ProjectType.ACTIVITIES),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          SwitchListTile(
-                            value: _active,
-                            onChanged: loading
-                                ? null
-                                : (v) => setState(() => _active = v),
-                            title: Text(l10n.super_project_active),
-                            subtitle: Text(l10n.super_project_active_hint),
-                          ),
-                          const SizedBox(height: 16),
-                          SizedBox(
-                            width: double.infinity,
-                            child: FilledButton.icon(
-                              onPressed:
-                                  loading ? null : () => _submit(context),
-                              icon: loading
-                                  ? const SizedBox(
-                                      width: 18,
-                                      height: 18,
-                                      child: CircularProgressIndicator(
-                                          strokeWidth: 2),
-                                    )
-                                  : const Icon(Icons.check_circle_outline),
-                              label: Text(
-                                loading
-                                    ? l10n.common_loading
-                                    : l10n.super_create_project_btn,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          if (state is CreateProjectSuccess)
-                            SizedBox(
-                              width: double.infinity,
-                              child: OutlinedButton.icon(
-                                onPressed: () {
-                                  context
-                                      .read<CreateProjectBloc>()
-                                      .add(CreateProjectReset());
-                                  _name.clear();
-                                  _desc.clear();
-                                  setState(() {
-                                    _active = true;
-                                    _type = ProjectType.ECOMMERCE;
-                                  });
-                                },
-                                icon: const Icon(Icons.add),
-                                label: Text(l10n.super_create_another),
-                              ),
-                            ),
-                        ],
-                      );
-                    },
-                  ),
-                ],
+            return TutorialVideoBloc(
+              getOwnerGuide: getGuide,
+              uploadOwnerGuide: uploadGuide,
+              tokenProvider: widget.tokenProvider,
+            )..add(const TutorialVideoStarted());
+          },
+        ),
+      ],
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(l10n.super_create_project_title), // ✅ NEW key
+        ),
+        body: SafeArea(
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              const SizedBox(height: 6),
+              Text(
+                l10n.super_create_project_subtitle,
+                style: Theme.of(context).textTheme.bodyMedium,
               ),
-            ),
-          );
-        },
+              const SizedBox(height: 16),
+
+              // ✅ THIS IS THE UPLOAD UI
+              TutorialVideoCard(dioBaseUrl: widget.dio.options.baseUrl),
+              const SizedBox(height: 16),
+
+              BlocConsumer<CreateProjectBloc, CreateProjectState>(
+                listener: (context, state) {
+                  if (state is CreateProjectSuccess) {
+                    AppToast.success(
+                      context,
+                      l10n.super_create_project_success(
+                        state.project.projectName,
+                      ),
+                    );
+                  }
+                  if (state is CreateProjectFailure) {
+                    AppToast.error(context, state.message);
+                  }
+                },
+                builder: (context, state) {
+                  final loading = state is CreateProjectLoading;
+
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (state is CreateProjectFailure)
+                        _InlineBanner(
+                          kind: _BannerKind.error,
+                          text: _prettyError(context, state.message),
+                        ),
+                      if (state is CreateProjectSuccess)
+                        _InlineBanner(
+                          kind: _BannerKind.success,
+                          text: l10n.super_create_project_created_id(
+                            state.project.id.toString(),
+                          ),
+                        ),
+                      const SizedBox(height: 12),
+
+                      TextField(
+                        controller: _name,
+                        textInputAction: TextInputAction.next,
+                        decoration: InputDecoration(
+                          labelText: l10n.super_project_name,
+                          hintText: l10n.super_project_name_hint,
+                          border: const OutlineInputBorder(),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+
+                      TextField(
+                        controller: _desc,
+                        minLines: 3,
+                        maxLines: 6,
+                        decoration: InputDecoration(
+                          labelText: l10n.super_project_description,
+                          hintText: l10n.super_project_description_hint,
+                          border: const OutlineInputBorder(),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+
+                      Text(
+                        l10n.super_project_type,
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                      ),
+                      const SizedBox(height: 8),
+
+                      Wrap(
+                        spacing: 10,
+                        runSpacing: 10,
+                        children: [
+                          ProjectTypeChip(
+                            type: ProjectType.ECOMMERCE,
+                            selected: _type == ProjectType.ECOMMERCE,
+                            label: l10n.project_type_ecommerce,
+                            onTap: () =>
+                                setState(() => _type = ProjectType.ECOMMERCE),
+                          ),
+                          ProjectTypeChip(
+                            type: ProjectType.SERVICES,
+                            selected: _type == ProjectType.SERVICES,
+                            label: l10n.project_type_services,
+                            onTap: () =>
+                                setState(() => _type = ProjectType.SERVICES),
+                          ),
+                          ProjectTypeChip(
+                            type: ProjectType.ACTIVITIES,
+                            selected: _type == ProjectType.ACTIVITIES,
+                            label: l10n.project_type_activities,
+                            onTap: () =>
+                                setState(() => _type = ProjectType.ACTIVITIES),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+
+                      SwitchListTile(
+                        value: _active,
+                        onChanged:
+                            loading ? null : (v) => setState(() => _active = v),
+                        title: Text(l10n.super_project_active),
+                        subtitle: Text(l10n.super_project_active_hint),
+                      ),
+                      const SizedBox(height: 16),
+
+                      SizedBox(
+                        width: double.infinity,
+                        child: FilledButton.icon(
+                          onPressed: loading ? null : () => _submit(context),
+                          icon: loading
+                              ? const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child:
+                                      CircularProgressIndicator(strokeWidth: 2),
+                                )
+                              : const Icon(Icons.check_circle_outline),
+                          label: Text(
+                            loading
+                                ? l10n.common_loading
+                                : l10n.super_create_project_btn,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+
+                      if (state is CreateProjectSuccess)
+                        SizedBox(
+                          width: double.infinity,
+                          child: OutlinedButton.icon(
+                            onPressed: () {
+                              context
+                                  .read<CreateProjectBloc>()
+                                  .add(CreateProjectReset());
+                              _name.clear();
+                              _desc.clear();
+                              setState(() {
+                                _active = true;
+                                _type = ProjectType.ECOMMERCE;
+                              });
+                            },
+                            icon: const Icon(Icons.add),
+                            label: Text(l10n.super_create_another),
+                          ),
+                        ),
+                    ],
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -244,8 +278,6 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
 
   String _prettyError(BuildContext context, String raw) {
     final l10n = AppLocalizations.of(context)!;
-
-    // If backend returns {"error":"..."} Dio prints a lot of junk sometimes.
     final s = raw.toLowerCase();
 
     if (s.contains("project name already exists")) {

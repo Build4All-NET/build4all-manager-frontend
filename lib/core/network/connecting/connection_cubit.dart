@@ -22,10 +22,14 @@ class ConnectionStateModel {
 class ConnectionCubit extends Cubit<ConnectionStateModel> {
   final Connectivity _connectivity;
 
-  // v6: often List<ConnectivityResult>
   StreamSubscription? _subscription;
-
   Timer? _heartbeatTimer;
+
+  //  new: delay before showing "serverDown"
+  static const Duration serverDownDelay = Duration(seconds: 5);
+  DateTime? _downSince;
+  Timer? _downTimer;
+  String? _downMessage;
 
   // ✅ pass a real url that exists (example: http://192.168.1.4:8080)
   final String baseUrl;
@@ -39,11 +43,9 @@ class ConnectionCubit extends Cubit<ConnectionStateModel> {
   }
 
   Future<void> _init() async {
-    // initial check
     final results = await _connectivity.checkConnectivity();
     _updateFromResults(results);
 
-    // listen changes (ignore type differences safely)
     _subscription = _connectivity.onConnectivityChanged.listen((_) async {
       final r = await _connectivity.checkConnectivity();
       _updateFromResults(r);
@@ -55,6 +57,7 @@ class ConnectionCubit extends Cubit<ConnectionStateModel> {
         results.isNotEmpty && !results.contains(ConnectivityResult.none);
 
     if (!hasNetwork) {
+      _clearServerDownDelay();
       emit(const ConnectionStateModel(
         status: ConnectionStatus.offline,
         message: 'No internet connection',
@@ -83,45 +86,79 @@ class ConnectionCubit extends Cubit<ConnectionStateModel> {
     _heartbeatTimer = null;
   }
 
-  /// ✅ “Server reachable” logic:
+  void _armServerDownDelay([String? message]) {
+    if (state.status == ConnectionStatus.offline) return;
+    if (state.status == ConnectionStatus.serverDown) return;
+
+    _downMessage = message ?? 'Connecting… (server unreachable)';
+    _downSince ??= DateTime.now();
+
+    // already armed
+    if (_downTimer != null) return;
+
+    final elapsed = DateTime.now().difference(_downSince!);
+    final remaining = serverDownDelay - elapsed;
+
+    if (remaining <= Duration.zero) {
+      emit(ConnectionStateModel(
+        status: ConnectionStatus.serverDown,
+        message: _downMessage,
+      ));
+      _downTimer?.cancel();
+      _downTimer = null;
+      return;
+    }
+
+    _downTimer = Timer(remaining, () {
+      // still down? only then emit
+      if (_downSince != null && state.status != ConnectionStatus.offline) {
+        emit(ConnectionStateModel(
+          status: ConnectionStatus.serverDown,
+          message: _downMessage,
+        ));
+      }
+      _downTimer = null;
+    });
+  }
+
+  void _clearServerDownDelay() {
+    _downSince = null;
+    _downMessage = null;
+    _downTimer?.cancel();
+    _downTimer = null;
+  }
+
+  ///  “Server reachable” logic:
   /// - Any HTTP response (200/401/403/404/500) => reachable => online
-  /// - Timeout/socket => unreachable => serverDown
+  /// - Timeout/socket => unreachable => serverDown (after 5s debounce)
   Future<void> _pingServer() async {
     if (state.status == ConnectionStatus.offline) return;
 
     try {
-      // ✅ Ping root or a known endpoint
-      // If you have ping endpoint: "$baseUrl/api/public/ping"
       final uri = Uri.parse('$baseUrl/');
-
       final res = await http.get(uri).timeout(const Duration(seconds: 4));
 
-      // Any response means server reachable
       if (res.statusCode > 0) {
+        //  recovered -> cancel pending "down" + set online
+        _clearServerDownDelay();
         if (state.status != ConnectionStatus.online) {
           emit(const ConnectionStateModel(status: ConnectionStatus.online));
         }
       }
     } catch (_) {
-      if (state.status != ConnectionStatus.offline) {
-        emit(const ConnectionStateModel(
-          status: ConnectionStatus.serverDown,
-          message: 'Connecting… (server unreachable)',
-        ));
-      }
+      //  don’t scream immediately — arm 5s delay first
+      _armServerDownDelay('Connecting… (server unreachable)');
     }
   }
 
-  // Optional: let Dio errors force the state
+  // Optional: let Dio errors force the state (also debounced)
   void setServerDown([String? message]) {
     if (state.status == ConnectionStatus.offline) return;
-    emit(ConnectionStateModel(
-      status: ConnectionStatus.serverDown,
-      message: message ?? 'Connecting… (server unreachable)',
-    ));
+    _armServerDownDelay(message);
   }
 
   void setOnline() {
+    _clearServerDownDelay();
     emit(const ConnectionStateModel(status: ConnectionStatus.online));
   }
 
@@ -129,6 +166,7 @@ class ConnectionCubit extends Cubit<ConnectionStateModel> {
   Future<void> close() async {
     await _subscription?.cancel();
     _stopHeartbeat();
+    _clearServerDownDelay();
     return super.close();
   }
 }

@@ -4,7 +4,6 @@ import 'package:build4all_manager/app/router/super_admin_entry_loader.dart';
 import 'package:build4all_manager/features/owner/ownerhome/data/static_project_models.dart';
 import 'package:build4all_manager/features/owner/ownerhome/presentation/screens/owner_project_details_screen.dart';
 import 'package:build4all_manager/features/owner/ownerhome/presentation/screens/owner_requests_list_screen.dart';
-import 'package:build4all_manager/features/owner/ownernav/presentation/controllers/owner_nav_cubit.dart';
 import 'package:build4all_manager/features/owner/ownerrequests/presentation/screens/owner_requests_screen.dart';
 
 import 'package:flutter/material.dart';
@@ -18,6 +17,7 @@ import 'package:build4all_manager/features/auth/presentation/screens/app_login_s
 
 // owner shell + screens
 import 'package:build4all_manager/features/owner/ownernav/presentation/screens/owner_nav_shell.dart';
+import 'package:build4all_manager/features/owner/ownernav/presentation/controllers/owner_nav_cubit.dart';
 import 'package:build4all_manager/features/owner/ownerhome/presentation/screens/owner_home_screen.dart';
 import 'package:build4all_manager/features/owner/ownerprojects/presentation/screens/owner_projects_screen.dart';
 import 'package:build4all_manager/features/owner/ownerprofile/presentation/screens/owner_profile_screen.dart';
@@ -47,7 +47,7 @@ import 'package:build4all_manager/core/network/dio_client.dart';
 import 'package:build4all_manager/core/auth/jwt_claims.dart';
 
 /// ===============================================================
-/// Owner session scope (ownerId/dio available everywhere under shell)
+/// Owner session scope (ownerId/dio available everywhere under /owner)
 /// ===============================================================
 class OwnerSessionScope extends InheritedWidget {
   final int ownerId;
@@ -116,7 +116,11 @@ const _publicPaths = <String>{
   '/owner/register/profile',
 };
 
-final _ownerShellKey = GlobalKey<NavigatorState>(debugLabel: 'owner-shell');
+final _ownerSessionShellKey =
+    GlobalKey<NavigatorState>(debugLabel: 'owner-session-shell');
+
+final _ownerNavShellKey =
+    GlobalKey<NavigatorState>(debugLabel: 'owner-nav-shell');
 
 final router = GoRouter(
   navigatorKey: appNavKey,
@@ -125,41 +129,53 @@ final router = GoRouter(
     GoRoute(path: '/', builder: (_, __) => const SplashGate()),
     GoRoute(path: '/login', builder: (_, __) => const AppLoginScreen()),
     GoRoute(path: '/loginScreen', builder: (_, __) => const AppLoginScreen()),
-    GoRoute(path: '/manager', builder: (_, __) => const SuperAdminEntryLoader()),
+    GoRoute(
+      path: '/manager',
+      builder: (_, __) => const SuperAdminEntryLoader(),
+    ),
 
-    // keep /owner stable (redirect into shell)
+    // keep /owner stable
     GoRoute(path: '/owner', redirect: (_, __) => '/owner/home'),
 
-    // ✅ OWNER SHELL: nav stays on all /owner/... pages
+    // ✅ OUTER OWNER SESSION SHELL (no nav)
     ShellRoute(
-      navigatorKey: _ownerShellKey,
-      builder: (context, state, child) => _OwnerShellLoader(child: child),
+      navigatorKey: _ownerSessionShellKey,
+      builder: (context, state, child) => _OwnerSessionLoader(child: child),
       routes: [
-        GoRoute(
-          path: '/owner/home',
-          builder: (context, state) {
-            final s = OwnerSessionScope.of(context);
-            return OwnerHomeScreen(
-              ownerId: s.ownerId,
-              dio: s.dio,
-              ownerName: s.ownerName,
-            );
-          },
+        // ✅ INNER NAV SHELL (nav ONLY for these 3)
+        ShellRoute(
+          navigatorKey: _ownerNavShellKey,
+          builder: (context, state, child) => _OwnerNavWrapper(child: child),
+          routes: [
+            GoRoute(
+              path: '/owner/home',
+              builder: (context, state) {
+                final s = OwnerSessionScope.of(context);
+                return OwnerHomeScreen(
+                  ownerId: s.ownerId,
+                  dio: s.dio,
+                  ownerName: s.ownerName,
+                );
+              },
+            ),
+            GoRoute(
+              path: '/owner/projects',
+              builder: (context, state) {
+                final s = OwnerSessionScope.of(context);
+                return OwnerProjectsScreen(ownerId: s.ownerId, dio: s.dio);
+              },
+            ),
+            GoRoute(
+              path: '/owner/profile',
+              builder: (context, state) {
+                final s = OwnerSessionScope.of(context);
+                return OwnerProfileScreen(dio: s.dio);
+              },
+            ),
+          ],
         ),
-        GoRoute(
-          path: '/owner/projects',
-          builder: (context, state) {
-            final s = OwnerSessionScope.of(context);
-            return OwnerProjectsScreen(ownerId: s.ownerId, dio: s.dio);
-          },
-        ),
-        GoRoute(
-          path: '/owner/profile',
-          builder: (context, state) {
-            final s = OwnerSessionScope.of(context);
-            return OwnerProfileScreen(dio: s.dio);
-          },
-        ),
+
+        // ✅ NO NAV routes (still under session scope)
         GoRoute(
           path: '/owner/project/:id',
           builder: (context, state) {
@@ -248,13 +264,14 @@ Future<String?> _authRedirect(BuildContext context, GoRouterState state) async {
     return isPublic ? null : '/login';
   }
 
-  final goingToAuth = loc.startsWith('/login') || loc.startsWith('/owner/register');
+  final goingToAuth =
+      loc.startsWith('/login') || loc.startsWith('/owner/register');
   if (goingToAuth) return role == 'SUPER_ADMIN' ? '/manager' : '/owner/home';
 
-  if (role == 'SUPER_ADMIN' && (loc.startsWith('/owner') || loc == '/home')) {
+  if (role == 'SUPER_ADMIN' && loc.startsWith('/owner')) {
     return '/manager';
   }
-  if (role != 'SUPER_ADMIN' && (loc.startsWith('/manager') || loc == '/home')) {
+  if (role != 'SUPER_ADMIN' && loc.startsWith('/manager')) {
     return '/owner/home';
   }
 
@@ -328,21 +345,62 @@ Future<(int?, String?)> _loadOwnerProfileFromJwt() async {
 }
 
 /// ===============================================================
-/// Owner Shell Loader
-/// - builds OwnerNavShell once
-/// - keeps nav visible always
-/// - syncs selected tab with route
-/// - navigates when tab changes
+/// OUTER shell loader: provides OwnerSessionScope for ALL /owner routes
 /// ===============================================================
-class _OwnerShellLoader extends StatefulWidget {
+class _OwnerSessionLoader extends StatelessWidget {
   final Widget child;
-  const _OwnerShellLoader({required this.child});
+  const _OwnerSessionLoader({required this.child});
 
   @override
-  State<_OwnerShellLoader> createState() => _OwnerShellLoaderState();
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return FutureBuilder<(int?, String?)>(
+      future: _loadOwnerProfileFromJwt(),
+      builder: (context, snap) {
+        if (snap.connectionState != ConnectionState.done) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        final (ownerId, ownerName) = snap.data ?? (null, null);
+        if (ownerId == null) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (context.mounted) context.go('/login');
+          });
+          return Scaffold(body: Center(child: Text(l10n.owner_nav_home)));
+        }
+
+        final Dio dio = DioClient.ensure();
+
+        // TODO: plug real backend menu type when you fetch it
+        final backendMenuType = 'bottom';
+
+        return OwnerSessionScope(
+          ownerId: ownerId,
+          ownerName: ownerName,
+          dio: dio,
+          backendMenuType: backendMenuType,
+          child: child,
+        );
+      },
+    );
+  }
 }
 
-class _OwnerShellLoaderState extends State<_OwnerShellLoader> {
+/// ===============================================================
+/// INNER nav wrapper: ONLY wraps home/projects/profile with OwnerNavShell
+/// ===============================================================
+class _OwnerNavWrapper extends StatefulWidget {
+  final Widget child;
+  const _OwnerNavWrapper({required this.child});
+
+  @override
+  State<_OwnerNavWrapper> createState() => _OwnerNavWrapperState();
+}
+
+class _OwnerNavWrapperState extends State<_OwnerNavWrapper> {
   late final OwnerNavCubit _nav;
 
   @override
@@ -360,89 +418,61 @@ class _OwnerShellLoaderState extends State<_OwnerShellLoader> {
   int _indexForLoc(String loc) {
     if (loc.startsWith('/owner/projects')) return 1;
     if (loc.startsWith('/owner/profile')) return 2;
-    return 0; // home + requests + details
+    return 0;
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final session = OwnerSessionScope.of(context);
+final destinations = <OwnerDestination>[
+  OwnerDestination(
+    icon: Icons.home_outlined,
+    selectedIcon: Icons.home_rounded,
+    label: l10n.owner_nav_home,
+    route: '/owner/home',
+  ),
+  OwnerDestination(
+    icon: Icons.apps_outlined,
+    selectedIcon: Icons.apps_rounded,
+    label: l10n.owner_nav_projects,
+    route: '/owner/projects',
+  ),
+  OwnerDestination(
+    icon: Icons.person_outline,
+    selectedIcon: Icons.person,
+    label: l10n.owner_nav_profile,
+    route: '/owner/profile',
+  ),
+];
 
-    return FutureBuilder<(int?, String?)>(
-      future: _loadOwnerProfileFromJwt(),
-      builder: (context, snap) {
-        if (snap.connectionState != ConnectionState.done) {
-          return const Scaffold(body: Center(child: CircularProgressIndicator()));
-        }
+    final loc = GoRouterState.of(context).uri.toString();
+    final idx = _indexForLoc(loc);
 
-        final (ownerId, ownerName) = snap.data ?? (null, null);
-        if (ownerId == null) {
-          WidgetsBinding.instance.addPostFrameCallback((_) => context.go('/login'));
-          return Scaffold(body: Center(child: Text(l10n.owner_nav_home)));
-        }
+    if (_nav.state.index != idx) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        if (_nav.state.index != idx) _nav.setIndex(idx);
+      });
+    }
 
-        final Dio dio = DioClient.ensure();
-
-        // if you later fetch menu type from backend config, plug it here
-        final backendMenuType = 'bottom';
-
-        final loc = GoRouterState.of(context).uri.toString();
-        final idx = _indexForLoc(loc);
-
-        // keep cubit synced with current route
-        if (_nav.state.index != idx) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (!mounted) return;
-            if (_nav.state.index != idx) _nav.setIndex(idx);
-          });
-        }
-
-        // ✅ must match your NEW OwnerDestination signature (route required)
-        final destinations = <OwnerDestination>[
-          OwnerDestination(
-            icon: Icons.home_outlined,
-            selectedIcon: Icons.home_rounded,
-            label: l10n.owner_nav_home,
-            route: '/owner/home',
-          ),
-          OwnerDestination(
-            icon: Icons.apps_outlined,
-            selectedIcon: Icons.apps_rounded,
-            label: l10n.owner_nav_projects,
-            route: '/owner/projects',
-          ),
-          OwnerDestination(
-            icon: Icons.person_outline,
-            selectedIcon: Icons.person,
-            label: l10n.owner_nav_profile,
-            route: '/owner/profile',
-          ),
-        ];
-
-        return BlocProvider.value(
-          value: _nav,
-          child: BlocListener<OwnerNavCubit, OwnerNavState>(
-            listenWhen: (p, c) => p.index != c.index,
-            listener: (context, st) {
-              final i = st.index.clamp(0, destinations.length - 1);
-              final target = destinations[i].route;
-              final current = GoRouterState.of(context).uri.toString();
-              if (!current.startsWith(target)) context.go(target);
-            },
-            child: OwnerSessionScope(
-              ownerId: ownerId,
-              ownerName: ownerName,
-              dio: dio,
-              backendMenuType: backendMenuType,
-              child: OwnerNavShell(
-                backendMenuType: backendMenuType,
-                destinations: destinations,
-                initialIndex: idx,
-                child: widget.child, // ✅ required by your updated shell
-              ),
-            ),
-          ),
-        );
-      },
+    return BlocProvider.value(
+      value: _nav,
+      child: BlocListener<OwnerNavCubit, OwnerNavState>(
+        listenWhen: (p, c) => p.index != c.index,
+        listener: (context, st) {
+          final i = st.index.clamp(0, destinations.length - 1);
+          final target = destinations[i].route;
+          final current = GoRouterState.of(context).uri.toString();
+          if (!current.startsWith(target)) context.go(target);
+        },
+        child: OwnerNavShell(
+          backendMenuType: session.backendMenuType,
+          destinations: destinations,
+          initialIndex: idx,
+          child: widget.child,
+        ),
+      ),
     );
   }
 }
