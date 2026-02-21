@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class AppBootGuard {
 
-  static const String authEpoch = 'manager-2026-02-19-v1';
+  static const String authEpoch = 'manager-2026-02-21-v1';
 
   static const _kEpoch = 'auth_epoch';
   static const _kApiRoot = 'auth_api_root';
