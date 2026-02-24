@@ -10,4 +10,5 @@ abstract class IOwnerRepository {
  
   Future<void> rebuildAndroid({required int linkId});
   Future<void> rebuildIos({required int linkId});
+  Future<void> deleteApp({required int linkId});
 }

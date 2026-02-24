@@ -1001,6 +1001,42 @@
     }
   },
 
-  "owner_projects_pick_template_first": "Choisissez d’abord un modèle de projet "
+  "owner_projects_pick_template_first": "Choisissez d’abord un modèle de projet ",
+   "owner_tutorial_card_title": "Guide rapide avant de créer votre application",
+  "owner_tutorial_card_subtitle": "Regardez une courte vidéo pour apprendre à créer votre application, suivre son avancement et la télécharger.",
+  "owner_tutorial_card_ready": "La vidéo tutorielle est prête",
+  "owner_tutorial_card_not_available": "La vidéo tutorielle n'est pas encore disponible",
+  "owner_tutorial_card_watch_btn": "Voir le tutoriel",
+  "common_refresh": "Actualiser",
+
+
+  "tutorial_ownerGuide_title": "Vidéo tutorielle de l’application propriétaire",
+  "tutorial_ownerGuide_subtitle": "Regardez comment créer votre application, suivre sa progression et la télécharger.",
+  "tutorial_ownerGuide_notSetYet": "La vidéo du tutoriel n’est pas encore disponible.",
+  "tutorial_common_refresh": "Actualiser",
+  "tutorial_common_loading": "Chargement...",
+  "tutorial_common_failedToLoad": "Échec du chargement de la vidéo du tutoriel.",
+  "tutorial_common_retry": "Réessayer",
+  "tutorial_player_play": "Lire",
+  "tutorial_player_pause": "Pause",
+  "tutorial_player_fullscreen": "Plein écran",
+  "tutorial_player_exitFullscreen": "Quitter le plein écran",
+  "tutorial_player_back10": "Reculer de 10 secondes",
+  "tutorial_player_forward10": "Avancer de 10 secondes",
+
+  "owner_proj_details_tutorial_title": "Comment créer votre application (guide rapide)",
+  "owner_proj_details_tutorial_subtitle": "Regardez le court tutoriel, puis suivez ces étapes pour créer, suivre et publier votre application.",
+  "owner_proj_details_tutorial_not_set": "La vidéo du tutoriel n’est pas encore disponible.",
+  "owner_proj_details_tutorial_fullscreen": "Plein écran",
+  "owner_proj_details_tutorial_steps_title": "Étapes montrées dans la vidéo",
+  "owner_proj_details_tutorial_step_1": "Ouvrez les détails du projet et appuyez sur Créer une application.",
+  "owner_proj_details_tutorial_step_2": "Remplissez les informations d’identité de l’application (nom, logo, devise et notes si nécessaire).",
+  "owner_proj_details_tutorial_step_3": "Choisissez les couleurs / la palette de votre application et le style du thème.",
+  "owner_proj_details_tutorial_step_4": "Choisissez le style de navigation (par exemple les onglets du bas ou le menu hamburger).",
+  "owner_proj_details_tutorial_step_5": "Prévisualisez les écrans générés et vérifiez l’apparence avant l’envoi.",
+  "owner_proj_details_tutorial_step_6": "Soumettez la demande de création d’application et attendez le démarrage du processus de build.",
+  "owner_proj_details_tutorial_step_7": "Suivez l’état du build depuis la liste de vos applications / demandes (progression Android/iOS).",
+  "owner_proj_details_tutorial_step_8": "Quand c’est prêt, téléchargez/installez le build ou continuez vers les options de publication."
+
   
 }

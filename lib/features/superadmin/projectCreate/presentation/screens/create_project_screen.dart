@@ -1,3 +1,5 @@
+import 'package:build4all_manager/features/superadmin/tutorial/presentation/superadmin/bloc/tutorial_video_event.dart';
+import 'package:build4all_manager/features/superadmin/tutorial/presentation/superadmin/widgets/tutorial_video_card.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -5,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:build4all_manager/l10n/app_localizations.dart';
 import 'package:build4all_manager/shared/widgets/app_toast.dart';
 
+import '../../../tutorial/presentation/superadmin/bloc/tutorial_video_bloc.dart';
 import '../../data/repositories/projects_repository_impl.dart';
 import '../../data/services/projects_api.dart';
 import '../../domain/entities/project.dart';
@@ -14,14 +17,10 @@ import '../bloc/create_project_event.dart';
 import '../bloc/create_project_state.dart';
 import '../widgets/project_type_chip.dart';
 
-import '../bloc/tutorial_video_bloc.dart';
-import '../bloc/tutorial_video_event.dart';
-import '../widgets/tutorial_video_card.dart';
-
-import '../../data/services/tutorial_api.dart';
-import '../../data/repositories/tutorial_repository_impl.dart';
-import '../../domain/usecases/get_owner_guide_video.dart';
-import '../../domain/usecases/upload_owner_guide_video.dart';
+import '../../../tutorial/data/services/tutorial_api.dart';
+import '../../../tutorial/data/repositories/tutorial_repository_impl.dart';
+import '../../../tutorial/domain/usecases/get_owner_guide_video.dart';
+import '../../../tutorial/domain/usecases/upload_owner_guide_video.dart';
 
 class CreateProjectScreen extends StatefulWidget {
   final Dio dio;

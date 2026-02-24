@@ -1,7 +1,7 @@
+import 'package:build4all_manager/features/superadmin/tutorial/domain/usecases/get_owner_guide_video.dart';
+import 'package:build4all_manager/features/superadmin/tutorial/domain/usecases/upload_owner_guide_video.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../domain/usecases/get_owner_guide_video.dart';
-import '../../domain/usecases/upload_owner_guide_video.dart';
 import 'tutorial_video_event.dart';
 import 'tutorial_video_state.dart';
 

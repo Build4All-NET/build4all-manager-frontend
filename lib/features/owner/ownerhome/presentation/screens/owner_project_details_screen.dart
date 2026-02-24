@@ -1,3 +1,4 @@
+import 'package:build4all_manager/features/superadmin/tutorial/presentation/owner/widgets/owner_guide_preview_card.dart';
 import 'package:build4all_manager/shared/themes/app_theme.dart';
 import 'package:build4all_manager/shared/themes/theme_palette.dart';
 import 'package:build4all_manager/shared/widgets/app_toast.dart';
@@ -5,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:build4all_manager/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
+import 'package:dio/dio.dart';
 
 import '../../data/static_project_models.dart';
 import '../specs/project_details_specs.dart';
@@ -13,10 +15,14 @@ class OwnerProjectDetailsScreen extends StatelessWidget {
   final ProjectTemplate tpl;
   final int ownerId;
 
+  // ✅ add dio so this screen can fetch tutorial video from API
+  final Dio dio;
+
   const OwnerProjectDetailsScreen({
     super.key,
     required this.tpl,
     required this.ownerId,
+    required this.dio,
   });
 
   @override
@@ -197,6 +203,24 @@ class OwnerProjectDetailsScreen extends StatelessWidget {
                     radius: radiusLg,
                     tint: tint,
                   ),
+                ),
+              ),
+            ),
+
+            // ✅ NEW: Owner tutorial video card (read-only, from API)
+            // shown under "Create App" button
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(
+                  pagePad.horizontal / 2,
+                  10,
+                  pagePad.horizontal / 2,
+                  0,
+                ),
+                child: OwnerGuidePreviewCard(
+                  dio: dio,
+                  // endpoint /api/tutorial/owner-guide is public in your backend
+                  // if later you want auth, pass tokenProvider here
                 ),
               ),
             ),

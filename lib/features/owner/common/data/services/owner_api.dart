@@ -46,6 +46,11 @@ class OwnerApi {
     return list.map(OwnerProjectDto.fromJson).toList();
   }
 
+  /// ✅ Delete app (owner project link)
+Future<void> deleteApp({required int linkId}) async {
+  await dio.delete('/owner/apps/$linkId');
+}
+
   // 🔴 REMOVE THIS WRONG METHOD
   // Future<void> rebuildLink(...)
 

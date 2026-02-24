@@ -26,7 +26,7 @@ class ConnectionCubit extends Cubit<ConnectionStateModel> {
   Timer? _heartbeatTimer;
 
   //  new: delay before showing "serverDown"
-  static const Duration serverDownDelay = Duration(seconds: 5);
+  static const Duration serverDownDelay = Duration(seconds: 2);
   DateTime? _downSince;
   Timer? _downTimer;
   String? _downMessage;
@@ -129,8 +129,8 @@ class ConnectionCubit extends Cubit<ConnectionStateModel> {
   }
 
   ///  “Server reachable” logic:
-  /// - Any HTTP response (200/401/403/404/500) => reachable => online
-  /// - Timeout/socket => unreachable => serverDown (after 5s debounce)
+  /// - Any HTTP response (200/401/403/404/200) => reachable => online
+  /// - Timeout/socket => unreachable => serverDown (after 2s debounce)
   Future<void> _pingServer() async {
     if (state.status == ConnectionStatus.offline) return;
 
@@ -146,7 +146,7 @@ class ConnectionCubit extends Cubit<ConnectionStateModel> {
         }
       }
     } catch (_) {
-      //  don’t scream immediately — arm 5s delay first
+      //  don’t scream immediately — arm 2s delay first
       _armServerDownDelay('Connecting… (server unreachable)');
     }
   }

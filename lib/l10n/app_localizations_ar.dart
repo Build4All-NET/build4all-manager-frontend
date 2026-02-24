@@ -2140,4 +2140,97 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get owner_projects_pick_template_first => 'اختر قالب مشروع أولاً ';
+
+  @override
+  String get owner_tutorial_card_title => 'دليل سريع قبل إنشاء التطبيق';
+
+  @override
+  String get owner_tutorial_card_subtitle => 'شاهد فيديو قصير يشرح كيفية إنشاء التطبيق، متابعة التقدم، وتنزيله.';
+
+  @override
+  String get owner_tutorial_card_ready => 'فيديو الشرح جاهز';
+
+  @override
+  String get owner_tutorial_card_not_available => 'فيديو الشرح غير متوفر حالياً';
+
+  @override
+  String get owner_tutorial_card_watch_btn => 'مشاهدة الشرح';
+
+  @override
+  String get tutorial_ownerGuide_title => 'فيديو شرح تطبيق المالك';
+
+  @override
+  String get tutorial_ownerGuide_subtitle => 'شاهد كيفية إنشاء التطبيق، متابعة التقدم، وتنزيله.';
+
+  @override
+  String get tutorial_ownerGuide_notSetYet => 'فيديو الشرح غير متوفر بعد.';
+
+  @override
+  String get tutorial_common_refresh => 'تحديث';
+
+  @override
+  String get tutorial_common_loading => 'جارٍ التحميل...';
+
+  @override
+  String get tutorial_common_failedToLoad => 'فشل تحميل فيديو الشرح.';
+
+  @override
+  String get tutorial_common_retry => 'إعادة المحاولة';
+
+  @override
+  String get tutorial_player_play => 'تشغيل';
+
+  @override
+  String get tutorial_player_pause => 'إيقاف';
+
+  @override
+  String get tutorial_player_fullscreen => 'ملء الشاشة';
+
+  @override
+  String get tutorial_player_exitFullscreen => 'الخروج من ملء الشاشة';
+
+  @override
+  String get tutorial_player_back10 => 'رجوع 10 ثوانٍ';
+
+  @override
+  String get tutorial_player_forward10 => 'تقديم 10 ثوانٍ';
+
+  @override
+  String get owner_proj_details_tutorial_title => 'كيفية إنشاء تطبيقك (دليل سريع)';
+
+  @override
+  String get owner_proj_details_tutorial_subtitle => 'شاهد الفيديو القصير ثم اتبع الخطوات لإنشاء التطبيق ومتابعة حالته ونشره.';
+
+  @override
+  String get owner_proj_details_tutorial_not_set => 'فيديو الشرح غير متوفر حالياً.';
+
+  @override
+  String get owner_proj_details_tutorial_fullscreen => 'ملء الشاشة';
+
+  @override
+  String get owner_proj_details_tutorial_steps_title => 'الخطوات الظاهرة في الفيديو';
+
+  @override
+  String get owner_proj_details_tutorial_step_1 => 'افتح تفاصيل المشروع واضغط على إنشاء تطبيق.';
+
+  @override
+  String get owner_proj_details_tutorial_step_2 => 'املأ معلومات هوية التطبيق (الاسم، الشعار، العملة، والملاحظات عند الحاجة).';
+
+  @override
+  String get owner_proj_details_tutorial_step_3 => 'اختر ألوان التطبيق / لوحة الألوان ونمط الثيم.';
+
+  @override
+  String get owner_proj_details_tutorial_step_4 => 'اختر طريقة التنقل (مثل الشريط السفلي أو قائمة الهامبرغر).';
+
+  @override
+  String get owner_proj_details_tutorial_step_5 => 'عاين الشاشات المولدة وتأكد من الشكل قبل الإرسال.';
+
+  @override
+  String get owner_proj_details_tutorial_step_6 => 'أرسل طلب إنشاء التطبيق وانتظر بدء عملية البناء.';
+
+  @override
+  String get owner_proj_details_tutorial_step_7 => 'تابع حالة البناء من قائمة تطبيقاتك / الطلبات (تقدم أندرويد / iOS).';
+
+  @override
+  String get owner_proj_details_tutorial_step_8 => 'عند الجاهزية، نزّل/ثبّت النسخة أو أكمل إلى خيارات النشر.';
 }

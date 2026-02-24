@@ -43,6 +43,11 @@ class OwnerRepositoryImpl implements IOwnerRepository {
     return api.rebuildAndroid(linkId: linkId);
   }
 
+  @override
+Future<void> deleteApp({required int linkId}) {
+  return api.deleteApp(linkId: linkId);
+}
+
 // IOS rebuild
   @override
   Future<void> rebuildIos({required int linkId}) {

@@ -4302,6 +4302,192 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Pick a project template first '**
   String get owner_projects_pick_template_first;
+
+  /// No description provided for @owner_tutorial_card_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick guide before creating your app'**
+  String get owner_tutorial_card_title;
+
+  /// No description provided for @owner_tutorial_card_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch a short tutorial to learn how to create your app, track progress, and download it.'**
+  String get owner_tutorial_card_subtitle;
+
+  /// No description provided for @owner_tutorial_card_ready.
+  ///
+  /// In en, this message translates to:
+  /// **'Tutorial video is ready'**
+  String get owner_tutorial_card_ready;
+
+  /// No description provided for @owner_tutorial_card_not_available.
+  ///
+  /// In en, this message translates to:
+  /// **'Tutorial video is not available yet'**
+  String get owner_tutorial_card_not_available;
+
+  /// No description provided for @owner_tutorial_card_watch_btn.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch tutorial'**
+  String get owner_tutorial_card_watch_btn;
+
+  /// No description provided for @tutorial_ownerGuide_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner app tutorial video'**
+  String get tutorial_ownerGuide_title;
+
+  /// No description provided for @tutorial_ownerGuide_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch how to create your app, track progress, and download it.'**
+  String get tutorial_ownerGuide_subtitle;
+
+  /// No description provided for @tutorial_ownerGuide_notSetYet.
+  ///
+  /// In en, this message translates to:
+  /// **'Tutorial video is not available yet.'**
+  String get tutorial_ownerGuide_notSetYet;
+
+  /// No description provided for @tutorial_common_refresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get tutorial_common_refresh;
+
+  /// No description provided for @tutorial_common_loading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading...'**
+  String get tutorial_common_loading;
+
+  /// No description provided for @tutorial_common_failedToLoad.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load tutorial video.'**
+  String get tutorial_common_failedToLoad;
+
+  /// No description provided for @tutorial_common_retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get tutorial_common_retry;
+
+  /// No description provided for @tutorial_player_play.
+  ///
+  /// In en, this message translates to:
+  /// **'Play'**
+  String get tutorial_player_play;
+
+  /// No description provided for @tutorial_player_pause.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get tutorial_player_pause;
+
+  /// No description provided for @tutorial_player_fullscreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Fullscreen'**
+  String get tutorial_player_fullscreen;
+
+  /// No description provided for @tutorial_player_exitFullscreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit fullscreen'**
+  String get tutorial_player_exitFullscreen;
+
+  /// No description provided for @tutorial_player_back10.
+  ///
+  /// In en, this message translates to:
+  /// **'Back 10 seconds'**
+  String get tutorial_player_back10;
+
+  /// No description provided for @tutorial_player_forward10.
+  ///
+  /// In en, this message translates to:
+  /// **'Forward 10 seconds'**
+  String get tutorial_player_forward10;
+
+  /// No description provided for @owner_proj_details_tutorial_title.
+  ///
+  /// In en, this message translates to:
+  /// **'How to create your app (quick guide)'**
+  String get owner_proj_details_tutorial_title;
+
+  /// No description provided for @owner_proj_details_tutorial_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch the short tutorial, then follow these steps to create, track, and publish your app.'**
+  String get owner_proj_details_tutorial_subtitle;
+
+  /// No description provided for @owner_proj_details_tutorial_not_set.
+  ///
+  /// In en, this message translates to:
+  /// **'Tutorial video is not available yet.'**
+  String get owner_proj_details_tutorial_not_set;
+
+  /// No description provided for @owner_proj_details_tutorial_fullscreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Fullscreen'**
+  String get owner_proj_details_tutorial_fullscreen;
+
+  /// No description provided for @owner_proj_details_tutorial_steps_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Steps shown in the video'**
+  String get owner_proj_details_tutorial_steps_title;
+
+  /// No description provided for @owner_proj_details_tutorial_step_1.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the project details and tap Create App.'**
+  String get owner_proj_details_tutorial_step_1;
+
+  /// No description provided for @owner_proj_details_tutorial_step_2.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill the app identity information (name, logo, currency, and notes if needed).'**
+  String get owner_proj_details_tutorial_step_2;
+
+  /// No description provided for @owner_proj_details_tutorial_step_3.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your app colors / palette and theme style.'**
+  String get owner_proj_details_tutorial_step_3;
+
+  /// No description provided for @owner_proj_details_tutorial_step_4.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick the navigation style (for example bottom tabs or hamburger menu).'**
+  String get owner_proj_details_tutorial_step_4;
+
+  /// No description provided for @owner_proj_details_tutorial_step_5.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview the generated screens and check the look before submitting.'**
+  String get owner_proj_details_tutorial_step_5;
+
+  /// No description provided for @owner_proj_details_tutorial_step_6.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit the app request and wait for the build process to start.'**
+  String get owner_proj_details_tutorial_step_6;
+
+  /// No description provided for @owner_proj_details_tutorial_step_7.
+  ///
+  /// In en, this message translates to:
+  /// **'Track build status from your apps / requests list (Android/iOS progress).'**
+  String get owner_proj_details_tutorial_step_7;
+
+  /// No description provided for @owner_proj_details_tutorial_step_8.
+  ///
+  /// In en, this message translates to:
+  /// **'When ready, download/install the build or continue to publishing options.'**
+  String get owner_proj_details_tutorial_step_8;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

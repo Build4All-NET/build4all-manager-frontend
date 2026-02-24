@@ -16,16 +16,15 @@ class ProjectTile extends StatelessWidget {
   final String serverRootNoApi;
   final OwnerPublishApi publishApi;
 
-  // ✅ UI overrides so tile updates instantly (no refresh)
+  // UI overrides so tile updates instantly (no full refresh needed)
   final String? androidBuildStatusOverride;
   final String? iosBuildStatusOverride;
   final String? androidBuildErrorOverride;
   final String? iosBuildErrorOverride;
 
-  // ✅ rebuild callback
-  final Future<void> Function(BuildContext ctx, OwnerProject p)?
-      onRebuildAndroid;
+  final Future<void> Function(BuildContext ctx, OwnerProject p)? onRebuildAndroid;
   final Future<void> Function(BuildContext ctx, OwnerProject p)? onRebuildIos;
+  final Future<void> Function(BuildContext ctx, OwnerProject p)? onDelete;
 
   const ProjectTile({
     super.key,
@@ -34,6 +33,7 @@ class ProjectTile extends StatelessWidget {
     required this.publishApi,
     this.onRebuildAndroid,
     this.onRebuildIos,
+    this.onDelete,
     this.androidBuildStatusOverride,
     this.iosBuildStatusOverride,
     this.androidBuildErrorOverride,
@@ -48,7 +48,10 @@ class ProjectTile extends StatelessWidget {
     if (s0.startsWith('http://') || s0.startsWith('https://')) {
       return Uri.parse(s0).toString();
     }
-    if (s0.startsWith('//')) return Uri.parse('https:$s0').toString();
+
+    if (s0.startsWith('//')) {
+      return Uri.parse('https:$s0').toString();
+    }
 
     final base = serverRootNoApi.replaceAll(RegExp(r'/+$'), '');
     final rel = s0.startsWith('/') ? s0 : '/$s0';
@@ -71,8 +74,7 @@ class ProjectTile extends StatelessWidget {
     }
 
     if (!await canLaunchUrl(uri)) {
-      AppToast.error(
-          context, '${l10n.owner_project_err_cannot_open}: $cleaned');
+      AppToast.error(context, '${l10n.owner_project_err_cannot_open}: $cleaned');
       return;
     }
 
@@ -139,34 +141,50 @@ class ProjectTile extends StatelessWidget {
 
   Color _buildColor(ColorScheme cs, String status) {
     final low = status.toLowerCase();
-    if (low.contains('success') || low.contains('done'))
+
+    if (low.contains('success') || low.contains('done')) {
       return const Color(0xFF22C55E);
-    if (low.contains('fail') || low.contains('error') || low.contains('reject'))
+    }
+    if (low.contains('fail') || low.contains('error') || low.contains('reject')) {
       return const Color(0xFFEF4444);
-    if (low.contains('queued')) return const Color(0xFFF59E0B);
+    }
+    if (low.contains('queued')) {
+      return const Color(0xFFF59E0B);
+    }
     if (low.contains('building') ||
         low.contains('running') ||
-        low.contains('started')) return const Color(0xFF0B6BFF);
+        low.contains('started')) {
+      return const Color(0xFF0B6BFF);
+    }
+
     return cs.outline;
   }
 
   String _statusLabel() {
     final raw = project.status.trim();
     final low = raw.toLowerCase();
+
     if (raw.isEmpty || low == 'null') return 'UNKNOWN';
+
+    // Keep your previous behavior:
+    // "active" mapped to "test" label
     if (low.split(RegExp(r'\s+')).first == 'active') return 'test';
+
     return raw;
   }
 
   Color _statusColor(ColorScheme cs, String label) {
     final low = label.toLowerCase();
+
     if (low == 'unknown') return cs.outline;
-    if (low.contains('fail') || low.contains('error') || low.contains('reject'))
+    if (low.contains('fail') || low.contains('error') || low.contains('reject')) {
       return cs.error;
+    }
     if (low.contains('test')) return cs.secondary;
     if (low.contains('review')) return cs.primary;
     if (low.contains('prod') || low.contains('production')) return cs.tertiary;
     if (low.contains('local')) return cs.outlineVariant;
+
     return cs.primary;
   }
 
@@ -181,9 +199,13 @@ class ProjectTile extends StatelessWidget {
     }
 
     if (isAndroid) {
-      if (onRebuildAndroid != null) await onRebuildAndroid!(context, project);
+      if (onRebuildAndroid != null) {
+        await onRebuildAndroid!(context, project);
+      }
     } else {
-      if (onRebuildIos != null) await onRebuildIos!(context, project);
+      if (onRebuildIos != null) {
+        await onRebuildIos!(context, project);
+      }
     }
   }
 
@@ -193,8 +215,7 @@ class ProjectTile extends StatelessWidget {
     final tt = Theme.of(context).textTheme;
     final l10n = AppLocalizations.of(context)!;
 
-    final appName =
-        project.appName.isNotEmpty ? project.appName : project.projectName;
+    final appName = project.appName.isNotEmpty ? project.appName : project.projectName;
 
     final statusLabel = _statusLabel();
     final statusColor = _statusColor(cs, statusLabel);
@@ -209,32 +230,31 @@ class ProjectTile extends StatelessWidget {
     final iosUrl = _abs(project.ipaUrl);
     final iosHasArtifact = iosUrl.isNotEmpty;
 
-    // base statuses from backend
+    // Base statuses from backend
     final androidBuildFromModel = _normalizeBuildStatus(
       project.androidBuildStatus,
       hasArtifact: androidHasArtifact,
     );
+
     final iosBuildFromModel = _normalizeBuildStatus(
       project.iosBuildStatus,
       hasArtifact: iosHasArtifact,
     );
 
-    // ✅ OVERRIDE if exists
-    final androidBuild = (androidBuildStatusOverride ?? androidBuildFromModel);
-    final iosBuild = (iosBuildStatusOverride ?? iosBuildFromModel);
+    // Apply instant UI overrides if present
+    final androidBuild = androidBuildStatusOverride ?? androidBuildFromModel;
+    final iosBuild = iosBuildStatusOverride ?? iosBuildFromModel;
 
     final androidBuildColor = _buildColor(cs, androidBuild);
     final iosBuildColor = _buildColor(cs, iosBuild);
 
     final androidErr =
         (androidBuildErrorOverride ?? (project.androidBuildError ?? '')).trim();
-    final iosErr =
-        (iosBuildErrorOverride ?? (project.iosBuildError ?? '')).trim();
+    final iosErr = (iosBuildErrorOverride ?? (project.iosBuildError ?? '')).trim();
 
     final showAndroidErr =
         androidBuild.toLowerCase().contains('fail') && androidErr.isNotEmpty;
-    final showIosErr =
-        iosBuild.toLowerCase().contains('fail') && iosErr.isNotEmpty;
+    final showIosErr = iosBuild.toLowerCase().contains('fail') && iosErr.isNotEmpty;
 
     final androidShareLabel = l10n.owner_project_share_android(
       appName,
@@ -259,10 +279,10 @@ class ProjectTile extends StatelessWidget {
         final double cardGap = small ? 8 : 10;
 
         final isDark = Theme.of(context).brightness == Brightness.dark;
+
         Color mix(Color a, Color b, double t) => Color.lerp(a, b, t)!;
 
         final base = cs.surface;
-
         final headerGradient = LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -284,8 +304,7 @@ class ProjectTile extends StatelessWidget {
           decoration: BoxDecoration(
             color: cs.surface,
             borderRadius: BorderRadius.circular(16),
-            border:
-                Border.all(color: cs.outlineVariant.withOpacity(.85), width: 1),
+            border: Border.all(color: cs.outlineVariant.withOpacity(.85), width: 1),
             boxShadow: const [
               BoxShadow(
                 color: Color(0x12000000),
@@ -303,78 +322,100 @@ class ProjectTile extends StatelessWidget {
                 child: Padding(
                   padding: EdgeInsets.all(headerPad),
                   child: Row(
-                    children: [
-                      _AppIcon(
-                        project: project,
-                        serverRootNoApi: serverRootNoApi,
-                        size: small ? 40 : 44,
-                        radius: 12,
-                        band: cs.primary,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // ✅ FIX: auto-shrink + allow 2 lines on small
-                            AutoSizeText(
-                              appName,
-                              maxLines: small ? 2 : 1,
-                              minFontSize: small ? 12.0 : 14.0,
-                              stepGranularity: 0.5,
-                              overflow: TextOverflow.ellipsis,
-                              style: tt.titleLarge?.copyWith(
-                                fontWeight: FontWeight.w900,
-                                fontSize: small ? 16 : 18,
-                                height: 1.08,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
+  children: [
+    _AppIcon(
+      project: project,
+      serverRootNoApi: serverRootNoApi,
+      size: small ? 40 : 44,
+      radius: 12,
+      band: cs.primary,
+    ),
+    const SizedBox(width: 8),
+    Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          AutoSizeText(
+            appName,
+            maxLines: small ? 2 : 1,
+            minFontSize: small ? 12.0 : 14.0,
+            stepGranularity: 0.5,
+            overflow: TextOverflow.ellipsis,
+            style: tt.titleLarge?.copyWith(
+              fontWeight: FontWeight.w900,
+              fontSize: small ? 16 : 18,
+              height: 1.08,
+            ),
+          ),
+          const SizedBox(height: 4),
+          AutoSizeText(
+            project.slug,
+            maxLines: 1,
+            minFontSize: 10.5,
+            stepGranularity: 0.5,
+            overflow: TextOverflow.ellipsis,
+            style: tt.bodyMedium?.copyWith(
+              color: cs.onSurface.withOpacity(.70),
+              fontWeight: FontWeight.w700,
+              fontSize: small ? 12 : 13,
+            ),
+          ),
+          if (idLine != null) ...[
+            const SizedBox(height: 3),
+            AutoSizeText(
+              idLine,
+              maxLines: 1,
+              minFontSize: 10.0,
+              stepGranularity: 0.5,
+              overflow: TextOverflow.ellipsis,
+              style: tt.bodyMedium?.copyWith(
+                color: cs.onSurface.withOpacity(.60),
+                fontFamily: 'monospace',
+                fontSize: small ? 12 : 13,
+              ),
+            ),
+          ],
+        ],
+      ),
+    ),
+    const SizedBox(width: 6),
 
-                            AutoSizeText(
-                              project.slug,
-                              maxLines: 1,
-                              minFontSize: 10.5,
-                              stepGranularity: 0.5,
-                              overflow: TextOverflow.ellipsis,
-                              style: tt.bodyMedium?.copyWith(
-                                color: cs.onSurface.withOpacity(.70),
-                                fontWeight: FontWeight.w700,
-                                fontSize: small ? 12 : 13,
-                              ),
-                            ),
-
-                            if (idLine != null) ...[
-                              const SizedBox(height: 3),
-                              AutoSizeText(
-                                idLine,
-                                maxLines: 1,
-                                minFontSize: 10.0,
-                                stepGranularity: 0.5,
-                                overflow: TextOverflow.ellipsis,
-                                style: tt.bodyMedium?.copyWith(
-                                  color: cs.onSurface.withOpacity(.60),
-                                  fontFamily: 'monospace',
-                                  fontSize: small ? 12 : 13,
-                                ),
-                              ),
-                            ],
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      ConstrainedBox(
-                        constraints:
-                            BoxConstraints(maxWidth: small ? 120 : 150),
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          alignment: Alignment.centerRight,
-                          child: _StatusPill(
-                              label: statusLabel, color: statusColor),
-                        ),
-                      ),
-                    ],
-                  ),
+    // right side: status + delete button
+    Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: small ? 120 : 150),
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerRight,
+            child: _StatusPill(label: statusLabel, color: statusColor),
+          ),
+        ),
+        if (onDelete != null) ...[
+          const SizedBox(height: 4),
+          SizedBox(
+            width: small ? 34 : 36,
+            height: small ? 34 : 36,
+            child: IconButton(
+              padding: EdgeInsets.zero,
+              visualDensity: VisualDensity.compact,
+              splashRadius: 18,
+              tooltip: 'Delete',
+              onPressed: () => onDelete!(context, project),
+              icon: Icon(
+                Icons.delete_outline_rounded,
+                color: cs.error,
+                size: small ? 19 : 21,
+              ),
+            ),
+          ),
+        ],
+      ],
+    ),
+  ],
+),
                 ),
               ),
 
@@ -407,14 +448,17 @@ class ProjectTile extends StatelessWidget {
                             shareLabel: shareText,
                             onCopy: () => _copyLink(context, androidUrl),
                             onShare: () async {
-                              final box =
-                                  context.findRenderObject() as RenderBox?;
+                              final box = context.findRenderObject() as RenderBox?;
                               final rect = box == null
                                   ? null
                                   : (box.localToGlobal(Offset.zero) & box.size);
+
                               await _shareLink(
-                                  context, androidUrl, androidShareLabel,
-                                  sharePositionOrigin: rect);
+                                context,
+                                androidUrl,
+                                androidShareLabel,
+                                sharePositionOrigin: rect,
+                              );
                             },
                             primaryText: l10n.common_download,
                             primaryIcon: Icons.download_rounded,
@@ -437,8 +481,10 @@ class ProjectTile extends StatelessWidget {
                             rebuildText: 'Rebuild',
                             rebuildColor: const Color(0xFFEF4444),
                             onRebuild: () => _handleRebuild(
-                                context, androidBuild,
-                                isAndroid: true),
+                              context,
+                              androidBuild,
+                              isAndroid: true,
+                            ),
                           );
                         },
                       ),
@@ -467,13 +513,17 @@ class ProjectTile extends StatelessWidget {
                             shareLabel: shareText,
                             onCopy: () => _copyLink(context, iosUrl),
                             onShare: () async {
-                              final box =
-                                  context.findRenderObject() as RenderBox?;
+                              final box = context.findRenderObject() as RenderBox?;
                               final rect = box == null
                                   ? null
                                   : (box.localToGlobal(Offset.zero) & box.size);
-                              await _shareLink(context, iosUrl, iosShareLabel,
-                                  sharePositionOrigin: rect);
+
+                              await _shareLink(
+                                context,
+                                iosUrl,
+                                iosShareLabel,
+                                sharePositionOrigin: rect,
+                              );
                             },
                             primaryText: l10n.download_ios,
                             primaryIcon: Icons.download_rounded,
@@ -496,8 +546,11 @@ class ProjectTile extends StatelessWidget {
                             rebuildEnabled: true,
                             rebuildText: 'Rebuild',
                             rebuildColor: const Color(0xFFEF4444),
-                            onRebuild: () => _handleRebuild(context, iosBuild,
-                                isAndroid: false),
+                            onRebuild: () => _handleRebuild(
+                              context,
+                              iosBuild,
+                              isAndroid: false,
+                            ),
                           );
                         },
                       ),
@@ -545,7 +598,6 @@ class _PlatformCard extends StatelessWidget {
   final bool secondaryEnabled;
   final VoidCallback onSecondary;
 
-  // ✅ rebuild
   final bool showRebuild;
   final bool rebuildEnabled;
   final String rebuildText;
@@ -631,6 +683,7 @@ class _PlatformCard extends StatelessWidget {
               ),
             ],
           ),
+
           if (showErrorBox) ...[
             SizedBox(height: tiny ? 6 : 7),
             Container(
@@ -642,8 +695,11 @@ class _PlatformCard extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.error_outline_rounded,
-                      color: Color(0xFFDC2626), size: 15),
+                  const Icon(
+                    Icons.error_outline_rounded,
+                    color: Color(0xFFDC2626),
+                    size: 15,
+                  ),
                   const SizedBox(width: 6),
                   Expanded(
                     child: AutoSizeText(
@@ -665,6 +721,7 @@ class _PlatformCard extends StatelessWidget {
             ),
           ] else
             SizedBox(height: tiny ? 8 : 10),
+
           Row(
             children: [
               Expanded(
@@ -698,15 +755,16 @@ class _PlatformCard extends StatelessWidget {
               ),
             ],
           ),
+
           const SizedBox(height: 7),
+
           if (showRebuild) ...[
             SizedBox(
               width: double.infinity,
               height: btnH,
               child: OutlinedButton.icon(
                 onPressed: rebuildEnabled ? onRebuild : null,
-                icon:
-                    Icon(Icons.refresh_rounded, size: 16, color: rebuildColor),
+                icon: Icon(Icons.refresh_rounded, size: 16, color: rebuildColor),
                 label: FittedBox(
                   fit: BoxFit.scaleDown,
                   alignment: Alignment.center,
@@ -727,6 +785,7 @@ class _PlatformCard extends StatelessWidget {
             ),
             const SizedBox(height: 6),
           ],
+
           SizedBox(
             width: double.infinity,
             height: btnH,
@@ -734,7 +793,9 @@ class _PlatformCard extends StatelessWidget {
               onPressed: primaryEnabled ? onPrimary : null,
               icon: primaryLeading != null
                   ? Opacity(
-                      opacity: primaryEnabled ? 1 : .35, child: primaryLeading!)
+                      opacity: primaryEnabled ? 1 : .35,
+                      child: primaryLeading!,
+                    )
                   : Icon(primaryIcon, size: 16),
               label: FittedBox(
                 fit: BoxFit.scaleDown,
@@ -742,7 +803,9 @@ class _PlatformCard extends StatelessWidget {
                 child: Text(
                   primaryText,
                   style: const TextStyle(
-                      fontWeight: FontWeight.w900, fontSize: 12.8),
+                    fontWeight: FontWeight.w900,
+                    fontSize: 12.8,
+                  ),
                 ),
               ),
               style: ElevatedButton.styleFrom(
@@ -753,7 +816,9 @@ class _PlatformCard extends StatelessWidget {
               ),
             ),
           ),
+
           const SizedBox(height: 6),
+
           SizedBox(
             width: double.infinity,
             height: btnH,
@@ -766,7 +831,9 @@ class _PlatformCard extends StatelessWidget {
                 child: Text(
                   secondaryText,
                   style: const TextStyle(
-                      fontWeight: FontWeight.w900, fontSize: 12.8),
+                    fontWeight: FontWeight.w900,
+                    fontSize: 12.8,
+                  ),
                 ),
               ),
               style: OutlinedButton.styleFrom(
@@ -800,9 +867,11 @@ class _AppIcon extends StatelessWidget {
   String _abs(String? maybe) {
     if (maybe == null) return '';
     final s0 = maybe.trim();
+
     if (s0.isEmpty || s0.toLowerCase() == 'null') return '';
-    if (s0.startsWith('http://') || s0.startsWith('https://'))
+    if (s0.startsWith('http://') || s0.startsWith('https://')) {
       return Uri.parse(s0).toString();
+    }
     if (s0.startsWith('//')) return Uri.parse('https:$s0').toString();
 
     final base = serverRootNoApi.replaceAll(RegExp(r'/+$'), '');
@@ -817,8 +886,7 @@ class _AppIcon extends StatelessWidget {
 
     if (cleaned.isNotEmpty && cleaned.toLowerCase() != 'null') {
       final baseSrc = _abs(cleaned);
-      final src =
-          '$baseSrc${baseSrc.contains('?') ? '&' : '?'}v=${project.linkId}';
+      final src = '$baseSrc${baseSrc.contains('?') ? '&' : '?'}v=${project.linkId}';
 
       return ClipRRect(
         borderRadius: BorderRadius.circular(radius),
@@ -829,6 +897,7 @@ class _AppIcon extends StatelessWidget {
           fit: BoxFit.cover,
           loadingBuilder: (context, child, progress) {
             if (progress == null) return child;
+
             return Container(
               width: size,
               height: size,
@@ -850,9 +919,7 @@ class _AppIcon extends StatelessWidget {
   }
 
   Widget _fallback(BuildContext context) {
-    final text =
-        (project.appName.isNotEmpty ? project.appName : project.projectName)
-            .trim();
+    final text = (project.appName.isNotEmpty ? project.appName : project.projectName).trim();
     final initial = (text.isEmpty ? 'A' : text.characters.first.toUpperCase());
 
     return Container(
@@ -865,7 +932,10 @@ class _AppIcon extends StatelessWidget {
       alignment: Alignment.center,
       child: Text(
         initial,
-        style: TextStyle(fontWeight: FontWeight.w900, fontSize: size * 0.34),
+        style: TextStyle(
+          fontWeight: FontWeight.w900,
+          fontSize: size * 0.34,
+        ),
       ),
     );
   }
@@ -875,11 +945,15 @@ class _StatusPill extends StatelessWidget {
   final String label;
   final Color color;
 
-  const _StatusPill({required this.label, required this.color});
+  const _StatusPill({
+    required this.label,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
     final shown = label.trim().toUpperCase();
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
@@ -892,7 +966,10 @@ class _StatusPill extends StatelessWidget {
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: TextStyle(
-            fontWeight: FontWeight.w900, fontSize: 10.5, color: color),
+          fontWeight: FontWeight.w900,
+          fontSize: 10.5,
+          color: color,
+        ),
       ),
     );
   }
@@ -902,7 +979,10 @@ class _MiniPill extends StatelessWidget {
   final String text;
   final Color color;
 
-  const _MiniPill({required this.text, required this.color});
+  const _MiniPill({
+    required this.text,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -916,8 +996,11 @@ class _MiniPill extends StatelessWidget {
         text,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style:
-            TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.w900),
+        style: TextStyle(
+          color: color,
+          fontSize: 10,
+          fontWeight: FontWeight.w900,
+        ),
       ),
     );
   }
@@ -1008,7 +1091,9 @@ class _TestFlightLikeIcon extends StatelessWidget {
               colors: [Color(0xFF1FB2FF), Color(0xFF0A74FF)],
             ),
           ),
-          child: CustomPaint(painter: _TestFlightPainter()),
+          child: CustomPaint(
+            painter: _TestFlightPainter(),
+          ),
         ),
       ),
     );
@@ -1050,6 +1135,7 @@ class _TestFlightPainter extends CustomPainter {
         width: bw,
         height: bl,
       );
+
       canvas.drawRRect(
         RRect.fromRectAndRadius(rect, Radius.circular(bw)),
         blade,

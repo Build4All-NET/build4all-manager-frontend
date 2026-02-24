@@ -190,7 +190,7 @@ final router = GoRouter(
               orElse: () => projectTemplates.first,
             );
 
-            return OwnerProjectDetailsScreen(tpl: tpl, ownerId: s.ownerId);
+            return OwnerProjectDetailsScreen(tpl: tpl, ownerId: s.ownerId, dio:s.dio);
           },
         ),
         GoRoute(

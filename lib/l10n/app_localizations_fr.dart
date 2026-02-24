@@ -1429,7 +1429,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get publish_no_requests => 'Aucune demande trouvée.';
 
   @override
-  String get common_refresh => 'Rafraîchir';
+  String get common_refresh => 'Actualiser';
 
   @override
   String get publish_status_submitted => 'Soumis';
@@ -2140,4 +2140,97 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get owner_projects_pick_template_first => 'Choisissez d’abord un modèle de projet ';
+
+  @override
+  String get owner_tutorial_card_title => 'Guide rapide avant de créer votre application';
+
+  @override
+  String get owner_tutorial_card_subtitle => 'Regardez une courte vidéo pour apprendre à créer votre application, suivre son avancement et la télécharger.';
+
+  @override
+  String get owner_tutorial_card_ready => 'La vidéo tutorielle est prête';
+
+  @override
+  String get owner_tutorial_card_not_available => 'La vidéo tutorielle n\'est pas encore disponible';
+
+  @override
+  String get owner_tutorial_card_watch_btn => 'Voir le tutoriel';
+
+  @override
+  String get tutorial_ownerGuide_title => 'Owner app tutorial video';
+
+  @override
+  String get tutorial_ownerGuide_subtitle => 'Watch how to create your app, track progress, and download it.';
+
+  @override
+  String get tutorial_ownerGuide_notSetYet => 'Tutorial video is not available yet.';
+
+  @override
+  String get tutorial_common_refresh => 'Refresh';
+
+  @override
+  String get tutorial_common_loading => 'Loading...';
+
+  @override
+  String get tutorial_common_failedToLoad => 'Failed to load tutorial video.';
+
+  @override
+  String get tutorial_common_retry => 'Retry';
+
+  @override
+  String get tutorial_player_play => 'Play';
+
+  @override
+  String get tutorial_player_pause => 'Pause';
+
+  @override
+  String get tutorial_player_fullscreen => 'Fullscreen';
+
+  @override
+  String get tutorial_player_exitFullscreen => 'Exit fullscreen';
+
+  @override
+  String get tutorial_player_back10 => 'Back 10 seconds';
+
+  @override
+  String get tutorial_player_forward10 => 'Forward 10 seconds';
+
+  @override
+  String get owner_proj_details_tutorial_title => 'How to create your app (quick guide)';
+
+  @override
+  String get owner_proj_details_tutorial_subtitle => 'Watch the short tutorial, then follow these steps to create, track, and publish your app.';
+
+  @override
+  String get owner_proj_details_tutorial_not_set => 'Tutorial video is not available yet.';
+
+  @override
+  String get owner_proj_details_tutorial_fullscreen => 'Fullscreen';
+
+  @override
+  String get owner_proj_details_tutorial_steps_title => 'Steps shown in the video';
+
+  @override
+  String get owner_proj_details_tutorial_step_1 => 'Open the project details and tap Create App.';
+
+  @override
+  String get owner_proj_details_tutorial_step_2 => 'Fill the app identity information (name, logo, currency, and notes if needed).';
+
+  @override
+  String get owner_proj_details_tutorial_step_3 => 'Choose your app colors / palette and theme style.';
+
+  @override
+  String get owner_proj_details_tutorial_step_4 => 'Pick the navigation style (for example bottom tabs or hamburger menu).';
+
+  @override
+  String get owner_proj_details_tutorial_step_5 => 'Preview the generated screens and check the look before submitting.';
+
+  @override
+  String get owner_proj_details_tutorial_step_6 => 'Submit the app request and wait for the build process to start.';
+
+  @override
+  String get owner_proj_details_tutorial_step_7 => 'Track build status from your apps / requests list (Android/iOS progress).';
+
+  @override
+  String get owner_proj_details_tutorial_step_8 => 'When ready, download/install the build or continue to publishing options.';
 }
