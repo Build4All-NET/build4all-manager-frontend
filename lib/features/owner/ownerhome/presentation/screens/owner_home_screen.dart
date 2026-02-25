@@ -326,23 +326,40 @@ class _HomeBodyState extends State<_HomeBody> {
                             final isAvailable = state.availableKinds.contains(kind);
                             final int? realProjectId = state.kindToProjectId[kind];
 
-                            return ProjectTemplateCard(
-                              tpl: tpl,
-                              isAvailable: isAvailable,
-                              onOpen: () {
-                                if (!isAvailable) {
-                                  AppToast.info(context, l10n.owner_proj_comingSoon);
-                                }
+                           return ProjectTemplateCard(
+  tpl: tpl,
+  // ✅ during first load, keep cards visually disabled
+  isAvailable: !(state.loading &&
+          state.availableKinds.isEmpty &&
+          state.kindToProjectId.isEmpty) &&
+      isAvailable,
+  onOpen: () {
+    // ✅ Block taps while availability is still loading (first load)
+    final isAvailabilityBootstrapping = state.loading &&
+        state.availableKinds.isEmpty &&
+        state.kindToProjectId.isEmpty;
 
-                                context.push(
-                                  '/owner/project/${tpl.id}',
-                                  extra: {
-                                    'canRequest': isAvailable,
-                                    'projectId': realProjectId,
-                                  },
-                                );
-                              },
-                            );
+    if (isAvailabilityBootstrapping) {
+      AppToast.info(context, 'Please wait... loading projects');
+      return; // ✅ IMPORTANT
+    }
+
+    // ✅ If not available, show toast and STOP (do not navigate)
+    if (!isAvailable) {
+      AppToast.info(context, l10n.owner_proj_comingSoon);
+      return; // ✅ THIS was missing
+    }
+
+    // ✅ Only navigate when backend already confirmed availability
+    context.push(
+      '/owner/project/${tpl.id}',
+      extra: {
+        'canRequest': isAvailable,
+        'projectId': realProjectId,
+      },
+    );
+  },
+);
                           },
                           childCount: projectTemplates.length,
                         ),
