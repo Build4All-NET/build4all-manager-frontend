@@ -93,7 +93,7 @@ String? _asNonEmptyStr(dynamic v) {
 /// ===============================================================
 Widget _withOwnerRegBloc(Widget child) {
   final IAuthRepository repo =
-      AuthRepositoryImpl(api: AuthApi(), jwtStore: JwtLocalDataSource());
+      AuthRepositoryImpl(api: AuthApi(DioClient.ensure()), jwtStore: JwtLocalDataSource());
   return BlocProvider(
     create: (_) => OwnerRegisterBloc(
       OwnerSendOtpUseCase(repo),

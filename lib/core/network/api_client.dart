@@ -1,4 +1,5 @@
 import 'package:build4all_manager/core/network/api_config.dart';
+import 'package:build4all_manager/features/auth/data/services/auth_api.dart';
 import 'package:dio/dio.dart';
 
 import 'package:build4all_manager/app/nav_key.dart';
@@ -24,8 +25,8 @@ class ApiClient {
     // ✅ auto attach token + handle 401 → logout
     dio.interceptors.add(
       AuthInterceptor(
-        jwt: JwtLocalDataSource(),
-        navKey: appNavKey,
+        jwtStore: JwtLocalDataSource(),
+        api: AuthApi(dio),
       ),
     );
 

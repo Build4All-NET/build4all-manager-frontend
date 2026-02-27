@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:build4all_manager/core/network/dio_client.dart';
+import 'package:build4all_manager/features/auth/data/services/auth_api.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -18,25 +21,85 @@ class _SplashGateState extends State<SplashGate> {
     super.initState();
     _boot();
   }
+Future<void> _boot() async {
+  final store = JwtLocalDataSource();
+  final api = AuthApi(DioClient.ensure()); // ✅ add this import
+  final (token, roleRaw) = await store.read();
+  final refresh = (await store.readRefreshToken())?.trim() ?? '';
 
-  Future<void> _boot() async {
-    final store = JwtLocalDataSource();
-    final (token, roleRaw) = await store.read();
+  if (!mounted) return;
 
-    if (!mounted) return;
+  final role = roleRaw.toUpperCase().trim();
 
-    final role = roleRaw.toUpperCase().trim();
+  // If no role => must login
+  if (role.isEmpty) {
+    context.go('/login');
+    return;
+  }
 
-    if (token.isEmpty || role.isEmpty) {
+  // ✅ If token missing, try refresh (if available)
+  String access = token.trim();
+
+  // If access missing OR expired => try refresh if we have refreshToken
+  if (access.isEmpty || _isJwtExpired(access)) {
+    if (refresh.isEmpty) {
+      await store.clear();
+      if (!mounted) return;
       context.go('/login');
       return;
     }
 
-    // Optional (not required, interceptor will attach token anyway)
-    DioClient.setToken(token);
+    try {
+      final res = await api.refresh(refresh);
+      final data = res.data;
 
-    context.go(role == 'SUPER_ADMIN' ? '/manager' : '/owner');
+      if (data is! Map) throw Exception('BAD_REFRESH');
+
+      final newToken = (data['token'] ?? '').toString().trim();
+      final newRefresh = (data['refreshToken'] ?? '').toString().trim();
+
+      if (newToken.isEmpty || newRefresh.isEmpty) throw Exception('MISSING_TOKENS');
+
+      await store.save(token: newToken, role: role, refreshToken: newRefresh);
+      DioClient.setToken(newToken);
+      access = newToken;
+    } catch (_) {
+      await store.clear();
+      if (!mounted) return;
+      context.go('/login');
+      return;
+    }
+  } else {
+    // token still valid
+    DioClient.setToken(access);
   }
+
+  if (!mounted) return;
+  context.go(role == 'SUPER_ADMIN' ? '/manager' : '/owner');
+}
+
+bool _isJwtExpired(String token) {
+  try {
+    final parts = token.split('.');
+    if (parts.length < 2) return true;
+
+    final payload = base64Url.normalize(parts[1]);
+    final decoded = utf8.decode(base64Url.decode(payload));
+    final map = jsonDecode(decoded);
+
+    if (map is! Map) return true;
+    final exp = map['exp'];
+
+    if (exp == null) return true;
+
+    final expSeconds = (exp is num) ? exp.toInt() : int.parse(exp.toString());
+    final nowSeconds = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+
+    return nowSeconds >= expSeconds;
+  } catch (_) {
+    return true;
+  }
+}
 
   @override
   Widget build(BuildContext context) {

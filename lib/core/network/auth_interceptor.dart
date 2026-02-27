@@ -1,65 +1,88 @@
+import 'dart:async';
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
-import 'package:build4all_manager/features/auth/data/datasources/jwt_local_datasource.dart';
+import '../../features/auth/data/datasources/jwt_local_datasource.dart';
+import '../../features/auth/data/services/auth_api.dart';
+import '../network/dio_client.dart';
 
 class AuthInterceptor extends Interceptor {
-  final JwtLocalDataSource jwt;
-  final GlobalKey<NavigatorState> navKey;
+  final JwtLocalDataSource jwtStore;
+  final AuthApi api;
 
-  bool _redirecting = false;
+  bool _refreshing = false;
+  final List<Completer<void>> _waiters = [];
 
   AuthInterceptor({
-    required this.jwt,
-    required this.navKey,
+    required this.jwtStore,
+    required this.api,
   });
 
-
-  bool _isPublicRequest(RequestOptions o) {
-    
-    final p = (o.uri.path.isNotEmpty ? o.uri.path : o.path).toLowerCase();
-
-    // ✅ allow auth/register endpoints without token
-    if (p.contains('/auth/logout')) return false; // لازم ينحط token
-if (p.contains('/auth/')) return true;
-    if (p.contains('/auth/')) return true;
-    if (p.contains('/login')) return true;
-    if (p.contains('/register')) return true;
-    if (p.contains('/otp')) return true;
-
-    return false;
+  bool _isAuthPath(RequestOptions o) {
+    final p = o.path;
+    return p.contains('/auth/refresh') ||
+        p.contains('/auth/logout') ||
+        p.contains('/auth/login') ||
+        p.contains('/auth/admin/login') ||
+        p.contains('/auth/manager/login') ||
+        p.contains('/auth/superadmin/login');
   }
 
-  bool _isMeRequest(RequestOptions o) {
-    // Use uri.path when possible (more reliable than o.path)
-    var p = (o.uri.path.isNotEmpty ? o.uri.path : o.path).toLowerCase();
+  Future<void> _refresh() async {
+    if (_refreshing) {
+      final c = Completer<void>();
+      _waiters.add(c);
+      return c.future;
+    }
 
-    // normalize trailing slash
-    if (p.endsWith('/')) p = p.substring(0, p.length - 1);
+    _refreshing = true;
 
-    // We only want to logout on 404 for the "who am I" endpoints
-    final endsWithMe = p.endsWith('/me');
+    try {
+      final refresh = (await jwtStore.readRefreshToken())?.trim() ?? '';
+      if (refresh.isEmpty) throw Exception('NO_REFRESH');
 
-    // extra safety: only for GET
-    final isGet = (o.method.toUpperCase() == 'GET');
+      final res = await api.refresh(refresh);
+      final data = res.data;
 
-    return endsWithMe && isGet;
+      if (data is! Map) throw Exception('BAD_REFRESH_RESPONSE');
+
+      final newToken = (data['token'] ?? '').toString();
+      final newRefresh = (data['refreshToken'] ?? '').toString();
+
+      if (newToken.isEmpty || newRefresh.isEmpty) throw Exception('BAD_REFRESH');
+
+      final (_, role) = await jwtStore.read();
+
+      await jwtStore.save(
+        token: newToken,
+        role: role,
+        refreshToken: newRefresh,
+      );
+
+      DioClient.setToken(newToken);
+
+      for (final w in _waiters) {
+        if (!w.isCompleted) w.complete();
+      }
+      _waiters.clear();
+    } catch (e) {
+      for (final w in _waiters) {
+        if (!w.isCompleted) w.completeError(e);
+      }
+      _waiters.clear();
+      rethrow;
+    } finally {
+      _refreshing = false;
+    }
   }
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
-    try {
-      if (!_isPublicRequest(options)) {
-        final (token, _) = await jwt.read();
-        if (token.isNotEmpty) {
-          options.headers['Authorization'] = 'Bearer ${token.trim()}';
-        } else {
-          options.headers.remove('Authorization');
-        }
-      }
-    } catch (_) {
-      // ignore
+    final (token, _) = await jwtStore.read();
+    final t = token.trim();
+
+    if (t.isNotEmpty) {
+      options.headers['Authorization'] =
+          t.toLowerCase().startsWith('bearer ') ? t : 'Bearer $t';
     }
 
     handler.next(options);
@@ -67,33 +90,32 @@ if (p.contains('/auth/')) return true;
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
-    final code = err.response?.statusCode;
+    final status = err.response?.statusCode ?? 0;
 
-    // ✅ DB reset case:
-    // token exists locally, but user is deleted -> backend may return 404 on /me
-    final shouldForceLogout =
-        (code == 401 || code == 403) || (code == 404 && _isMeRequest(err.requestOptions));
-
-    // don't redirect on public/auth calls (wrong password etc.)
-    if (shouldForceLogout && !_isPublicRequest(err.requestOptions)) {
-      try {
-        await jwt.clear();
-      } catch (_) {}
-
-      if (!_redirecting) {
-        _redirecting = true;
-
-        final ctx = navKey.currentContext;
-        if (ctx != null) {
-          ctx.go('/login');
-        }
-
-        Future.delayed(const Duration(milliseconds: 600), () {
-          _redirecting = false;
-        });
-      }
+    if ((status != 401 && status != 403) || _isAuthPath(err.requestOptions)) {
+      return handler.next(err);
     }
 
-    handler.next(err);
+    // prevent infinite retry loop
+    if (err.requestOptions.extra['__retried'] == true) {
+      return handler.next(err);
+    }
+
+    try {
+      await _refresh();
+
+      final retryReq = err.requestOptions;
+      retryReq.extra['__retried'] = true;
+
+      // ✅ your project uses ensure()
+      final dio = DioClient.ensure();
+      final res = await dio.fetch(retryReq);
+
+      return handler.resolve(res);
+    } catch (_) {
+      await jwtStore.clear();
+      DioClient.clearToken();
+      return handler.next(err);
+    }
   }
 }

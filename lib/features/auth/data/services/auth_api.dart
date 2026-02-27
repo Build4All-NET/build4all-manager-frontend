@@ -1,9 +1,10 @@
 import 'package:dio/dio.dart';
-import 'package:build4all_manager/core/network/dio_client.dart';
 import '../models/login_request_dto.dart';
 
 class AuthApi {
-  final Dio _dio = DioClient.ensure();
+  final Dio _dio;
+
+  AuthApi(this._dio); // ✅ inject Dio (no ensure here)
 
   Future<Response> login(LoginRequestDto body) {
     return _dio.post('/auth/admin/login', data: body.toJson());
@@ -19,9 +20,14 @@ class AuthApi {
     });
   }
 
-Future<Response> logout() {
-  return _dio.post('/auth/logout');
-}
+  Future<Response> refresh(String refreshToken) {
+    return _dio.post('/auth/refresh', data: {'refreshToken': refreshToken});
+  }
+
+  Future<Response> logout({required String refreshToken}) {
+    return _dio.post('/auth/logout', data: {'refreshToken': refreshToken});
+  }
+
   Future<Response> ownerVerifyOtp({
     required String email,
     required String password,
@@ -34,7 +40,6 @@ Future<Response> logout() {
     });
   }
 
-  // ✅ UPDATED: phoneNumber
   Future<Response> ownerCompleteProfile({
     required String registrationToken,
     required String username,
@@ -51,4 +56,3 @@ Future<Response> logout() {
     });
   }
 }
-

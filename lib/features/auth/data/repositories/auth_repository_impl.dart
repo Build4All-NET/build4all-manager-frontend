@@ -3,6 +3,7 @@ import 'package:build4all_manager/core/network/dio_client.dart';
 import 'package:build4all_manager/shared/utils/ApiErrorHandler.dart';
 
 import 'package:build4all_manager/core/exceptions/auth_failure.dart';
+import 'package:http/http.dart';
 
 import '../../domain/entities/app_user.dart';
 import '../../domain/entities/auth_token.dart';
@@ -42,7 +43,11 @@ class AuthRepositoryImpl implements IAuthRepository {
         role: role,
       );
 
-      await jwtStore.save(token: dto.token, role: role);
+      await jwtStore.save(
+  token: dto.token,
+  role: role,
+  refreshToken: dto.refreshToken, // ✅ NEW
+);
       DioClient.setToken(dto.token);
 
       return (AuthToken(dto.token), user);
@@ -68,13 +73,14 @@ class AuthRepositoryImpl implements IAuthRepository {
     }
   }
 
-@override
+ @override
 Future<void> logout() async {
   try {
-    await api.logout(); 
-  } catch (_) {
-    
-  }
+    final refresh = await jwtStore.readRefreshToken() ?? '';
+    if (refresh.isNotEmpty) {
+      await api.logout(refreshToken: refresh); // ✅ kills session
+    }
+  } catch (_) {}
 
   await jwtStore.clear();
   DioClient.clearToken();
@@ -176,7 +182,13 @@ Future<void> logout() async {
         role: 'OWNER',
       );
 
-      await jwtStore.save(token: token, role: 'OWNER');
+      final refreshToken = (res.data['refreshToken'] ?? '').toString();
+
+await jwtStore.save(
+  token: token,
+  role: 'OWNER',
+  refreshToken: refreshToken, // ✅ NEW
+);
       DioClient.setToken(token);
 
       return (AuthToken(token), user);

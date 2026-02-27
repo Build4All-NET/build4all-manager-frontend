@@ -1,23 +1,28 @@
 class LoginResponseDto {
   final String token;
-  final Map<String, dynamic> userOrAdmin;
+  final String refreshToken; // ✅ NEW
   final String role;
+  final Map<String, dynamic> userOrAdmin; // ✅ NEW
 
   LoginResponseDto({
     required this.token,
-    required this.userOrAdmin,
+    required this.refreshToken,
     required this.role,
+    required this.userOrAdmin,
   });
 
   factory LoginResponseDto.fromJson(Map<String, dynamic> json) {
-    // backend shapes:
-    // {token, role, admin:{...}}  OR  {token, role, user:{...}}
-    final map = (json['admin'] ?? json['user'] ?? {}) as Map<String, dynamic>;
-    final role = (json['role'] ?? map['role'] ?? '').toString();
+    final map = (json['admin'] ??
+            json['manager'] ??
+            json['owner'] ??
+            json['user'] ??
+            {}) as Map;
+
     return LoginResponseDto(
       token: (json['token'] ?? '').toString(),
-      userOrAdmin: map,
-      role: role,
+      refreshToken: (json['refreshToken'] ?? '').toString(), // ✅ NEW
+      role: (json['role'] ?? map['role'] ?? '').toString(),
+      userOrAdmin: Map<String, dynamic>.from(map),
     );
   }
 }

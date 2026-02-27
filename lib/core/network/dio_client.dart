@@ -1,3 +1,6 @@
+import 'package:build4all_manager/core/network/auth_interceptor.dart';
+import 'package:build4all_manager/features/auth/data/datasources/jwt_local_datasource.dart';
+import 'package:build4all_manager/features/auth/data/services/auth_api.dart';
 import 'package:dio/dio.dart';
 import 'package:build4all_manager/core/network/api_config.dart';
 import 'package:build4all_manager/core/network/globals.dart' as g;
@@ -17,6 +20,7 @@ class DioClient {
     // ✅ init server status controller (for the popup auto-retry)
     ServerStatusController.init(baseUrl: cfg.baseUrl);
 
+
     final client = ApiClient(cfg);
     g.appDio = client.dio;
 
@@ -27,7 +31,11 @@ class DioClient {
     if (!alreadyAdded) {
       dio.interceptors.add(GlobalErrorInterceptor());
     }
+
+   
   }
+
+  
 
   static Dio ensure() {
     final dio = g.appDio;

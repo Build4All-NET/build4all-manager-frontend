@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:build4all_manager/core/network/dio_client.dart';
 import 'package:build4all_manager/features/auth/data/datasources/jwt_local_datasource.dart';
 import 'package:build4all_manager/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:build4all_manager/features/auth/data/services/auth_api.dart';
@@ -26,7 +27,7 @@ class AppLoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final IAuthRepository repo = AuthRepositoryImpl(
-      api: AuthApi(),
+      api: AuthApi(DioClient.ensure()),
       jwtStore: JwtLocalDataSource(),
     );
 
