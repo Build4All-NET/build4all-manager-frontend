@@ -68,8 +68,17 @@ class AuthRepositoryImpl implements IAuthRepository {
     }
   }
 
-  @override
-  Future<void> logout() => jwtStore.clear();
+@override
+Future<void> logout() async {
+  try {
+    await api.logout(); 
+  } catch (_) {
+    
+  }
+
+  await jwtStore.clear();
+  DioClient.clearToken();
+}
 
   @override
   Future<bool> isLoggedIn() async {

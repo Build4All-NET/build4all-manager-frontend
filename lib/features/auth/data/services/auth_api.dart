@@ -19,6 +19,9 @@ class AuthApi {
     });
   }
 
+Future<Response> logout() {
+  return _dio.post('/auth/logout');
+}
   Future<Response> ownerVerifyOtp({
     required String email,
     required String password,

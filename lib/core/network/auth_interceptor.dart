@@ -15,10 +15,14 @@ class AuthInterceptor extends Interceptor {
     required this.navKey,
   });
 
+
   bool _isPublicRequest(RequestOptions o) {
+    
     final p = (o.uri.path.isNotEmpty ? o.uri.path : o.path).toLowerCase();
 
     // ✅ allow auth/register endpoints without token
+    if (p.contains('/auth/logout')) return false; // لازم ينحط token
+if (p.contains('/auth/')) return true;
     if (p.contains('/auth/')) return true;
     if (p.contains('/login')) return true;
     if (p.contains('/register')) return true;
