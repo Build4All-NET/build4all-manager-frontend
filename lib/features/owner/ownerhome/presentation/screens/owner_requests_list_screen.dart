@@ -117,7 +117,7 @@ class _RequestsCubit extends Cubit<_RequestsState> {
     emit(state.copyWith(ownerId: ownerId, loading: true, error: null));
     try {
       // Assumes your UC is callable: await getMyRequests(ownerId)
-      final List<AppRequest> all = await getMyRequests(ownerId);
+      final List<AppRequest> all = await getMyRequests();
 
       all.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 

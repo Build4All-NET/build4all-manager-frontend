@@ -12,31 +12,23 @@ class OwnerApi {
 
   Future<AppConfigDto> getAppConfig() async {
     try {
-      final r = await dio.get('/public/app-config');
+      final r = await dio.get('/public/app-config'); // => /api/public/app-config
       return AppConfigDto.fromJson(r.data as Map<String, dynamic>);
-    } on DioException catch (e) {
-      if (e.response?.statusCode == 403) {
-        return AppConfigDto(ownerProjectLinkId: null, wsPath: '');
-      }
+    } on DioException catch (_) {
       return AppConfigDto(ownerProjectLinkId: null, wsPath: '');
     }
   }
 
-  Future<List<AppRequestDto>> getMyRequests({required int ownerId}) async {
-    final r = await dio.get(
-      '/owner/app-requests',
-      queryParameters: {'ownerId': ownerId},
-    );
-
+  // ✅ ownerId removed
+  Future<List<AppRequestDto>> getMyRequests() async {
+    final r = await dio.get('/owner/app-requests');
     final list = (r.data as List).cast<Map<String, dynamic>>();
     return list.map(AppRequestDto.fromJson).toList();
   }
 
-  Future<List<OwnerProjectDto>> getMyApps({required int ownerId}) async {
-    final r = await dio.get(
-      '/owner/my-apps',
-      queryParameters: {'ownerId': ownerId},
-    );
+  // ✅ ownerId removed
+  Future<List<OwnerProjectDto>> getMyApps() async {
+    final r = await dio.get('/owner/my-apps');
 
     if (kDebugMode) {
       debugPrint('MY_APPS RAW => ${r.data}');
@@ -46,41 +38,27 @@ class OwnerApi {
     return list.map(OwnerProjectDto.fromJson).toList();
   }
 
-  /// ✅ Delete app (owner project link)
-Future<void> deleteApp({required int linkId}) async {
-  await dio.delete('/owner/apps/$linkId');
-}
+  Future<void> deleteApp({required int linkId}) async {
+    await dio.delete('/owner/apps/$linkId'); // matches backend: DELETE /api/owner/apps/{linkId}
+  }
 
-  // 🔴 REMOVE THIS WRONG METHOD
-  // Future<void> rebuildLink(...)
-
-  /// ✅ Rebuild ANDROID only
   Future<void> rebuildAndroid({required int linkId}) async {
     await dio.post('/owner/apps/$linkId/rebuild-bundle');
   }
 
-  /// ✅ Rebuild IOS only
   Future<void> rebuildIos({required int linkId}) async {
     await dio.post('/owner/apps/$linkId/rebuild-ios');
   }
 
-  /// ✅ Rebuild BOTH (optional)
   Future<void> rebuildBoth({required int linkId}) async {
     await dio.post('/owner/apps/$linkId/rebuild-both');
   }
 
-  Future<List<AppRequest>> getRecentRequests(int ownerId,
-      {int limit = 5}) async {
-    final r = await dio.get(
-      '/owner/app-requests',
-      queryParameters: {
-        'limit': limit,
-        'sort': 'createdAt,desc',
-        'ownerId': ownerId,
-      },
-    );
-
-    final list = (r.data as List).cast<Map<String, dynamic>>();
-    return list.map((j) => AppRequestDto.fromJson(j).toEntity()).toList();
+  // ✅ If you still want a “recent requests” helper, do it client-side (cleanest)
+  Future<List<AppRequest>> getRecentRequests({int limit = 5}) async {
+    final all = await getMyRequests();
+    final entities = all.map((e) => e.toEntity()).toList();
+    entities.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    return entities.take(limit).toList();
   }
 }

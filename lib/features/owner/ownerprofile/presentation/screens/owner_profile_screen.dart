@@ -21,35 +21,37 @@ import 'package:go_router/go_router.dart';
 import 'owner_edit_profile_screen.dart';
 
 class OwnerProfileScreen extends StatelessWidget {
-  final int? ownerId; // if provided, fetch by id; else /me
+  final int? ownerId; // if provided -> view someone else; else /me
   final Dio dio;
 
   const OwnerProfileScreen({super.key, required this.dio, this.ownerId});
+
+  int? _normalizeOwnerId(int? id) {
+    if (id == null) return null;
+    if (id <= 0) return null; // treat 0/-1 as "me"
+    return id;
+  }
 
   @override
   Widget build(BuildContext context) {
     final repo = OwnerProfileRepositoryImpl(OwnerProfileApi(dio));
     final uc = GetOwnerProfileUseCase(repo);
 
+    final normalized = _normalizeOwnerId(ownerId);
+
     return BlocProvider(
       create: (_) => OwnerProfileBloc(getProfile: uc)
-        ..add(OwnerProfileStarted(adminId: ownerId)),
-      child: _OwnerProfileView(dio: dio, ownerId: ownerId),
+        ..add(OwnerProfileStarted(adminId: normalized)),
+      child: _OwnerProfileView(dio: dio, ownerId: normalized),
     );
   }
 }
 
 class _OwnerProfileView extends StatelessWidget {
   final Dio dio;
-  final int? ownerId;
+  final int? ownerId; // already normalized
 
   const _OwnerProfileView({required this.dio, this.ownerId});
-
-  int? _normalizeOwnerId(int? id) {
-    if (id == null) return null;
-    if (id <= 0) return null; // ✅ treat 0 / -1 as "me"
-    return id;
-  }
 
   Future<void> _logoutFlow(BuildContext context) async {
     final l10n = AppLocalizations.of(context)!;
@@ -150,7 +152,8 @@ class _OwnerProfileView extends StatelessWidget {
     );
 
     if (ok == true && context.mounted) {
-      context.read<OwnerProfileBloc>().add(OwnerProfileRefreshed());
+      // refresh same mode (me vs by-id)
+      context.read<OwnerProfileBloc>().add(OwnerProfileStarted(adminId: ownerId));
     }
   }
 
@@ -162,10 +165,8 @@ class _OwnerProfileView extends StatelessWidget {
       builder: (context, s) {
         final p = s.profile;
 
-        final normalizedOwnerId = _normalizeOwnerId(ownerId);
-
-        // ✅ now this behaves correctly even if router passes ownerId=0
-        final bool canEdit = normalizedOwnerId == null && p != null && !s.loading;
+        // can edit ONLY when it's /me
+        final bool canEdit = ownerId == null && p != null && !s.loading;
 
         final appBar = AppBar(
           title: AutoSizeText(
@@ -233,8 +234,11 @@ class _OwnerProfileView extends StatelessWidget {
         return Scaffold(
           appBar: appBar,
           body: RefreshIndicator(
-            onRefresh: () async =>
-                context.read<OwnerProfileBloc>().add(OwnerProfileRefreshed()),
+            onRefresh: () async {
+              context.read<OwnerProfileBloc>().add(
+                    OwnerProfileStarted(adminId: ownerId),
+                  );
+            },
             child: LayoutBuilder(
               builder: (context, constraints) {
                 final bool wide = constraints.maxWidth >= 720;
@@ -286,6 +290,10 @@ class _OwnerProfileView extends StatelessWidget {
   }
 }
 
+/* =========================================================
+ * ✅ PRIVATE WIDGETS (must be in SAME FILE to use "_" names)
+ * ========================================================= */
+
 class _PreferencesCard extends StatelessWidget {
   final AppLocalizations l10n;
   final VoidCallback onLogout;
@@ -330,7 +338,7 @@ class _PreferencesCard extends StatelessWidget {
 
           Divider(height: 1, color: cs.outlineVariant.withOpacity(.7)),
 
-          // ✅ ALWAYS SHOW IT (no more "where is it??")
+          // Edit profile
           Opacity(
             opacity: canEdit ? 1 : 0.45,
             child: ListTile(
@@ -350,9 +358,7 @@ class _PreferencesCard extends StatelessWidget {
                 style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w900),
               ),
               subtitle: AutoSizeText(
-                canEdit
-                    ? (l10n.owner_profile_edit_basic ?? 'Update your account info')
-                    :"",
+                canEdit ? (l10n.owner_profile_edit_basic ?? 'Update your account info') : '',
                 maxLines: 2,
                 minFontSize: 11,
                 stepGranularity: 0.5,
@@ -369,6 +375,7 @@ class _PreferencesCard extends StatelessWidget {
 
           Divider(height: 1, color: cs.outlineVariant.withOpacity(.7)),
 
+          // Logout
           ListTile(
             onTap: onLogout,
             contentPadding: const EdgeInsets.symmetric(horizontal: 16),

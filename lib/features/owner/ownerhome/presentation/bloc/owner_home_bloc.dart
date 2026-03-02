@@ -38,7 +38,7 @@ class OwnerHomeBloc extends Bloc<OwnerHomeEvent, OwnerHomeState> {
 
     try {
       // ✅ requests
-      final List<AppRequest> reqs = await getMyRequests(ownerId);
+      final List<AppRequest> reqs = await getMyRequests();
       reqs.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
       // ✅ config (optional)

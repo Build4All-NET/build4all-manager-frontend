@@ -187,15 +187,21 @@ class _OwnerEditProfileScreenState extends State<OwnerEditProfileScreen> {
 
     return BlocProvider(
       create: (_) => OwnerProfileEditCubit(update: updateUc),
-    child: BlocListener<OwnerProfileEditCubit, OwnerProfileEditState>(
-  listener: (context, s) {
+   child: BlocListener<OwnerProfileEditCubit, OwnerProfileEditState>(
+  listenWhen: (prev, curr) {
+    // فقط لما تتغير error أو updated فعليًا
+    return prev.error != curr.error || prev.updated != curr.updated;
+  },
+  listener: (context, s) async {
+    if (!context.mounted) return;
+
     // ✅ ERROR FIRST
     if (s.error != null) {
       AppToast.error(context, _friendlyError(l10n, s.error!));
       return;
     }
 
-    // ✅ SUCCESS
+    // ✅ SUCCESS (only once)
     if (s.updated != null) {
       final up = s.updated!;
 
@@ -203,11 +209,15 @@ class _OwnerEditProfileScreenState extends State<OwnerEditProfileScreen> {
       final last = up.lastName.trim();
       final full = [first, last].where((e) => e.isNotEmpty).join(' ').trim();
 
-      // ✅ Home updates immediately
       OwnerMeStore.I.setName(full.isNotEmpty ? full : up.username.trim());
 
+    
       AppToast.success(context, l10n.owner_profile_edit_saved ?? 'Profile updated');
-      Navigator.of(context).pop(true); // tells profile/home to refresh if needed
+
+      await Future.delayed(const Duration(milliseconds: 50));
+      if (!context.mounted) return;
+
+      Navigator.of(context).pop(true);
     }
   },
   child: BlocBuilder<OwnerProfileEditCubit, OwnerProfileEditState>(
@@ -399,16 +409,12 @@ class _OwnerEditProfileScreenState extends State<OwnerEditProfileScreen> {
                               initialCountryCode: _initialCountryCode,
                               disableLengthCheck: true,
                               decoration: phoneDeco(),
-                              onChanged: (phone) {
-                                // phone.completeNumber => +96170123456
-                                setState(() {
-                                  if (phone.number.trim().isEmpty) {
-                                    _fullPhone = '';
-                                  } else {
-                                    _fullPhone = phone.completeNumber;
-                                  }
-                                });
-                              },
+                             onChanged: (phone) {
+  if (!mounted) return;
+  setState(() {
+    _fullPhone = phone.number.trim().isEmpty ? '' : phone.completeNumber;
+  });
+},
                             ),
                           ],
                         ),

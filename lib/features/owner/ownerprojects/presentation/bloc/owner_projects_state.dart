@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import '../../../common/domain/entities/owner_project.dart';
+import 'package:build4all_manager/features/owner/common/domain/entities/owner_project.dart';
 
 class OwnerProjectsState extends Equatable {
   final bool loading;
@@ -18,12 +18,20 @@ class OwnerProjectsState extends Equatable {
 
   List<OwnerProject> get filtered {
     final q = query.trim().toLowerCase();
+
     return all.where((p) {
-      final matchesText = q.isEmpty ||
-          p.projectName.toLowerCase().contains(q) ||
-          p.slug.toLowerCase().contains(q);
-      final matchesReady = !onlyReady ||
-          (p.androidBuildStatus == 'SUCCESS' || p.iosBuildStatus == 'SUCCESS');
+      final name = p.projectName.toLowerCase();
+      final slug = p.slug.toLowerCase();
+      final app = (p.appName ?? '').toLowerCase();
+
+      final matchesText =
+          q.isEmpty || name.contains(q) || slug.contains(q) || app.contains(q);
+
+      final android = (p.androidBuildStatus ?? '').toUpperCase();
+      final ios = (p.iosBuildStatus ?? '').toUpperCase();
+
+      final matchesReady = !onlyReady || android == 'SUCCESS' || ios == 'SUCCESS';
+
       return matchesText && matchesReady;
     }).toList();
   }

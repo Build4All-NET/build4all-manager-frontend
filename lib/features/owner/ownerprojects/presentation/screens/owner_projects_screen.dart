@@ -21,13 +21,15 @@ enum _PlatformReadyFilter { all, android, ios }
 enum _EnvironmentFilter { all, local, test, production }
 
 class OwnerProjectsScreen extends StatefulWidget {
-  final int ownerId;
   final Dio dio;
+
+  /// ✅ FIX: you were using widget.ownerId but never declared it
+  final int ownerId;
 
   const OwnerProjectsScreen({
     super.key,
-    required this.ownerId,
     required this.dio,
+    required this.ownerId,
   });
 
   @override
@@ -87,87 +89,86 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
     await Future.delayed(const Duration(milliseconds: 250));
   }
 
-
   Future<void> _deleteProject(BuildContext ctx, OwnerProject p) async {
-  final appName = p.appName.isNotEmpty ? p.appName : p.projectName;
+    final appName = (p.appName ?? '').trim().isNotEmpty ? p.appName!.trim() : p.projectName;
 
-  final confirmed = await showDialog<bool>(
-        context: ctx,
-        builder: (dialogCtx) {
-          final cs = Theme.of(dialogCtx).colorScheme;
+    final confirmed = await showDialog<bool>(
+          context: ctx,
+          builder: (dialogCtx) {
+            final cs = Theme.of(dialogCtx).colorScheme;
 
-          return AlertDialog(
-            title: const Text('Delete project'),
-            content: Text('Are you sure you want to delete "$appName"?'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(dialogCtx, false),
-                child: const Text('Cancel'),
-              ),
-              FilledButton.icon(
-                style: FilledButton.styleFrom(
-                  backgroundColor: cs.error,
-                  foregroundColor: cs.onError,
+            return AlertDialog(
+              title: const Text('Delete project'),
+              content: Text('Are you sure you want to delete "$appName"?'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(dialogCtx, false),
+                  child: const Text('Cancel'),
                 ),
-                onPressed: () => Navigator.pop(dialogCtx, true),
-                icon: const Icon(Icons.delete_rounded),
-                label: const Text('Delete'),
-              ),
-            ],
-          );
-        },
-      ) ??
-      false;
+                FilledButton.icon(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: cs.error,
+                    foregroundColor: cs.onError,
+                  ),
+                  onPressed: () => Navigator.pop(dialogCtx, true),
+                  icon: const Icon(Icons.delete_rounded),
+                  label: const Text('Delete'),
+                ),
+              ],
+            );
+          },
+        ) ??
+        false;
 
-  if (!confirmed) return;
+    if (!confirmed) return;
 
-  try {
-    await _repo.deleteApp(linkId: p.linkId);
+    try {
+      await _repo.deleteApp(linkId: p.linkId);
 
-    if (!mounted) return;
+      if (!mounted) return;
 
-    // Clean local per-tile overrides for deleted tile
-    setState(() {
-      _androidBuildOverride.remove(p.linkId);
-      _iosBuildOverride.remove(p.linkId);
-      _androidErrOverride.remove(p.linkId);
-      _iosErrOverride.remove(p.linkId);
+      // Clean local per-tile overrides for deleted tile
+      setState(() {
+        _androidBuildOverride.remove(p.linkId);
+        _iosBuildOverride.remove(p.linkId);
+        _androidErrOverride.remove(p.linkId);
+        _iosErrOverride.remove(p.linkId);
 
-      // keep pagination sane after delete
-      if (_visibleCount > _pageSize) {
-        _visibleCount = (_visibleCount - 1).clamp(_pageSize, 999999);
+        // keep pagination sane after delete
+        if (_visibleCount > _pageSize) {
+          _visibleCount = (_visibleCount - 1).clamp(_pageSize, 999999);
+        }
+      });
+
+      if (ctx.mounted) {
+        AppToast.success(ctx, 'Project deleted successfully');
       }
-    });
 
-    if (ctx.mounted) {
-      AppToast.success(ctx, 'Project deleted successfully');
-    }
+      // Refresh list from backend
+      _bloc.add(OwnerProjectsRefreshed(widget.ownerId));
+    } on DioException catch (e) {
+      String msg = 'Delete failed';
 
-    // Refresh list from backend
-    _bloc.add(OwnerProjectsRefreshed(widget.ownerId));
-  } on DioException catch (e) {
-    String msg = 'Delete failed';
-
-    final data = e.response?.data;
-    if (data is Map<String, dynamic>) {
-      if (data['message'] != null) {
-        msg = data['message'].toString();
-      } else if (data['error'] != null) {
-        msg = data['error'].toString();
+      final data = e.response?.data;
+      if (data is Map<String, dynamic>) {
+        if (data['message'] != null) {
+          msg = data['message'].toString();
+        } else if (data['error'] != null) {
+          msg = data['error'].toString();
+        }
+      } else if (e.message != null && e.message!.trim().isNotEmpty) {
+        msg = e.message!.trim();
       }
-    } else if (e.message != null && e.message!.trim().isNotEmpty) {
-      msg = e.message!.trim();
-    }
 
-    if (ctx.mounted) {
-      AppToast.error(ctx, msg);
-    }
-  } catch (e) {
-    if (ctx.mounted) {
-      AppToast.error(ctx, 'Delete failed: $e');
+      if (ctx.mounted) {
+        AppToast.error(ctx, msg);
+      }
+    } catch (e) {
+      if (ctx.mounted) {
+        AppToast.error(ctx, 'Delete failed: $e');
+      }
     }
   }
-}
 
   Future<void> _rebuildAndroid(BuildContext ctx, OwnerProject p) async {
     final id = p.linkId;
@@ -260,7 +261,7 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
   bool _matchEnv(OwnerProject p) {
     if (_env == _EnvironmentFilter.all) return true;
 
-    final s = p.status.toLowerCase();
+    final s = (p.status).toLowerCase();
 
     if (_env == _EnvironmentFilter.local) return s.contains('local');
     if (_env == _EnvironmentFilter.test) return s.contains('test');
@@ -316,9 +317,7 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
       value: _bloc,
       child: BlocListener<OwnerProjectsBloc, OwnerProjectsState>(
         listener: (context, state) {
-          if (_androidBuildOverride.isEmpty && _iosBuildOverride.isEmpty) {
-            return;
-          }
+          if (_androidBuildOverride.isEmpty && _iosBuildOverride.isEmpty) return;
 
           final removeAndroid = <int>[];
           final removeIos = <int>[];
@@ -345,9 +344,8 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
           body: SafeArea(
             child: LayoutBuilder(
               builder: (context, viewport) {
-                final double maxContentWidth =
-                    _maxContentWidth(viewport.maxWidth);
-                final double hPad = _contentHPad(viewport.maxWidth);
+                final maxContentWidth = _maxContentWidth(viewport.maxWidth);
+                final hPad = _contentHPad(viewport.maxWidth);
 
                 return Align(
                   alignment: Alignment.topCenter,
@@ -410,8 +408,8 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
                                     .where(_matchEnv)
                                     .toList();
 
-                                final int total = filtered.length;
-                                final int visible =
+                                final total = filtered.length;
+                                final visible =
                                     total == 0 ? 0 : _visibleCount.clamp(0, total);
 
                                 return RefreshIndicator(
@@ -449,15 +447,13 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
                                       physics: const AlwaysScrollableScrollPhysics(),
                                       padding: const EdgeInsets.only(bottom: 12),
                                       itemCount: visible + 1,
-                                      separatorBuilder: (_, __) =>
-                                          const SizedBox(height: 6),
+                                      separatorBuilder: (_, __) => const SizedBox(height: 6),
                                       itemBuilder: (context, index) {
                                         // Footer
                                         if (index == visible) {
                                           if (visible < total) {
                                             return Padding(
-                                              padding:
-                                                  const EdgeInsets.only(top: 2),
+                                              padding: const EdgeInsets.only(top: 2),
                                               child: Center(
                                                 child: OutlinedButton.icon(
                                                   onPressed: () {
@@ -467,33 +463,32 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
                                                               .clamp(0, total);
                                                     });
                                                   },
-                                                  icon: const Icon(
-                                                      Icons.expand_more_rounded),
-                                                  label: Text(
-                                                    l10n.owner_projects_load_more,
-                                                  ),
+                                                  icon: const Icon(Icons.expand_more_rounded),
+                                                  label: Text(l10n.owner_projects_load_more),
                                                 ),
                                               ),
                                             );
                                           }
-
                                           return const SizedBox(height: 6);
                                         }
 
                                         final item = filtered[index];
 
-                                       return ProjectTile(
-  project: item,
-  serverRootNoApi: _serverRootNoApi(widget.dio),
-  publishApi: _publishApi,
-  onRebuildAndroid: (ctx, p) => _rebuildAndroid(ctx, p),
-  onRebuildIos: (ctx, p) => _rebuildIos(ctx, p),
-  onDelete: (ctx, p) => _deleteProject(ctx, p), // ✅ added
-  androidBuildStatusOverride: _androidBuildOverride[item.linkId],
-  iosBuildStatusOverride: _iosBuildOverride[item.linkId],
-  androidBuildErrorOverride: _androidErrOverride[item.linkId],
-  iosBuildErrorOverride: _iosErrOverride[item.linkId],
-);
+                                        return ProjectTile(
+                                          project: item,
+                                          serverRootNoApi: _serverRootNoApi(widget.dio),
+                                          publishApi: _publishApi,
+                                          onRebuildAndroid: (ctx, p) => _rebuildAndroid(ctx, p),
+                                          onRebuildIos: (ctx, p) => _rebuildIos(ctx, p),
+                                          onDelete: (ctx, p) => _deleteProject(ctx, p),
+                                          androidBuildStatusOverride:
+                                              _androidBuildOverride[item.linkId],
+                                          iosBuildStatusOverride:
+                                              _iosBuildOverride[item.linkId],
+                                          androidBuildErrorOverride:
+                                              _androidErrOverride[item.linkId],
+                                          iosBuildErrorOverride: _iosErrOverride[item.linkId],
+                                        );
                                       },
                                     );
                                   }(),
@@ -569,12 +564,12 @@ class _FiltersBar extends StatelessWidget {
     final tt = Theme.of(context).textTheme;
     final w = MediaQuery.of(context).size.width;
 
-    final bool compact = w < 420;
-    final bool ultraCompact = w < 360;
+    final compact = w < 420;
+    final ultraCompact = w < 360;
 
-    final double pillHPad = ultraCompact ? 12 : (compact ? 14 : 16);
-    final double pillVPad = ultraCompact ? 9 : (compact ? 10 : 11);
-    final double fontSize = ultraCompact ? 12.5 : (compact ? 13.5 : 14);
+    final pillHPad = ultraCompact ? 12.0 : (compact ? 14.0 : 16.0);
+    final pillVPad = ultraCompact ? 9.0 : (compact ? 10.0 : 11.0);
+    final fontSize = ultraCompact ? 12.5 : (compact ? 13.5 : 14.0);
 
     Widget group({
       required String title,
@@ -780,8 +775,7 @@ class _SearchField extends StatelessWidget {
           hintText: l10n.owner_projects_searchHint,
           filled: true,
           fillColor: cs.surface,
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
             borderSide: BorderSide(color: cs.outlineVariant),

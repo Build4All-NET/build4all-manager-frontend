@@ -13,46 +13,33 @@ class OwnerRepositoryImpl implements IOwnerRepository {
 
   @override
   Future<AppConfig> getAppConfig() async {
-    final AppConfigDto dto = await api.getAppConfig(); // safe fallback inside
+    final dto = await api.getAppConfig();
     return dto.toEntity();
   }
 
   @override
-  Future<List<AppRequest>> getMyRequests({required int ownerId}) async {
-    final List<AppRequestDto> list = await api.getMyRequests(ownerId: ownerId);
+  Future<List<AppRequest>> getMyRequests() async {
+    final list = await api.getMyRequests();
     return list.map((e) => e.toEntity()).toList();
   }
 
   @override
-  Future<List<OwnerProject>> getMyApps({required int ownerId}) async {
-    final List<OwnerProjectDto> list = await api.getMyApps(ownerId: ownerId);
+  Future<List<OwnerProject>> getMyApps() async {
+    final list = await api.getMyApps();
     return list.map((e) => e.toEntity()).toList();
   }
 
   @override
-  Future<List<AppRequest>> getRecentRequests(int ownerId,
-      {int limit = 5}) async {
-    final all = await getMyRequests(ownerId: ownerId);
-    all.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-    return all.take(limit).toList();
-  }
-
-   // ANDROID rebuild
-  @override
-  Future<void> rebuildAndroid({required int linkId}) {
-    return api.rebuildAndroid(linkId: linkId);
+  Future<List<AppRequest>> getRecentRequests({int limit = 5}) async {
+    return api.getRecentRequests(limit: limit);
   }
 
   @override
-Future<void> deleteApp({required int linkId}) {
-  return api.deleteApp(linkId: linkId);
-}
+  Future<void> rebuildAndroid({required int linkId}) => api.rebuildAndroid(linkId: linkId);
 
-// IOS rebuild
   @override
-  Future<void> rebuildIos({required int linkId}) {
-    return api.rebuildIos(linkId: linkId);
-  }
+  Future<void> rebuildIos({required int linkId}) => api.rebuildIos(linkId: linkId);
 
-
+  @override
+  Future<void> deleteApp({required int linkId}) => api.deleteApp(linkId: linkId);
 }
