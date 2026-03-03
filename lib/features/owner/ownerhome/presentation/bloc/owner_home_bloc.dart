@@ -1,46 +1,35 @@
-// lib/features/owner/ownerhome/presentation/bloc/owner_home_bloc.dart
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../common/domain/entities/app_config.dart';
-import '../../../common/domain/entities/app_request.dart';
+import '../../../common/domain/entities/owner_project.dart';
 import '../../../common/domain/usecases/get_app_config_uc.dart';
-import '../../../common/domain/usecases/get_my_requests_uc.dart';
-import '../../domain/usecases/get_available_kinds_from_active_uc.dart';
+import '../../../common/domain/usecases/get_my_apps_uc.dart';
 
 import 'owner_home_event.dart';
 import 'owner_home_state.dart';
 
 class OwnerHomeBloc extends Bloc<OwnerHomeEvent, OwnerHomeState> {
-  final GetMyRequestsUc getMyRequests;
   final GetAppConfigUc getAppConfig;
-  final GetAvailableKindsFromActiveUc getAvailableKinds;
+  final GetMyAppsUc getMyApps;
 
   OwnerHomeBloc({
-    required this.getMyRequests,
     required this.getAppConfig,
-    required this.getAvailableKinds,
+    required this.getMyApps,
   }) : super(const OwnerHomeState()) {
     on<OwnerHomeStarted>(_onLoad);
     on<OwnerHomeRefreshed>(_onLoad);
   }
 
   Future<void> _onLoad(OwnerHomeEvent e, Emitter<OwnerHomeState> emit) async {
-    final ownerId =
-        (e is OwnerHomeStarted) ? e.ownerId : (e as OwnerHomeRefreshed).ownerId;
-
-    // ✅ reset to disable all cards immediately
     emit(state.copyWith(
       loading: true,
       error: null,
+      myApps: const [],
       availableKinds: const {},
       kindToProjectId: const {},
     ));
 
     try {
-      // ✅ requests
-      final List<AppRequest> reqs = await getMyRequests();
-      reqs.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-
       // ✅ config (optional)
       AppConfig? cfg;
       try {
@@ -49,24 +38,26 @@ class OwnerHomeBloc extends Bloc<OwnerHomeEvent, OwnerHomeState> {
         cfg = null;
       }
 
-      // ✅ projects kinds map (main)
-      Map<String, int> kindMap;
-      try {
-        kindMap = await getAvailableKinds(); // Map<String,int>
-      } catch (_) {
-        // if backend fails => keep disabled
-        kindMap = const {};
-      }
+      // ✅ SAME SOURCE as My Apps screen
+      final List<OwnerProject> apps = await getMyApps();
 
-      final kinds = kindMap.keys
-          .map((e) => e.toString().trim().toLowerCase())
-          .where((e) => e.isNotEmpty)
-          .toSet();
+      // ✅ only ACTIVE apps unlock templates
+      final activeApps = apps.where((p) {
+        final s = p.status.toString().trim().toUpperCase();
+        return s == 'ACTIVE';
+      }).toList();
+
+      final Map<String, int> kindMap = {
+        for (final p in activeApps)
+          p.projectName.toString().trim().toLowerCase(): p.projectId
+      };
+
+      final kinds = kindMap.keys.where((k) => k.isNotEmpty).toSet();
 
       emit(state.copyWith(
         loading: false,
-        recent: reqs.take(5).toList(),
         config: cfg,
+        myApps: apps, // ✅ keep full list to show in UI
         availableKinds: kinds,
         kindToProjectId: kindMap,
         error: null,
@@ -75,6 +66,7 @@ class OwnerHomeBloc extends Bloc<OwnerHomeEvent, OwnerHomeState> {
       emit(state.copyWith(
         loading: false,
         error: err.toString(),
+        myApps: const [],
         availableKinds: const {},
         kindToProjectId: const {},
       ));

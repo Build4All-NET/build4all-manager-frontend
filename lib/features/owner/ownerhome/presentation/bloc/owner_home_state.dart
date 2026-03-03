@@ -1,44 +1,43 @@
-// lib/features/owner/ownerhome/presentation/bloc/owner_home_state.dart
 import 'package:equatable/equatable.dart';
 import '../../../common/domain/entities/app_config.dart';
-import '../../../common/domain/entities/app_request.dart';
+import '../../../common/domain/entities/owner_project.dart';
 
 class OwnerHomeState extends Equatable {
   final bool loading;
-  final List<AppRequest> recent;
   final AppConfig? config;
   final String? error;
 
-  /// ✅ Available kinds from active DB projects only
-  /// empty => all disabled
+  // ✅ list of apps from /owner/my-apps
+  final List<OwnerProject> myApps;
+
+  /// ✅ Available kinds from ACTIVE apps only
   final Set<String> availableKinds;
 
   /// ✅ kind -> real DB projectId
-  /// empty => none available
   final Map<String, int> kindToProjectId;
 
   const OwnerHomeState({
     this.loading = false,
-    this.recent = const [],
     this.config,
     this.error,
+    this.myApps = const [],
     this.availableKinds = const {},
     this.kindToProjectId = const {},
   });
 
   OwnerHomeState copyWith({
     bool? loading,
-    List<AppRequest>? recent,
     AppConfig? config,
     String? error,
+    List<OwnerProject>? myApps,
     Set<String>? availableKinds,
     Map<String, int>? kindToProjectId,
   }) {
     return OwnerHomeState(
       loading: loading ?? this.loading,
-      recent: recent ?? this.recent,
       config: config ?? this.config,
       error: error,
+      myApps: myApps ?? this.myApps,
       availableKinds: availableKinds ?? this.availableKinds,
       kindToProjectId: kindToProjectId ?? this.kindToProjectId,
     );
@@ -47,9 +46,9 @@ class OwnerHomeState extends Equatable {
   @override
   List<Object?> get props => [
         loading,
-        recent,
         config,
         error,
+        myApps,
         availableKinds,
         kindToProjectId,
       ];

@@ -1,4 +1,5 @@
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:build4all_manager/features/owner/common/domain/usecases/get_my_apps_uc.dart';
 import 'package:build4all_manager/shared/state/owner_me_store.dart';
 import 'package:build4all_manager/shared/themes/app_theme.dart';
 import 'package:build4all_manager/shared/widgets/search_input.dart';
@@ -12,22 +13,19 @@ import 'package:go_router/go_router.dart';
 import '../../../common/data/repositories/owner_repository_impl.dart';
 import '../../../common/data/services/owner_api.dart';
 import '../../../common/domain/usecases/get_app_config_uc.dart';
-import '../../../common/domain/usecases/get_my_requests_uc.dart';
-
-import '../../domain/usecases/get_available_kinds_from_active_uc.dart';
-import '../../data/services/owner_projects_api.dart';
-import '../../data/repositories/owner_projects_repository_impl.dart';
 
 import '../bloc/owner_home_bloc.dart';
 import '../bloc/owner_home_event.dart';
 import '../bloc/owner_home_state.dart';
 
-import '../widgets/request_card.dart';
 import '../../data/static_project_models.dart';
 import '../widgets/project_template_card.dart';
 
 // ✅ SAME call style as Profile -> /admin/users/me
 import 'package:build4all_manager/features/owner/ownerprofile/data/services/owner_profile_api.dart';
+
+// ✅ entity used in My Apps list
+import 'package:build4all_manager/features/owner/common/domain/entities/owner_project.dart';
 
 class OwnerHomeScreen extends StatelessWidget {
   final int ownerId;
@@ -44,14 +42,11 @@ class OwnerHomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final generalRepo = OwnerRepositoryImpl(OwnerApi(dio));
-    final projectsRepo = OwnerProjectsRepositoryImpl(OwnerProjectsApi(dio));
-    final getAvailableKinds = GetAvailableKindsFromActiveUc(projectsRepo);
 
     return BlocProvider(
       create: (_) => OwnerHomeBloc(
-        getMyRequests: GetMyRequestsUc(generalRepo),
         getAppConfig: GetAppConfigUc(generalRepo),
-        getAvailableKinds: getAvailableKinds,
+        getMyApps: GetMyAppsUc(generalRepo),
       )..add(OwnerHomeStarted(ownerId)),
       child: _HomeScaffold(
         ownerId: ownerId,
@@ -129,7 +124,6 @@ class _HomeBodyState extends State<_HomeBody> {
   }
 
   Future<String?> _loadDisplayName() async {
-    // ✅ API FIRST (so edited name shows)
     try {
       final api = OwnerProfileApi(widget.dio);
       final dto = await api.getMe();
@@ -143,11 +137,9 @@ class _HomeBodyState extends State<_HomeBody> {
       final u = dto.username.trim();
       return u.isNotEmpty ? u : null;
     } catch (_) {
-      // fallback 1: store
       final store = OwnerMeStore.I.displayName.value;
       if ((store ?? '').trim().isNotEmpty) return store;
 
-      // fallback 2: router passed
       final passed = widget.ownerName?.trim();
       return (passed != null && passed.isNotEmpty) ? passed : null;
     }
@@ -180,6 +172,12 @@ class _HomeBodyState extends State<_HomeBody> {
     } catch (_) {
       return null;
     }
+  }
+
+  // ✅ quick: extract server root without /api
+  String _serverRootNoApi(Dio d) {
+    final base = d.options.baseUrl; // e.g. http://host:8080/api
+    return base.replaceFirst(RegExp(r'/api/?$'), '');
   }
 
   @override
@@ -309,7 +307,8 @@ class _HomeBodyState extends State<_HomeBody> {
                       const spacing = 12.0;
 
                       final cardW = (cross - (spacing * (cols - 1))) / cols;
-                      final aspect = cardW < 190 ? 0.86 : (cardW < 230 ? 0.95 : 1.05);
+                      final aspect =
+                          cardW < 190 ? 0.86 : (cardW < 230 ? 0.95 : 1.05);
 
                       return SliverGrid(
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -326,40 +325,37 @@ class _HomeBodyState extends State<_HomeBody> {
                             final isAvailable = state.availableKinds.contains(kind);
                             final int? realProjectId = state.kindToProjectId[kind];
 
-                           return ProjectTemplateCard(
-  tpl: tpl,
-  // ✅ during first load, keep cards visually disabled
-  isAvailable: !(state.loading &&
-          state.availableKinds.isEmpty &&
-          state.kindToProjectId.isEmpty) &&
-      isAvailable,
-  onOpen: () {
-    // ✅ Block taps while availability is still loading (first load)
-    final isAvailabilityBootstrapping = state.loading &&
-        state.availableKinds.isEmpty &&
-        state.kindToProjectId.isEmpty;
+                            return ProjectTemplateCard(
+                              tpl: tpl,
+                              // ✅ during first load, keep cards visually disabled
+                              isAvailable: !(state.loading &&
+                                      state.availableKinds.isEmpty &&
+                                      state.kindToProjectId.isEmpty) &&
+                                  isAvailable,
+                              onOpen: () {
+                                final isBoot = state.loading &&
+                                    state.availableKinds.isEmpty &&
+                                    state.kindToProjectId.isEmpty;
 
-    if (isAvailabilityBootstrapping) {
-      AppToast.info(context, 'Please wait... loading projects');
-      return; // ✅ IMPORTANT
-    }
+                                if (isBoot) {
+                                  AppToast.info(context, 'Please wait... loading projects');
+                                  return;
+                                }
 
-    // ✅ If not available, show toast and STOP (do not navigate)
-    if (!isAvailable) {
-      AppToast.info(context, l10n.owner_proj_comingSoon);
-      return; // ✅ THIS was missing
-    }
+                                if (!isAvailable) {
+                                  AppToast.info(context, l10n.owner_proj_comingSoon);
+                                  return;
+                                }
 
-    // ✅ Only navigate when backend already confirmed availability
-    context.push(
-      '/owner/project/${tpl.id}',
-      extra: {
-        'canRequest': isAvailable,
-        'projectId': realProjectId,
-      },
-    );
-  },
-);
+                                context.push(
+                                  '/owner/project/${tpl.id}',
+                                  extra: {
+                                    'canRequest': isAvailable,
+                                    'projectId': realProjectId,
+                                  },
+                                );
+                              },
+                            );
                           },
                           childCount: projectTemplates.length,
                         ),
@@ -368,13 +364,13 @@ class _HomeBodyState extends State<_HomeBody> {
                   ),
                 ),
 
-                // ----- Recent requests -----
+                // ✅ MY APPS SUMMARY (replaces Recent Requests)
                 SliverToBoxAdapter(
                   child: Row(
                     children: [
                       Expanded(
                         child: AutoSizeText(
-                          _safe(l10n.owner_home_recentRequests, 'Recent requests'),
+                          _safe(l10n.owner_projects_title, 'My apps'),
                           maxLines: 1,
                           minFontSize: 14,
                           stepGranularity: 0.5,
@@ -386,10 +382,7 @@ class _HomeBodyState extends State<_HomeBody> {
                         ),
                       ),
                       TextButton(
-                        onPressed: () => context.push(
-                          '/owner/requests/list',
-                          extra: {'ownerId': widget.ownerId, 'dio': widget.dio},
-                        ),
+                        onPressed: () => context.push('/owner/projects'),
                         child: AutoSizeText(
                           _safe(l10n.owner_home_viewAll, 'View all'),
                           maxLines: 1,
@@ -401,15 +394,16 @@ class _HomeBodyState extends State<_HomeBody> {
                     ],
                   ),
                 ),
+                const SliverToBoxAdapter(child: SizedBox(height: 10)),
 
-                if (state.loading && state.recent.isEmpty)
+                if (state.loading && state.myApps.isEmpty)
                   const SliverToBoxAdapter(child: _LoadingList())
-                else if (state.recent.isEmpty)
+                else if (state.myApps.isEmpty)
                   SliverToBoxAdapter(
                     child: Padding(
                       padding: const EdgeInsets.only(top: 6, bottom: 12),
                       child: AutoSizeText(
-                        _safe(l10n.owner_home_noRecent, 'No recent requests'),
+                        'No apps yet',
                         maxLines: 2,
                         minFontSize: 12,
                         stepGranularity: 0.5,
@@ -422,8 +416,14 @@ class _HomeBodyState extends State<_HomeBody> {
                   )
                 else
                   SliverList.builder(
-                    itemCount: state.recent.length,
-                    itemBuilder: (_, i) => RequestCard(req: state.recent[i]),
+                    itemCount: state.myApps.length > 5 ? 5 : state.myApps.length,
+                    itemBuilder: (_, i) {
+                      final app = state.myApps[i];
+                      return _MyAppSummaryCard(
+                        app: app,
+                        serverRootNoApi: _serverRootNoApi(widget.dio),
+                      );
+                    },
                   ),
 
                 const SliverToBoxAdapter(child: SizedBox(height: 12)),
@@ -453,6 +453,144 @@ class _LoadingList extends StatelessWidget {
           ),
         );
       }),
+    );
+  }
+}
+
+/// ✅ Compact summary card (NOT ProjectTile)
+class _MyAppSummaryCard extends StatelessWidget {
+  final OwnerProject app;
+  final String serverRootNoApi;
+
+  const _MyAppSummaryCard({
+    required this.app,
+    required this.serverRootNoApi,
+  });
+
+  String _clean(String? s) => (s ?? '').trim();
+
+  String _statusLabel(String raw) {
+    final s = raw.toUpperCase();
+    if (s == 'ACTIVE') return 'Active';
+    if (s.contains('TEST')) return 'Test';
+    if (s.contains('LOCAL')) return 'Local';
+    if (s.contains('PROD')) return 'Production';
+    return raw;
+  }
+
+  (Color bg, Color fg) _statusColors(ColorScheme cs, String raw) {
+    final s = raw.toUpperCase();
+    if (s == 'ACTIVE') return (cs.primary.withOpacity(.12), cs.primary);
+    if (s.contains('TEST')) return (cs.tertiaryContainer.withOpacity(.30), cs.tertiary);
+    if (s.contains('LOCAL')) return (cs.secondary.withOpacity(.14), cs.secondary);
+    return (cs.outlineVariant.withOpacity(.22), cs.onSurface);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
+    final name = _clean(app.appName).isNotEmpty ? _clean(app.appName) : _clean(app.projectName);
+    final status = _clean(app.status).isNotEmpty ? _clean(app.status) : '—';
+    final (bg, fg) = _statusColors(cs, status);
+
+    final logoUrl = _clean(app.logoUrl);
+    final fullLogo = logoUrl.isEmpty
+        ? null
+        : (logoUrl.startsWith('http') ? logoUrl : '$serverRootNoApi$logoUrl');
+
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: cs.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: cs.outlineVariant.withOpacity(.65)),
+      ),
+      child: Row(
+        children: [
+          // Logo
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: cs.surfaceContainerHighest.withOpacity(.35),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: cs.outlineVariant.withOpacity(.5)),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: fullLogo == null
+                ? Icon(Icons.apps_rounded, color: cs.onSurface.withOpacity(.65))
+                : Image.network(
+                    fullLogo,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) =>
+                        Icon(Icons.apps_rounded, color: cs.onSurface.withOpacity(.65)),
+                  ),
+          ),
+          const SizedBox(width: 12),
+
+          // Main
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // title + status chip
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        name.isEmpty ? '—' : name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: tt.bodyMedium?.copyWith(fontWeight: FontWeight.w800),
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: bg,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        _statusLabel(status),
+                        style: tt.labelSmall?.copyWith(
+                          color: fg,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+
+                // meta line
+                Text(
+                  'Project: ${_clean(app.projectName).isEmpty ? '—' : _clean(app.projectName)}  •  LinkId: ${app.linkId}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: tt.bodySmall?.copyWith(
+                    color: cs.onSurface.withOpacity(.7),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(width: 10),
+
+          // open button
+          IconButton(
+            tooltip: 'Open',
+            onPressed: () {
+              // take user to My Apps screen to manage this app (rebuild/delete/etc)
+              context.push('/owner/projects');
+            },
+            icon: Icon(Icons.arrow_forward_ios_rounded, size: 18, color: cs.onSurface.withOpacity(.7)),
+          ),
+        ],
+      ),
     );
   }
 }
