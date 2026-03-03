@@ -160,8 +160,18 @@ jobs:
             sed -i '' "s/platform :ios, '[0-9.]\\+'/platform :ios, '14.0'/" "$PODFILE"
           fi
 
-          echo "✅ Podfile iOS platform forced to 14.0"
-          head -n 5 "$PODFILE"
+          # Pin GTMAppAuth directly to its git tag to avoid CocoaPods CDN clone failures (GitHub 500s)
+          if grep -q "GTMAppAuth" "$PODFILE"; then
+            sed -i '' "s|pod 'GTMAppAuth'.*|pod 'GTMAppAuth', :git => 'https://github.com/google/GTMAppAuth.git', :tag => '4.1.1'|" "$PODFILE"
+          else
+            # Inject before the closing `end` of the target block
+            sed -i '' "/^end$/i\\
+          pod 'GTMAppAuth', :git => 'https://github.com/google/GTMAppAuth.git', :tag => '4.1.1'
+          " "$PODFILE"
+          fi
+
+          echo "✅ Podfile iOS platform forced to 14.0 + GTMAppAuth pinned to git tag"
+          head -n 10 "$PODFILE"
 
       - name: Install Ruby tooling (Bundler if available, else fallback gem install)
         shell: bash
@@ -180,7 +190,6 @@ jobs:
             echo "⚠️ No Gemfile → fallback to gem install (with --force to avoid console conflicts)"
             gem install cocoapods -N
             gem install fastlane -N --force
-            # xcodeproj is usually pulled by cocoapods, but keep this to guarantee patch step works:
             gem install xcodeproj -N || true
             pod --version
             fastlane --version
@@ -348,12 +357,41 @@ jobs:
 
           BUNDLE_ID="${BUNDLE_ID}" PROFILE_NAME="${PROFILE_NAME}" TEAM_ID="${IOS_TEAM_ID}" ./ci_ruby patch_runner_signing.rb
 
-      - name: Install iOS Pods
+      # ── CocoaPods cache ──────────────────────────────────────────────────────
+      # Caching Pods + ~/.cocoapods avoids re-cloning on every run.
+      # Cache key is based on Podfile.lock so it invalidates when deps change.
+      - name: Cache CocoaPods sources & install
+        uses: actions/cache@v4
+        id: pods-cache
+        with:
+          path: |
+            ios/Pods
+            ~/.cocoapods
+          key: ${{ runner.os }}-pods-${{ hashFiles('ios/Podfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pods-
+
+      - name: Install iOS Pods (with retry on GitHub 500s)
         shell: bash
         run: |
           set -euo pipefail
           cd ios
-          ../ci_pod install || { ../ci_pod repo update; ../ci_pod install; }
+
+          MAX_ATTEMPTS=3
+          ATTEMPT=0
+
+          until ../ci_pod install; do
+            ATTEMPT=$((ATTEMPT + 1))
+            if [ "$ATTEMPT" -ge "$MAX_ATTEMPTS" ]; then
+              echo "❌ pod install failed after $MAX_ATTEMPTS attempts"
+              exit 1
+            fi
+            echo "⚠️  pod install failed (attempt $ATTEMPT/$MAX_ATTEMPTS) — updating spec repo and retrying in 30s..."
+            sleep 30
+            ../ci_pod repo update
+          done
+
+          echo "✅ pod install succeeded"
 
       - name: Force iOS deployment target for all Pods
         shell: bash
