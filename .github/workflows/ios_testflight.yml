@@ -148,48 +148,97 @@ jobs:
           BASH
           chmod +x ci_ruby
 
-      - name: Force iOS minimum deployment target + pin Google pods to git tags (Podfile)
+      - name: Force iOS minimum deployment target (Podfile)
         shell: bash
         run: |
           set -euo pipefail
           PODFILE="ios/Podfile"
 
-          # ── 1. iOS platform ───────────────────────────────────────────────────
           if ! grep -q "^platform :ios" "$PODFILE"; then
             sed -i '' '1s;^;platform :ios, '\''14.0'\''\n\n;' "$PODFILE"
           else
             sed -i '' "s/platform :ios, '[0-9.]\\+'/platform :ios, '14.0'/" "$PODFILE"
           fi
 
-          # ── 2. Pin every Google pod that CocoaPods clones from GitHub ─────────
-          # These pods have their podspec source as a git clone; they hit GitHub
-          # CDN intermittently with HTTP 500 errors. Pinning them here forces
-          # CocoaPods to clone directly from the git tag, which is more reliable
-          # AND lets our pre-clone retry script warm the cache first.
-          #
+          echo "✅ Podfile iOS platform forced to 14.0"
+          head -n 5 "$PODFILE"
+
+      # ── Pre-clone all GitHub-sourced Google pods with per-repo retry ─────────
+      # AppCheckCore and other Google pods are TRANSITIVE deps — they don't appear
+      # in the Podfile directly, so sed-patching the Podfile won't pin them.
+      # Strategy: pre-clone every known GitHub-cloned pod locally (with retry),
+      # then inject a Podfile pre_install hook to redirect CocoaPods to use
+      # the local clones. This means `pod install` never touches GitHub at all.
+      - name: Pre-clone GitHub-sourced Google pods (retry) + inject Podfile hook
+        shell: bash
+        run: |
+          set -euo pipefail
+
           # Format: "POD_NAME|GITHUB_ORG/REPO|TAG"
-          # Using a plain indexed array — bash 3.2 compatible (macOS default shell)
-          POD_PINS=(
+          # Covers both direct AND transitive GitHub-cloned pods
+          PODS=(
             "GTMAppAuth|google/GTMAppAuth|4.1.1"
             "AppCheckCore|google/app-check|CocoaPods-11.2.0"
             "Google-Maps-iOS-Utils|googlemaps/google-maps-ios-utils|v5.0.0"
             "GoogleSignIn|google/GoogleSignIn-iOS|8.0.0"
           )
 
-          for ENTRY in "${POD_PINS[@]}"; do
-            IFS='|' read -r POD REPO TAG <<< "$ENTRY"
-            GIT_URL="https://github.com/${REPO}.git"
-            NEW_LINE="pod '${POD}', :git => '${GIT_URL}', :tag => '${TAG}'"
-            if grep -q "pod '${POD}'" "$PODFILE"; then
-              sed -i '' "s|pod '${POD}'.*|${NEW_LINE}|" "$PODFILE"
-              echo "  🔁 Replaced: ${POD}"
-            else
-              echo "  ⚠️  ${POD} not found in Podfile — skipping (not a direct dep)"
+          MAX=5
+          DELAY=20
+          CLONE_ROOT="${HOME}/.cocoapods/local_clones"
+          mkdir -p "$CLONE_ROOT"
+
+          git_clone_with_retry() {
+            local url="$1" dest="$2" tag="$3" label="$4"
+            if [ -d "$dest/.git" ]; then
+              echo "  ✅ $label already cloned — skipping"
+              return 0
             fi
+            local attempt=0
+            until git clone --single-branch --depth 1 --branch "$tag" "$url" "$dest" 2>&1; do
+              attempt=$((attempt + 1))
+              if [ "$attempt" -ge "$MAX" ]; then
+                echo "  ❌ Failed to clone $label after $MAX attempts"; return 1
+              fi
+              echo "  ⚠️  Clone failed for $label (attempt $attempt/$MAX) — retrying in ${DELAY}s..."
+              sleep "$DELAY"
+              rm -rf "$dest"
+            done
+            echo "  ✅ Cloned $label @ $tag"
+          }
+
+          # Step 1: clone each repo independently with retry
+          for ENTRY in "${PODS[@]}"; do
+            IFS='|' read -r POD REPO TAG <<< "$ENTRY"
+            URL="https://github.com/${REPO}.git"
+            DEST="${CLONE_ROOT}/${POD}"
+            echo "🔄 Pre-cloning ${POD}..."
+            git_clone_with_retry "$URL" "$DEST" "$TAG" "$POD"
           done
 
-          echo "✅ Podfile patched"
-          cat "$PODFILE"
+          echo "✅ All repos cloned to $CLONE_ROOT"
+
+          # Step 2: build and inject a pre_install hook into the Podfile.
+          # pre_install fires before CocoaPods resolves sources, so it intercepts
+          # BOTH direct deps and transitive deps (like AppCheckCore).
+          PODFILE="ios/Podfile"
+
+          # Remove any previously injected hook block (makes step idempotent)
+          perl -i -0pe 's/\n# \[CI\] GitHub-500 workaround.*?end\n//s' "$PODFILE" 2>/dev/null || true
+
+          # Build the Ruby path map inline
+          RUBY_ENTRIES=""
+          for ENTRY in "${PODS[@]}"; do
+            IFS='|' read -r POD REPO TAG <<< "$ENTRY"
+            DEST="${CLONE_ROOT}/${POD}"
+            RUBY_ENTRIES="${RUBY_ENTRIES}    '${POD}' => '${DEST}',\n"
+          done
+
+          # Append hook to Podfile
+          printf "\n# [CI] GitHub-500 workaround: redirect git-sourced pods to local clones\npre_install do |installer|\n  local_paths = {\n%s  }\n  installer.podfile.dependencies.each do |dep|\n    next unless local_paths.key?(dep.name)\n    dep.external_source = { :path => local_paths[dep.name] }\n  end\nend\n" "$RUBY_ENTRIES" >> "$PODFILE"
+
+          echo "✅ Podfile pre_install hook injected"
+          tail -n 20 "$PODFILE"
 
       - name: Install Ruby tooling (Bundler if available, else fallback gem install)
         shell: bash
@@ -386,68 +435,6 @@ jobs:
           key: ${{ runner.os }}-pods-${{ hashFiles('ios/Podfile.lock') }}
           restore-keys: |
             ${{ runner.os }}-pods-
-
-      # ── Pre-clone all GitHub-sourced Google pods with per-repo retry ─────────
-      # CocoaPods clones these from GitHub during `pod install`. GitHub's CDN
-      # returns sporadic HTTP 500s on single-branch shallow clones. We pre-clone
-      # each one into CocoaPods' cache dir so `pod install` finds them locally.
-      - name: Pre-clone GitHub-sourced pods (retry per repo)
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          # format: "REPO|TAG|CACHE_DIR_NAME"
-          PODS=(
-            "google/GTMAppAuth|4.1.1|GTMAppAuth"
-            "google/app-check|CocoaPods-11.2.0|AppCheckCore"
-            "googlemaps/google-maps-ios-utils|v5.0.0|Google-Maps-iOS-Utils"
-            "google/GoogleSignIn-iOS|8.0.0|GoogleSignIn"
-          )
-
-          MAX=5
-          DELAY=20
-
-          git_clone_with_retry() {
-            local url="$1"
-            local dest="$2"
-            local tag="$3"
-            local label="$4"
-
-            if [ -d "$dest/.git" ]; then
-              echo "  ✅ $label already cached — skipping"
-              return 0
-            fi
-
-            local attempt=0
-            until git clone \
-                    --single-branch \
-                    --depth 1 \
-                    --branch "$tag" \
-                    "$url" "$dest"; do
-              attempt=$((attempt + 1))
-              if [ "$attempt" -ge "$MAX" ]; then
-                echo "  ❌ Failed to clone $label after $MAX attempts"
-                return 1
-              fi
-              echo "  ⚠️  Clone failed for $label (attempt $attempt/$MAX) — retrying in ${DELAY}s..."
-              sleep "$DELAY"
-              rm -rf "$dest"
-            done
-            echo "  ✅ Cloned $label @ $tag"
-          }
-
-          CACHE_ROOT="$HOME/.cocoapods/repos-art/github_clones"
-          mkdir -p "$CACHE_ROOT"
-
-          for ENTRY in "${PODS[@]}"; do
-            IFS='|' read -r REPO TAG NAME <<< "$ENTRY"
-            URL="https://github.com/${REPO}.git"
-            DEST="${CACHE_ROOT}/${NAME}"
-            echo "🔄 Pre-cloning $NAME..."
-            git_clone_with_retry "$URL" "$DEST" "$TAG" "$NAME"
-          done
-
-          echo "✅ All GitHub-sourced pods pre-cloned"
 
       - name: Install iOS Pods
         shell: bash
