@@ -148,30 +148,48 @@ jobs:
           BASH
           chmod +x ci_ruby
 
-      - name: Force iOS minimum deployment target (Podfile)
+      - name: Force iOS minimum deployment target + pin Google pods to git tags (Podfile)
         shell: bash
         run: |
           set -euo pipefail
           PODFILE="ios/Podfile"
 
+          # ── 1. iOS platform ───────────────────────────────────────────────────
           if ! grep -q "^platform :ios" "$PODFILE"; then
             sed -i '' '1s;^;platform :ios, '\''14.0'\''\n\n;' "$PODFILE"
           else
             sed -i '' "s/platform :ios, '[0-9.]\\+'/platform :ios, '14.0'/" "$PODFILE"
           fi
 
-          # Pin GTMAppAuth directly to its git tag to avoid CocoaPods CDN clone failures (GitHub 500s)
-          if grep -q "GTMAppAuth" "$PODFILE"; then
-            sed -i '' "s|pod 'GTMAppAuth'.*|pod 'GTMAppAuth', :git => 'https://github.com/google/GTMAppAuth.git', :tag => '4.1.1'|" "$PODFILE"
-          else
-            # Inject before the closing `end` of the target block
-            sed -i '' "/^end$/i\\
-          pod 'GTMAppAuth', :git => 'https://github.com/google/GTMAppAuth.git', :tag => '4.1.1'
-          " "$PODFILE"
-          fi
+          # ── 2. Pin every Google pod that CocoaPods clones from GitHub ─────────
+          # These pods have their podspec source as a git clone; they hit GitHub
+          # CDN intermittently with HTTP 500 errors. Pinning them here forces
+          # CocoaPods to clone directly from the git tag, which is more reliable
+          # AND lets our pre-clone retry script warm the cache first.
+          #
+          # Map format:  POD_NAME|GITHUB_REPO|TAG
+          declare -A POD_PINS=(
+            ["GTMAppAuth"]="google/GTMAppAuth|4.1.1"
+            ["AppCheckCore"]="google/app-check|CocoaPods-11.2.0"
+            ["Google-Maps-iOS-Utils"]="googlemaps/google-maps-ios-utils|v5.0.0"
+            ["GoogleSignIn"]="google/GoogleSignIn-iOS|8.0.0"
+          )
 
-          echo "✅ Podfile iOS platform forced to 14.0 + GTMAppAuth pinned to git tag"
-          head -n 10 "$PODFILE"
+          for POD in "${!POD_PINS[@]}"; do
+            IFS='|' read -r REPO TAG <<< "${POD_PINS[$POD]}"
+            GIT_URL="https://github.com/${REPO}.git"
+            NEW_LINE="pod '${POD}', :git => '${GIT_URL}', :tag => '${TAG}'"
+            if grep -q "pod '${POD}'" "$PODFILE"; then
+              # Replace existing pod line (handles any existing options)
+              sed -i '' "s|pod '${POD}'.*|${NEW_LINE}|" "$PODFILE"
+              echo "  🔁 Replaced: ${POD}"
+            else
+              echo "  ⚠️  ${POD} not found in Podfile — skipping pin (not a direct dep)"
+            fi
+          done
+
+          echo "✅ Podfile patched"
+          cat "$PODFILE"
 
       - name: Install Ruby tooling (Bundler if available, else fallback gem install)
         shell: bash
@@ -358,9 +376,7 @@ jobs:
           BUNDLE_ID="${BUNDLE_ID}" PROFILE_NAME="${PROFILE_NAME}" TEAM_ID="${IOS_TEAM_ID}" ./ci_ruby patch_runner_signing.rb
 
       # ── CocoaPods cache ──────────────────────────────────────────────────────
-      # Caching Pods + ~/.cocoapods avoids re-cloning on every run.
-      # Cache key is based on Podfile.lock so it invalidates when deps change.
-      - name: Cache CocoaPods sources & install
+      - name: Cache CocoaPods sources & Pods dir
         uses: actions/cache@v4
         id: pods-cache
         with:
@@ -371,12 +387,76 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pods-
 
-      - name: Install iOS Pods (with retry on GitHub 500s)
+      # ── Pre-clone all GitHub-sourced Google pods with per-repo retry ─────────
+      # CocoaPods clones these from GitHub during `pod install`. GitHub's CDN
+      # returns sporadic HTTP 500s on single-branch shallow clones. We pre-clone
+      # each one into CocoaPods' cache dir so `pod install` finds them locally.
+      - name: Pre-clone GitHub-sourced pods (retry per repo)
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # format: "REPO|TAG|CACHE_DIR_NAME"
+          PODS=(
+            "google/GTMAppAuth|4.1.1|GTMAppAuth"
+            "google/app-check|CocoaPods-11.2.0|AppCheckCore"
+            "googlemaps/google-maps-ios-utils|v5.0.0|Google-Maps-iOS-Utils"
+            "google/GoogleSignIn-iOS|8.0.0|GoogleSignIn"
+          )
+
+          MAX=5
+          DELAY=20
+
+          git_clone_with_retry() {
+            local url="$1"
+            local dest="$2"
+            local tag="$3"
+            local label="$4"
+
+            if [ -d "$dest/.git" ]; then
+              echo "  ✅ $label already cached — skipping"
+              return 0
+            fi
+
+            local attempt=0
+            until git clone \
+                    --single-branch \
+                    --depth 1 \
+                    --branch "$tag" \
+                    "$url" "$dest"; do
+              attempt=$((attempt + 1))
+              if [ "$attempt" -ge "$MAX" ]; then
+                echo "  ❌ Failed to clone $label after $MAX attempts"
+                return 1
+              fi
+              echo "  ⚠️  Clone failed for $label (attempt $attempt/$MAX) — retrying in ${DELAY}s..."
+              sleep "$DELAY"
+              rm -rf "$dest"
+            done
+            echo "  ✅ Cloned $label @ $tag"
+          }
+
+          CACHE_ROOT="$HOME/.cocoapods/repos-art/github_clones"
+          mkdir -p "$CACHE_ROOT"
+
+          for ENTRY in "${PODS[@]}"; do
+            IFS='|' read -r REPO TAG NAME <<< "$ENTRY"
+            URL="https://github.com/${REPO}.git"
+            DEST="${CACHE_ROOT}/${NAME}"
+            echo "🔄 Pre-cloning $NAME..."
+            git_clone_with_retry "$URL" "$DEST" "$TAG" "$NAME"
+          done
+
+          echo "✅ All GitHub-sourced pods pre-cloned"
+
+      - name: Install iOS Pods
         shell: bash
         run: |
           set -euo pipefail
           cd ios
 
+          # pod install itself should now succeed first time since all git sources
+          # are pre-cloned. Keep one retry as a safety net for any other issues.
           MAX_ATTEMPTS=3
           ATTEMPT=0
 
@@ -386,8 +466,8 @@ jobs:
               echo "❌ pod install failed after $MAX_ATTEMPTS attempts"
               exit 1
             fi
-            echo "⚠️  pod install failed (attempt $ATTEMPT/$MAX_ATTEMPTS) — updating spec repo and retrying in 30s..."
-            sleep 30
+            echo "⚠️  pod install failed (attempt $ATTEMPT/$MAX_ATTEMPTS) — retrying in 20s..."
+            sleep 20
             ../ci_pod repo update
           done
 
