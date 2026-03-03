@@ -167,24 +167,24 @@ jobs:
           # CocoaPods to clone directly from the git tag, which is more reliable
           # AND lets our pre-clone retry script warm the cache first.
           #
-          # Map format:  POD_NAME|GITHUB_REPO|TAG
-          declare -A POD_PINS=(
-            ["GTMAppAuth"]="google/GTMAppAuth|4.1.1"
-            ["AppCheckCore"]="google/app-check|CocoaPods-11.2.0"
-            ["Google-Maps-iOS-Utils"]="googlemaps/google-maps-ios-utils|v5.0.0"
-            ["GoogleSignIn"]="google/GoogleSignIn-iOS|8.0.0"
+          # Format: "POD_NAME|GITHUB_ORG/REPO|TAG"
+          # Using a plain indexed array — bash 3.2 compatible (macOS default shell)
+          POD_PINS=(
+            "GTMAppAuth|google/GTMAppAuth|4.1.1"
+            "AppCheckCore|google/app-check|CocoaPods-11.2.0"
+            "Google-Maps-iOS-Utils|googlemaps/google-maps-ios-utils|v5.0.0"
+            "GoogleSignIn|google/GoogleSignIn-iOS|8.0.0"
           )
 
-          for POD in "${!POD_PINS[@]}"; do
-            IFS='|' read -r REPO TAG <<< "${POD_PINS[$POD]}"
+          for ENTRY in "${POD_PINS[@]}"; do
+            IFS='|' read -r POD REPO TAG <<< "$ENTRY"
             GIT_URL="https://github.com/${REPO}.git"
             NEW_LINE="pod '${POD}', :git => '${GIT_URL}', :tag => '${TAG}'"
             if grep -q "pod '${POD}'" "$PODFILE"; then
-              # Replace existing pod line (handles any existing options)
               sed -i '' "s|pod '${POD}'.*|${NEW_LINE}|" "$PODFILE"
               echo "  🔁 Replaced: ${POD}"
             else
-              echo "  ⚠️  ${POD} not found in Podfile — skipping pin (not a direct dep)"
+              echo "  ⚠️  ${POD} not found in Podfile — skipping (not a direct dep)"
             fi
           done
 
