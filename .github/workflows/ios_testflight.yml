@@ -163,83 +163,6 @@ jobs:
           echo "✅ Podfile iOS platform forced to 14.0"
           head -n 5 "$PODFILE"
 
-      # ── Pre-clone all GitHub-sourced Google pods with per-repo retry ─────────
-      # AppCheckCore and other Google pods are TRANSITIVE deps — they don't appear
-      # in the Podfile directly, so sed-patching the Podfile won't pin them.
-      # Strategy: pre-clone every known GitHub-cloned pod locally (with retry),
-      # then inject a Podfile pre_install hook to redirect CocoaPods to use
-      # the local clones. This means `pod install` never touches GitHub at all.
-      - name: Pre-clone GitHub-sourced Google pods (retry) + inject Podfile hook
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          # Format: "POD_NAME|GITHUB_ORG/REPO|TAG"
-          # Covers both direct AND transitive GitHub-cloned pods
-          PODS=(
-            "GTMAppAuth|google/GTMAppAuth|4.1.1"
-            "AppCheckCore|google/app-check|CocoaPods-11.2.0"
-            "Google-Maps-iOS-Utils|googlemaps/google-maps-ios-utils|v5.0.0"
-            "GoogleSignIn|google/GoogleSignIn-iOS|8.0.0"
-          )
-
-          MAX=5
-          DELAY=20
-          CLONE_ROOT="${HOME}/.cocoapods/local_clones"
-          mkdir -p "$CLONE_ROOT"
-
-          git_clone_with_retry() {
-            local url="$1" dest="$2" tag="$3" label="$4"
-            if [ -d "$dest/.git" ]; then
-              echo "  ✅ $label already cloned — skipping"
-              return 0
-            fi
-            local attempt=0
-            until git clone --single-branch --depth 1 --branch "$tag" "$url" "$dest" 2>&1; do
-              attempt=$((attempt + 1))
-              if [ "$attempt" -ge "$MAX" ]; then
-                echo "  ❌ Failed to clone $label after $MAX attempts"; return 1
-              fi
-              echo "  ⚠️  Clone failed for $label (attempt $attempt/$MAX) — retrying in ${DELAY}s..."
-              sleep "$DELAY"
-              rm -rf "$dest"
-            done
-            echo "  ✅ Cloned $label @ $tag"
-          }
-
-          # Step 1: clone each repo independently with retry
-          for ENTRY in "${PODS[@]}"; do
-            IFS='|' read -r POD REPO TAG <<< "$ENTRY"
-            URL="https://github.com/${REPO}.git"
-            DEST="${CLONE_ROOT}/${POD}"
-            echo "🔄 Pre-cloning ${POD}..."
-            git_clone_with_retry "$URL" "$DEST" "$TAG" "$POD"
-          done
-
-          echo "✅ All repos cloned to $CLONE_ROOT"
-
-          # Step 2: build and inject a pre_install hook into the Podfile.
-          # pre_install fires before CocoaPods resolves sources, so it intercepts
-          # BOTH direct deps and transitive deps (like AppCheckCore).
-          PODFILE="ios/Podfile"
-
-          # Remove any previously injected hook block (makes step idempotent)
-          perl -i -0pe 's/\n# \[CI\] GitHub-500 workaround.*?end\n//s' "$PODFILE" 2>/dev/null || true
-
-          # Build the Ruby path map inline
-          RUBY_ENTRIES=""
-          for ENTRY in "${PODS[@]}"; do
-            IFS='|' read -r POD REPO TAG <<< "$ENTRY"
-            DEST="${CLONE_ROOT}/${POD}"
-            RUBY_ENTRIES="${RUBY_ENTRIES}    '${POD}' => '${DEST}',\n"
-          done
-
-          # Append hook to Podfile
-          printf "\n# [CI] GitHub-500 workaround: redirect git-sourced pods to local clones\npre_install do |installer|\n  local_paths = {\n%s  }\n  installer.podfile.dependencies.each do |dep|\n    next unless local_paths.key?(dep.name)\n    dep.external_source = { :path => local_paths[dep.name] }\n  end\nend\n" "$RUBY_ENTRIES" >> "$PODFILE"
-
-          echo "✅ Podfile pre_install hook injected"
-          tail -n 20 "$PODFILE"
-
       - name: Install Ruby tooling (Bundler if available, else fallback gem install)
         shell: bash
         run: |
@@ -257,6 +180,7 @@ jobs:
             echo "⚠️ No Gemfile → fallback to gem install (with --force to avoid console conflicts)"
             gem install cocoapods -N
             gem install fastlane -N --force
+            # xcodeproj is usually pulled by cocoapods, but keep this to guarantee patch step works:
             gem install xcodeproj -N || true
             pod --version
             fastlane --version
@@ -424,41 +348,12 @@ jobs:
 
           BUNDLE_ID="${BUNDLE_ID}" PROFILE_NAME="${PROFILE_NAME}" TEAM_ID="${IOS_TEAM_ID}" ./ci_ruby patch_runner_signing.rb
 
-      # ── CocoaPods cache ──────────────────────────────────────────────────────
-      - name: Cache CocoaPods sources & Pods dir
-        uses: actions/cache@v4
-        id: pods-cache
-        with:
-          path: |
-            ios/Pods
-            ~/.cocoapods
-          key: ${{ runner.os }}-pods-${{ hashFiles('ios/Podfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-pods-
-
       - name: Install iOS Pods
         shell: bash
         run: |
           set -euo pipefail
           cd ios
-
-          # pod install itself should now succeed first time since all git sources
-          # are pre-cloned. Keep one retry as a safety net for any other issues.
-          MAX_ATTEMPTS=3
-          ATTEMPT=0
-
-          until ../ci_pod install; do
-            ATTEMPT=$((ATTEMPT + 1))
-            if [ "$ATTEMPT" -ge "$MAX_ATTEMPTS" ]; then
-              echo "❌ pod install failed after $MAX_ATTEMPTS attempts"
-              exit 1
-            fi
-            echo "⚠️  pod install failed (attempt $ATTEMPT/$MAX_ATTEMPTS) — retrying in 20s..."
-            sleep 20
-            ../ci_pod repo update
-          done
-
-          echo "✅ pod install succeeded"
+          ../ci_pod install || { ../ci_pod repo update; ../ci_pod install; }
 
       - name: Force iOS deployment target for all Pods
         shell: bash
