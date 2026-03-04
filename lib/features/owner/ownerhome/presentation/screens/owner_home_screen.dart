@@ -1,5 +1,8 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:build4all_manager/features/owner/common/domain/usecases/get_my_apps_uc.dart';
+import 'package:build4all_manager/features/owner/ownerhome/data/repositories/owner_projects_repository_impl.dart';
+import 'package:build4all_manager/features/owner/ownerhome/data/services/owner_projects_api.dart';
+import 'package:build4all_manager/features/owner/ownerhome/domain/usecases/get_platform_projects_uc.dart';
 import 'package:build4all_manager/shared/state/owner_me_store.dart';
 import 'package:build4all_manager/shared/themes/app_theme.dart';
 import 'package:build4all_manager/shared/widgets/search_input.dart';
@@ -42,18 +45,23 @@ class OwnerHomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final generalRepo = OwnerRepositoryImpl(OwnerApi(dio));
+   
 
-    return BlocProvider(
-      create: (_) => OwnerHomeBloc(
-        getAppConfig: GetAppConfigUc(generalRepo),
-        getMyApps: GetMyAppsUc(generalRepo),
-      )..add(OwnerHomeStarted(ownerId)),
-      child: _HomeScaffold(
-        ownerId: ownerId,
-        dio: dio,
-        ownerName: ownerName,
-      ),
-    );
+//  NEW repo for /projects
+final projectsRepo = OwnerProjectsRepositoryImpl(OwnerProjectsApi(dio));
+
+   return BlocProvider(
+  create: (_) => OwnerHomeBloc(
+    getAppConfig: GetAppConfigUc(generalRepo),
+    getMyApps: GetMyAppsUc(generalRepo),
+    getPlatformProjects: GetPlatformProjectsUc(projectsRepo), // 
+  )..add(OwnerHomeStarted(ownerId)),
+  child: _HomeScaffold(
+    ownerId: ownerId,
+    dio: dio,
+    ownerName: ownerName,
+  ),
+);
   }
 }
 
