@@ -1037,6 +1037,66 @@
   "owner_proj_details_tutorial_step_6": "Soumettez la demande de création d’application et attendez le démarrage du processus de build.",
   "owner_proj_details_tutorial_step_7": "Suivez l’état du build depuis la liste de vos applications / demandes (progression Android/iOS).",
   "owner_proj_details_tutorial_step_8": "Quand c’est prêt, téléchargez/installez le build ou continuez vers les options de publication."
+,"owner_profile_edit_new_password_length": "Le nouveau mot de passe doit contenir au moins 6 caractères",
+"owner_profile_edit_username_required": "Le nom d’utilisateur est requis",
+  "owner_profile_edit_first_name_required": "Le prénom est requis",
+  "owner_profile_edit_last_name_required": "Le nom de famille est requis",
+  "owner_profile_edit_email_required": "L’e-mail est requis",
 
+  "owner_profile_edit_username_min3": "Le nom d’utilisateur doit contenir au moins 3 caractères",
+  "owner_profile_edit_first_name_min3": "Le prénom doit contenir au moins 3 caractères",
+  "owner_profile_edit_last_name_min3": "Le nom de famille doit contenir au moins 3 caractères",
+
+  "owner_profile_edit_email_requires_verification": "Le changement d’e-mail nécessite une vérification",
+
+  "owner_profile_edit_email_change_sent": "Le code de vérification a été envoyé",
+  "owner_profile_edit_email_change_title": "Vérifier le nouvel e-mail",
+  "owner_profile_edit_email_change_code_hint": "Code à 6 chiffres",
+  "owner_profile_edit_email_change_verify": "Vérifier",
+  "owner_profile_edit_email_change_resend": "Renvoyer",
+  "owner_profile_edit_email_change_resend_ok": "Code renvoyé",
+  "owner_profile_edit_email_change_resend_fail": "Échec de l’envoi",
+  "owner_profile_edit_email_change_verified": "E-mail mis à jour",
+   "owner_projects_no_results_title": "Aucune application trouvée",
+  "owner_projects_no_results_body_query": "Aucun résultat ne correspond à \"{query}\".\nEssayez un autre mot-clé.",
+  "owner_projects_no_results_body_query_and_filters": "Aucun résultat ne correspond à \"{query}\" avec les filtres actuels.\nEssayez d’effacer la recherche ou de réinitialiser les filtres.",
+  "owner_projects_no_results_body_filters": "Aucune application ne correspond aux filtres actuels.\nEssayez de réinitialiser les filtres.",
+  "owner_projects_no_results_body_generic": "Aucune application trouvée.",
+  "owner_projects_clear_search": "Effacer la recherche",
+  "owner_projects_reset_filters": "Réinitialiser les filtres",
+  "owner_projects_tooltip_clear_search": "Effacer la recherche",
+
+  "@owner_projects_no_results_body_query": {
+    "placeholders": { "query": {} }
+  },
+  "@owner_projects_no_results_body_query_and_filters": {
+    "placeholders": { "query": {} }
+  },
+  "ownerAppsSlugLabel": "slug : {slug}",
+  "owner_request_runtime_title": "Exécution",
+  "owner_request_runtime_menu_type": "Type de menu",
+  "owner_request_runtime_enabled_features": "Fonctionnalités activées",
+  "owner_request_runtime_navigation": "Navigation",
+  "owner_request_runtime_navigation_help": "Activer/désactiver pour afficher/masquer. Glisser les éléments activés pour réorganiser.",
+  "owner_request_runtime_home_sections": "Sections d’accueil",
+  "owner_request_runtime_home_help": "Activer/désactiver pour afficher/masquer. Glisser les sections activées pour réorganiser.",
+  "owner_request_menu_bottom": "Bas",
+  "owner_request_menu_hamburger": "Hamburger",
+  "owner_request_feature_items": "Articles",
+  "owner_request_feature_booking": "Réservations",
+  "owner_request_feature_reviews": "Avis",
+  "owner_request_feature_orders": "Commandes",
+  "owner_request_feature_coupons": "Coupons",
+  "owner_request_feature_notifications": "Notifications",
+  "owner_request_nav_home": "Accueil",
+  "owner_request_nav_explore": "Explorer",
+  "owner_request_nav_cart": "Panier",
+  "owner_request_nav_profile": "Profil",
+  "owner_request_nav_locked_required": "Obligatoire",
+  "owner_request_nav_locked_bottom_max": "Max {max} onglets dans le menu du bas",
+  "@owner_request_nav_locked_bottom_max": { "placeholders": { "max": {} } },
+  "owner_request_nav_locked_missing_features": "Requiert : {features}",
+  "@owner_request_nav_locked_missing_features": { "placeholders": { "features": {} } },
+  "owner_request_pick_limit": "Choisir la limite"
   
 }

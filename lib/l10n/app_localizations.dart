@@ -1966,7 +1966,7 @@ abstract class AppLocalizations {
   /// No description provided for @owner_request_runtime_title.
   ///
   /// In en, this message translates to:
-  /// **'Runtime Config'**
+  /// **'Runtime'**
   String get owner_request_runtime_title;
 
   /// No description provided for @owner_request_runtime_subtitle.
@@ -4488,6 +4488,300 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'When ready, download/install the build or continue to publishing options.'**
   String get owner_proj_details_tutorial_step_8;
+
+  /// No description provided for @owner_profile_edit_new_password_length.
+  ///
+  /// In en, this message translates to:
+  /// **'New password must be at least 6 characters'**
+  String get owner_profile_edit_new_password_length;
+
+  /// No description provided for @owner_profile_edit_username_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Username is required'**
+  String get owner_profile_edit_username_required;
+
+  /// No description provided for @owner_profile_edit_first_name_required.
+  ///
+  /// In en, this message translates to:
+  /// **'First name is required'**
+  String get owner_profile_edit_first_name_required;
+
+  /// No description provided for @owner_profile_edit_last_name_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Last name is required'**
+  String get owner_profile_edit_last_name_required;
+
+  /// No description provided for @owner_profile_edit_email_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Email is required'**
+  String get owner_profile_edit_email_required;
+
+  /// No description provided for @owner_profile_edit_username_min3.
+  ///
+  /// In en, this message translates to:
+  /// **'Username must be at least 3 characters'**
+  String get owner_profile_edit_username_min3;
+
+  /// No description provided for @owner_profile_edit_first_name_min3.
+  ///
+  /// In en, this message translates to:
+  /// **'First name must be at least 3 characters'**
+  String get owner_profile_edit_first_name_min3;
+
+  /// No description provided for @owner_profile_edit_last_name_min3.
+  ///
+  /// In en, this message translates to:
+  /// **'Last name must be at least 3 characters'**
+  String get owner_profile_edit_last_name_min3;
+
+  /// No description provided for @owner_profile_edit_email_requires_verification.
+  ///
+  /// In en, this message translates to:
+  /// **'Email change requires verification'**
+  String get owner_profile_edit_email_requires_verification;
+
+  /// No description provided for @owner_profile_edit_email_change_sent.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification code sent'**
+  String get owner_profile_edit_email_change_sent;
+
+  /// No description provided for @owner_profile_edit_email_change_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify new email'**
+  String get owner_profile_edit_email_change_title;
+
+  /// No description provided for @owner_profile_edit_email_change_code_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'6-digit code'**
+  String get owner_profile_edit_email_change_code_hint;
+
+  /// No description provided for @owner_profile_edit_email_change_verify.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify'**
+  String get owner_profile_edit_email_change_verify;
+
+  /// No description provided for @owner_profile_edit_email_change_resend.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend'**
+  String get owner_profile_edit_email_change_resend;
+
+  /// No description provided for @owner_profile_edit_email_change_resend_ok.
+  ///
+  /// In en, this message translates to:
+  /// **'Code resent'**
+  String get owner_profile_edit_email_change_resend_ok;
+
+  /// No description provided for @owner_profile_edit_email_change_resend_fail.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to resend'**
+  String get owner_profile_edit_email_change_resend_fail;
+
+  /// No description provided for @owner_profile_edit_email_change_verified.
+  ///
+  /// In en, this message translates to:
+  /// **'Email updated'**
+  String get owner_profile_edit_email_change_verified;
+
+  /// No description provided for @owner_profile_edit_email_change_invalid_code.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid verification code'**
+  String get owner_profile_edit_email_change_invalid_code;
+
+  /// No description provided for @owner_projects_no_results_title.
+  ///
+  /// In en, this message translates to:
+  /// **'No apps found'**
+  String get owner_projects_no_results_title;
+
+  /// No description provided for @owner_projects_no_results_body_query.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing matches \"{query}\".\nTry a different keyword.'**
+  String owner_projects_no_results_body_query(Object query);
+
+  /// No description provided for @owner_projects_no_results_body_query_and_filters.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing matches \"{query}\" with the current filters.\nTry clearing search or resetting filters.'**
+  String owner_projects_no_results_body_query_and_filters(Object query);
+
+  /// No description provided for @owner_projects_no_results_body_filters.
+  ///
+  /// In en, this message translates to:
+  /// **'No apps match the current filters.\nTry resetting filters.'**
+  String get owner_projects_no_results_body_filters;
+
+  /// No description provided for @owner_projects_no_results_body_generic.
+  ///
+  /// In en, this message translates to:
+  /// **'No apps found.'**
+  String get owner_projects_no_results_body_generic;
+
+  /// No description provided for @owner_projects_clear_search.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear search'**
+  String get owner_projects_clear_search;
+
+  /// No description provided for @owner_projects_reset_filters.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset filters'**
+  String get owner_projects_reset_filters;
+
+  /// No description provided for @owner_projects_tooltip_clear_search.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear search'**
+  String get owner_projects_tooltip_clear_search;
+
+  /// No description provided for @ownerAppsSlugLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'slug: {slug}'**
+  String ownerAppsSlugLabel(Object slug);
+
+  /// No description provided for @owner_request_runtime_menu_type.
+  ///
+  /// In en, this message translates to:
+  /// **'Menu Type'**
+  String get owner_request_runtime_menu_type;
+
+  /// No description provided for @owner_request_runtime_enabled_features.
+  ///
+  /// In en, this message translates to:
+  /// **'Enabled Features'**
+  String get owner_request_runtime_enabled_features;
+
+  /// No description provided for @owner_request_runtime_navigation.
+  ///
+  /// In en, this message translates to:
+  /// **'Navigation'**
+  String get owner_request_runtime_navigation;
+
+  /// No description provided for @owner_request_runtime_navigation_help.
+  ///
+  /// In en, this message translates to:
+  /// **'Check/uncheck to show/hide. Drag enabled items to reorder.'**
+  String get owner_request_runtime_navigation_help;
+
+  /// No description provided for @owner_request_runtime_home_sections.
+  ///
+  /// In en, this message translates to:
+  /// **'Home Sections'**
+  String get owner_request_runtime_home_sections;
+
+  /// No description provided for @owner_request_runtime_home_help.
+  ///
+  /// In en, this message translates to:
+  /// **'Check/uncheck to show/hide. Drag enabled sections to reorder.'**
+  String get owner_request_runtime_home_help;
+
+  /// No description provided for @owner_request_menu_bottom.
+  ///
+  /// In en, this message translates to:
+  /// **'Bottom'**
+  String get owner_request_menu_bottom;
+
+  /// No description provided for @owner_request_menu_hamburger.
+  ///
+  /// In en, this message translates to:
+  /// **'Hamburger'**
+  String get owner_request_menu_hamburger;
+
+  /// No description provided for @owner_request_feature_items.
+  ///
+  /// In en, this message translates to:
+  /// **'Items'**
+  String get owner_request_feature_items;
+
+  /// No description provided for @owner_request_feature_booking.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking'**
+  String get owner_request_feature_booking;
+
+  /// No description provided for @owner_request_feature_reviews.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviews'**
+  String get owner_request_feature_reviews;
+
+  /// No description provided for @owner_request_feature_orders.
+  ///
+  /// In en, this message translates to:
+  /// **'Orders'**
+  String get owner_request_feature_orders;
+
+  /// No description provided for @owner_request_feature_coupons.
+  ///
+  /// In en, this message translates to:
+  /// **'Coupons'**
+  String get owner_request_feature_coupons;
+
+  /// No description provided for @owner_request_feature_notifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get owner_request_feature_notifications;
+
+  /// No description provided for @owner_request_nav_home.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get owner_request_nav_home;
+
+  /// No description provided for @owner_request_nav_explore.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore'**
+  String get owner_request_nav_explore;
+
+  /// No description provided for @owner_request_nav_cart.
+  ///
+  /// In en, this message translates to:
+  /// **'Cart'**
+  String get owner_request_nav_cart;
+
+  /// No description provided for @owner_request_nav_profile.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get owner_request_nav_profile;
+
+  /// No description provided for @owner_request_nav_locked_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Required'**
+  String get owner_request_nav_locked_required;
+
+  /// No description provided for @owner_request_nav_locked_bottom_max.
+  ///
+  /// In en, this message translates to:
+  /// **'Max {max} tabs in bottom menu'**
+  String owner_request_nav_locked_bottom_max(Object max);
+
+  /// No description provided for @owner_request_nav_locked_missing_features.
+  ///
+  /// In en, this message translates to:
+  /// **'Requires: {features}'**
+  String owner_request_nav_locked_missing_features(Object features);
+
+  /// No description provided for @owner_request_pick_limit.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick limit'**
+  String get owner_request_pick_limit;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

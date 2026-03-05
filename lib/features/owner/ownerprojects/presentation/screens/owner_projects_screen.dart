@@ -45,6 +45,10 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
 
   bool _showFilters = false;
 
+  // ✅ NEW: keep search text locally so we can show "No apps found"
+  late final TextEditingController _searchCtrl;
+  String _searchText = '';
+
   // Per-tile UI overrides so build status updates instantly before refresh returns
   final Map<int, String> _androidBuildOverride = {};
   final Map<int, String> _iosBuildOverride = {};
@@ -61,6 +65,8 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
   void initState() {
     super.initState();
 
+    _searchCtrl = TextEditingController();
+
     _repo = OwnerRepositoryImpl(OwnerApi(widget.dio));
     _publishApi = OwnerPublishApi(widget.dio);
 
@@ -70,6 +76,7 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
 
   @override
   void dispose() {
+    _searchCtrl.dispose();
     _bloc.close();
     super.dispose();
   }
@@ -307,6 +314,9 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
     return 16;
   }
 
+  bool get _hasActiveFilters =>
+      _platform != _PlatformReadyFilter.all || _env != _EnvironmentFilter.all;
+
   // ---------------- UI ----------------
 
   @override
@@ -363,9 +373,26 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
                           BlocBuilder<OwnerProjectsBloc, OwnerProjectsState>(
                             builder: (context, state) {
                               final l10n = AppLocalizations.of(context)!;
+                              final hasText = _searchText.trim().isNotEmpty;
+
                               return _SearchField(
                                 l10n: l10n,
+                                controller: _searchCtrl,
+                                hasText: hasText,
                                 showFilters: _showFilters,
+                                onChanged: (v) {
+                                  setState(() => _searchText = v);
+                                  context
+                                      .read<OwnerProjectsBloc>()
+                                      .add(OwnerProjectsSearchChanged(v));
+                                },
+                                onClear: () {
+                                  _searchCtrl.clear();
+                                  setState(() => _searchText = '');
+                                  context
+                                      .read<OwnerProjectsBloc>()
+                                      .add(OwnerProjectsSearchChanged(''));
+                                },
                                 onToggleFilters: () {
                                   setState(() => _showFilters = !_showFilters);
                                 },
@@ -412,6 +439,9 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
                                 final visible =
                                     total == 0 ? 0 : _visibleCount.clamp(0, total);
 
+                                final hasQuery = _searchText.trim().isNotEmpty;
+                                final hasFilters = _hasActiveFilters;
+
                                 return RefreshIndicator(
                                   onRefresh: _refresh,
                                   child: () {
@@ -433,7 +463,40 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
                                       );
                                     }
 
+                                    // ✅ FIX: distinguish "no results" vs "no projects at all"
                                     if (total == 0) {
+                                      if (hasQuery || hasFilters) {
+                                        return ListView(
+                                          physics: const AlwaysScrollableScrollPhysics(),
+                                          children: [
+                                            const SizedBox(height: 60),
+                                         _NoResults(
+  l10n: l10n, //  pass localization
+  query: hasQuery ? _searchText.trim() : null,
+  hasFilters: hasFilters,
+                                              onClearSearch: hasQuery
+                                                  ? () {
+                                                      _searchCtrl.clear();
+                                                      setState(() => _searchText = '');
+                                                      context
+                                                          .read<OwnerProjectsBloc>()
+                                                          .add(OwnerProjectsSearchChanged(''));
+                                                    }
+                                                  : null,
+                                              onResetFilters: hasFilters
+                                                  ? () {
+                                                      setState(() {
+                                                        _platform = _PlatformReadyFilter.all;
+                                                        _env = _EnvironmentFilter.all;
+                                                        _visibleCount = _pageSize;
+                                                      });
+                                                    }
+                                                  : null,
+                                            ),
+                                          ],
+                                        );
+                                      }
+
                                       return ListView(
                                         physics: const AlwaysScrollableScrollPhysics(),
                                         children: [
@@ -750,12 +813,22 @@ class _PillSeg extends StatelessWidget {
 
 class _SearchField extends StatelessWidget {
   final AppLocalizations l10n;
+  final TextEditingController controller;
+
+  final bool hasText;
   final bool showFilters;
+
+  final ValueChanged<String> onChanged;
+  final VoidCallback onClear;
   final VoidCallback onToggleFilters;
 
   const _SearchField({
     required this.l10n,
+    required this.controller,
+    required this.hasText,
     required this.showFilters,
+    required this.onChanged,
+    required this.onClear,
     required this.onToggleFilters,
   });
 
@@ -767,8 +840,8 @@ class _SearchField extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4),
       child: TextField(
-        onChanged: (v) =>
-            context.read<OwnerProjectsBloc>().add(OwnerProjectsSearchChanged(v)),
+        controller: controller,
+        onChanged: onChanged,
         style: tt.bodyMedium,
         decoration: InputDecoration(
           prefixIcon: const Icon(Icons.search_rounded),
@@ -791,17 +864,30 @@ class _SearchField extends StatelessWidget {
               width: 1.3,
             ),
           ),
-          suffixIcon: IconButton(
-            onPressed: onToggleFilters,
-            icon: Icon(
-              showFilters ? Icons.close_rounded : Icons.tune_rounded,
-              color: cs.onSurface.withOpacity(.75),
-            ),
-            tooltip: showFilters
-                ? l10n.owner_projects_filters_hide
-                : l10n.owner_projects_filters_show,
+          // ✅ clear + filters without fighting for suffixIcon space
+         suffixIcon: Row(
+  mainAxisSize: MainAxisSize.min,
+  children: [
+    if (hasText)
+      IconButton(
+        onPressed: onClear,
+        icon: Icon(Icons.close_rounded, color: cs.onSurface.withOpacity(.65)),
+        tooltip: l10n.owner_projects_tooltip_clear_search, // ✅ localized
+      ),
+    IconButton(
+      onPressed: onToggleFilters,
+      icon: Icon(
+        Icons.tune_rounded,
+        color: cs.onSurface.withOpacity(.75),
+      ),
+      tooltip: showFilters
+          ? l10n.owner_projects_filters_hide
+          : l10n.owner_projects_filters_show,
+    ),
+  ],
+),
           ),
-        ),
+        
       ),
     );
   }
@@ -842,6 +928,90 @@ class _CenteredMessage extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _NoResults extends StatelessWidget {
+  final AppLocalizations l10n;
+  final String? query;
+  final bool hasFilters;
+  final VoidCallback? onClearSearch;
+  final VoidCallback? onResetFilters;
+
+  const _NoResults({
+    required this.l10n,
+    this.query,
+    required this.hasFilters,
+    this.onClearSearch,
+    this.onResetFilters,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
+    final title = l10n.owner_projects_no_results_title;
+
+    final q = query?.trim();
+    final body = () {
+      if (q != null && q.isNotEmpty) {
+        if (hasFilters) return l10n.owner_projects_no_results_body_query_and_filters(q);
+        return l10n.owner_projects_no_results_body_query(q);
+      }
+      if (hasFilters) return l10n.owner_projects_no_results_body_filters;
+      return l10n.owner_projects_no_results_body_generic;
+    }();
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.search_off_rounded, size: 62, color: cs.outline),
+          const SizedBox(height: 10),
+          AutoSizeText(
+            title,
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            minFontSize: 13,
+            stepGranularity: 0.5,
+            overflow: TextOverflow.ellipsis,
+            style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+          ),
+          const SizedBox(height: 6),
+          AutoSizeText(
+            body,
+            textAlign: TextAlign.center,
+            maxLines: 4,
+            minFontSize: 12,
+            stepGranularity: 0.5,
+            overflow: TextOverflow.ellipsis,
+            style: tt.bodyMedium?.copyWith(color: cs.onSurface.withOpacity(.7)),
+          ),
+          const SizedBox(height: 14),
+          Wrap(
+            alignment: WrapAlignment.center,
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              if (onClearSearch != null)
+                OutlinedButton.icon(
+                  onPressed: onClearSearch,
+                  icon: const Icon(Icons.close_rounded),
+                  label: Text(l10n.owner_projects_clear_search), // ✅ localized
+                ),
+              if (onResetFilters != null)
+                OutlinedButton.icon(
+                  onPressed: onResetFilters,
+                  icon: const Icon(Icons.refresh_rounded),
+                  label: Text(l10n.owner_projects_reset_filters), // ✅ localized
+                ),
+            ],
+          ),
+        ],
       ),
     );
   }

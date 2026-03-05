@@ -882,5 +882,67 @@
   "owner_proj_details_tutorial_step_5": "عاين الشاشات المولدة وتأكد من الشكل قبل الإرسال.",
   "owner_proj_details_tutorial_step_6": "أرسل طلب إنشاء التطبيق وانتظر بدء عملية البناء.",
   "owner_proj_details_tutorial_step_7": "تابع حالة البناء من قائمة تطبيقاتك / الطلبات (تقدم أندرويد / iOS).",
-  "owner_proj_details_tutorial_step_8": "عند الجاهزية، نزّل/ثبّت النسخة أو أكمل إلى خيارات النشر."
+  "owner_proj_details_tutorial_step_8": "عند الجاهزية، نزّل/ثبّت النسخة أو أكمل إلى خيارات النشر.",
+  "owner_profile_edit_new_password_length0": "كلمة المرور الجديدة يجب أن تكون على الأقل 6 أحرف.",
+    "owner_profile_edit_username_required": "اسم المستخدم مطلوب",
+  "owner_profile_edit_first_name_required": "الاسم الأول مطلوب",
+  "owner_profile_edit_last_name_required": "اسم العائلة مطلوب",
+  "owner_profile_edit_email_required": "البريد الإلكتروني مطلوب",
+
+  "owner_profile_edit_username_min3": "اسم المستخدم يجب أن يكون 3 أحرف على الأقل",
+  "owner_profile_edit_first_name_min3": "الاسم الأول يجب أن يكون 3 أحرف على الأقل",
+  "owner_profile_edit_last_name_min3": "اسم العائلة يجب أن يكون 3 أحرف على الأقل",
+
+  "owner_profile_edit_email_requires_verification": "تغيير البريد الإلكتروني يتطلب التحقق",
+
+  "owner_profile_edit_email_change_sent": "تم إرسال رمز التحقق",
+  "owner_profile_edit_email_change_title": "تحقق من البريد الجديد",
+  "owner_profile_edit_email_change_code_hint": "رمز من 6 أرقام",
+  "owner_profile_edit_email_change_verify": "تأكيد",
+  "owner_profile_edit_email_change_resend": "إعادة إرسال",
+  "owner_profile_edit_email_change_resend_ok": "تمت إعادة إرسال الرمز",
+  "owner_profile_edit_email_change_resend_fail": "فشل إعادة الإرسال",
+  "owner_profile_edit_email_change_verified": "تم تحديث البريد الإلكتروني",
+   "owner_projects_no_results_title": "لم يتم العثور على تطبيقات",
+  "owner_projects_no_results_body_query": "لا يوجد أي نتائج تطابق \"{query}\".\nجرّب كلمة بحث مختلفة.",
+  "owner_projects_no_results_body_query_and_filters": "لا يوجد أي نتائج تطابق \"{query}\" مع الفلاتر الحالية.\nجرّب مسح البحث أو إعادة ضبط الفلاتر.",
+  "owner_projects_no_results_body_filters": "لا توجد تطبيقات تطابق الفلاتر الحالية.\nجرّب إعادة ضبط الفلاتر.",
+  "owner_projects_no_results_body_generic": "لم يتم العثور على تطبيقات.",
+  "owner_projects_clear_search": "مسح البحث",
+  "owner_projects_reset_filters": "إعادة ضبط الفلاتر",
+  "owner_projects_tooltip_clear_search": "مسح البحث",
+
+  "@owner_projects_no_results_body_query": {
+    "placeholders": { "query": {} }
+  },
+  "@owner_projects_no_results_body_query_and_filters": {
+    "placeholders": { "query": {} }
+  },
+  "ownerAppsSlugLabel": "slug: {slug}",
+  "owner_request_runtime_title": "إعدادات التشغيل",
+  "owner_request_runtime_menu_type": "نوع القائمة",
+  "owner_request_runtime_enabled_features": "الميزات المفعّلة",
+  "owner_request_runtime_navigation": "التنقّل",
+  "owner_request_runtime_navigation_help": "فعّل/عطّل لإظهار/إخفاء. اسحب العناصر المفعّلة لإعادة الترتيب.",
+  "owner_request_runtime_home_sections": "أقسام الصفحة الرئيسية",
+  "owner_request_runtime_home_help": "فعّل/عطّل لإظهار/إخفاء. اسحب الأقسام المفعّلة لإعادة الترتيب.",
+  "owner_request_menu_bottom": "سفلية",
+  "owner_request_menu_hamburger": "هامبرغر",
+  "owner_request_feature_items": "المنتجات",
+  "owner_request_feature_booking": "الحجوزات",
+  "owner_request_feature_reviews": "المراجعات",
+  "owner_request_feature_orders": "الطلبات",
+  "owner_request_feature_coupons": "الكوبونات",
+  "owner_request_feature_notifications": "الإشعارات",
+  "owner_request_nav_home": "الرئيسية",
+  "owner_request_nav_explore": "استكشاف",
+  "owner_request_nav_cart": "السلة",
+  "owner_request_nav_profile": "الملف الشخصي",
+  "owner_request_nav_locked_required": "إجباري",
+  "owner_request_nav_locked_bottom_max": "الحد الأقصى {max} تبويبات في القائمة السفلية",
+  "@owner_request_nav_locked_bottom_max": { "placeholders": { "max": {} } },
+  "owner_request_nav_locked_missing_features": "يتطلب: {features}",
+  "@owner_request_nav_locked_missing_features": { "placeholders": { "features": {} } },
+  "owner_request_pick_limit": "اختر العدد"
+ 
 }

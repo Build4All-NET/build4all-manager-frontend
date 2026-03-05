@@ -950,7 +950,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get owner_request_palette_subtitle => 'اختر قالباً أو خصص الألوان.';
 
   @override
-  String get owner_request_runtime_title => 'إعدادات Runtime';
+  String get owner_request_runtime_title => 'إعدادات التشغيل';
 
   @override
   String get owner_request_runtime_subtitle => 'التنقل + تصميم الصفحة الرئيسية + الميزات (بدون كتابة JSON).';
@@ -2233,4 +2233,161 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get owner_proj_details_tutorial_step_8 => 'عند الجاهزية، نزّل/ثبّت النسخة أو أكمل إلى خيارات النشر.';
+
+  @override
+  String get owner_profile_edit_new_password_length => 'New password must be at least 6 characters';
+
+  @override
+  String get owner_profile_edit_username_required => 'اسم المستخدم مطلوب';
+
+  @override
+  String get owner_profile_edit_first_name_required => 'الاسم الأول مطلوب';
+
+  @override
+  String get owner_profile_edit_last_name_required => 'اسم العائلة مطلوب';
+
+  @override
+  String get owner_profile_edit_email_required => 'البريد الإلكتروني مطلوب';
+
+  @override
+  String get owner_profile_edit_username_min3 => 'اسم المستخدم يجب أن يكون 3 أحرف على الأقل';
+
+  @override
+  String get owner_profile_edit_first_name_min3 => 'الاسم الأول يجب أن يكون 3 أحرف على الأقل';
+
+  @override
+  String get owner_profile_edit_last_name_min3 => 'اسم العائلة يجب أن يكون 3 أحرف على الأقل';
+
+  @override
+  String get owner_profile_edit_email_requires_verification => 'تغيير البريد الإلكتروني يتطلب التحقق';
+
+  @override
+  String get owner_profile_edit_email_change_sent => 'تم إرسال رمز التحقق';
+
+  @override
+  String get owner_profile_edit_email_change_title => 'تحقق من البريد الجديد';
+
+  @override
+  String get owner_profile_edit_email_change_code_hint => 'رمز من 6 أرقام';
+
+  @override
+  String get owner_profile_edit_email_change_verify => 'تأكيد';
+
+  @override
+  String get owner_profile_edit_email_change_resend => 'إعادة إرسال';
+
+  @override
+  String get owner_profile_edit_email_change_resend_ok => 'تمت إعادة إرسال الرمز';
+
+  @override
+  String get owner_profile_edit_email_change_resend_fail => 'فشل إعادة الإرسال';
+
+  @override
+  String get owner_profile_edit_email_change_verified => 'تم تحديث البريد الإلكتروني';
+
+  @override
+  String get owner_profile_edit_email_change_invalid_code => 'Invalid verification code';
+
+  @override
+  String get owner_projects_no_results_title => 'لم يتم العثور على تطبيقات';
+
+  @override
+  String owner_projects_no_results_body_query(Object query) {
+    return 'لا يوجد أي نتائج تطابق \"$query\".\nجرّب كلمة بحث مختلفة.';
+  }
+
+  @override
+  String owner_projects_no_results_body_query_and_filters(Object query) {
+    return 'لا يوجد أي نتائج تطابق \"$query\" مع الفلاتر الحالية.\nجرّب مسح البحث أو إعادة ضبط الفلاتر.';
+  }
+
+  @override
+  String get owner_projects_no_results_body_filters => 'لا توجد تطبيقات تطابق الفلاتر الحالية.\nجرّب إعادة ضبط الفلاتر.';
+
+  @override
+  String get owner_projects_no_results_body_generic => 'لم يتم العثور على تطبيقات.';
+
+  @override
+  String get owner_projects_clear_search => 'مسح البحث';
+
+  @override
+  String get owner_projects_reset_filters => 'إعادة ضبط الفلاتر';
+
+  @override
+  String get owner_projects_tooltip_clear_search => 'مسح البحث';
+
+  @override
+  String ownerAppsSlugLabel(Object slug) {
+    return 'slug: $slug';
+  }
+
+  @override
+  String get owner_request_runtime_menu_type => 'نوع القائمة';
+
+  @override
+  String get owner_request_runtime_enabled_features => 'الميزات المفعّلة';
+
+  @override
+  String get owner_request_runtime_navigation => 'التنقّل';
+
+  @override
+  String get owner_request_runtime_navigation_help => 'فعّل/عطّل لإظهار/إخفاء. اسحب العناصر المفعّلة لإعادة الترتيب.';
+
+  @override
+  String get owner_request_runtime_home_sections => 'أقسام الصفحة الرئيسية';
+
+  @override
+  String get owner_request_runtime_home_help => 'فعّل/عطّل لإظهار/إخفاء. اسحب الأقسام المفعّلة لإعادة الترتيب.';
+
+  @override
+  String get owner_request_menu_bottom => 'سفلية';
+
+  @override
+  String get owner_request_menu_hamburger => 'هامبرغر';
+
+  @override
+  String get owner_request_feature_items => 'المنتجات';
+
+  @override
+  String get owner_request_feature_booking => 'الحجوزات';
+
+  @override
+  String get owner_request_feature_reviews => 'المراجعات';
+
+  @override
+  String get owner_request_feature_orders => 'الطلبات';
+
+  @override
+  String get owner_request_feature_coupons => 'الكوبونات';
+
+  @override
+  String get owner_request_feature_notifications => 'الإشعارات';
+
+  @override
+  String get owner_request_nav_home => 'الرئيسية';
+
+  @override
+  String get owner_request_nav_explore => 'استكشاف';
+
+  @override
+  String get owner_request_nav_cart => 'السلة';
+
+  @override
+  String get owner_request_nav_profile => 'الملف الشخصي';
+
+  @override
+  String get owner_request_nav_locked_required => 'إجباري';
+
+  @override
+  String owner_request_nav_locked_bottom_max(Object max) {
+    return 'الحد الأقصى $max تبويبات في القائمة السفلية';
+  }
+
+  @override
+  String owner_request_nav_locked_missing_features(Object features) {
+    return 'يتطلب: $features';
+  }
+
+  @override
+  String get owner_request_pick_limit => 'اختر العدد';
 }

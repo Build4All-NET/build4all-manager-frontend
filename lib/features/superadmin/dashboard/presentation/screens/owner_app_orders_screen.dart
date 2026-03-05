@@ -205,10 +205,10 @@ class _OwnerAppOrdersScreenState extends State<OwnerAppOrdersScreen> {
                             row: o,
                             onTap: () {
                               // TODO: push a details screen when you create it.
-                              AppToast.info(
-                                context,
-                                '${l10n.orderLabel} #${o.id}',
-                              );
+                             AppToast.info(
+  context,
+  '${l10n.orderLabel} ${((o.orderCode ?? '').trim().isNotEmpty) ? o.orderCode : '#${o.id}'}',
+);
                             },
                           ),
                         ),
@@ -263,6 +263,9 @@ class _InlineError extends StatelessWidget {
 
 class SuperAdminOrderHeaderRow {
   final int id;
+  final String? orderCode;     // ✅ NEW
+  final int? orderSeq;         // ✅ NEW
+
   final DateTime? orderDate;
   final double totalPrice;
   final String status;
@@ -273,6 +276,8 @@ class SuperAdminOrderHeaderRow {
 
   SuperAdminOrderHeaderRow({
     required this.id,
+    required this.orderCode,
+    required this.orderSeq,
     required this.orderDate,
     required this.totalPrice,
     required this.status,
@@ -297,6 +302,8 @@ class SuperAdminOrderHeaderRow {
 
     return SuperAdminOrderHeaderRow(
       id: (json['id'] as num).toInt(),
+      orderCode: json['orderCode']?.toString(),              //  NEW
+      orderSeq: (json['orderSeq'] as num?)?.toInt(),         //  NEW
       orderDate: parseDate(json['orderDate']),
       totalPrice: d(json['totalPrice']),
       status: (json['status'] ?? '').toString(),
@@ -309,7 +316,6 @@ class SuperAdminOrderHeaderRow {
     );
   }
 }
-
 class PaymentSummary {
   final double orderTotal;
   final double paidAmount;
@@ -817,6 +823,11 @@ class SuperAdminOrderCard extends StatelessWidget {
     final paid = row.payment.paidAmount;
     final progress = total <= 0 ? 0.0 : (paid / total).clamp(0.0, 1.0);
 
+final displayCode = (row.orderCode ?? '').trim();
+final title = displayCode.isNotEmpty
+    ? '${l10n.orderLabel} $displayCode'
+    : '${l10n.orderLabel} #${row.id}';
+
     String fmtDate(DateTime? dt) {
       if (dt == null) return '—';
       final d = dt.toLocal();
@@ -857,11 +868,12 @@ class SuperAdminOrderCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header row
+            
             Row(
               children: [
                 Expanded(
                   child: Text(
-                    '${l10n.orderLabel} #${row.id}',
+                    title,
                     style: textTheme.titleMedium?.copyWith(
                       color: cs.onSurface,
                       fontWeight: FontWeight.w800,

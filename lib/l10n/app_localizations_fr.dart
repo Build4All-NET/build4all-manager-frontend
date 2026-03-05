@@ -950,7 +950,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get owner_request_palette_subtitle => 'Choisissez un preset ou personnalisez les couleurs.';
 
   @override
-  String get owner_request_runtime_title => 'Config Runtime';
+  String get owner_request_runtime_title => 'Exécution';
 
   @override
   String get owner_request_runtime_subtitle => 'Navigation + layout home + feature flags (sans taper du JSON).';
@@ -2157,80 +2157,237 @@ class AppLocalizationsFr extends AppLocalizations {
   String get owner_tutorial_card_watch_btn => 'Voir le tutoriel';
 
   @override
-  String get tutorial_ownerGuide_title => 'Owner app tutorial video';
+  String get tutorial_ownerGuide_title => 'Vidéo tutorielle de l’application propriétaire';
 
   @override
-  String get tutorial_ownerGuide_subtitle => 'Watch how to create your app, track progress, and download it.';
+  String get tutorial_ownerGuide_subtitle => 'Regardez comment créer votre application, suivre sa progression et la télécharger.';
 
   @override
-  String get tutorial_ownerGuide_notSetYet => 'Tutorial video is not available yet.';
+  String get tutorial_ownerGuide_notSetYet => 'La vidéo du tutoriel n’est pas encore disponible.';
 
   @override
-  String get tutorial_common_refresh => 'Refresh';
+  String get tutorial_common_refresh => 'Actualiser';
 
   @override
-  String get tutorial_common_loading => 'Loading...';
+  String get tutorial_common_loading => 'Chargement...';
 
   @override
-  String get tutorial_common_failedToLoad => 'Failed to load tutorial video.';
+  String get tutorial_common_failedToLoad => 'Échec du chargement de la vidéo du tutoriel.';
 
   @override
-  String get tutorial_common_retry => 'Retry';
+  String get tutorial_common_retry => 'Réessayer';
 
   @override
-  String get tutorial_player_play => 'Play';
+  String get tutorial_player_play => 'Lire';
 
   @override
   String get tutorial_player_pause => 'Pause';
 
   @override
-  String get tutorial_player_fullscreen => 'Fullscreen';
+  String get tutorial_player_fullscreen => 'Plein écran';
 
   @override
-  String get tutorial_player_exitFullscreen => 'Exit fullscreen';
+  String get tutorial_player_exitFullscreen => 'Quitter le plein écran';
 
   @override
-  String get tutorial_player_back10 => 'Back 10 seconds';
+  String get tutorial_player_back10 => 'Reculer de 10 secondes';
 
   @override
-  String get tutorial_player_forward10 => 'Forward 10 seconds';
+  String get tutorial_player_forward10 => 'Avancer de 10 secondes';
 
   @override
-  String get owner_proj_details_tutorial_title => 'How to create your app (quick guide)';
+  String get owner_proj_details_tutorial_title => 'Comment créer votre application (guide rapide)';
 
   @override
-  String get owner_proj_details_tutorial_subtitle => 'Watch the short tutorial, then follow these steps to create, track, and publish your app.';
+  String get owner_proj_details_tutorial_subtitle => 'Regardez le court tutoriel, puis suivez ces étapes pour créer, suivre et publier votre application.';
 
   @override
-  String get owner_proj_details_tutorial_not_set => 'Tutorial video is not available yet.';
+  String get owner_proj_details_tutorial_not_set => 'La vidéo du tutoriel n’est pas encore disponible.';
 
   @override
-  String get owner_proj_details_tutorial_fullscreen => 'Fullscreen';
+  String get owner_proj_details_tutorial_fullscreen => 'Plein écran';
 
   @override
-  String get owner_proj_details_tutorial_steps_title => 'Steps shown in the video';
+  String get owner_proj_details_tutorial_steps_title => 'Étapes montrées dans la vidéo';
 
   @override
-  String get owner_proj_details_tutorial_step_1 => 'Open the project details and tap Create App.';
+  String get owner_proj_details_tutorial_step_1 => 'Ouvrez les détails du projet et appuyez sur Créer une application.';
 
   @override
-  String get owner_proj_details_tutorial_step_2 => 'Fill the app identity information (name, logo, currency, and notes if needed).';
+  String get owner_proj_details_tutorial_step_2 => 'Remplissez les informations d’identité de l’application (nom, logo, devise et notes si nécessaire).';
 
   @override
-  String get owner_proj_details_tutorial_step_3 => 'Choose your app colors / palette and theme style.';
+  String get owner_proj_details_tutorial_step_3 => 'Choisissez les couleurs / la palette de votre application et le style du thème.';
 
   @override
-  String get owner_proj_details_tutorial_step_4 => 'Pick the navigation style (for example bottom tabs or hamburger menu).';
+  String get owner_proj_details_tutorial_step_4 => 'Choisissez le style de navigation (par exemple les onglets du bas ou le menu hamburger).';
 
   @override
-  String get owner_proj_details_tutorial_step_5 => 'Preview the generated screens and check the look before submitting.';
+  String get owner_proj_details_tutorial_step_5 => 'Prévisualisez les écrans générés et vérifiez l’apparence avant l’envoi.';
 
   @override
-  String get owner_proj_details_tutorial_step_6 => 'Submit the app request and wait for the build process to start.';
+  String get owner_proj_details_tutorial_step_6 => 'Soumettez la demande de création d’application et attendez le démarrage du processus de build.';
 
   @override
-  String get owner_proj_details_tutorial_step_7 => 'Track build status from your apps / requests list (Android/iOS progress).';
+  String get owner_proj_details_tutorial_step_7 => 'Suivez l’état du build depuis la liste de vos applications / demandes (progression Android/iOS).';
 
   @override
-  String get owner_proj_details_tutorial_step_8 => 'When ready, download/install the build or continue to publishing options.';
+  String get owner_proj_details_tutorial_step_8 => 'Quand c’est prêt, téléchargez/installez le build ou continuez vers les options de publication.';
+
+  @override
+  String get owner_profile_edit_new_password_length => 'Le nouveau mot de passe doit contenir au moins 6 caractères';
+
+  @override
+  String get owner_profile_edit_username_required => 'Le nom d’utilisateur est requis';
+
+  @override
+  String get owner_profile_edit_first_name_required => 'Le prénom est requis';
+
+  @override
+  String get owner_profile_edit_last_name_required => 'Le nom de famille est requis';
+
+  @override
+  String get owner_profile_edit_email_required => 'L’e-mail est requis';
+
+  @override
+  String get owner_profile_edit_username_min3 => 'Le nom d’utilisateur doit contenir au moins 3 caractères';
+
+  @override
+  String get owner_profile_edit_first_name_min3 => 'Le prénom doit contenir au moins 3 caractères';
+
+  @override
+  String get owner_profile_edit_last_name_min3 => 'Le nom de famille doit contenir au moins 3 caractères';
+
+  @override
+  String get owner_profile_edit_email_requires_verification => 'Le changement d’e-mail nécessite une vérification';
+
+  @override
+  String get owner_profile_edit_email_change_sent => 'Le code de vérification a été envoyé';
+
+  @override
+  String get owner_profile_edit_email_change_title => 'Vérifier le nouvel e-mail';
+
+  @override
+  String get owner_profile_edit_email_change_code_hint => 'Code à 6 chiffres';
+
+  @override
+  String get owner_profile_edit_email_change_verify => 'Vérifier';
+
+  @override
+  String get owner_profile_edit_email_change_resend => 'Renvoyer';
+
+  @override
+  String get owner_profile_edit_email_change_resend_ok => 'Code renvoyé';
+
+  @override
+  String get owner_profile_edit_email_change_resend_fail => 'Échec de l’envoi';
+
+  @override
+  String get owner_profile_edit_email_change_verified => 'E-mail mis à jour';
+
+  @override
+  String get owner_profile_edit_email_change_invalid_code => 'Invalid verification code';
+
+  @override
+  String get owner_projects_no_results_title => 'Aucune application trouvée';
+
+  @override
+  String owner_projects_no_results_body_query(Object query) {
+    return 'Aucun résultat ne correspond à \"$query\".\nEssayez un autre mot-clé.';
+  }
+
+  @override
+  String owner_projects_no_results_body_query_and_filters(Object query) {
+    return 'Aucun résultat ne correspond à \"$query\" avec les filtres actuels.\nEssayez d’effacer la recherche ou de réinitialiser les filtres.';
+  }
+
+  @override
+  String get owner_projects_no_results_body_filters => 'Aucune application ne correspond aux filtres actuels.\nEssayez de réinitialiser les filtres.';
+
+  @override
+  String get owner_projects_no_results_body_generic => 'Aucune application trouvée.';
+
+  @override
+  String get owner_projects_clear_search => 'Effacer la recherche';
+
+  @override
+  String get owner_projects_reset_filters => 'Réinitialiser les filtres';
+
+  @override
+  String get owner_projects_tooltip_clear_search => 'Effacer la recherche';
+
+  @override
+  String ownerAppsSlugLabel(Object slug) {
+    return 'slug : $slug';
+  }
+
+  @override
+  String get owner_request_runtime_menu_type => 'Type de menu';
+
+  @override
+  String get owner_request_runtime_enabled_features => 'Fonctionnalités activées';
+
+  @override
+  String get owner_request_runtime_navigation => 'Navigation';
+
+  @override
+  String get owner_request_runtime_navigation_help => 'Activer/désactiver pour afficher/masquer. Glisser les éléments activés pour réorganiser.';
+
+  @override
+  String get owner_request_runtime_home_sections => 'Sections d’accueil';
+
+  @override
+  String get owner_request_runtime_home_help => 'Activer/désactiver pour afficher/masquer. Glisser les sections activées pour réorganiser.';
+
+  @override
+  String get owner_request_menu_bottom => 'Bas';
+
+  @override
+  String get owner_request_menu_hamburger => 'Hamburger';
+
+  @override
+  String get owner_request_feature_items => 'Articles';
+
+  @override
+  String get owner_request_feature_booking => 'Réservations';
+
+  @override
+  String get owner_request_feature_reviews => 'Avis';
+
+  @override
+  String get owner_request_feature_orders => 'Commandes';
+
+  @override
+  String get owner_request_feature_coupons => 'Coupons';
+
+  @override
+  String get owner_request_feature_notifications => 'Notifications';
+
+  @override
+  String get owner_request_nav_home => 'Accueil';
+
+  @override
+  String get owner_request_nav_explore => 'Explorer';
+
+  @override
+  String get owner_request_nav_cart => 'Panier';
+
+  @override
+  String get owner_request_nav_profile => 'Profil';
+
+  @override
+  String get owner_request_nav_locked_required => 'Obligatoire';
+
+  @override
+  String owner_request_nav_locked_bottom_max(Object max) {
+    return 'Max $max onglets dans le menu du bas';
+  }
+
+  @override
+  String owner_request_nav_locked_missing_features(Object features) {
+    return 'Requiert : $features';
+  }
+
+  @override
+  String get owner_request_pick_limit => 'Choisir la limite';
 }

@@ -216,6 +216,8 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
       final onBgHex = hexOf(_draft.onBackground);
       final errorHex = hexOf(_draft.error);
 
+_runtime = _runtime.normalized();
+
       final out = _runtime.toJsonOut();
 
       await api.submitOwnerRequest(
@@ -276,7 +278,7 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
         ? l.owner_request_app_name_hint
         : _appNameCtrl.text.trim();
 
-    final previewOut = _runtime.toJsonOut();
+    final previewOut = _runtime.normalized().toJsonOut();
 
     return Scaffold(
       backgroundColor: cs.surface,

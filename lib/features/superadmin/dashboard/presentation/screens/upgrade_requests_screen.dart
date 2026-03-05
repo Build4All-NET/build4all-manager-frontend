@@ -249,6 +249,10 @@ class _RequestCard extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
 
+    final appTitle = row.appName.trim().isNotEmpty
+    ? row.appName.trim()
+    : (row.slug.trim().isNotEmpty ? row.slug.trim() : '—');
+
     String fmtDate(DateTime? dt) {
       if (dt == null) return '—';
       final d = dt.toLocal();
@@ -287,32 +291,32 @@ class _RequestCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    '${l10n.upgrade_requests_request} #${row.id}',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w900,
-                        ),
-                  ),
+  appTitle,
+  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+    fontWeight: FontWeight.w900,
+  ),
+),
                 ),
                 chip(row.requestedPlanCode.isEmpty ? '—' : row.requestedPlanCode,
                     cs.primary),
               ],
             ),
-            const SizedBox(height: 8),
+            
 
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                chip('${l10n.upgrade_requests_aup}: ${row.aupId}', cs.outline),
-                chip('${l10n.upgrade_requests_requested_at}: ${fmtDate(row.requestedAt)}',
-                    cs.outline),
-                if (row.usersAllowedOverride != null)
-                  chip(
-                    '${l10n.upgrade_requests_users_override}: ${row.usersAllowedOverride}',
-                    cs.tertiary,
-                  ),
-              ],
-            ),
+           const SizedBox(height: 6),
+Wrap(
+  spacing: 8,
+  runSpacing: 8,
+  children: [
+    chip('${l10n.upgrade_requests_request} #${row.id}', cs.outline),
+    if (row.slug.trim().isNotEmpty)
+      chip('${l10n.ownerAppsSlugLabel}: ${row.slug}', cs.outline),
+    chip('${l10n.upgrade_requests_aup}: ${row.aupId}', cs.outline),
+    chip('${l10n.upgrade_requests_requested_at}: ${fmtDate(row.requestedAt)}', cs.outline),
+    if (row.usersAllowedOverride != null)
+      chip('${l10n.upgrade_requests_users_override}: ${row.usersAllowedOverride}', cs.tertiary),
+  ],
+),
 
             const SizedBox(height: 12),
 
@@ -398,6 +402,11 @@ class _InlineError extends StatelessWidget {
 class UpgradeRequestRow {
   final int id;
   final int aupId;
+
+  // ✅ NEW
+  final String appName;
+  final String slug;
+
   final String requestedPlanCode;
   final int? usersAllowedOverride;
   final DateTime? requestedAt;
@@ -405,6 +414,8 @@ class UpgradeRequestRow {
   UpgradeRequestRow({
     required this.id,
     required this.aupId,
+    required this.appName,
+    required this.slug,
     required this.requestedPlanCode,
     required this.usersAllowedOverride,
     required this.requestedAt,
@@ -422,11 +433,13 @@ class UpgradeRequestRow {
     return UpgradeRequestRow(
       id: i(json['id']),
       aupId: i(json['aupId']),
+      appName: (json['appName'] ?? '').toString(), // ✅ NEW
+      slug: (json['slug'] ?? '').toString(),       // ✅ NEW
       requestedPlanCode: (json['requestedPlanCode'] ?? '').toString(),
-      usersAllowedOverride: json['usersAllowedOverride'] == null
-          ? null
-          : i(json['usersAllowedOverride']),
+      usersAllowedOverride:
+          json['usersAllowedOverride'] == null ? null : i(json['usersAllowedOverride']),
       requestedAt: dt(json['requestedAt']),
     );
   }
+
 }

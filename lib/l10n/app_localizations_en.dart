@@ -950,7 +950,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get owner_request_palette_subtitle => 'Pick a preset or customize colors.';
 
   @override
-  String get owner_request_runtime_title => 'Runtime Config';
+  String get owner_request_runtime_title => 'Runtime';
 
   @override
   String get owner_request_runtime_subtitle => 'Navigation + home layout + feature flags (no JSON typing).';
@@ -2233,4 +2233,161 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get owner_proj_details_tutorial_step_8 => 'When ready, download/install the build or continue to publishing options.';
+
+  @override
+  String get owner_profile_edit_new_password_length => 'New password must be at least 6 characters';
+
+  @override
+  String get owner_profile_edit_username_required => 'Username is required';
+
+  @override
+  String get owner_profile_edit_first_name_required => 'First name is required';
+
+  @override
+  String get owner_profile_edit_last_name_required => 'Last name is required';
+
+  @override
+  String get owner_profile_edit_email_required => 'Email is required';
+
+  @override
+  String get owner_profile_edit_username_min3 => 'Username must be at least 3 characters';
+
+  @override
+  String get owner_profile_edit_first_name_min3 => 'First name must be at least 3 characters';
+
+  @override
+  String get owner_profile_edit_last_name_min3 => 'Last name must be at least 3 characters';
+
+  @override
+  String get owner_profile_edit_email_requires_verification => 'Email change requires verification';
+
+  @override
+  String get owner_profile_edit_email_change_sent => 'Verification code sent';
+
+  @override
+  String get owner_profile_edit_email_change_title => 'Verify new email';
+
+  @override
+  String get owner_profile_edit_email_change_code_hint => '6-digit code';
+
+  @override
+  String get owner_profile_edit_email_change_verify => 'Verify';
+
+  @override
+  String get owner_profile_edit_email_change_resend => 'Resend';
+
+  @override
+  String get owner_profile_edit_email_change_resend_ok => 'Code resent';
+
+  @override
+  String get owner_profile_edit_email_change_resend_fail => 'Failed to resend';
+
+  @override
+  String get owner_profile_edit_email_change_verified => 'Email updated';
+
+  @override
+  String get owner_profile_edit_email_change_invalid_code => 'Invalid verification code';
+
+  @override
+  String get owner_projects_no_results_title => 'No apps found';
+
+  @override
+  String owner_projects_no_results_body_query(Object query) {
+    return 'Nothing matches \"$query\".\nTry a different keyword.';
+  }
+
+  @override
+  String owner_projects_no_results_body_query_and_filters(Object query) {
+    return 'Nothing matches \"$query\" with the current filters.\nTry clearing search or resetting filters.';
+  }
+
+  @override
+  String get owner_projects_no_results_body_filters => 'No apps match the current filters.\nTry resetting filters.';
+
+  @override
+  String get owner_projects_no_results_body_generic => 'No apps found.';
+
+  @override
+  String get owner_projects_clear_search => 'Clear search';
+
+  @override
+  String get owner_projects_reset_filters => 'Reset filters';
+
+  @override
+  String get owner_projects_tooltip_clear_search => 'Clear search';
+
+  @override
+  String ownerAppsSlugLabel(Object slug) {
+    return 'slug: $slug';
+  }
+
+  @override
+  String get owner_request_runtime_menu_type => 'Menu Type';
+
+  @override
+  String get owner_request_runtime_enabled_features => 'Enabled Features';
+
+  @override
+  String get owner_request_runtime_navigation => 'Navigation';
+
+  @override
+  String get owner_request_runtime_navigation_help => 'Check/uncheck to show/hide. Drag enabled items to reorder.';
+
+  @override
+  String get owner_request_runtime_home_sections => 'Home Sections';
+
+  @override
+  String get owner_request_runtime_home_help => 'Check/uncheck to show/hide. Drag enabled sections to reorder.';
+
+  @override
+  String get owner_request_menu_bottom => 'Bottom';
+
+  @override
+  String get owner_request_menu_hamburger => 'Hamburger';
+
+  @override
+  String get owner_request_feature_items => 'Items';
+
+  @override
+  String get owner_request_feature_booking => 'Booking';
+
+  @override
+  String get owner_request_feature_reviews => 'Reviews';
+
+  @override
+  String get owner_request_feature_orders => 'Orders';
+
+  @override
+  String get owner_request_feature_coupons => 'Coupons';
+
+  @override
+  String get owner_request_feature_notifications => 'Notifications';
+
+  @override
+  String get owner_request_nav_home => 'Home';
+
+  @override
+  String get owner_request_nav_explore => 'Explore';
+
+  @override
+  String get owner_request_nav_cart => 'Cart';
+
+  @override
+  String get owner_request_nav_profile => 'Profile';
+
+  @override
+  String get owner_request_nav_locked_required => 'Required';
+
+  @override
+  String owner_request_nav_locked_bottom_max(Object max) {
+    return 'Max $max tabs in bottom menu';
+  }
+
+  @override
+  String owner_request_nav_locked_missing_features(Object features) {
+    return 'Requires: $features';
+  }
+
+  @override
+  String get owner_request_pick_limit => 'Pick limit';
 }
