@@ -2390,4 +2390,73 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get owner_request_pick_limit => 'Choisir la limite';
+
+  @override
+  String get appLicensesTitle => 'Licences des applications';
+
+  @override
+  String get appLicensesSubtitle => 'Surveiller le plan, l’état, les limites d’utilisateurs et la disponibilité de l’infrastructure';
+
+  @override
+  String get searchAppsHint => 'Rechercher des applications, propriétaires, plans, statuts...';
+
+  @override
+  String get failedToLoadAppLicenses => 'Échec du chargement des licences des applications';
+
+  @override
+  String get noAppsLicensesFound => 'Aucune licence d’application trouvée';
+
+  @override
+  String get noSearchResults => 'Aucun résultat trouvé';
+
+  @override
+  String get itemsLoadedSuffix => 'éléments chargés';
+
+  @override
+  String get idLabel => 'ID';
+
+  @override
+  String get slugLabel => 'Slug';
+
+  @override
+  String get ownerLabel => 'Propriétaire';
+
+  @override
+  String get emailLabel => 'E-mail';
+
+  @override
+  String get projectLabel => 'Projet';
+
+  @override
+  String get planLabel => 'Plan';
+
+  @override
+  String get subscriptionStatusLabel => 'Statut de l’abonnement';
+
+  @override
+  String get periodEndLabel => 'Fin de période';
+
+  @override
+  String get daysLeftLabel => 'Jours restants';
+
+  @override
+  String get usersLabel => 'Utilisateurs';
+
+  @override
+  String get requiresDedicatedServerLabel => 'Serveur dédié requis';
+
+  @override
+  String get dedicatedInfraReadyLabel => 'Infrastructure dédiée prête';
+
+  @override
+  String get dashboardAccessLabel => 'Accès au tableau de bord';
+
+  @override
+  String get blockingReasonLabel => 'Raison du blocage';
+
+  @override
+  String get unlimitedLabel => 'Illimité';
+
+  @override
+  String get unknownLabel => 'Inconnu';
 }

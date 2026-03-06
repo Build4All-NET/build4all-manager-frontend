@@ -4782,6 +4782,144 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Pick limit'**
   String get owner_request_pick_limit;
+
+  /// No description provided for @appLicensesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'App Licenses'**
+  String get appLicensesTitle;
+
+  /// No description provided for @appLicensesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Monitor plan, status, user limits, and infra readiness'**
+  String get appLicensesSubtitle;
+
+  /// No description provided for @searchAppsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search apps, owners, plans, status...'**
+  String get searchAppsHint;
+
+  /// No description provided for @failedToLoadAppLicenses.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load app licenses'**
+  String get failedToLoadAppLicenses;
+
+  /// No description provided for @noAppsLicensesFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No app licenses found'**
+  String get noAppsLicensesFound;
+
+  /// No description provided for @noSearchResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No results found'**
+  String get noSearchResults;
+
+  /// No description provided for @itemsLoadedSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'items loaded'**
+  String get itemsLoadedSuffix;
+
+  /// No description provided for @idLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'ID'**
+  String get idLabel;
+
+  /// No description provided for @slugLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Slug'**
+  String get slugLabel;
+
+  /// No description provided for @ownerLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner'**
+  String get ownerLabel;
+
+  /// No description provided for @emailLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get emailLabel;
+
+  /// No description provided for @projectLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Project'**
+  String get projectLabel;
+
+  /// No description provided for @planLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan'**
+  String get planLabel;
+
+  /// No description provided for @subscriptionStatusLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription status'**
+  String get subscriptionStatusLabel;
+
+  /// No description provided for @periodEndLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Period end'**
+  String get periodEndLabel;
+
+  /// No description provided for @daysLeftLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Days left'**
+  String get daysLeftLabel;
+
+  /// No description provided for @usersLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Users'**
+  String get usersLabel;
+
+  /// No description provided for @requiresDedicatedServerLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Requires dedicated server'**
+  String get requiresDedicatedServerLabel;
+
+  /// No description provided for @dedicatedInfraReadyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Dedicated infra ready'**
+  String get dedicatedInfraReadyLabel;
+
+  /// No description provided for @dashboardAccessLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Dashboard access'**
+  String get dashboardAccessLabel;
+
+  /// No description provided for @blockingReasonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocking reason'**
+  String get blockingReasonLabel;
+
+  /// No description provided for @unlimitedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited'**
+  String get unlimitedLabel;
+
+  /// No description provided for @unknownLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get unknownLabel;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -1,5 +1,6 @@
 import 'package:build4all_manager/core/network/dio_client.dart';
 import 'package:build4all_manager/features/superadmin/dashboard/data/services/licensing_api.dart';
+import 'package:build4all_manager/features/superadmin/dashboard/presentation/screens/apps_licenses_screen.dart';
 import 'package:build4all_manager/features/superadmin/dashboard/presentation/screens/projects_screen.dart';
 import 'package:build4all_manager/features/superadmin/dashboard/presentation/screens/upgrade_requests_screen.dart';
 import 'package:build4all_manager/l10n/app_localizations.dart';
@@ -7,15 +8,15 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../data/services/project_api.dart';
 import '../../data/repositories/dashboard_repository_impl.dart';
+import '../../data/services/project_api.dart';
 import '../bloc/dashboard_bloc.dart';
 import '../bloc/dashboard_event.dart';
 import '../bloc/dashboard_state.dart';
+import '../widgets/header_hero.dart';
 import '../widgets/pro_kpi_card.dart';
 import '../widgets/pro_project_tile.dart';
 import '../widgets/section_header.dart';
-import '../widgets/header_hero.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -36,7 +37,7 @@ class DashboardScreen extends StatelessWidget {
   }
 }
 
-/// ✅ CONTENT ONLY
+/// CONTENT ONLY
 class _DashboardContent extends StatelessWidget {
   const _DashboardContent();
 
@@ -46,7 +47,6 @@ class _DashboardContent extends StatelessWidget {
 
     return BlocBuilder<DashboardBloc, DashboardState>(
       builder: (context, state) {
-        // ✅ if error + no overview => show message instead of infinite skeleton
         if (state.overview == null) {
           if (state.error != null) {
             return _FullPageError(
@@ -60,12 +60,12 @@ class _DashboardContent extends StatelessWidget {
         final ov = state.overview!;
 
         return RefreshIndicator.adaptive(
-          onRefresh: () async =>
-              context.read<DashboardBloc>().add(RefreshDashboard()),
+          onRefresh: () async {
+            context.read<DashboardBloc>().add(RefreshDashboard());
+          },
           child: ListView(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
             children: [
-              // ✅ FIX: HeaderHero must have a finite height
               const _HeroBox(),
               const SizedBox(height: 14),
 
@@ -123,7 +123,6 @@ class _DashboardContent extends StatelessWidget {
 
               const SizedBox(height: 12),
 
-              // ✅ PRO wide tile (same vibe as KPI tiles)
               _ProWideKpiCard(
                 icon: Icons.upgrade_rounded,
                 label: l10n.dash_upgrade_requests,
@@ -141,6 +140,30 @@ class _DashboardContent extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                       builder: (_) => const SuperAdminUpgradeRequestsScreen(),
+                    ),
+                  );
+                },
+              ),
+
+              const SizedBox(height: 12),
+
+              _ProWideKpiCard(
+                icon: Icons.verified_user_rounded,
+                label: l10n.appLicensesTitle,
+                subtitle: l10n.appLicensesSubtitle,
+                value: ov.totalProjects,
+                gradient: LinearGradient(
+                  colors: [
+                    Theme.of(context).colorScheme.primary,
+                    Theme.of(context).colorScheme.secondary,
+                  ],
+                ),
+                delayMs: 260,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const AppsLicensesScreen(),
                     ),
                   );
                 },
@@ -204,7 +227,10 @@ class _FullPageError extends StatelessWidget {
   final String message;
   final VoidCallback onRetry;
 
-  const _FullPageError({required this.message, required this.onRetry});
+  const _FullPageError({
+    required this.message,
+    required this.onRetry,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -220,7 +246,7 @@ class _FullPageError extends StatelessWidget {
             Icon(Icons.error_outline_rounded, color: cs.error, size: 46),
             const SizedBox(height: 10),
             Text(
-              l10n.common_error, // ✅ better than empty string
+              l10n.common_error,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.w900,
                   ),
@@ -249,7 +275,11 @@ class _FullPageError extends StatelessWidget {
 class _InlineError extends StatelessWidget {
   final String message;
   final VoidCallback onRetry;
-  const _InlineError({required this.message, required this.onRetry});
+
+  const _InlineError({
+    required this.message,
+    required this.onRetry,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -276,7 +306,10 @@ class _InlineError extends StatelessWidget {
               style: TextStyle(color: cs.error),
             ),
           ),
-          TextButton(onPressed: onRetry, child: Text(l10n.common_retry)),
+          TextButton(
+            onPressed: onRetry,
+            child: Text(l10n.common_retry),
+          ),
         ],
       ),
     );
@@ -294,6 +327,8 @@ class _SkeletonLoader extends StatelessWidget {
       children: [
         const _HeroBox(),
         const SizedBox(height: 14),
+        _shimmerBox(cs),
+        const SizedBox(height: 12),
         _shimmerBox(cs),
         const SizedBox(height: 12),
         _shimmerBox(cs),
@@ -342,7 +377,10 @@ class _SkeletonLoader extends StatelessWidget {
 }
 
 class _g {
-  final Gradient primary, success, warning;
+  final Gradient primary;
+  final Gradient success;
+  final Gradient warning;
+
   _g._(this.primary, this.success, this.warning);
 
   factory _g(BuildContext context) {
@@ -354,8 +392,6 @@ class _g {
     );
   }
 }
-
-/* ========================= PRO WIDE KPI TILE ========================= */
 
 class _ProWideKpiCard extends StatefulWidget {
   final IconData icon;
@@ -446,7 +482,9 @@ class _ProWideKpiCardState extends State<_ProWideKpiCard>
                     child: AnimatedOpacity(
                       duration: const Duration(milliseconds: 160),
                       opacity: _hover ? 1 : 0,
-                      child: Container(color: Colors.white.withOpacity(.06)),
+                      child: Container(
+                        color: Colors.white.withOpacity(.06),
+                      ),
                     ),
                   ),
                   Container(

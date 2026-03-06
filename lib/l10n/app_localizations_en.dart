@@ -2390,4 +2390,73 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get owner_request_pick_limit => 'Pick limit';
+
+  @override
+  String get appLicensesTitle => 'App Licenses';
+
+  @override
+  String get appLicensesSubtitle => 'Monitor plan, status, user limits, and infra readiness';
+
+  @override
+  String get searchAppsHint => 'Search apps, owners, plans, status...';
+
+  @override
+  String get failedToLoadAppLicenses => 'Failed to load app licenses';
+
+  @override
+  String get noAppsLicensesFound => 'No app licenses found';
+
+  @override
+  String get noSearchResults => 'No results found';
+
+  @override
+  String get itemsLoadedSuffix => 'items loaded';
+
+  @override
+  String get idLabel => 'ID';
+
+  @override
+  String get slugLabel => 'Slug';
+
+  @override
+  String get ownerLabel => 'Owner';
+
+  @override
+  String get emailLabel => 'Email';
+
+  @override
+  String get projectLabel => 'Project';
+
+  @override
+  String get planLabel => 'Plan';
+
+  @override
+  String get subscriptionStatusLabel => 'Subscription status';
+
+  @override
+  String get periodEndLabel => 'Period end';
+
+  @override
+  String get daysLeftLabel => 'Days left';
+
+  @override
+  String get usersLabel => 'Users';
+
+  @override
+  String get requiresDedicatedServerLabel => 'Requires dedicated server';
+
+  @override
+  String get dedicatedInfraReadyLabel => 'Dedicated infra ready';
+
+  @override
+  String get dashboardAccessLabel => 'Dashboard access';
+
+  @override
+  String get blockingReasonLabel => 'Blocking reason';
+
+  @override
+  String get unlimitedLabel => 'Unlimited';
+
+  @override
+  String get unknownLabel => 'Unknown';
 }

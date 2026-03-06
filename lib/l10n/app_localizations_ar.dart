@@ -2390,4 +2390,73 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get owner_request_pick_limit => 'اختر العدد';
+
+  @override
+  String get appLicensesTitle => 'تراخيص التطبيقات';
+
+  @override
+  String get appLicensesSubtitle => 'مراقبة الخطة والحالة وحدود المستخدمين وجهوزية البنية التحتية';
+
+  @override
+  String get searchAppsHint => 'ابحث عن التطبيقات أو المالكين أو الخطط أو الحالة...';
+
+  @override
+  String get failedToLoadAppLicenses => 'فشل في تحميل تراخيص التطبيقات';
+
+  @override
+  String get noAppsLicensesFound => 'لم يتم العثور على تراخيص تطبيقات';
+
+  @override
+  String get noSearchResults => 'لم يتم العثور على نتائج';
+
+  @override
+  String get itemsLoadedSuffix => 'عنصر تم تحميله';
+
+  @override
+  String get idLabel => 'المعرّف';
+
+  @override
+  String get slugLabel => 'المعرّف النصي';
+
+  @override
+  String get ownerLabel => 'المالك';
+
+  @override
+  String get emailLabel => 'البريد الإلكتروني';
+
+  @override
+  String get projectLabel => 'المشروع';
+
+  @override
+  String get planLabel => 'الخطة';
+
+  @override
+  String get subscriptionStatusLabel => 'حالة الاشتراك';
+
+  @override
+  String get periodEndLabel => 'نهاية المدة';
+
+  @override
+  String get daysLeftLabel => 'الأيام المتبقية';
+
+  @override
+  String get usersLabel => 'المستخدمون';
+
+  @override
+  String get requiresDedicatedServerLabel => 'يتطلب خادماً مخصصاً';
+
+  @override
+  String get dedicatedInfraReadyLabel => 'البنية التحتية المخصصة جاهزة';
+
+  @override
+  String get dashboardAccessLabel => 'الوصول إلى لوحة التحكم';
+
+  @override
+  String get blockingReasonLabel => 'سبب المنع';
+
+  @override
+  String get unlimitedLabel => 'غير محدود';
+
+  @override
+  String get unknownLabel => 'غير معروف';
 }

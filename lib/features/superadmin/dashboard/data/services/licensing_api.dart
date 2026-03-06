@@ -1,3 +1,4 @@
+import 'package:build4all_manager/features/superadmin/dashboard/data/models/super_admin_app_license_row.dart';
 import 'package:dio/dio.dart';
 
 class LicensingApi {
@@ -18,4 +19,14 @@ class LicensingApi {
         '/licensing/upgrade-requests/$requestId/reject',
         data: {'note': note},
       );
+
+
+      Future<List<SuperAdminAppLicenseRow>> listAppsLicenses() async {
+  final res = await dio.get('/licensing/apps');
+  final data = (res.data as List?) ?? const [];
+  return data
+      .map((e) => SuperAdminAppLicenseRow.fromJson(e as Map<String, dynamic>))
+      .toList();
+}
+
 }
