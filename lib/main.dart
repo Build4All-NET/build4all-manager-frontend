@@ -7,6 +7,8 @@ import 'package:build4all_manager/core/network/connecting/server_down_overlay.da
 import 'package:build4all_manager/core/network/dio_client.dart';
 import 'package:build4all_manager/features/auth/data/datasources/jwt_local_datasource.dart';
 import 'package:build4all_manager/l10n/app_localizations.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -14,18 +16,35 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:build4all_manager/app/router/router.dart' as nav;
 import 'package:build4all_manager/features/theme_manager/data/local_theme_store.dart';
 import 'package:build4all_manager/features/theme_manager/presentation/theme_cubit.dart';
+import 'firebase_options.dart';
+
+@pragma('vm:entry-point')
+Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  // Initialize Firebase in background isolate
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+}
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Initialize Firebase for the manager app
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  // Register background FCM handler
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+
   await DioClient.init();
 
-  //  Boot guard BEFORE reading token (kills stale tokens after DB reset / env switch)
+  // Boot guard BEFORE reading token (kills stale tokens after DB reset / env switch)
   await AppBootGuard.run(
     currentApiBaseUrl: DioClient.ensure().options.baseUrl,
   );
 
-  //  Read token normally
+  // Read token normally
   final jwt = JwtLocalDataSource();
   final (token, _) = await jwt.read();
   if (token.isNotEmpty) {

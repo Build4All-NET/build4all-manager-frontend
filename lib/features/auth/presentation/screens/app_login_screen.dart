@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:build4all_manager/core/network/dio_client.dart';
+import 'package:build4all_manager/core/notifications/firebase_push_service.dart';
 import 'package:build4all_manager/features/auth/data/datasources/jwt_local_datasource.dart';
 import 'package:build4all_manager/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:build4all_manager/features/auth/data/services/auth_api.dart';
@@ -43,24 +44,28 @@ class AppLoginScreen extends StatelessWidget {
       child: BlocListener<AuthBloc, AuthState>(
         // ✅ react only when role or error changes (prevents toast spam)
         listenWhen: (p, c) => p.role != c.role || p.error != c.error,
-        listener: (context, state) {
-          final role = (state.role ?? '').toUpperCase();
+       listener: (context, state) async {
+  final role = (state.role ?? '').toUpperCase();
 
-          // ✅ show toast error using common widget
-          if (state.error != null && state.error!.isNotEmpty) {
-            AppToast.error(context, state.error!);
-            return;
-          }
+  if (state.error != null && state.error!.isNotEmpty) {
+    AppToast.error(context, state.error!);
+    return;
+  }
 
-          // ✅ navigate when role exists (success)
-          if (role == 'SUPER_ADMIN') {
-            AppToast.success(context, l10n.msgWelcomeBack); // optional key
-            context.go('/manager');
-          } else if (role.isNotEmpty) {
-            AppToast.success(context, l10n.msgWelcomeBack); // optional key
-            context.go('/owner');
-          }
-        },
+  if (role == 'SUPER_ADMIN') {
+    await FirebasePushService().initForAdmin();
+    if (!context.mounted) return;
+
+    AppToast.success(context, l10n.msgWelcomeBack);
+    context.go('/manager');
+  } else if (role.isNotEmpty) {
+    await FirebasePushService().initForAdmin();
+    if (!context.mounted) return;
+
+    AppToast.success(context, l10n.msgWelcomeBack);
+    context.go('/owner');
+  }
+},
         child: Scaffold(
           backgroundColor: cs.surface,
           body: SafeArea(

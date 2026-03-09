@@ -1,4 +1,7 @@
+
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <application
         android:label="Build4All"
         android:name="${applicationName}"
@@ -35,6 +38,7 @@ android:networkSecurityConfig="@xml/network_security_config">
             android:name="flutterEmbedding"
             android:value="2" />
     </application>
+    
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and
          https://developer.android.com/reference/android/content/Intent#ACTION_PROCESS_TEXT.
