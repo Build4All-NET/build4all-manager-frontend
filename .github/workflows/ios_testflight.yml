@@ -153,14 +153,14 @@ jobs:
         run: |
           set -euo pipefail
           PODFILE="ios/Podfile"
-
+      
           if ! grep -q "^platform :ios" "$PODFILE"; then
-            sed -i '' '1s;^;platform :ios, '\''14.0'\''\n\n;' "$PODFILE"
+            sed -i '' '1s;^;platform :ios, '\''15.0'\''\n\n;' "$PODFILE"    # ✅ Change 14.0 to 15.0
           else
-            sed -i '' "s/platform :ios, '[0-9.]\\+'/platform :ios, '14.0'/" "$PODFILE"
+            sed -i '' "s/platform :ios, '[0-9.]\\+'/platform :ios, '15.0'/" "$PODFILE"    # ✅ Change 14.0 to 15.0
           fi
-
-          echo "✅ Podfile iOS platform forced to 14.0"
+      
+          echo "✅ Podfile iOS platform forced to 15.0"
           head -n 5 "$PODFILE"
 
       - name: Install Ruby tooling (Bundler if available, else fallback gem install)
@@ -360,8 +360,8 @@ jobs:
         run: |
           set -euo pipefail
           PODS_PROJECT="ios/Pods/Pods.xcodeproj/project.pbxproj"
-          echo "🔧 Forcing IPHONEOS_DEPLOYMENT_TARGET = 14.0 for Pods"
-          perl -pi -e 's/IPHONEOS_DEPLOYMENT_TARGET = [0-9.]+;/IPHONEOS_DEPLOYMENT_TARGET = 14.0;/g' "$PODS_PROJECT"
+          echo "🔧 Forcing IPHONEOS_DEPLOYMENT_TARGET = 15.0 for Pods"
+          perl -pi -e 's/IPHONEOS_DEPLOYMENT_TARGET = [0-9.]+;/IPHONEOS_DEPLOYMENT_TARGET = 15.0;/g' "$PODS_PROJECT"
 
       - name: Add required privacy purpose strings (Info.plist)
         shell: bash
