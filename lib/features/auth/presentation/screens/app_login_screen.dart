@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:build4all_manager/core/network/dio_client.dart';
@@ -20,7 +21,23 @@ import 'package:go_router/go_router.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/app_text_field.dart';
 import '../../../../shared/widgets/app_button.dart';
-import '../../../../shared/widgets/app_toast.dart'; // ✅ use common toast
+import '../../../../shared/widgets/app_toast.dart';
+
+Future<void> _initPushSafely() async {
+  try {
+    await FirebasePushService().initForAdmin();
+  } catch (_) {
+    // ignore push init errors here so login navigation is never blocked
+  }
+}
+
+void _goAfterFrame(BuildContext context, String route) {
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    if (context.mounted) {
+      context.go(route);
+    }
+  });
+}
 
 class AppLoginScreen extends StatelessWidget {
   const AppLoginScreen({super.key});
@@ -42,30 +59,36 @@ class AppLoginScreen extends StatelessWidget {
         getRoleUseCase: GetStoredRoleUseCase(repo),
       ),
       child: BlocListener<AuthBloc, AuthState>(
-        // ✅ react only when role or error changes (prevents toast spam)
         listenWhen: (p, c) => p.role != c.role || p.error != c.error,
-       listener: (context, state) async {
-  final role = (state.role ?? '').toUpperCase();
+        listener: (context, state) {
+          final role = (state.role ?? '').toUpperCase();
 
-  if (state.error != null && state.error!.isNotEmpty) {
-    AppToast.error(context, state.error!);
-    return;
-  }
+          if (state.error != null && state.error!.isNotEmpty) {
+            AppToast.error(context, state.error!);
+            return;
+          }
 
-  if (role == 'SUPER_ADMIN') {
-    await FirebasePushService().initForAdmin();
-    if (!context.mounted) return;
+          if (role == 'SUPER_ADMIN') {
+            AppToast.success(context, l10n.msgWelcomeBack);
 
-    AppToast.success(context, l10n.msgWelcomeBack);
-    context.go('/manager');
-  } else if (role.isNotEmpty) {
-    await FirebasePushService().initForAdmin();
-    if (!context.mounted) return;
+            // ✅ navigate immediately
+            _goAfterFrame(context, '/manager');
 
-    AppToast.success(context, l10n.msgWelcomeBack);
-    context.go('/owner');
-  }
-},
+            // ✅ init push in background, do NOT block iOS navigation
+            unawaited(_initPushSafely());
+            return;
+          }
+
+          if (role.isNotEmpty) {
+            AppToast.success(context, l10n.msgWelcomeBack);
+
+            // ✅ navigate immediately
+            _goAfterFrame(context, '/owner');
+
+            // ✅ init push in background
+            unawaited(_initPushSafely());
+          }
+        },
         child: Scaffold(
           backgroundColor: cs.surface,
           body: SafeArea(
@@ -138,6 +161,8 @@ class AppLoginScreen extends StatelessWidget {
                                   const SizedBox(height: 20),
                                   const _LoginForm(),
                                   const SizedBox(height: 16),
+
+                                  // إذا بدك هيدا screen للـ owner + super admin مع بعض، خليه
                                   TextButton(
                                     onPressed: () =>
                                         context.go('/owner/register'),
@@ -163,6 +188,7 @@ class AppLoginScreen extends StatelessWidget {
                                       textAlign: TextAlign.center,
                                     ),
                                   ),
+
                                   const SizedBox(height: 8),
                                   Text(
                                     l10n.termsNotice,
@@ -233,12 +259,12 @@ class _LoginFormState extends State<_LoginForm> {
     if (form == null) return;
 
     if (!form.validate()) {
-      // ✅ optional: show warning toast on invalid form
-      AppToast.warn(context, l10n.errFixForm); // optional key
+      AppToast.warn(context, l10n.errFixForm);
       return;
     }
 
     FocusScope.of(context).unfocus();
+
     context.read<AuthBloc>().add(
           LoginSubmitted(_identifier.text.trim(), _password.text),
         );
@@ -284,8 +310,6 @@ class _LoginFormState extends State<_LoginForm> {
                 trailing: const Icon(Icons.login_rounded),
                 onPressed: state.loading ? null : () => _submit(context, l10n),
               ),
-
-              // ✅ keep inline error if you want (it’s useful)
               const SizedBox(height: 12),
               AnimatedSwitcher(
                 duration: const Duration(milliseconds: 220),
@@ -368,6 +392,7 @@ class _Blob extends StatelessWidget {
   final Color color;
   final double size;
   const _Blob({required this.color, required this.size});
+
   @override
   Widget build(BuildContext context) => Container(
         width: size,
@@ -380,7 +405,7 @@ class _Blob extends StatelessWidget {
               color: color.withOpacity(.4),
               blurRadius: 24,
               spreadRadius: 2,
-            )
+            ),
           ],
         ),
       );
@@ -389,6 +414,7 @@ class _Blob extends StatelessWidget {
 class _FrostedCard extends StatelessWidget {
   final Widget child;
   const _FrostedCard({required this.child});
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
@@ -405,7 +431,7 @@ class _FrostedCard extends StatelessWidget {
                 color: Color(0x14000000),
                 blurRadius: 24,
                 offset: Offset(0, 10),
-              )
+              ),
             ],
             border: Border.all(color: cs.outlineVariant.withOpacity(.5)),
           ),
