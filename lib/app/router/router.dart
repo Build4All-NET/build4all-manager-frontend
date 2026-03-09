@@ -1,5 +1,6 @@
 import 'package:build4all_manager/app/nav_key.dart';
 import 'package:build4all_manager/app/router/super_admin_entry_loader.dart';
+import 'package:build4all_manager/features/notifications_admin/presentation/screens/admin_notifications_screen.dart';
 
 import 'package:build4all_manager/features/owner/ownerhome/data/static_project_models.dart';
 import 'package:build4all_manager/features/owner/ownerhome/presentation/screens/owner_project_details_screen.dart';
@@ -158,6 +159,12 @@ final router = GoRouter(
                 );
               },
             ),
+              GoRoute(
+  path: '/owner/notifications',
+  builder: (context, state) {
+    return const AdminNotificationsScreen();
+  },
+),
             GoRoute(
               path: '/owner/projects',
               builder: (context, state) {
@@ -200,6 +207,7 @@ final router = GoRouter(
             return OwnerRequestsListScreen(ownerId: s.ownerId, dio: s.dio);
           },
         ),
+      
         GoRoute(
           path: '/owner/requests',
           builder: (context, state) {
@@ -415,11 +423,12 @@ class _OwnerNavWrapperState extends State<_OwnerNavWrapper> {
     super.dispose();
   }
 
-  int _indexForLoc(String loc) {
-    if (loc.startsWith('/owner/projects')) return 1;
-    if (loc.startsWith('/owner/profile')) return 2;
-    return 0;
-  }
+ int _indexForLoc(String loc) {
+  if (loc.startsWith('/owner/projects')) return 1;
+  if (loc.startsWith('/owner/notifications')) return 2;
+  if (loc.startsWith('/owner/profile')) return 3;
+  return 0;
+}
 
   @override
   Widget build(BuildContext context) {
@@ -437,6 +446,12 @@ final destinations = <OwnerDestination>[
     selectedIcon: Icons.apps_rounded,
     label: l10n.owner_nav_projects,
     route: '/owner/projects',
+  ),
+  OwnerDestination(
+    icon: Icons.notifications_none_outlined,
+    selectedIcon: Icons.notifications,
+    label: 'Notifications',
+    route: '/owner/notifications',
   ),
   OwnerDestination(
     icon: Icons.person_outline,

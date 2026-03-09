@@ -1,3 +1,4 @@
+import 'package:build4all_manager/features/notifications_admin/presentation/screens/admin_notifications_screen.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:build4all_manager/l10n/app_localizations.dart';
@@ -42,37 +43,42 @@ class SuperAdminEntry extends StatelessWidget {
     // ✅ If you don't have l10n key, don't crash the whole nav.
     final createLabel = _tryL10nCreateProject(l10n);
 
-    final destinations = <SuperAdminDestination>[
-      SuperAdminDestination(
-        icon: Icons.dashboard_outlined,
-        selectedIcon: Icons.dashboard_rounded,
-        label: l10n.super_nav_dashboard,
-        page: const DashboardScreen(),
-      ),
-      SuperAdminDestination(
-        icon: Icons.add_box_outlined,
-        selectedIcon: Icons.add_box_rounded,
-        label: createLabel,
-        page: CreateProjectScreen(
-          dio: dio,
-          baseUrl: dio.options.baseUrl,
-          tokenProvider: _tokenProvider,
-        ),
-      ),
-      SuperAdminDestination(
-        icon: Icons.publish_outlined,
-        selectedIcon: Icons.publish_rounded,
-        label: l10n.super_nav_publish_requests,
-        page: PublishRequestsScreen(dio: dio),
-      ),
-      SuperAdminDestination(
-        icon: Icons.person_outline,
-        selectedIcon: Icons.person,
-        label: l10n.super_nav_profile,
-        page: const SuperAdminProfileScreen(),
-      ),
-    ];
-
+   final destinations = <SuperAdminDestination>[
+  SuperAdminDestination(
+    icon: Icons.dashboard_outlined,
+    selectedIcon: Icons.dashboard_rounded,
+    label: l10n.super_nav_dashboard,
+    page: const DashboardScreen(),
+  ),
+  SuperAdminDestination(
+    icon: Icons.add_box_outlined,
+    selectedIcon: Icons.add_box_rounded,
+    label: createLabel,
+    page: CreateProjectScreen(
+      dio: dio,
+      baseUrl: dio.options.baseUrl,
+      tokenProvider: _tokenProvider,
+    ),
+  ),
+  SuperAdminDestination(
+    icon: Icons.publish_outlined,
+    selectedIcon: Icons.publish_rounded,
+    label: l10n.super_nav_publish_requests,
+    page: PublishRequestsScreen(dio: dio),
+  ),
+  SuperAdminDestination(
+    icon: Icons.notifications_none_outlined,
+    selectedIcon: Icons.notifications,
+    label: 'Notifications',
+    page: const AdminNotificationsScreen(),
+  ),
+  SuperAdminDestination(
+    icon: Icons.person_outline,
+    selectedIcon: Icons.person,
+    label: l10n.super_nav_profile,
+    page: const SuperAdminProfileScreen(),
+  ),
+];
     return SuperAdminNavShell(
       backendMenuType: backendMenuType,
       destinations: destinations,

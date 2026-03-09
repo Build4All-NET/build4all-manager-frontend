@@ -1,3 +1,6 @@
+import 'package:build4all_manager/core/network/dio_client.dart';
+import 'package:build4all_manager/features/notifications_admin/data/service/admin_notifications_api.dart';
+import 'package:build4all_manager/features/notifications_admin/presentation/cubit/admin_unread_count_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -20,7 +23,6 @@ OwnerMenuType _parseOwnerMenu(String? s) {
 }
 
 class OwnerDestination {
-  /// ✅ Back to IconData (works with ANY icon library)
   final IconData icon;
   final IconData selectedIcon;
   final String label;
@@ -39,8 +41,6 @@ class OwnerNavShell extends StatefulWidget {
   final OwnerMenuType? override;
   final List<OwnerDestination> destinations;
   final int initialIndex;
-
-  /// ✅ Routed page
   final Widget child;
 
   const OwnerNavShell({
@@ -52,7 +52,6 @@ class OwnerNavShell extends StatefulWidget {
     this.initialIndex = 0,
   });
 
-  
   State<OwnerNavShell> createState() => _OwnerNavShellState();
 }
 
@@ -67,17 +66,35 @@ class _OwnerNavShellState extends State<OwnerNavShell>
   @override
   void initState() {
     super.initState();
+    _syncCubitWithRouteIndex(widget.initialIndex);
     _attachTabIfNeeded(widget.initialIndex);
   }
 
   @override
   void didUpdateWidget(covariant OwnerNavShell oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.destinations.length != widget.destinations.length ||
-        oldWidget.override != widget.override ||
-        oldWidget.backendMenuType != widget.backendMenuType) {
-      final idx = context.read<OwnerNavCubit>().state.index;
-      _attachTabIfNeeded(idx);
+
+    final destinationsChanged =
+        oldWidget.destinations.length != widget.destinations.length ||
+            oldWidget.override != widget.override ||
+            oldWidget.backendMenuType != widget.backendMenuType;
+
+    final routeIndexChanged = oldWidget.initialIndex != widget.initialIndex;
+
+    if (destinationsChanged || routeIndexChanged) {
+      _syncCubitWithRouteIndex(widget.initialIndex);
+      _attachTabIfNeeded(widget.initialIndex);
+    }
+  }
+
+  void _syncCubitWithRouteIndex(int routeIndex) {
+    if (widget.destinations.isEmpty) return;
+
+    final safeIndex = routeIndex.clamp(0, widget.destinations.length - 1);
+    final cubit = context.read<OwnerNavCubit>();
+
+    if (cubit.state.index != safeIndex) {
+      cubit.setIndex(safeIndex);
     }
   }
 
@@ -106,7 +123,6 @@ class _OwnerNavShellState extends State<OwnerNavShell>
       _tab = TabController(length: widget.destinations.length, vsync: this)
         ..index = safeIndex
         ..addListener(() {
-          // ✅ user taps tab => go to route
           if (_tab!.indexIsChanging) {
             _goTo(_tab!.index);
           }
@@ -123,14 +139,20 @@ class _OwnerNavShellState extends State<OwnerNavShell>
   }
 
   @override
-  Widget build(BuildContext context) {
-    final pages = widget.destinations;
+Widget build(BuildContext context) {
+  final pages = widget.destinations;
+  final width = MediaQuery.of(context).size.width;
+  final useRail = width >= 900 && _mode == OwnerMenuType.bottom;
 
-    final width = MediaQuery.of(context).size.width;
-    final useRail = width >= 900 && _mode == OwnerMenuType.bottom;
-
-    return BlocBuilder<OwnerNavCubit, OwnerNavState>(
+  return BlocProvider(
+    create: (_) => AdminUnreadCountCubit(
+      AdminNotificationsApi(DioClient.ensure()),
+    )..start(),
+    child: BlocBuilder<OwnerNavCubit, OwnerNavState>(
       builder: (context, navState) {
+        final unreadCount =
+            context.watch<AdminUnreadCountCubit>().state.count;
+
         final index =
             pages.isEmpty ? 0 : navState.index.clamp(0, pages.length - 1);
 
@@ -218,18 +240,23 @@ class _OwnerNavShellState extends State<OwnerNavShell>
                 items: List.generate(pages.length, (i) {
                   final d = pages[i];
                   final iconData = (i == index) ? d.selectedIcon : d.icon;
+
+                  final isNotificationsTab =
+                      d.route.startsWith('/owner/notifications');
+
                   return OwnerPillNavItem(
-                    icon: Icon(iconData), // ✅ IconTheme handles color
+                    icon: Icon(iconData),
                     label: d.label,
+                    badgeCount: isNotificationsTab ? unreadCount : 0,
                   );
                 }),
               ),
             );
         }
       },
-    );
-  }
-
+    ),
+  );
+}
   Widget _buildDrawer(
     BuildContext context,
     List<OwnerDestination> pages,

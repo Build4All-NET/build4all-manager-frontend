@@ -430,20 +430,23 @@ class _View extends StatelessWidget {
                         type: AppButtonType.secondary,
                         expand: true,
                         isBusy: state.acting,
-                        onPressed: (!item.isSubmitted || state.acting)
-                            ? null
-                            : () async {
-                                final notes = await DecisionSheet.open(
-                                  context,
-                                  title: l10n.publish_sheet_reject_title,
-                                  confirmLabel: l10n.publish_action_reject,
-                                  hint: l10n.publish_sheet_notes_hint,
-                                  cancelLabel: l10n.common_cancel,
-                                );
-                                context
-                                    .read<PublishRequestDetailBloc>()
-                                    .add(PublishRequestReject(notes));
-                              },
+                       onPressed: (!state.item.isSubmitted || state.acting)
+    ? null
+    : () async {
+        final notes = await DecisionSheet.open(
+          context,
+          title: l10n.publish_sheet_reject_title,
+          confirmLabel: l10n.publish_action_reject,
+          hint: l10n.publish_sheet_notes_hint,
+          cancelLabel: l10n.common_cancel,
+        );
+
+        if (!context.mounted || notes == null) return;
+
+        context
+            .read<PublishRequestDetailBloc>()
+            .add(PublishRequestReject(notes));
+      },
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -453,20 +456,23 @@ class _View extends StatelessWidget {
                         type: AppButtonType.primary,
                         expand: true,
                         isBusy: state.acting,
-                        onPressed: (!item.isSubmitted || state.acting)
-                            ? null
-                            : () async {
-                                final notes = await DecisionSheet.open(
-                                  context,
-                                  title: l10n.publish_sheet_approve_title,
-                                  confirmLabel: l10n.publish_action_approve,
-                                  hint: l10n.publish_sheet_notes_hint,
-                                  cancelLabel: l10n.common_cancel,
-                                );
-                                context
-                                    .read<PublishRequestDetailBloc>()
-                                    .add(PublishRequestApprove(notes));
-                              },
+                       onPressed: (!state.item.isSubmitted || state.acting)
+    ? null
+    : () async {
+        final notes = await DecisionSheet.open(
+          context,
+          title: l10n.publish_sheet_approve_title,
+          confirmLabel: l10n.publish_action_approve,
+          hint: l10n.publish_sheet_notes_hint,
+          cancelLabel: l10n.common_cancel,
+        );
+
+        if (!context.mounted || notes == null) return;
+
+        context
+            .read<PublishRequestDetailBloc>()
+            .add(PublishRequestApprove(notes));
+      },
                       ),
                     ),
                   ],

@@ -1,3 +1,4 @@
+import 'package:build4all_manager/features/notifications_admin/presentation/widgets/admin_notification_bell.dart';
 import 'package:build4all_manager/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
@@ -141,59 +142,70 @@ class _SuperAdminNavShellState extends State<SuperAdminNavShell>
   }
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+  final cs = Theme.of(context).colorScheme;
 
-    return AppBar(
-      titleSpacing: 14,
-      title: Row(
-        children: [
-          Container(
-            width: 10,
-            height: 10,
-            margin: const EdgeInsets.only(right: 10),
-            decoration: BoxDecoration(
-              color: cs.primary,
-              borderRadius: BorderRadius.circular(4),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              _title(context),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
-            ),
-          ),
-        ],
-      ),
+  final notificationsIndex = widget.destinations.indexWhere(
+    (d) => d.label.toLowerCase() == 'notifications',
+  );
 
-      // ✅ top tabs only when mode=top
-      bottom: (_mode == SuperMenuType.top && _tab != null)
-          ? PreferredSize(
-              preferredSize: const Size.fromHeight(54),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: TabBar(
-                  controller: _tab,
-                  isScrollable: true,
-                  tabAlignment: TabAlignment.start,
-                  dividerHeight: 0,
-                  labelStyle: const TextStyle(fontWeight: FontWeight.w800),
-                  tabs: [
-                    for (final d in widget.destinations)
-                      Tab(
-                        text: d.label,
-                        icon: Icon(d.icon),
-                      ),
-                  ],
+  return AppBar(
+    titleSpacing: 14,
+    title: Row(
+      children: [
+        Container(
+          width: 10,
+          height: 10,
+          margin: const EdgeInsets.only(right: 10),
+          decoration: BoxDecoration(
+            color: cs.primary,
+            borderRadius: BorderRadius.circular(4),
+          ),
+        ),
+        Expanded(
+          child: Text(
+            _title(context),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w800,
                 ),
+          ),
+        ),
+      ],
+    ),
+    actions: [
+      if (notificationsIndex != -1)
+        AdminNotificationBell(
+          onTap: () async {
+            _goTo(notificationsIndex);
+          },
+        ),
+      const SizedBox(width: 6),
+    ],
+    bottom: (_mode == SuperMenuType.top && _tab != null)
+        ? PreferredSize(
+            preferredSize: const Size.fromHeight(54),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: TabBar(
+                controller: _tab,
+                isScrollable: true,
+                tabAlignment: TabAlignment.start,
+                dividerHeight: 0,
+                labelStyle: const TextStyle(fontWeight: FontWeight.w800),
+                tabs: [
+                  for (final d in widget.destinations)
+                    Tab(
+                      text: d.label,
+                      icon: Icon(d.icon),
+                    ),
+                ],
               ),
-            )
-          : null,
-    );
-  }
+            ),
+          )
+        : null,
+  );
+}
 
   /// ✅ Pro transitions + keep state
   Widget _buildBodyStack(List<SuperAdminDestination> pages) {
