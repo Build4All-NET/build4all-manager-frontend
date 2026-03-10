@@ -2,6 +2,9 @@ import java.util.Properties
 
 plugins {
     id("com.android.application")
+    // START: FlutterFire Configuration
+    id("com.google.gms.google-services")
+    // END: FlutterFire Configuration
     id("kotlin-android")
     id("dev.flutter.flutter-gradle-plugin")
    
@@ -31,7 +34,7 @@ android {
 
     defaultConfig {
     applicationId = "com.buil4all.build4allmanager"
-   minSdk = 23
+   minSdkVersion flutter.minSdkVersion
     targetSdk = flutter.targetSdkVersion
     versionCode = flutter.versionCode
     versionName = flutter.versionName

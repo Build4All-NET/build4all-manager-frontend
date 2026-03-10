@@ -88,34 +88,62 @@ class AuthInterceptor extends Interceptor {
     handler.next(options);
   }
 
-  @override
-  void onError(DioException err, ErrorInterceptorHandler handler) async {
-    final status = err.response?.statusCode ?? 0;
+ @override
+void onError(DioException err, ErrorInterceptorHandler handler) async {
+  final status = err.response?.statusCode ?? 0;
 
-    if ((status != 401 && status != 403) || _isAuthPath(err.requestOptions)) {
-      return handler.next(err);
-    }
+  // ✅ refresh ONLY on 401
+  if (status != 401 || _isAuthPath(err.requestOptions)) {
+    return handler.next(err);
+  }
 
-    // prevent infinite retry loop
-    if (err.requestOptions.extra['__retried'] == true) {
-      return handler.next(err);
-    }
+  // ✅ avoid infinite loop
+  if (err.requestOptions.extra['__retried'] == true) {
+    return handler.next(err);
+  }
 
-    try {
-      await _refresh();
+  // ✅ if request had no auth at all, don't try refresh
+  final authHeader =
+      (err.requestOptions.headers['Authorization'] ?? '').toString().trim();
+  if (authHeader.isEmpty) {
+    return handler.next(err);
+  }
 
-      final retryReq = err.requestOptions;
-      retryReq.extra['__retried'] = true;
+  try {
+    await _refresh();
 
-      // ✅ your project uses ensure()
-      final dio = DioClient.ensure();
-      final res = await dio.fetch(retryReq);
+    final retryReq = err.requestOptions;
+    retryReq.extra['__retried'] = true;
 
-      return handler.resolve(res);
-    } catch (_) {
+    final dio = DioClient.ensure();
+    final res = await dio.fetch(retryReq);
+
+    return handler.resolve(res);
+  } catch (e) {
+    // ✅ clear session ONLY if refresh itself is truly invalid
+    final shouldClear = _shouldClearAfterRefreshFailure(e);
+
+    if (shouldClear) {
       await jwtStore.clear();
       DioClient.clearToken();
-      return handler.next(err);
     }
+
+    return handler.next(err);
   }
+}
+
+bool _shouldClearAfterRefreshFailure(Object e) {
+  if (e is DioException) {
+    final s = e.response?.statusCode ?? 0;
+
+    // refresh endpoint said token is invalid / unauthorized
+    if (s == 401) return true;
+  }
+
+  final msg = e.toString().toUpperCase();
+
+  return msg.contains('NO_REFRESH') ||
+      msg.contains('BAD_REFRESH') ||
+      msg.contains('BAD_REFRESH_RESPONSE');
+}
 }

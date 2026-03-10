@@ -60,20 +60,20 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyC7sV_SjVelnMhnm2GUs3RFFunuGLwWgdc',
-    appId: '1:814148375402:ios:657b6291e1f89574d04b13',
+    appId: '1:814148375402:ios:5ce59e24775a248ed04b13',
     messagingSenderId: '814148375402',
     projectId: 'build4all-manager',
     storageBucket: 'build4all-manager.firebasestorage.app',
-    iosBundleId: 'com.example.build4allManager',
+    iosBundleId: 'com.build4all.build4allmanager',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
     apiKey: 'AIzaSyC7sV_SjVelnMhnm2GUs3RFFunuGLwWgdc',
-    appId: '1:814148375402:ios:657b6291e1f89574d04b13',
+    appId: '1:814148375402:ios:5ce59e24775a248ed04b13',
     messagingSenderId: '814148375402',
     projectId: 'build4all-manager',
     storageBucket: 'build4all-manager.firebasestorage.app',
-    iosBundleId: 'com.example.build4allManager',
+    iosBundleId: 'com.build4all.build4allmanager',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
@@ -85,4 +85,5 @@ class DefaultFirebaseOptions {
     storageBucket: 'build4all-manager.firebasestorage.app',
     measurementId: 'G-KERJ15LNP8',
   );
+
 }

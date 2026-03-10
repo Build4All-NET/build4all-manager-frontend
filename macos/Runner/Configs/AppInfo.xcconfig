@@ -8,7 +8,7 @@
 PRODUCT_NAME = build4all_manager
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.example.build4allManager
+PRODUCT_BUNDLE_IDENTIFIER = com.build4all.build4allmanager
 
 // The copyright displayed in application information
 PRODUCT_COPYRIGHT = Copyright © 2025 com.example. All rights reserved.
