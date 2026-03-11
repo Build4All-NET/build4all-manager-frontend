@@ -2459,4 +2459,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get unknownLabel => 'Unknown';
+
+  @override
+  String get loginIncorrectPassword => 'Incorrect password';
+
+  @override
+  String get loginIncorrectEmailOrUsername => 'Incorrect email or username';
+
+  @override
+  String get loginIncorrectCredentials => 'Incorrect email/username or password';
 }

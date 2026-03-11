@@ -8,6 +8,7 @@ import 'package:build4all_manager/shared/widgets/app_toast.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 import 'package:build4all_manager/l10n/app_localizations.dart';
@@ -207,65 +208,61 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
       return;
     }
 
-    setState(() => _loading = true);
+  setState(() => _loading = true);
 
-    try {
-      final primaryHex = hexOf(_draft.primary);
-      final secondaryHex = hexOf(_draft.secondary);
-      final bgHex = hexOf(_draft.background);
-      final onBgHex = hexOf(_draft.onBackground);
-      final errorHex = hexOf(_draft.error);
+  try {
+    final primaryHex = hexOf(_draft.primary);
+    final secondaryHex = hexOf(_draft.secondary);
+    final bgHex = hexOf(_draft.background);
+    final onBgHex = hexOf(_draft.onBackground);
+    final errorHex = hexOf(_draft.error);
 
-_runtime = _runtime.normalized();
+    _runtime = _runtime.normalized();
 
-      final out = _runtime.toJsonOut();
+    final out = _runtime.toJsonOut();
 
-      await api.submitOwnerRequest(
-        ownerId: widget.ownerId,
-        projectId: projectId,
-        appName: _appNameCtrl.text.trim(),
-        notes: _notesCtrl.text.trim(),
-        primaryColor: primaryHex,
-        secondaryColor: secondaryHex,
-        backgroundColor: bgHex,
-        onBackgroundColor: onBgHex,
-        errorColor: errorHex,
-        currencyId: _selectedCurrency!.id,
-        navJson: out.navJson,
-        homeJson: out.homeJson,
-        enabledFeaturesJson: out.enabledFeaturesJson,
-        brandingJson: out.brandingJson,
-        logoFile: _logoFile,
-      );
+    await api.submitOwnerRequest(
+      ownerId: widget.ownerId,
+      projectId: projectId,
+      appName: _appNameCtrl.text.trim(),
+      notes: _notesCtrl.text.trim(),
+      primaryColor: primaryHex,
+      secondaryColor: secondaryHex,
+      backgroundColor: bgHex,
+      onBackgroundColor: onBgHex,
+      errorColor: errorHex,
+      currencyId: _selectedCurrency!.id,
+      navJson: out.navJson,
+      homeJson: out.homeJson,
+      enabledFeaturesJson: out.enabledFeaturesJson,
+      brandingJson: out.brandingJson,
+      logoFile: _logoFile,
+    );
 
-      if (!mounted) return;
+    if (!mounted) return;
 
-      AppToast.success(context, l.owner_request_submit_success);
+    AppToast.success(context, l.owner_request_submit_success);
 
-      try {
-        context.read<OwnerNavCubit>().setIndex(1);
-      } catch (_) {}
+   
+    context.go('/owner/projects');
+  } catch (e) {
+    if (!mounted) return;
 
-      Navigator.of(context).pop(true);
-    } catch (e) {
-      if (!mounted) return;
-
-      String msg = e.toString();
-      if (e is DioException) {
-        final data = e.response?.data;
-        if (data is Map && data['error'] != null) {
-          msg = data['error'].toString();
-        } else if (data is String && data.isNotEmpty) {
-          msg = data;
-        }
+    String msg = e.toString();
+    if (e is DioException) {
+      final data = e.response?.data;
+      if (data is Map && data['error'] != null) {
+        msg = data['error'].toString();
+      } else if (data is String && data.isNotEmpty) {
+        msg = data;
       }
-
-      AppToast.error(context, l.owner_request_submit_failed(msg));
-    } finally {
-      if (mounted) setState(() => _loading = false);
     }
-  }
 
+    AppToast.error(context, l.owner_request_submit_failed(msg));
+  } finally {
+    if (mounted) setState(() => _loading = false);
+  }
+}
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;

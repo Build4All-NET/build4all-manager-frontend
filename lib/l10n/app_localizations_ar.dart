@@ -2459,4 +2459,13 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get unknownLabel => 'غير معروف';
+
+  @override
+  String get loginIncorrectPassword => 'كلمة المرور غير صحيحة';
+
+  @override
+  String get loginIncorrectEmailOrUsername => 'البريد الإلكتروني أو اسم المستخدم غير صحيح';
+
+  @override
+  String get loginIncorrectCredentials => 'البريد الإلكتروني/اسم المستخدم أو كلمة المرور غير صحيحة';
 }

@@ -39,6 +39,116 @@ void _goAfterFrame(BuildContext context, String route) {
   });
 }
 
+enum _LoginErrorType {
+  incorrectPassword,
+  incorrectEmailOrUsername,
+  incorrectCredentials,
+  raw,
+}
+
+_LoginErrorType? _resolveLoginErrorType(String? rawError) {
+  final raw = (rawError ?? '').trim();
+  if (raw.isEmpty) return null;
+
+  final msg = raw.toLowerCase();
+
+  bool hasAny(List<String> values) {
+    for (final value in values) {
+      if (msg.contains(value.toLowerCase())) return true;
+    }
+    return false;
+  }
+
+  // password wrong
+  if (hasAny([
+    'incorrect password',
+    'wrong password',
+    'invalid password',
+    'password incorrect',
+    'password is incorrect',
+    'bad password',
+  ])) {
+    return _LoginErrorType.incorrectPassword;
+  }
+
+  // email / username / owner identifier wrong
+  if (hasAny([
+    'incorrect email',
+    'wrong email',
+    'invalid email',
+    'email not found',
+    'incorrect username',
+    'wrong username',
+    'invalid username',
+    'username not found',
+    'owner not found',
+    'account not found',
+    'identifier not found',
+    'invalid identifier',
+  ])) {
+    return _LoginErrorType.incorrectEmailOrUsername;
+  }
+
+  // generic backend auth errors
+  if (hasAny([
+    'bad credentials',
+    'invalid credentials',
+    'wrong credentials',
+    'invalid login',
+    'login failed',
+    'invalid username or password',
+    'incorrect username or password',
+    'incorrect email or password',
+    'invalid email or password',
+  ])) {
+    return _LoginErrorType.incorrectCredentials;
+  }
+
+  // fallback heuristics
+  if (msg.contains('password') &&
+      (msg.contains('wrong') ||
+          msg.contains('incorrect') ||
+          msg.contains('invalid'))) {
+    return _LoginErrorType.incorrectPassword;
+  }
+
+  if ((msg.contains('email') ||
+          msg.contains('username') ||
+          msg.contains('owner') ||
+          msg.contains('identifier') ||
+          msg.contains('account')) &&
+      (msg.contains('wrong') ||
+          msg.contains('incorrect') ||
+          msg.contains('invalid') ||
+          msg.contains('not found') ||
+          msg.contains('does not exist'))) {
+    return _LoginErrorType.incorrectEmailOrUsername;
+  }
+
+  return _LoginErrorType.raw;
+}
+
+String? _mapLoginError(BuildContext context, String? rawError) {
+  final raw = (rawError ?? '').trim();
+  if (raw.isEmpty) return null;
+
+  final l10n = AppLocalizations.of(context)!;
+  final type = _resolveLoginErrorType(raw);
+
+  switch (type) {
+    case _LoginErrorType.incorrectPassword:
+      return l10n.loginIncorrectPassword;
+    case _LoginErrorType.incorrectEmailOrUsername:
+      return l10n.loginIncorrectEmailOrUsername;
+    case _LoginErrorType.incorrectCredentials:
+      return l10n.loginIncorrectCredentials;
+    case _LoginErrorType.raw:
+      return raw;
+    case null:
+      return null;
+  }
+}
+
 class AppLoginScreen extends StatelessWidget {
   const AppLoginScreen({super.key});
 
@@ -62,19 +172,17 @@ class AppLoginScreen extends StatelessWidget {
         listenWhen: (p, c) => p.role != c.role || p.error != c.error,
         listener: (context, state) {
           final role = (state.role ?? '').toUpperCase();
+          final friendlyError = _mapLoginError(context, state.error);
 
-          if (state.error != null && state.error!.isNotEmpty) {
-            AppToast.error(context, state.error!);
+          if (friendlyError != null && friendlyError.isNotEmpty) {
+            AppToast.error(context, friendlyError);
             return;
           }
 
           if (role == 'SUPER_ADMIN') {
             AppToast.success(context, l10n.msgWelcomeBack);
 
-            // ✅ navigate immediately
             _goAfterFrame(context, '/manager');
-
-            // ✅ init push in background, do NOT block iOS navigation
             unawaited(_initPushSafely());
             return;
           }
@@ -82,10 +190,7 @@ class AppLoginScreen extends StatelessWidget {
           if (role.isNotEmpty) {
             AppToast.success(context, l10n.msgWelcomeBack);
 
-            // ✅ navigate immediately
             _goAfterFrame(context, '/owner');
-
-            // ✅ init push in background
             unawaited(_initPushSafely());
           }
         },
@@ -113,8 +218,7 @@ class AppLoginScreen extends StatelessWidget {
                           constraints: BoxConstraints(maxWidth: cardMaxWidth),
                           child: _FrostedCard(
                             child: Padding(
-                              padding:
-                                  const EdgeInsets.fromLTRB(24, 28, 24, 20),
+                              padding: const EdgeInsets.fromLTRB(24, 28, 24, 20),
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
@@ -125,8 +229,7 @@ class AppLoginScreen extends StatelessWidget {
                                         tag: 'brand',
                                         child: CircleAvatar(
                                           radius: 30,
-                                          backgroundColor:
-                                              cs.primary.withOpacity(.12),
+                                          backgroundColor: cs.primary.withOpacity(.12),
                                           child: Text(
                                             'B4',
                                             style: TextStyle(
@@ -161,10 +264,8 @@ class AppLoginScreen extends StatelessWidget {
                                   const SizedBox(height: 20),
                                   const _LoginForm(),
                                   const SizedBox(height: 16),
-
                                   TextButton(
-                                    onPressed: () =>
-                                        context.go('/owner/register'),
+                                    onPressed: () => context.go('/owner/register'),
                                     child: Text.rich(
                                       TextSpan(
                                         children: [
@@ -187,7 +288,6 @@ class AppLoginScreen extends StatelessWidget {
                                       textAlign: TextAlign.center,
                                     ),
                                   ),
-
                                   const SizedBox(height: 8),
                                   Text(
                                     l10n.termsNotice,
@@ -276,6 +376,8 @@ class _LoginFormState extends State<_LoginForm> {
 
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, state) {
+        final friendlyError = _mapLoginError(context, state.error);
+
         return Form(
           key: _formKey,
           child: Column(
@@ -312,10 +414,10 @@ class _LoginFormState extends State<_LoginForm> {
               const SizedBox(height: 12),
               AnimatedSwitcher(
                 duration: const Duration(milliseconds: 220),
-                child: (state.error?.isNotEmpty == true)
+                child: (friendlyError?.isNotEmpty == true)
                     ? Text(
-                        state.error!,
-                        key: ValueKey(state.error),
+                        friendlyError!,
+                        key: ValueKey(friendlyError),
                         style: TextStyle(
                           color: cs.error,
                           fontWeight: FontWeight.w600,

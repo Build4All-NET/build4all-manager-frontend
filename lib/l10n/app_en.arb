@@ -1034,6 +1034,9 @@
   "unlimitedLabel": "Unlimited",
   "yes": "Yes",
   "no": "No",
-  "unknownLabel": "Unknown"
+  "unknownLabel": "Unknown",
+   "loginIncorrectPassword": "Incorrect password",
+  "loginIncorrectEmailOrUsername": "Incorrect email or username",
+  "loginIncorrectCredentials": "Incorrect email/username or password"
  
 }

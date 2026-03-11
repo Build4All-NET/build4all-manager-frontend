@@ -969,6 +969,9 @@
   "unlimitedLabel": "غير محدود",
   "yes": "نعم",
   "no": "لا",
-  "unknownLabel": "غير معروف"
+  "unknownLabel": "غير معروف",
+   "loginIncorrectPassword": "كلمة المرور غير صحيحة",
+  "loginIncorrectEmailOrUsername": "البريد الإلكتروني أو اسم المستخدم غير صحيح",
+  "loginIncorrectCredentials": "البريد الإلكتروني/اسم المستخدم أو كلمة المرور غير صحيحة"
  
 }

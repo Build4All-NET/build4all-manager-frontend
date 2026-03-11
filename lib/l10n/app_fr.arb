@@ -1123,6 +1123,9 @@
   "unlimitedLabel": "Illimité",
   "yes": "Oui",
   "no": "Non",
-  "unknownLabel": "Inconnu"
+  "unknownLabel": "Inconnu",
+    "loginIncorrectPassword": "Mot de passe incorrect",
+  "loginIncorrectEmailOrUsername": "E-mail ou nom d’utilisateur incorrect",
+  "loginIncorrectCredentials": "E-mail/nom d’utilisateur ou mot de passe incorrect"
   
 }

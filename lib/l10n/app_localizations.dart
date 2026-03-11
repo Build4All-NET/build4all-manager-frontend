@@ -4920,6 +4920,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unknown'**
   String get unknownLabel;
+
+  /// No description provided for @loginIncorrectPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect password'**
+  String get loginIncorrectPassword;
+
+  /// No description provided for @loginIncorrectEmailOrUsername.
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect email or username'**
+  String get loginIncorrectEmailOrUsername;
+
+  /// No description provided for @loginIncorrectCredentials.
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect email/username or password'**
+  String get loginIncorrectCredentials;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
