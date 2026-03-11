@@ -101,6 +101,30 @@ jobs:
         run: flutter pub get
 
       # --------------------------------------------------
+      # Setup Android local.properties (FIX)
+      # --------------------------------------------------
+      - name: Setup Android local.properties
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "sdk.dir=$ANDROID_SDK_ROOT" > android/local.properties
+          flutter config --android-sdk "$ANDROID_SDK_ROOT"
+          echo "✅ local.properties configured"
+
+      # --------------------------------------------------
+      # Clean Gradle cache
+      # --------------------------------------------------
+      - name: Clean Gradle cache
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd android
+          rm -rf .gradle build
+          cd ..
+          flutter clean
+          echo "✅ Gradle cache cleaned"
+
+      # --------------------------------------------------
       # Android signing (NO heredoc, NO syntax traps)
       # --------------------------------------------------
       - name: Prepare Android signing
