@@ -10,4 +10,8 @@ abstract class IOwnerProfileRepository {
   Future<void> requestEmailChange(String newEmail);
   Future<void> verifyEmailChange(String code);
   Future<void> resendEmailChange();
+
+    Future<void> requestPhoneChange(String newPhone);
+  Future<void> verifyPhoneChange(String code);
+  Future<void> resendPhoneChange();
 }

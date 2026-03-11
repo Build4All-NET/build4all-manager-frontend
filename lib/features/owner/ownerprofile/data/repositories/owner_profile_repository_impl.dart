@@ -40,4 +40,16 @@ class OwnerProfileRepositoryImpl implements IOwnerProfileRepository {
 
   @override
   Future<void> resendEmailChange() => api.resendEmailChange();
+    // ✅ NEW
+  @override
+  Future<void> requestPhoneChange(String newPhone) =>
+      api.requestPhoneChange(newPhone);
+
+  @override
+  Future<void> verifyPhoneChange(String code) =>
+      api.verifyPhoneChange(code);
+
+  @override
+  Future<void> resendPhoneChange() =>
+      api.resendPhoneChange();
 }

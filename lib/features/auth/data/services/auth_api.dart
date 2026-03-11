@@ -28,6 +28,8 @@ class AuthApi {
     return _dio.post('/auth/logout', data: {'refreshToken': refreshToken});
   }
 
+
+
   Future<Response> ownerVerifyOtp({
     required String email,
     required String password,

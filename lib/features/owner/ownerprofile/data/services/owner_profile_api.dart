@@ -38,6 +38,22 @@ class OwnerProfileApi {
     });
   }
 
+  // ✅ NEW: phone change OTP flow
+  Future<void> requestPhoneChange(String newPhone) async {
+    await dio.post('/admin/users/me/request-phone-change', data: {
+      'newPhone': newPhone,
+    });
+  }
+
+  Future<void> verifyPhoneChange(String code) async {
+    await dio.post('/admin/users/me/verify-phone-change', data: {
+      'code': code,
+    });
+  }
+
+  Future<void> resendPhoneChange() async {
+    await dio.post('/admin/users/me/resend-phone-change');
+  }
   Future<void> resendEmailChange() async {
     await dio.post('/admin/users/me/resend-email-change');
   }

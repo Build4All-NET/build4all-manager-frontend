@@ -162,7 +162,6 @@ class AppLoginScreen extends StatelessWidget {
                                   const _LoginForm(),
                                   const SizedBox(height: 16),
 
-                                  // إذا بدك هيدا screen للـ owner + super admin مع بعض، خليه
                                   TextButton(
                                     onPressed: () =>
                                         context.go('/owner/register'),
