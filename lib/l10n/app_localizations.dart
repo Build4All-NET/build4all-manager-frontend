@@ -3154,7 +3154,7 @@ abstract class AppLocalizations {
   /// No description provided for @common_open.
   ///
   /// In en, this message translates to:
-  /// **'Ouvrir'**
+  /// **'Open'**
   String get common_open;
 
   /// No description provided for @common_unknown.
@@ -4938,6 +4938,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Incorrect email/username or password'**
   String get loginIncorrectCredentials;
+
+  /// No description provided for @owner_home_loading_projects.
+  ///
+  /// In en, this message translates to:
+  /// **'Please wait... loading projects'**
+  String get owner_home_loading_projects;
+
+  /// No description provided for @owner_home_no_apps_yet.
+  ///
+  /// In en, this message translates to:
+  /// **'No apps yet'**
+  String get owner_home_no_apps_yet;
+
+  /// No description provided for @owner_home_no_matching_projects.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching projects found'**
+  String get owner_home_no_matching_projects;
+
+  /// No description provided for @owner_home_search_projects.
+  ///
+  /// In en, this message translates to:
+  /// **'Search projects...'**
+  String get owner_home_search_projects;
+
+  /// No description provided for @common_status_active.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get common_status_active;
+
+  /// No description provided for @common_status_test.
+  ///
+  /// In en, this message translates to:
+  /// **'Test'**
+  String get common_status_test;
+
+  /// No description provided for @common_status_local.
+  ///
+  /// In en, this message translates to:
+  /// **'Local'**
+  String get common_status_local;
+
+  /// No description provided for @common_status_production.
+  ///
+  /// In en, this message translates to:
+  /// **'Production'**
+  String get common_status_production;
+
+  /// No description provided for @common_project_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Project'**
+  String get common_project_label;
+
+  /// No description provided for @common_link_id_label.
+  ///
+  /// In en, this message translates to:
+  /// **'LinkId'**
+  String get common_link_id_label;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

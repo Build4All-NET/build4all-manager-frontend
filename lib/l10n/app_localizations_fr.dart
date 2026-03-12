@@ -2468,4 +2468,34 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get loginIncorrectCredentials => 'E-mail/nom d’utilisateur ou mot de passe incorrect';
+
+  @override
+  String get owner_home_loading_projects => 'Chargement de vos projets...';
+
+  @override
+  String get owner_home_no_apps_yet => 'Vous n’avez pas encore d’applications. Créez votre première application à partir d’un projet !';
+
+  @override
+  String get owner_home_no_matching_projects => 'Aucun projet ne correspond à votre recherche ou à vos filtres.';
+
+  @override
+  String get owner_home_search_projects => 'Search projects...';
+
+  @override
+  String get common_status_active => 'Actif';
+
+  @override
+  String get common_status_test => 'Test';
+
+  @override
+  String get common_status_local => 'Local';
+
+  @override
+  String get common_status_production => 'Production';
+
+  @override
+  String get common_project_label => 'Projet';
+
+  @override
+  String get common_link_id_label => 'ID du lien';
 }

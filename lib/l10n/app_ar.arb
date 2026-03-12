@@ -972,6 +972,17 @@
   "unknownLabel": "غير معروف",
    "loginIncorrectPassword": "كلمة المرور غير صحيحة",
   "loginIncorrectEmailOrUsername": "البريد الإلكتروني أو اسم المستخدم غير صحيح",
-  "loginIncorrectCredentials": "البريد الإلكتروني/اسم المستخدم أو كلمة المرور غير صحيحة"
+  "loginIncorrectCredentials": "البريد الإلكتروني/اسم المستخدم أو كلمة المرور غير صحيحة",
+   "owner_home_loading_projects": "يرجى الانتظار... يتم تحميل المشاريع",
+  "owner_home_no_apps_yet": "لا توجد تطبيقات بعد",
+  "owner_home_no_matching_projects": "لم يتم العثور على مشاريع مطابقة",
+  "owner_home_search_projects": "ابحث عن المشاريع...",
+  "common_open": "فتح",
+  "common_status_active": "نشط",
+  "common_status_test": "تجريبي",
+  "common_status_local": "محلي",
+  "common_status_production": "إنتاجي",
+  "common_project_label": "المشروع",
+  "common_link_id_label": "معرّف الرابط"
  
 }

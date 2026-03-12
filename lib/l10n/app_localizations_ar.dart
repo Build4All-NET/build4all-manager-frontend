@@ -2468,4 +2468,34 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get loginIncorrectCredentials => 'البريد الإلكتروني/اسم المستخدم أو كلمة المرور غير صحيحة';
+
+  @override
+  String get owner_home_loading_projects => 'يرجى الانتظار... يتم تحميل المشاريع';
+
+  @override
+  String get owner_home_no_apps_yet => 'لا توجد تطبيقات بعد';
+
+  @override
+  String get owner_home_no_matching_projects => 'لم يتم العثور على مشاريع مطابقة';
+
+  @override
+  String get owner_home_search_projects => 'ابحث عن المشاريع...';
+
+  @override
+  String get common_status_active => 'نشط';
+
+  @override
+  String get common_status_test => 'تجريبي';
+
+  @override
+  String get common_status_local => 'محلي';
+
+  @override
+  String get common_status_production => 'إنتاجي';
+
+  @override
+  String get common_project_label => 'المشروع';
+
+  @override
+  String get common_link_id_label => 'معرّف الرابط';
 }

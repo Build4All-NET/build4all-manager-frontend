@@ -1126,6 +1126,16 @@
   "unknownLabel": "Inconnu",
     "loginIncorrectPassword": "Mot de passe incorrect",
   "loginIncorrectEmailOrUsername": "E-mail ou nom d’utilisateur incorrect",
-  "loginIncorrectCredentials": "E-mail/nom d’utilisateur ou mot de passe incorrect"
+  "loginIncorrectCredentials": "E-mail/nom d’utilisateur ou mot de passe incorrect",
+   "owner_home_loading_projects": "Chargement de vos projets...",
+  "owner_home_no_apps_yet": "Vous n’avez pas encore d’applications. Créez votre première application à partir d’un projet !",
+  "owner_home_no_matching_projects": "Aucun projet ne correspond à votre recherche ou à vos filtres.",
+
+  "common_status_active": "Actif",
+  "common_status_test":  "Test",
+  "common_status_local":  "Local",
+  "common_status_production": "Production",
+  "common_project_label": "Projet",
+  "common_link_id_label": "ID du lien"
   
 }

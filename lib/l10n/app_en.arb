@@ -1037,6 +1037,17 @@
   "unknownLabel": "Unknown",
    "loginIncorrectPassword": "Incorrect password",
   "loginIncorrectEmailOrUsername": "Incorrect email or username",
-  "loginIncorrectCredentials": "Incorrect email/username or password"
+  "loginIncorrectCredentials": "Incorrect email/username or password",
+    "owner_home_loading_projects": "Please wait... loading projects",
+  "owner_home_no_apps_yet": "No apps yet",
+  "owner_home_no_matching_projects": "No matching projects found",
+  "owner_home_search_projects": "Search projects...",
+  "common_open": "Open",
+  "common_status_active": "Active",
+  "common_status_test": "Test",
+  "common_status_local": "Local",
+  "common_status_production": "Production",
+  "common_project_label": "Project",
+  "common_link_id_label": "LinkId"
  
 }

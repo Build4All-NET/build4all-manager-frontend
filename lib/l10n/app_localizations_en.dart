@@ -1558,7 +1558,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get common_save_failed => 'Save failed';
 
   @override
-  String get common_open => 'Ouvrir';
+  String get common_open => 'Open';
 
   @override
   String get common_unknown => 'Unknown';
@@ -2468,4 +2468,34 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get loginIncorrectCredentials => 'Incorrect email/username or password';
+
+  @override
+  String get owner_home_loading_projects => 'Please wait... loading projects';
+
+  @override
+  String get owner_home_no_apps_yet => 'No apps yet';
+
+  @override
+  String get owner_home_no_matching_projects => 'No matching projects found';
+
+  @override
+  String get owner_home_search_projects => 'Search projects...';
+
+  @override
+  String get common_status_active => 'Active';
+
+  @override
+  String get common_status_test => 'Test';
+
+  @override
+  String get common_status_local => 'Local';
+
+  @override
+  String get common_status_production => 'Production';
+
+  @override
+  String get common_project_label => 'Project';
+
+  @override
+  String get common_link_id_label => 'LinkId';
 }

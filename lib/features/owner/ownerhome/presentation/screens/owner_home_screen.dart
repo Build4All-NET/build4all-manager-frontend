@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:build4all_manager/features/owner/common/domain/usecases/get_my_apps_uc.dart';
 import 'package:build4all_manager/features/owner/ownerhome/data/repositories/owner_projects_repository_impl.dart';
@@ -5,7 +7,6 @@ import 'package:build4all_manager/features/owner/ownerhome/data/services/owner_p
 import 'package:build4all_manager/features/owner/ownerhome/domain/usecases/get_platform_projects_uc.dart';
 import 'package:build4all_manager/shared/state/owner_me_store.dart';
 import 'package:build4all_manager/shared/themes/app_theme.dart';
-import 'package:build4all_manager/shared/widgets/search_input.dart';
 import 'package:build4all_manager/shared/widgets/app_toast.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -24,10 +25,7 @@ import '../bloc/owner_home_state.dart';
 import '../../data/static_project_models.dart';
 import '../widgets/project_template_card.dart';
 
-// ✅ SAME call style as Profile -> /admin/users/me
 import 'package:build4all_manager/features/owner/ownerprofile/data/services/owner_profile_api.dart';
-
-// ✅ entity used in My Apps list
 import 'package:build4all_manager/features/owner/common/domain/entities/owner_project.dart';
 
 class OwnerHomeScreen extends StatelessWidget {
@@ -45,23 +43,20 @@ class OwnerHomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final generalRepo = OwnerRepositoryImpl(OwnerApi(dio));
-   
+    final projectsRepo = OwnerProjectsRepositoryImpl(OwnerProjectsApi(dio));
 
-//  NEW repo for /projects
-final projectsRepo = OwnerProjectsRepositoryImpl(OwnerProjectsApi(dio));
-
-   return BlocProvider(
-  create: (_) => OwnerHomeBloc(
-    getAppConfig: GetAppConfigUc(generalRepo),
-    getMyApps: GetMyAppsUc(generalRepo),
-    getPlatformProjects: GetPlatformProjectsUc(projectsRepo), // 
-  )..add(OwnerHomeStarted(ownerId)),
-  child: _HomeScaffold(
-    ownerId: ownerId,
-    dio: dio,
-    ownerName: ownerName,
-  ),
-);
+    return BlocProvider(
+      create: (_) => OwnerHomeBloc(
+        getAppConfig: GetAppConfigUc(generalRepo),
+        getMyApps: GetMyAppsUc(generalRepo),
+        getPlatformProjects: GetPlatformProjectsUc(projectsRepo),
+      )..add(OwnerHomeStarted(ownerId)),
+      child: _HomeScaffold(
+        ownerId: ownerId,
+        dio: dio,
+        ownerName: ownerName,
+      ),
+    );
   }
 }
 
@@ -79,6 +74,7 @@ class _HomeScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+
     return Scaffold(
       backgroundColor: cs.surface,
       body: SafeArea(
@@ -108,11 +104,13 @@ class _HomeBody extends StatefulWidget {
 }
 
 class _HomeBodyState extends State<_HomeBody> {
+  final TextEditingController _searchCtrl = TextEditingController();
+  String _searchQuery = '';
+
   @override
   void initState() {
     super.initState();
 
-    // ✅ only use router name if store is empty (avoid forcing old value forever)
     final current = OwnerMeStore.I.displayName.value;
     if ((current ?? '').trim().isEmpty) {
       final passed = widget.ownerName?.trim();
@@ -121,7 +119,6 @@ class _HomeBodyState extends State<_HomeBody> {
       }
     }
 
-    // ✅ always sync from API after first frame (real source of truth)
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final fresh = await _loadDisplayName();
       if (!mounted) return;
@@ -129,6 +126,12 @@ class _HomeBodyState extends State<_HomeBody> {
         OwnerMeStore.I.setName(fresh);
       }
     });
+  }
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
   }
 
   Future<String?> _loadDisplayName() async {
@@ -182,10 +185,32 @@ class _HomeBodyState extends State<_HomeBody> {
     }
   }
 
-  // ✅ quick: extract server root without /api
   String _serverRootNoApi(Dio d) {
-    final base = d.options.baseUrl; // e.g. http://host:8080/api
+    final base = d.options.baseUrl;
     return base.replaceFirst(RegExp(r'/api/?$'), '');
+  }
+
+  String _norm(String? value) => (value ?? '').trim().toLowerCase();
+
+  bool _matchesProject(OwnerProject app, String query) {
+    final q = _norm(query);
+    if (q.isEmpty) return true;
+
+    final appName = _norm(app.appName);
+    final projectName = _norm(app.projectName);
+    final status = _norm(app.status);
+    final linkId = app.linkId.toString().toLowerCase();
+
+    return appName.contains(q) ||
+        projectName.contains(q) ||
+        status.contains(q) ||
+        linkId.contains(q);
+  }
+
+  List<OwnerProject> _filteredProjects(List<OwnerProject> apps) {
+    final q = _searchQuery.trim();
+    if (q.isEmpty) return apps;
+    return apps.where((app) => _matchesProject(app, q)).toList();
   }
 
   @override
@@ -218,9 +243,17 @@ class _HomeBodyState extends State<_HomeBody> {
           }
         },
         builder: (context, state) {
+          final filteredApps = _filteredProjects(state.myApps);
+          final hasSearch = _searchQuery.trim().isNotEmpty;
+          final visibleApps = hasSearch
+              ? filteredApps
+              : filteredApps.take(math.min(5, filteredApps.length)).toList();
+
           return RefreshIndicator(
             onRefresh: () async {
-              context.read<OwnerHomeBloc>().add(OwnerHomeRefreshed(widget.ownerId));
+              context.read<OwnerHomeBloc>().add(
+                    OwnerHomeRefreshed(widget.ownerId),
+                  );
 
               final fresh = await _loadDisplayName();
               if (!mounted) return;
@@ -233,7 +266,6 @@ class _HomeBodyState extends State<_HomeBody> {
                 parent: AlwaysScrollableScrollPhysics(),
               ),
               slivers: [
-                // ----- Header -----
                 SliverToBoxAdapter(
                   child: ValueListenableBuilder<String?>(
                     valueListenable: OwnerMeStore.I.displayName,
@@ -279,19 +311,34 @@ class _HomeBodyState extends State<_HomeBody> {
                 ),
                 const SliverToBoxAdapter(child: SizedBox(height: 12)),
 
-                // ----- Search -----
-                const SliverToBoxAdapter(
-                  child: AppSearchInput(
-                    hintKey: 'owner_home_search_hint',
-                    showFilter: false,
+                SliverToBoxAdapter(
+                  child: _OwnerProjectsSearchField(
+                    controller: _searchCtrl,
+                    hintText: _safe(
+                      l10n.owner_home_search_hint,
+                      l10n.owner_home_search_projects,
+                    ),
+                    onChanged: (value) {
+                      setState(() {
+                        _searchQuery = value;
+                      });
+                    },
+                    onClear: () {
+                      _searchCtrl.clear();
+                      setState(() {
+                        _searchQuery = '';
+                      });
+                    },
                   ),
                 ),
                 const SliverToBoxAdapter(child: SizedBox(height: 16)),
 
-                // ----- Choose your project -----
                 SliverToBoxAdapter(
                   child: AutoSizeText(
-                    _safe(l10n.owner_home_chooseProject, 'Choose your project'),
+                    _safe(
+                      l10n.owner_home_chooseProject,
+                      'Choose your project',
+                    ),
                     maxLines: 1,
                     minFontSize: 14,
                     stepGranularity: 0.5,
@@ -304,13 +351,11 @@ class _HomeBodyState extends State<_HomeBody> {
                 ),
                 const SliverToBoxAdapter(child: SizedBox(height: 12)),
 
-                // ----- Projects grid -----
                 SliverPadding(
                   padding: EdgeInsets.only(bottom: ux.radiusMd),
                   sliver: SliverLayoutBuilder(
                     builder: (context, constraints) {
                       final cross = constraints.crossAxisExtent;
-
                       final cols = cross >= 900 ? 4 : (cross >= 600 ? 3 : 2);
                       const spacing = 12.0;
 
@@ -330,12 +375,13 @@ class _HomeBodyState extends State<_HomeBody> {
                             final tpl = projectTemplates[i];
                             final kind = tpl.kind.toLowerCase();
 
-                            final isAvailable = state.availableKinds.contains(kind);
-                            final int? realProjectId = state.kindToProjectId[kind];
+                            final isAvailable =
+                                state.availableKinds.contains(kind);
+                            final int? realProjectId =
+                                state.kindToProjectId[kind];
 
                             return ProjectTemplateCard(
                               tpl: tpl,
-                              // ✅ during first load, keep cards visually disabled
                               isAvailable: !(state.loading &&
                                       state.availableKinds.isEmpty &&
                                       state.kindToProjectId.isEmpty) &&
@@ -346,12 +392,18 @@ class _HomeBodyState extends State<_HomeBody> {
                                     state.kindToProjectId.isEmpty;
 
                                 if (isBoot) {
-                                  AppToast.info(context, 'Please wait... loading projects');
+                                  AppToast.info(
+                                    context,
+                                    l10n.owner_home_loading_projects,
+                                  );
                                   return;
                                 }
 
                                 if (!isAvailable) {
-                                  AppToast.info(context, l10n.owner_proj_comingSoon);
+                                  AppToast.info(
+                                    context,
+                                    l10n.owner_proj_comingSoon,
+                                  );
                                   return;
                                 }
 
@@ -372,7 +424,6 @@ class _HomeBodyState extends State<_HomeBody> {
                   ),
                 ),
 
-                // ✅ MY APPS SUMMARY (replaces Recent Requests)
                 SliverToBoxAdapter(
                   child: Row(
                     children: [
@@ -406,16 +457,14 @@ class _HomeBodyState extends State<_HomeBody> {
 
                 if (state.loading && state.myApps.isEmpty)
                   const SliverToBoxAdapter(child: _LoadingList())
-                else if (state.myApps.isEmpty)
+                else if (visibleApps.isEmpty)
                   SliverToBoxAdapter(
                     child: Padding(
                       padding: const EdgeInsets.only(top: 6, bottom: 12),
-                      child: AutoSizeText(
-                        'No apps yet',
-                        maxLines: 2,
-                        minFontSize: 12,
-                        stepGranularity: 0.5,
-                        overflow: TextOverflow.ellipsis,
+                      child: Text(
+                        hasSearch
+                            ? l10n.owner_home_no_matching_projects
+                            : l10n.owner_home_no_apps_yet,
                         style: tt.bodyMedium?.copyWith(
                           color: cs.onSurfaceVariant,
                         ),
@@ -424,9 +473,9 @@ class _HomeBodyState extends State<_HomeBody> {
                   )
                 else
                   SliverList.builder(
-                    itemCount: state.myApps.length > 5 ? 5 : state.myApps.length,
+                    itemCount: visibleApps.length,
                     itemBuilder: (_, i) {
-                      final app = state.myApps[i];
+                      final app = visibleApps[i];
                       return _MyAppSummaryCard(
                         app: app,
                         serverRootNoApi: _serverRootNoApi(widget.dio),
@@ -444,12 +493,74 @@ class _HomeBodyState extends State<_HomeBody> {
   }
 }
 
+class _OwnerProjectsSearchField extends StatelessWidget {
+  final TextEditingController controller;
+  final String hintText;
+  final ValueChanged<String> onChanged;
+  final VoidCallback onClear;
+
+  const _OwnerProjectsSearchField({
+    required this.controller,
+    required this.hintText,
+    required this.onChanged,
+    required this.onClear,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
+    return Container(
+      height: 56,
+      decoration: BoxDecoration(
+        color: cs.surface,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: cs.outlineVariant.withOpacity(.7)),
+      ),
+      child: Row(
+        children: [
+          const SizedBox(width: 14),
+          Icon(Icons.search_rounded, color: cs.onSurfaceVariant),
+          const SizedBox(width: 10),
+          Expanded(
+            child: TextField(
+              controller: controller,
+              onChanged: onChanged,
+              style: tt.bodyLarge?.copyWith(color: cs.onSurface),
+              decoration: InputDecoration(
+                hintText: hintText,
+                hintStyle: tt.bodyLarge?.copyWith(
+                  color: cs.onSurfaceVariant.withOpacity(.8),
+                ),
+                border: InputBorder.none,
+                isCollapsed: true,
+              ),
+            ),
+          ),
+          if (controller.text.trim().isNotEmpty)
+            IconButton(
+              onPressed: onClear,
+              icon: Icon(
+                Icons.close_rounded,
+                color: cs.onSurfaceVariant,
+              ),
+            )
+          else
+            const SizedBox(width: 12),
+        ],
+      ),
+    );
+  }
+}
+
 class _LoadingList extends StatelessWidget {
   const _LoadingList();
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+
     return Column(
       children: List.generate(3, (i) {
         return Container(
@@ -465,7 +576,6 @@ class _LoadingList extends StatelessWidget {
   }
 }
 
-/// ✅ Compact summary card (NOT ProjectTile)
 class _MyAppSummaryCard extends StatelessWidget {
   final OwnerProject app;
   final String serverRootNoApi;
@@ -477,29 +587,40 @@ class _MyAppSummaryCard extends StatelessWidget {
 
   String _clean(String? s) => (s ?? '').trim();
 
-  String _statusLabel(String raw) {
+  String _statusLabel(BuildContext context, String raw) {
+    final l10n = AppLocalizations.of(context)!;
     final s = raw.toUpperCase();
-    if (s == 'ACTIVE') return 'Active';
-    if (s.contains('TEST')) return 'Test';
-    if (s.contains('LOCAL')) return 'Local';
-    if (s.contains('PROD')) return 'Production';
+
+    if (s == 'ACTIVE') return l10n.common_status_active;
+    if (s.contains('TEST')) return l10n.common_status_test;
+    if (s.contains('LOCAL')) return l10n.common_status_local;
+    if (s.contains('PROD')) return l10n.common_status_production;
+
     return raw;
   }
 
   (Color bg, Color fg) _statusColors(ColorScheme cs, String raw) {
     final s = raw.toUpperCase();
     if (s == 'ACTIVE') return (cs.primary.withOpacity(.12), cs.primary);
-    if (s.contains('TEST')) return (cs.tertiaryContainer.withOpacity(.30), cs.tertiary);
-    if (s.contains('LOCAL')) return (cs.secondary.withOpacity(.14), cs.secondary);
+    if (s.contains('TEST')) {
+      return (cs.tertiaryContainer.withOpacity(.30), cs.tertiary);
+    }
+    if (s.contains('LOCAL')) {
+      return (cs.secondary.withOpacity(.14), cs.secondary);
+    }
     return (cs.outlineVariant.withOpacity(.22), cs.onSurface);
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
 
-    final name = _clean(app.appName).isNotEmpty ? _clean(app.appName) : _clean(app.projectName);
+    final name = _clean(app.appName).isNotEmpty
+        ? _clean(app.appName)
+        : _clean(app.projectName);
+
     final status = _clean(app.status).isNotEmpty ? _clean(app.status) : '—';
     final (bg, fg) = _statusColors(cs, status);
 
@@ -518,7 +639,6 @@ class _MyAppSummaryCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // Logo
           Container(
             width: 42,
             height: 42,
@@ -529,22 +649,24 @@ class _MyAppSummaryCard extends StatelessWidget {
             ),
             clipBehavior: Clip.antiAlias,
             child: fullLogo == null
-                ? Icon(Icons.apps_rounded, color: cs.onSurface.withOpacity(.65))
+                ? Icon(
+                    Icons.apps_rounded,
+                    color: cs.onSurface.withOpacity(.65),
+                  )
                 : Image.network(
                     fullLogo,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) =>
-                        Icon(Icons.apps_rounded, color: cs.onSurface.withOpacity(.65)),
+                    errorBuilder: (_, __, ___) => Icon(
+                      Icons.apps_rounded,
+                      color: cs.onSurface.withOpacity(.65),
+                    ),
                   ),
           ),
           const SizedBox(width: 12),
-
-          // Main
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // title + status chip
                 Row(
                   children: [
                     Expanded(
@@ -552,17 +674,22 @@ class _MyAppSummaryCard extends StatelessWidget {
                         name.isEmpty ? '—' : name,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: tt.bodyMedium?.copyWith(fontWeight: FontWeight.w800),
+                        style: tt.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: bg,
                         borderRadius: BorderRadius.circular(999),
                       ),
                       child: Text(
-                        _statusLabel(status),
+                        _statusLabel(context, status),
                         style: tt.labelSmall?.copyWith(
                           color: fg,
                           fontWeight: FontWeight.w800,
@@ -572,10 +699,11 @@ class _MyAppSummaryCard extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 4),
-
-                // meta line
                 Text(
-                  'Project: ${_clean(app.projectName).isEmpty ? '—' : _clean(app.projectName)}  •  LinkId: ${app.linkId}',
+                  '${l10n.common_project_label}: '
+                  '${_clean(app.projectName).isEmpty ? '—' : _clean(app.projectName)}'
+                  '  •  '
+                  '${l10n.common_link_id_label}: ${app.linkId}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: tt.bodySmall?.copyWith(
@@ -585,17 +713,17 @@ class _MyAppSummaryCard extends StatelessWidget {
               ],
             ),
           ),
-
           const SizedBox(width: 10),
-
-          // open button
           IconButton(
-            tooltip: 'Open',
+            tooltip: l10n.common_open,
             onPressed: () {
-              // take user to My Apps screen to manage this app (rebuild/delete/etc)
               context.push('/owner/projects');
             },
-            icon: Icon(Icons.arrow_forward_ios_rounded, size: 18, color: cs.onSurface.withOpacity(.7)),
+            icon: Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 18,
+              color: cs.onSurface.withOpacity(.7),
+            ),
           ),
         ],
       ),
