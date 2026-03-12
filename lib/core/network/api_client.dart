@@ -1,8 +1,8 @@
 import 'package:build4all_manager/core/network/api_config.dart';
 import 'package:build4all_manager/features/auth/data/services/auth_api.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 
-import 'package:build4all_manager/app/nav_key.dart';
 import 'package:build4all_manager/core/network/auth_interceptor.dart';
 import 'package:build4all_manager/features/auth/data/datasources/jwt_local_datasource.dart';
 
@@ -12,7 +12,7 @@ class ApiClient {
   ApiClient(ApiConfig config)
       : dio = Dio(
           BaseOptions(
-            baseUrl: config.baseUrl, // http://host:8080/api
+            baseUrl: config.baseUrl,
             connectTimeout: const Duration(seconds: 30),
             receiveTimeout: const Duration(seconds: 60),
             sendTimeout: const Duration(seconds: 30),
@@ -22,7 +22,7 @@ class ApiClient {
             },
           ),
         ) {
-    // ✅ auto attach token + handle 401 → logout
+    // Auto attach token + handle 401 → logout
     dio.interceptors.add(
       AuthInterceptor(
         jwtStore: JwtLocalDataSource(),
@@ -30,15 +30,20 @@ class ApiClient {
       ),
     );
 
-    // ✅ logs
-    dio.interceptors.add(
-      LogInterceptor(
-        requestBody: true,
-        responseBody: true,
-        requestHeader: false,
-        responseHeader: false,
-      ),
-    );
+    // Lightweight logs in debug only
+    if (kDebugMode) {
+      dio.interceptors.add(
+        LogInterceptor(
+          request: true,
+          requestHeader: false,
+          requestBody: false,
+          responseHeader: false,
+          responseBody: false,
+          error: true,
+          logPrint: (obj) => debugPrint(obj.toString()),
+        ),
+      );
+    }
   }
 
   void setToken(String token) {
