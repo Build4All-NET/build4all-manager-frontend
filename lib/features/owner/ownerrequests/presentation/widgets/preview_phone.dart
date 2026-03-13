@@ -1,4 +1,3 @@
-// lib/features/owner/ownerrequests/presentation/widgets/preview_phone.dart
 import 'dart:convert';
 import 'dart:io';
 
@@ -35,7 +34,7 @@ class PhonePreview extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
 
     final navItems = _tryParseNav(navJson);
-    final menuType = _tryBrandingMenuType(brandingJson); // bottom | hamburger
+    final menuType = _tryBrandingMenuType(brandingJson);
     final features = _tryParseFeatures(enabledFeaturesJson);
     final sections = _tryParseHome(homeJson);
 
@@ -59,7 +58,6 @@ class PhonePreview extends StatelessWidget {
               color: draft.background,
               child: Column(
                 children: [
-                  // Status bar
                   Container(
                     height: 22,
                     color: _headerBlue(draft.primary),
@@ -75,27 +73,32 @@ class PhonePreview extends StatelessWidget {
                           ),
                         ),
                         const Spacer(),
-                        Icon(Icons.signal_cellular_4_bar,
-                            size: 14, color: _on(_headerBlue(draft.primary))),
+                        Icon(
+                          Icons.signal_cellular_4_bar,
+                          size: 14,
+                          color: _on(_headerBlue(draft.primary)),
+                        ),
                         const SizedBox(width: 6),
-                        Icon(Icons.wifi,
-                            size: 14, color: _on(_headerBlue(draft.primary))),
+                        Icon(
+                          Icons.wifi,
+                          size: 14,
+                          color: _on(_headerBlue(draft.primary)),
+                        ),
                         const SizedBox(width: 6),
-                        Icon(Icons.battery_full,
-                            size: 14, color: _on(_headerBlue(draft.primary))),
+                        Icon(
+                          Icons.battery_full,
+                          size: 14,
+                          color: _on(_headerBlue(draft.primary)),
+                        ),
                       ],
                     ),
                   ),
-
-                  // Header
                   _Header(
                     appName: appName,
                     headerColor: _headerBlue(draft.primary),
                     menuType: menuType,
                     logoFile: logoFile,
                   ),
-
-                  // Body
                   Expanded(
                     child: _Body(
                       draft: draft,
@@ -104,8 +107,6 @@ class PhonePreview extends StatelessWidget {
                       sections: sections,
                     ),
                   ),
-
-                  // Bottom nav only if menuType == bottom
                   if (menuType == 'bottom')
                     _BottomNav(
                       draft: draft,
@@ -133,14 +134,10 @@ class PhonePreview extends StatelessWidget {
     );
   }
 
-  // --------------------------------------------------------------
-  // Parsing helpers
-  // --------------------------------------------------------------
   List<_NavItem> _tryParseNav(String navJson) {
     try {
       final d = jsonDecode(navJson);
 
-      // supports: [ ... ] OR { "items": [ ... ] }
       final list = (d is List)
           ? d
           : (d is Map && d['items'] is List)
@@ -172,9 +169,6 @@ class PhonePreview extends StatelessWidget {
     return const [];
   }
 
-  /// Supports:
-  /// - [ {type, layout, limit}, ... ]
-  /// - { "sections": [ {type, layout, limit}, ... ] }
   List<_HomeSection> _tryParseHome(String homeJson) {
     try {
       final d = jsonDecode(homeJson);
@@ -199,13 +193,10 @@ class PhonePreview extends StatelessWidget {
     return const [];
   }
 
-  /// Returns: "bottom" or "hamburger"
-  /// Accepts: bottom | hamburger | drawer
   String _tryBrandingMenuType(String brandingJson) {
     try {
       final raw = jsonDecode(brandingJson);
 
-      // supports direct map OR nested { "BRANDING": { ... } }
       Map<String, dynamic>? m;
       if (raw is Map) {
         m = raw.cast<String, dynamic>();
@@ -222,7 +213,7 @@ class PhonePreview extends StatelessWidget {
           .trim();
 
       if (v == 'hamburger') return 'hamburger';
-      if (v == 'drawer') return 'hamburger'; // backward compat
+      if (v == 'drawer') return 'hamburger';
       if (v == 'side') return 'hamburger';
 
       return 'bottom';
@@ -259,9 +250,6 @@ class PhonePreview extends StatelessWidget {
   }
 }
 
-/// ===============================================================
-/// Header (hamburger supported)
-/// ===============================================================
 class _Header extends StatelessWidget {
   final String appName;
   final Color headerColor;
@@ -289,6 +277,9 @@ class _Header extends StatelessWidget {
           width: 28,
           height: 28,
           fit: BoxFit.cover,
+          cacheWidth: 56,
+          cacheHeight: 56,
+          filterQuality: FilterQuality.low,
           errorBuilder: (_, __, ___) => const SizedBox.shrink(),
         ),
       );
@@ -323,7 +314,8 @@ class _Header extends StatelessWidget {
               ),
               Icon(Icons.search_rounded, color: onHeader, size: 20),
               const SizedBox(width: 10),
-              Icon(Icons.shopping_cart_outlined, color: onHeader, size: 20),
+              Icon(Icons.shopping_cart_outlined,
+                  color: onHeader, size: 20),
             ],
           ),
           const SizedBox(height: 10),
@@ -337,8 +329,11 @@ class _Header extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Row(
               children: [
-                Icon(Icons.search_rounded,
-                    size: 18, color: onHeader.withOpacity(.9)),
+                Icon(
+                  Icons.search_rounded,
+                  size: 18,
+                  color: onHeader.withOpacity(.9),
+                ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
@@ -359,9 +354,6 @@ class _Header extends StatelessWidget {
   }
 }
 
-/// ===============================================================
-/// Body (renders features + home sections)
-/// ===============================================================
 class _Body extends StatelessWidget {
   final ThemeDraft draft;
   final CurrencyModel? currency;
@@ -397,7 +389,9 @@ class _Body extends StatelessWidget {
       color: bg,
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
       child: ListView(
+        primary: false,
         physics: const BouncingScrollPhysics(),
+        padding: EdgeInsets.zero,
         children: [
           if (features.isNotEmpty) ...[
             Wrap(
@@ -406,12 +400,14 @@ class _Body extends StatelessWidget {
               children: [
                 for (final f in features.take(6))
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 10, vertical: 6),
                     decoration: BoxDecoration(
                       color: draft.primary.withOpacity(.12),
                       borderRadius: BorderRadius.circular(999),
-                      border: Border.all(color: draft.primary.withOpacity(.35)),
+                      border: Border.all(
+                        color: draft.primary.withOpacity(.35),
+                      ),
                     ),
                     child: Text(
                       f,
@@ -426,7 +422,6 @@ class _Body extends StatelessWidget {
             ),
             const SizedBox(height: 12),
           ],
-
           for (final s in list) ..._renderSection(context, s, on, money),
         ],
       ),
@@ -439,7 +434,8 @@ class _Body extends StatelessWidget {
       case 'HEADER':
         return [
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(16),
@@ -461,8 +457,11 @@ class _Body extends StatelessWidget {
                     color: draft.primary.withOpacity(.12),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child:
-                      Icon(Icons.bolt_rounded, color: draft.primary, size: 20),
+                  child: Icon(
+                    Icons.bolt_rounded,
+                    color: draft.primary,
+                    size: 20,
+                  ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
@@ -493,8 +492,11 @@ class _Body extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Icon(Icons.search_rounded,
-                    size: 18, color: on.withOpacity(.6)),
+                Icon(
+                  Icons.search_rounded,
+                  size: 18,
+                  color: on.withOpacity(.6),
+                ),
                 const SizedBox(width: 8),
                 Text(
                   "Search...",
@@ -649,7 +651,6 @@ class _ProductCard extends StatelessWidget {
   }
 }
 
-/// Bottom nav
 class _BottomNav extends StatelessWidget {
   final ThemeDraft draft;
   final List<_NavItem> items;

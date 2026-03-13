@@ -43,7 +43,6 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
 
   final _formKey = GlobalKey<FormState>();
 
-  late final TextEditingController _projectIdCtrl;
   late final TextEditingController _appNameCtrl;
   final _notesCtrl = TextEditingController();
 
@@ -71,7 +70,8 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
     if (_selectedCurrency != null) return;
     if (_currencies.isEmpty) return;
 
-    final usd = _currencies.where((c) => c.code.toUpperCase() == 'USD').toList();
+    final usd =
+        _currencies.where((c) => c.code.toUpperCase() == 'USD').toList();
     _selectedCurrency = usd.isNotEmpty ? usd.first : _currencies.first;
   }
 
@@ -80,21 +80,13 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
     super.initState();
     api = OwnerRequestApi(dio: widget.dio, baseUrl: widget.baseUrl);
 
-    _projectIdCtrl = TextEditingController(
-      text: widget.initialProjectId?.toString() ?? '',
-    );
     _appNameCtrl = TextEditingController(text: widget.initialAppName ?? '');
-
-    _appNameCtrl.addListener(() {
-      if (mounted) setState(() {});
-    });
 
     _loadCurrencies();
   }
 
   @override
   void dispose() {
-    _projectIdCtrl.dispose();
     _appNameCtrl.dispose();
     _notesCtrl.dispose();
     super.dispose();
@@ -109,14 +101,17 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
       setState(() {
         _currencies = list;
 
-        final usd = list.where((c) => c.code.toUpperCase() == 'USD').toList();
+        final usd =
+            list.where((c) => c.code.toUpperCase() == 'USD').toList();
         if (usd.isNotEmpty) {
           _selectedCurrency = usd.first;
           return;
         }
 
-        final eur = list.where((c) => c.code.toUpperCase() == 'EUR').toList();
-        _selectedCurrency = eur.isNotEmpty ? eur.first : (list.isNotEmpty ? list.first : null);
+        final eur =
+            list.where((c) => c.code.toUpperCase() == 'EUR').toList();
+        _selectedCurrency =
+            eur.isNotEmpty ? eur.first : (list.isNotEmpty ? list.first : null);
       });
     } catch (_) {
       if (!mounted) return;
@@ -177,8 +172,7 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
       return;
     }
 
-    final projectIdStr = _projectIdCtrl.text.trim();
-    final projectId = int.tryParse(projectIdStr);
+    final projectId = widget.initialProjectId;
     if (projectId == null || projectId <= 0) {
       AppToast.error(context, l.owner_request_err_valid_number);
       return;
@@ -277,23 +271,64 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
                         ),
                       ),
                     )
-                  : RepaintBoundary(
-                      key: const ValueKey('preview_phone'),
-                      child: PhonePreview(
-                        appName: appName,
-                        draft: _draft,
-                        logoFile: _logoFile,
-                        currency: _selectedCurrency,
-                        navJson: previewOut.navJson,
-                        homeJson: previewOut.homeJson,
-                        enabledFeaturesJson: previewOut.enabledFeaturesJson,
-                        brandingJson: previewOut.brandingJson,
+                  : IgnorePointer(
+                      key: const ValueKey('preview_phone_ignore'),
+                      ignoring: true,
+                      child: RepaintBoundary(
+                        key: const ValueKey('preview_phone'),
+                        child: PhonePreview(
+                          appName: appName,
+                          draft: _draft,
+                          logoFile: _logoFile,
+                          currency: _selectedCurrency,
+                          navJson: previewOut.navJson,
+                          homeJson: previewOut.homeJson,
+                          enabledFeaturesJson: previewOut.enabledFeaturesJson,
+                          brandingJson: previewOut.brandingJson,
+                        ),
                       ),
                     ),
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildReactivePreview({
+    required String previewSubtitle,
+    required dynamic previewOut,
+    required String fallbackAppName,
+  }) {
+    return ValueListenableBuilder<TextEditingValue>(
+      valueListenable: _appNameCtrl,
+      builder: (context, value, _) {
+        final appName = value.text.trim().isEmpty
+            ? fallbackAppName
+            : value.text.trim();
+
+        return _buildPreviewCard(
+          appName: appName,
+          previewSubtitle: previewSubtitle,
+          previewOut: previewOut,
+        );
+      },
+    );
+  }
+
+  Widget _buildReactiveSubmitBar() {
+    return ValueListenableBuilder<TextEditingValue>(
+      valueListenable: _appNameCtrl,
+      builder: (context, value, _) {
+        final enabled =
+            !_loading && value.text.trim().isNotEmpty && _logoFile != null;
+
+        return _SubmitBar(
+          loading: _loading,
+          enabled: enabled,
+          onSubmit: _submit,
+        );
+      },
     );
   }
 
@@ -304,11 +339,6 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
     final l = AppLocalizations.of(context)!;
 
     final previewSubtitle = l.owner_request_hero_subtitle;
-
-    final appName = _appNameCtrl.text.trim().isEmpty
-        ? l.owner_request_app_name_hint
-        : _appNameCtrl.text.trim();
-
     final previewOut = _runtime.normalized().toJsonOut();
 
     return Scaffold(
@@ -323,11 +353,7 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
           ),
         ],
       ),
-      bottomNavigationBar: _SubmitBar(
-        loading: _loading,
-        enabled: _canSubmit,
-        onSubmit: _submit,
-      ),
+      bottomNavigationBar: _buildReactiveSubmitBar(),
       body: SafeArea(
         child: Form(
           key: _formKey,
@@ -336,43 +362,49 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
               final isWide = constraints.maxWidth >= 980;
 
               if (isWide) {
-                return Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 110),
+                return SingleChildScrollView(
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 130),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(
                         flex: 4,
-                        child: _buildPreviewCard(
-                          appName: appName,
+                        child: _buildReactivePreview(
                           previewSubtitle: previewSubtitle,
                           previewOut: previewOut,
+                          fallbackAppName: l.owner_request_app_name_hint,
                         ),
                       ),
                       const SizedBox(width: 14),
                       Expanded(
                         flex: 5,
                         child: _CustomizeColumn(
-                          titleStyle: t.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+                          titleStyle: t.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.w900),
                           loading: _loading,
                           currencies: _currencies,
                           selectedCurrency: _selectedCurrency,
                           onPickCurrency: () async {
                             if (_currencies.isEmpty) await _loadCurrencies();
                             if (!mounted) return;
-                            final picked = await _showCurrencySearchSheet(context, _currencies);
+                            final picked = await _showCurrencySearchSheet(
+                              context,
+                              _currencies,
+                            );
                             if (picked != null) {
                               setState(() => _selectedCurrency = picked);
                             }
                           },
-                          projectIdCtrl: _projectIdCtrl,
                           appNameCtrl: _appNameCtrl,
                           notesCtrl: _notesCtrl,
                           presetId: _selectedPresetId,
                           draft: _draft,
                           runtime: _runtime,
                           logoFile: _logoFile,
-                          onPresetChanged: (id) => setState(() => _selectedPresetId = id),
+                          onPresetChanged: (id) =>
+                              setState(() => _selectedPresetId = id),
                           onDraftChanged: (d) => setState(() => _draft = d),
                           onRuntimeChanged: (d) => setState(() => _runtime = d),
                           onPickLogo: _pickLogo,
@@ -386,44 +418,53 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
                 );
               }
 
-              return ListView(
+              return SingleChildScrollView(
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 130),
-                children: [
-                  _buildPreviewCard(
-                    appName: appName,
-                    previewSubtitle: previewSubtitle,
-                    previewOut: previewOut,
-                  ),
-                  const SizedBox(height: 14),
-                  _CustomizeColumn(
-                    titleStyle: t.titleMedium?.copyWith(fontWeight: FontWeight.w900),
-                    loading: _loading,
-                    currencies: _currencies,
-                    selectedCurrency: _selectedCurrency,
-                    onPickCurrency: () async {
-                      if (_currencies.isEmpty) await _loadCurrencies();
-                      if (!mounted) return;
-                      final picked = await _showCurrencySearchSheet(context, _currencies);
-                      if (picked != null) {
-                        setState(() => _selectedCurrency = picked);
-                      }
-                    },
-                    projectIdCtrl: _projectIdCtrl,
-                    appNameCtrl: _appNameCtrl,
-                    notesCtrl: _notesCtrl,
-                    presetId: _selectedPresetId,
-                    draft: _draft,
-                    runtime: _runtime,
-                    logoFile: _logoFile,
-                    onPresetChanged: (id) => setState(() => _selectedPresetId = id),
-                    onDraftChanged: (d) => setState(() => _draft = d),
-                    onRuntimeChanged: (d) => setState(() => _runtime = d),
-                    onPickLogo: _pickLogo,
-                    onRemoveLogo: _removeLogo,
-                    panel: _panel,
-                    onPanelChanged: (p) => setState(() => _panel = p),
-                  ),
-                ],
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _buildReactivePreview(
+                      previewSubtitle: previewSubtitle,
+                      previewOut: previewOut,
+                      fallbackAppName: l.owner_request_app_name_hint,
+                    ),
+                    const SizedBox(height: 14),
+                    _CustomizeColumn(
+                      titleStyle:
+                          t.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+                      loading: _loading,
+                      currencies: _currencies,
+                      selectedCurrency: _selectedCurrency,
+                      onPickCurrency: () async {
+                        if (_currencies.isEmpty) await _loadCurrencies();
+                        if (!mounted) return;
+                        final picked = await _showCurrencySearchSheet(
+                          context,
+                          _currencies,
+                        );
+                        if (picked != null) {
+                          setState(() => _selectedCurrency = picked);
+                        }
+                      },
+                      appNameCtrl: _appNameCtrl,
+                      notesCtrl: _notesCtrl,
+                      presetId: _selectedPresetId,
+                      draft: _draft,
+                      runtime: _runtime,
+                      logoFile: _logoFile,
+                      onPresetChanged: (id) =>
+                          setState(() => _selectedPresetId = id),
+                      onDraftChanged: (d) => setState(() => _draft = d),
+                      onRuntimeChanged: (d) => setState(() => _runtime = d),
+                      onPickLogo: _pickLogo,
+                      onRemoveLogo: _removeLogo,
+                      panel: _panel,
+                      onPanelChanged: (p) => setState(() => _panel = p),
+                    ),
+                  ],
+                ),
               );
             },
           ),
@@ -519,10 +560,13 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
                             contentPadding: EdgeInsets.zero,
                             title: Text(
                               c.shortLabel,
-                              style: const TextStyle(fontWeight: FontWeight.w700),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
                             subtitle: Text(c.currencyType),
-                            trailing: const Icon(Icons.chevron_right_rounded),
+                            trailing:
+                                const Icon(Icons.chevron_right_rounded),
                             onTap: () => Navigator.pop(ctx, c),
                           );
                         },
@@ -549,7 +593,6 @@ class _CustomizeColumn extends StatelessWidget {
   final CurrencyModel? selectedCurrency;
   final VoidCallback onPickCurrency;
 
-  final TextEditingController projectIdCtrl;
   final TextEditingController appNameCtrl;
   final TextEditingController notesCtrl;
 
@@ -575,7 +618,6 @@ class _CustomizeColumn extends StatelessWidget {
     required this.currencies,
     required this.selectedCurrency,
     required this.onPickCurrency,
-    required this.projectIdCtrl,
     required this.appNameCtrl,
     required this.notesCtrl,
     required this.presetId,
@@ -598,7 +640,10 @@ class _CustomizeColumn extends StatelessWidget {
       children: [
         Text(
           'App Settings',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+          style: Theme.of(context)
+              .textTheme
+              .titleMedium
+              ?.copyWith(fontWeight: FontWeight.w900),
         ),
         const SizedBox(height: 10),
         _PillTabs(selected: panel, onChanged: onPanelChanged),
@@ -611,7 +656,6 @@ class _CustomizeColumn extends StatelessWidget {
                 loading: loading,
                 selectedCurrency: selectedCurrency,
                 onPickCurrency: onPickCurrency,
-                projectIdCtrl: projectIdCtrl,
                 appNameCtrl: appNameCtrl,
                 notesCtrl: notesCtrl,
                 logoFile: logoFile,
@@ -679,7 +723,8 @@ class _PillTabs extends StatelessWidget {
           onTap: () => onChanged(value),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 160),
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             decoration: BoxDecoration(
               color: active ? _green : Colors.transparent,
               borderRadius: BorderRadius.circular(999),
@@ -687,7 +732,9 @@ class _PillTabs extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(icon, size: 16, color: active ? Colors.white : cs.onSurfaceVariant),
+                Icon(icon,
+                    size: 16,
+                    color: active ? Colors.white : cs.onSurfaceVariant),
                 const SizedBox(width: 6),
                 Text(
                   label,
@@ -713,9 +760,21 @@ class _PillTabs extends StatelessWidget {
       ),
       child: Row(
         children: [
-          tab(value: _Panel.identity, label: 'Identity', icon: Icons.badge_outlined),
-          tab(value: _Panel.palette, label: 'Palette', icon: Icons.palette_outlined),
-          tab(value: _Panel.runtime, label: 'Runtime', icon: Icons.tune_rounded),
+          tab(
+            value: _Panel.identity,
+            label: 'Identity',
+            icon: Icons.badge_outlined,
+          ),
+          tab(
+            value: _Panel.palette,
+            label: 'Palette',
+            icon: Icons.palette_outlined,
+          ),
+          tab(
+            value: _Panel.runtime,
+            label: 'Runtime',
+            icon: Icons.tune_rounded,
+          ),
         ],
       ),
     );
@@ -728,7 +787,6 @@ class _IdentityPanel extends StatelessWidget {
   final CurrencyModel? selectedCurrency;
   final VoidCallback onPickCurrency;
 
-  final TextEditingController projectIdCtrl;
   final TextEditingController appNameCtrl;
   final TextEditingController notesCtrl;
 
@@ -741,7 +799,6 @@ class _IdentityPanel extends StatelessWidget {
     required this.loading,
     required this.selectedCurrency,
     required this.onPickCurrency,
-    required this.projectIdCtrl,
     required this.appNameCtrl,
     required this.notesCtrl,
     required this.logoFile,
@@ -762,7 +819,8 @@ class _IdentityPanel extends StatelessWidget {
             isDense: true,
             filled: true,
             fillColor: cs.surfaceContainerHighest,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
               borderSide: BorderSide(color: cs.outlineVariant),
@@ -773,7 +831,8 @@ class _IdentityPanel extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(color: Color(0xFF16A34A), width: 1.5),
+              borderSide:
+                  const BorderSide(color: Color(0xFF16A34A), width: 1.5),
             ),
           ),
         ),
@@ -793,10 +852,12 @@ class _IdentityPanel extends StatelessWidget {
               controller: appNameCtrl,
               enabled: !loading,
               decoration: InputDecoration(
-                prefixIcon: Icon(Icons.apps_rounded, size: 18, color: hint),
+                prefixIcon:
+                    Icon(Icons.apps_rounded, size: 18, color: hint),
                 hintText: 'My Shop',
               ),
-              validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
+              validator: (v) =>
+                  (v == null || v.trim().isEmpty) ? 'Required' : null,
             ),
             const SizedBox(height: 14),
             Text(
@@ -877,7 +938,8 @@ class _IdentityPanel extends StatelessWidget {
               borderRadius: BorderRadius.circular(14),
               onTap: loading ? null : onPickCurrency,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 12, vertical: 12),
                 decoration: BoxDecoration(
                   color: cs.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(14),
@@ -889,7 +951,9 @@ class _IdentityPanel extends StatelessWidget {
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
-                        selectedCurrency == null ? 'USD (\$)' : selectedCurrency!.shortLabel,
+                        selectedCurrency == null
+                            ? 'USD (\$)'
+                            : selectedCurrency!.shortLabel,
                         style: const TextStyle(
                           fontWeight: FontWeight.w900,
                           fontSize: 13,
@@ -962,12 +1026,18 @@ class _SubmitBar extends StatelessWidget {
                 children: [
                   Text(
                     l.owner_request_submit_ready,
-                    style: t.titleSmall?.copyWith(fontWeight: FontWeight.w900),
+                    style: t.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    enabled ? 'Ready to submit ✅' : 'App name + logo required',
-                    style: t.bodySmall?.copyWith(color: cs.onSurface.withOpacity(.65)),
+                    enabled
+                        ? 'Ready to submit ✅'
+                        : 'App name + logo required',
+                    style: t.bodySmall?.copyWith(
+                      color: cs.onSurface.withOpacity(.65),
+                    ),
                   ),
                 ],
               ),
@@ -987,8 +1057,11 @@ class _SubmitBar extends StatelessWidget {
                   : const Icon(Icons.send_rounded),
               label: Text(loading ? l.owner_request_submitting : l.submit),
               style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 14, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
               ),
             ),
           ],
@@ -1082,7 +1155,9 @@ class _HeaderRow extends StatelessWidget {
               const SizedBox(height: 2),
               Text(
                 subtitle,
-                style: t.bodySmall?.copyWith(color: cs.onSurface.withOpacity(.65)),
+                style: t.bodySmall?.copyWith(
+                  color: cs.onSurface.withOpacity(.65),
+                ),
               ),
             ],
           ),

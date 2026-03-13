@@ -53,6 +53,8 @@ class _OwnerEditProfileScreenState extends State<OwnerEditProfileScreen> {
   String _initialCountryCode = 'LB';
   String _originalPhone = '';
   String? _fullPhone;
+  bool _phoneWasManuallyEdited = false;
+  late final FocusNode _phoneFocusNode = FocusNode();
 
   // ✅ Password change
   final TextEditingController _currentPass = TextEditingController();
@@ -118,6 +120,7 @@ class _OwnerEditProfileScreenState extends State<OwnerEditProfileScreen> {
     _phoneCtrl.dispose();
     _currentPass.dispose();
     _newPass.dispose();
+    _phoneFocusNode.dispose();
     super.dispose();
   }
 
@@ -168,9 +171,21 @@ class _OwnerEditProfileScreenState extends State<OwnerEditProfileScreen> {
     return RegExp(r'^\+[1-9]\d{7,14}$').hasMatch(v);
   }
 
-  bool _phoneChanged() =>
-      _normalizePhoneForCompare(_fullPhone ?? _phoneCtrl.text) !=
-      _normalizePhoneForCompare(_originalPhone);
+  /// ✅ If IntlPhoneField clears/changes its internal value unexpectedly,
+  /// fallback to controller text instead of treating phone as invalid.
+  String _effectivePhoneValue() {
+    final full = (_fullPhone ?? '').trim();
+    if (full.isNotEmpty) return full;
+    return _phoneCtrl.text.trim();
+  }
+
+  /// ✅ Only consider phone changed if user actually interacted with phone field.
+  bool _phoneChanged() {
+    if (!_phoneWasManuallyEdited) return false;
+
+    return _normalizePhoneForCompare(_effectivePhoneValue()) !=
+        _normalizePhoneForCompare(_originalPhone);
+  }
 
   String _extractBackendMessage(DioException e) {
     final data = e.response?.data;
@@ -320,7 +335,8 @@ class _OwnerEditProfileScreenState extends State<OwnerEditProfileScreen> {
       }
 
       final normalizedPhone =
-          _normalizePhoneForCompare(_fullPhone ?? _phoneCtrl.text);
+          _normalizePhoneForCompare(_effectivePhoneValue());
+
       if (_phoneChanged()) {
         if (normalizedPhone.isEmpty || !_isValidFullPhone(normalizedPhone)) {
           throw l10n.errPhoneInvalid ?? 'Invalid phone number';
@@ -777,7 +793,7 @@ class _OwnerEditProfileScreenState extends State<OwnerEditProfileScreen> {
               final emailChanged = _emailChanged();
 
               final newPhone =
-                  _normalizePhoneForCompare(_fullPhone ?? _phoneCtrl.text);
+                  _normalizePhoneForCompare(_effectivePhoneValue());
               final phoneChanged = _phoneChanged();
 
               // email changed => exclude email from PATCH
@@ -1004,15 +1020,31 @@ class _OwnerEditProfileScreenState extends State<OwnerEditProfileScreen> {
                             _topHint(l10n, l10n.owner_profile_phone ?? 'Phone'),
                             IntlPhoneField(
                               controller: _phoneCtrl,
+                              focusNode: _phoneFocusNode,
                               initialCountryCode: _initialCountryCode,
                               disableLengthCheck: false,
                               decoration: phoneDeco(),
                               onChanged: (phone) {
                                 if (!mounted) return;
+
+                                final nextFullPhone =
+                                    phone.number.trim().isEmpty
+                                        ? ''
+                                        : phone.completeNumber;
+
                                 setState(() {
-                                  _fullPhone = phone.number.trim().isEmpty
-                                      ? ''
-                                      : phone.completeNumber;
+                                  _fullPhone = nextFullPhone;
+
+                                  if (_phoneFocusNode.hasFocus) {
+                                    _phoneWasManuallyEdited = true;
+                                  }
+                                });
+                              },
+                              onCountryChanged: (country) {
+                                if (!mounted) return;
+
+                                setState(() {
+                                  _phoneWasManuallyEdited = true;
                                 });
                               },
                             ),
