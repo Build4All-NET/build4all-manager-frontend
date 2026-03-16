@@ -4998,6 +4998,282 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'LinkId'**
   String get common_link_id_label;
+
+  /// No description provided for @iosInternalTestingStatusReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready'**
+  String get iosInternalTestingStatusReady;
+
+  /// No description provided for @iosInternalTestingStatusWaitingAcceptance.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for acceptance'**
+  String get iosInternalTestingStatusWaitingAcceptance;
+
+  /// No description provided for @iosInternalTestingStatusFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get iosInternalTestingStatusFailed;
+
+  /// No description provided for @iosInternalTestingStatusProcessing.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing'**
+  String get iosInternalTestingStatusProcessing;
+
+  /// No description provided for @iosInternalTestingStatusRequested.
+  ///
+  /// In en, this message translates to:
+  /// **'Requested'**
+  String get iosInternalTestingStatusRequested;
+
+  /// No description provided for @iosInternalTestingStatusInvitationSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitation sent'**
+  String get iosInternalTestingStatusInvitationSent;
+
+  /// No description provided for @iosInternalTestingStatusFinalizing.
+  ///
+  /// In en, this message translates to:
+  /// **'Finalizing'**
+  String get iosInternalTestingStatusFinalizing;
+
+  /// No description provided for @iosInternalTestingStatusCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get iosInternalTestingStatusCancelled;
+
+  /// No description provided for @iosInternalTestingStatusNotRequested.
+  ///
+  /// In en, this message translates to:
+  /// **'Not requested'**
+  String get iosInternalTestingStatusNotRequested;
+
+  /// No description provided for @iosInternalTestingRequestTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Request Internal Testing'**
+  String get iosInternalTestingRequestTitle;
+
+  /// No description provided for @iosInternalTestingRequestSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the Apple ID email that should receive internal iOS testing access.'**
+  String get iosInternalTestingRequestSubtitle;
+
+  /// No description provided for @iosInternalTestingAppleEmailLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Apple ID Email'**
+  String get iosInternalTestingAppleEmailLabel;
+
+  /// No description provided for @iosInternalTestingAppleEmailHint.
+  ///
+  /// In en, this message translates to:
+  /// **'name@icloud.com'**
+  String get iosInternalTestingAppleEmailHint;
+
+  /// No description provided for @iosInternalTestingFirstNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'First Name'**
+  String get iosInternalTestingFirstNameLabel;
+
+  /// No description provided for @iosInternalTestingFirstNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'First name'**
+  String get iosInternalTestingFirstNameHint;
+
+  /// No description provided for @iosInternalTestingLastNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Last Name'**
+  String get iosInternalTestingLastNameLabel;
+
+  /// No description provided for @iosInternalTestingLastNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Last name'**
+  String get iosInternalTestingLastNameHint;
+
+  /// No description provided for @iosInternalTestingInfoText.
+  ///
+  /// In en, this message translates to:
+  /// **'If this email is already an App Store Connect user, access may become ready immediately. Otherwise an Apple invitation will be sent first.'**
+  String get iosInternalTestingInfoText;
+
+  /// No description provided for @iosInternalTestingSubmitRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit Request'**
+  String get iosInternalTestingSubmitRequest;
+
+  /// No description provided for @iosInternalTestingEmailRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Apple email is required'**
+  String get iosInternalTestingEmailRequired;
+
+  /// No description provided for @iosInternalTestingFirstNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'First name is required'**
+  String get iosInternalTestingFirstNameRequired;
+
+  /// No description provided for @iosInternalTestingFirstNameMin.
+  ///
+  /// In en, this message translates to:
+  /// **'First name must be at least 2 characters'**
+  String get iosInternalTestingFirstNameMin;
+
+  /// No description provided for @iosInternalTestingFirstNameTooLong.
+  ///
+  /// In en, this message translates to:
+  /// **'First name is too long'**
+  String get iosInternalTestingFirstNameTooLong;
+
+  /// No description provided for @iosInternalTestingLastNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Last name is required'**
+  String get iosInternalTestingLastNameRequired;
+
+  /// No description provided for @iosInternalTestingLastNameMin.
+  ///
+  /// In en, this message translates to:
+  /// **'Last name must be at least 2 characters'**
+  String get iosInternalTestingLastNameMin;
+
+  /// No description provided for @iosInternalTestingLastNameTooLong.
+  ///
+  /// In en, this message translates to:
+  /// **'Last name is too long'**
+  String get iosInternalTestingLastNameTooLong;
+
+  /// No description provided for @iosInternalTestingReadyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Internal testing is ready.'**
+  String get iosInternalTestingReadyMessage;
+
+  /// No description provided for @iosInternalTestingWaitingMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitation sent. Waiting for Apple acceptance.'**
+  String get iosInternalTestingWaitingMessage;
+
+  /// No description provided for @iosInternalTestingFailedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Internal testing request failed.'**
+  String get iosInternalTestingFailedMessage;
+
+  /// No description provided for @iosInternalTestingSubmittedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Internal testing request submitted successfully.'**
+  String get iosInternalTestingSubmittedMessage;
+
+  /// No description provided for @iosInternalTestingSectionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Request internal iOS testing access.'**
+  String get iosInternalTestingSectionSubtitle;
+
+  /// No description provided for @iosInternalTestingReadyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'You can now download the iOS build using TestFlight.'**
+  String get iosInternalTestingReadyHint;
+
+  /// No description provided for @iosInternalTestingWaitingHint.
+  ///
+  /// In en, this message translates to:
+  /// **'An invitation has been sent to the provided email. Please accept it in order to get access to the iOS build.'**
+  String get iosInternalTestingWaitingHint;
+
+  /// No description provided for @iosInternalTestingFailedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'There was an issue with your request. Please try again or contact support if the issue persists.'**
+  String get iosInternalTestingFailedHint;
+
+  /// No description provided for @iosInternalTestingSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'iOS Internal Testing'**
+  String get iosInternalTestingSectionTitle;
+
+  /// No description provided for @iosInternalTestingRequestButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Request Internal Testing'**
+  String get iosInternalTestingRequestButton;
+
+  /// No description provided for @iosInternalTestingRequestedForLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Requested for'**
+  String get iosInternalTestingRequestedForLabel;
+
+  /// No description provided for @iosInternalTestingOpenPageButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Internal Testing'**
+  String get iosInternalTestingOpenPageButton;
+
+  /// No description provided for @iosInternalTestingPageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'iOS Internal Testing'**
+  String get iosInternalTestingPageTitle;
+
+  /// No description provided for @iosInternalTestingSlotsUsedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'used'**
+  String get iosInternalTestingSlotsUsedLabel;
+
+  /// No description provided for @iosInternalTestingRemainingSlotsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining slots'**
+  String get iosInternalTestingRemainingSlotsLabel;
+
+  /// No description provided for @iosInternalTestingCapacityReachedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This app has reached the internal testing capacity. Remove or cancel a tester before adding a new one.'**
+  String get iosInternalTestingCapacityReachedMessage;
+
+  /// No description provided for @iosInternalTestingAddTesterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add tester'**
+  String get iosInternalTestingAddTesterTitle;
+
+  /// No description provided for @iosInternalTestingAddTesterButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Add tester'**
+  String get iosInternalTestingAddTesterButton;
+
+  /// No description provided for @iosInternalTestingTesterListTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Invited testers'**
+  String get iosInternalTestingTesterListTitle;
+
+  /// No description provided for @iosInternalTestingNoTestersYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No internal testers have been added yet.'**
+  String get iosInternalTestingNoTestersYet;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

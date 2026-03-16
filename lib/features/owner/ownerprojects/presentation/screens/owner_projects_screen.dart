@@ -3,6 +3,13 @@ import 'package:build4all_manager/features/owner/common/data/repositories/owner_
 import 'package:build4all_manager/features/owner/common/data/services/owner_api.dart';
 import 'package:build4all_manager/features/owner/common/domain/entities/owner_project.dart';
 import 'package:build4all_manager/features/owner/common/domain/usecases/get_my_apps_uc.dart';
+
+import 'package:build4all_manager/features/owner/ios_internal_testing/data/repository/owner_ios_internal_testing_repository_impl.dart';
+import 'package:build4all_manager/features/owner/ios_internal_testing/data/services/owner_ios_internal_testing_api.dart';
+import 'package:build4all_manager/features/owner/ios_internal_testing/domain/usecases/create_ios_internal_testing_request_uc.dart';
+import 'package:build4all_manager/features/owner/ios_internal_testing/domain/usecases/get_ios_internal_testing_app_summary_uc.dart';
+import 'package:build4all_manager/features/owner/ios_internal_testing/domain/usecases/get_latest_ios_internal_testing_request_uc.dart';
+
 import 'package:build4all_manager/features/owner/ownernav/presentation/controllers/owner_nav_cubit.dart';
 import 'package:build4all_manager/features/owner/ownerprojects/presentation/widgets/project_tile.dart';
 import 'package:build4all_manager/features/owner/publish/data/services/owner_publish_api.dart';
@@ -22,8 +29,6 @@ enum _EnvironmentFilter { all, local, test, production }
 
 class OwnerProjectsScreen extends StatefulWidget {
   final Dio dio;
-
-  /// ✅ FIX: you were using widget.ownerId but never declared it
   final int ownerId;
 
   const OwnerProjectsScreen({
@@ -45,11 +50,9 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
 
   bool _showFilters = false;
 
-  // ✅ NEW: keep search text locally so we can show "No apps found"
   late final TextEditingController _searchCtrl;
   String _searchText = '';
 
-  // Per-tile UI overrides so build status updates instantly before refresh returns
   final Map<int, String> _androidBuildOverride = {};
   final Map<int, String> _iosBuildOverride = {};
   final Map<int, String> _androidErrOverride = {};
@@ -58,6 +61,10 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
   late final OwnerRepositoryImpl _repo;
   late final OwnerProjectsBloc _bloc;
   late final OwnerPublishApi _publishApi;
+
+  late final OwnerIosInternalTestingRepositoryImpl _iosInternalRepo;
+  late final CreateIosInternalTestingRequestUc _createIosInternalUc;
+  late final GetIosInternalTestingAppSummaryUc _getIosInternalTestingSummaryUc;
 
   bool _cleanupScheduled = false;
 
@@ -70,6 +77,12 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
     _repo = OwnerRepositoryImpl(OwnerApi(widget.dio));
     _publishApi = OwnerPublishApi(widget.dio);
 
+    _iosInternalRepo = OwnerIosInternalTestingRepositoryImpl(
+      OwnerIosInternalTestingApi(widget.dio),
+    );
+    _createIosInternalUc = CreateIosInternalTestingRequestUc(_iosInternalRepo);
+   _getIosInternalTestingSummaryUc = GetIosInternalTestingAppSummaryUc(_iosInternalRepo);
+
     _bloc = OwnerProjectsBloc(getMyApps: GetMyAppsUc(_repo))
       ..add(OwnerProjectsStarted(widget.ownerId));
   }
@@ -81,23 +94,21 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
     super.dispose();
   }
 
-  // ---------------- Helpers ----------------
-
   String _serverRootNoApi(Dio d) {
-    final base = d.options.baseUrl; // e.g. http://host:8080/api
+    final base = d.options.baseUrl;
     return base.replaceFirst(RegExp(r'/api/?$'), '');
   }
 
   Future<void> _refresh() async {
     _bloc.add(OwnerProjectsStarted(widget.ownerId));
     if (mounted) setState(() => _visibleCount = _pageSize);
-
-    // Small delay so RefreshIndicator doesn't end too aggressively
     await Future.delayed(const Duration(milliseconds: 250));
   }
 
   Future<void> _deleteProject(BuildContext ctx, OwnerProject p) async {
-    final appName = (p.appName ?? '').trim().isNotEmpty ? p.appName!.trim() : p.projectName;
+    final appName = (p.appName ?? '').trim().isNotEmpty
+        ? p.appName!.trim()
+        : p.projectName;
 
     final confirmed = await showDialog<bool>(
           context: ctx,
@@ -134,14 +145,12 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
 
       if (!mounted) return;
 
-      // Clean local per-tile overrides for deleted tile
       setState(() {
         _androidBuildOverride.remove(p.linkId);
         _iosBuildOverride.remove(p.linkId);
         _androidErrOverride.remove(p.linkId);
         _iosErrOverride.remove(p.linkId);
 
-        // keep pagination sane after delete
         if (_visibleCount > _pageSize) {
           _visibleCount = (_visibleCount - 1).clamp(_pageSize, 999999);
         }
@@ -151,7 +160,6 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
         AppToast.success(ctx, 'Project deleted successfully');
       }
 
-      // Refresh list from backend
       _bloc.add(OwnerProjectsRefreshed(widget.ownerId));
     } on DioException catch (e) {
       String msg = 'Delete failed';
@@ -317,8 +325,6 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
   bool get _hasActiveFilters =>
       _platform != _PlatformReadyFilter.all || _env != _EnvironmentFilter.all;
 
-  // ---------------- UI ----------------
-
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
@@ -369,7 +375,6 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
                           const _Header(),
                           const SizedBox(height: 10),
 
-                          // Search
                           BlocBuilder<OwnerProjectsBloc, OwnerProjectsState>(
                             builder: (context, state) {
                               final l10n = AppLocalizations.of(context)!;
@@ -400,7 +405,6 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
                             },
                           ),
 
-                          // Filters
                           if (_showFilters) ...[
                             const SizedBox(height: 10),
                             _FiltersBar(
@@ -424,7 +428,6 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
 
                           const SizedBox(height: 10),
 
-                          // Content
                           Expanded(
                             child: BlocBuilder<OwnerProjectsBloc, OwnerProjectsState>(
                               builder: (context, state) {
@@ -463,17 +466,16 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
                                       );
                                     }
 
-                                    // ✅ FIX: distinguish "no results" vs "no projects at all"
                                     if (total == 0) {
                                       if (hasQuery || hasFilters) {
                                         return ListView(
                                           physics: const AlwaysScrollableScrollPhysics(),
                                           children: [
                                             const SizedBox(height: 60),
-                                         _NoResults(
-  l10n: l10n, //  pass localization
-  query: hasQuery ? _searchText.trim() : null,
-  hasFilters: hasFilters,
+                                            _NoResults(
+                                              l10n: l10n,
+                                              query: hasQuery ? _searchText.trim() : null,
+                                              hasFilters: hasFilters,
                                               onClearSearch: hasQuery
                                                   ? () {
                                                       _searchCtrl.clear();
@@ -510,9 +512,9 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
                                       physics: const AlwaysScrollableScrollPhysics(),
                                       padding: const EdgeInsets.only(bottom: 12),
                                       itemCount: visible + 1,
-                                      separatorBuilder: (_, __) => const SizedBox(height: 6),
+                                      separatorBuilder: (_, __) =>
+                                          const SizedBox(height: 6),
                                       itemBuilder: (context, index) {
-                                        // Footer
                                         if (index == visible) {
                                           if (visible < total) {
                                             return Padding(
@@ -527,7 +529,9 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
                                                     });
                                                   },
                                                   icon: const Icon(Icons.expand_more_rounded),
-                                                  label: Text(l10n.owner_projects_load_more),
+                                                  label: Text(
+                                                    l10n.owner_projects_load_more,
+                                                  ),
                                                 ),
                                               ),
                                             );
@@ -541,8 +545,10 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
                                           project: item,
                                           serverRootNoApi: _serverRootNoApi(widget.dio),
                                           publishApi: _publishApi,
-                                          onRebuildAndroid: (ctx, p) => _rebuildAndroid(ctx, p),
-                                          onRebuildIos: (ctx, p) => _rebuildIos(ctx, p),
+                                          onRebuildAndroid: (ctx, p) =>
+                                              _rebuildAndroid(ctx, p),
+                                          onRebuildIos: (ctx, p) =>
+                                              _rebuildIos(ctx, p),
                                           onDelete: (ctx, p) => _deleteProject(ctx, p),
                                           androidBuildStatusOverride:
                                               _androidBuildOverride[item.linkId],
@@ -550,7 +556,13 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
                                               _iosBuildOverride[item.linkId],
                                           androidBuildErrorOverride:
                                               _androidErrOverride[item.linkId],
-                                          iosBuildErrorOverride: _iosErrOverride[item.linkId],
+                                          iosBuildErrorOverride:
+                                              _iosErrOverride[item.linkId],
+                                          createIosInternalTestingRequestUc: _createIosInternalUc,
+getIosInternalTestingAppSummaryUc: _getIosInternalTestingSummaryUc,
+initialOwnerEmail: '',
+initialOwnerFirstName: '',
+initialOwnerLastName: '',
                                         );
                                       },
                                     );
@@ -572,10 +584,6 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
     );
   }
 }
-
-// ─────────────────────────────────────────────
-// UI widgets
-// ─────────────────────────────────────────────
 
 class _Header extends StatelessWidget {
   const _Header();
@@ -607,7 +615,6 @@ class _Header extends StatelessWidget {
 
 class _FiltersBar extends StatelessWidget {
   final AppLocalizations l10n;
-
   final _PlatformReadyFilter platform;
   final _EnvironmentFilter env;
   final ValueChanged<_PlatformReadyFilter> onPlatform;
@@ -762,7 +769,6 @@ class _PillSeg extends StatelessWidget {
   final String text;
   final bool selected;
   final VoidCallback onTap;
-
   final double hPad;
   final double vPad;
   final double fontSize;
@@ -814,10 +820,8 @@ class _PillSeg extends StatelessWidget {
 class _SearchField extends StatelessWidget {
   final AppLocalizations l10n;
   final TextEditingController controller;
-
   final bool hasText;
   final bool showFilters;
-
   final ValueChanged<String> onChanged;
   final VoidCallback onClear;
   final VoidCallback onToggleFilters;
@@ -864,30 +868,28 @@ class _SearchField extends StatelessWidget {
               width: 1.3,
             ),
           ),
-          // ✅ clear + filters without fighting for suffixIcon space
-         suffixIcon: Row(
-  mainAxisSize: MainAxisSize.min,
-  children: [
-    if (hasText)
-      IconButton(
-        onPressed: onClear,
-        icon: Icon(Icons.close_rounded, color: cs.onSurface.withOpacity(.65)),
-        tooltip: l10n.owner_projects_tooltip_clear_search, // ✅ localized
-      ),
-    IconButton(
-      onPressed: onToggleFilters,
-      icon: Icon(
-        Icons.tune_rounded,
-        color: cs.onSurface.withOpacity(.75),
-      ),
-      tooltip: showFilters
-          ? l10n.owner_projects_filters_hide
-          : l10n.owner_projects_filters_show,
-    ),
-  ],
-),
+          suffixIcon: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (hasText)
+                IconButton(
+                  onPressed: onClear,
+                  icon: Icon(Icons.close_rounded, color: cs.onSurface.withOpacity(.65)),
+                  tooltip: l10n.owner_projects_tooltip_clear_search,
+                ),
+              IconButton(
+                onPressed: onToggleFilters,
+                icon: Icon(
+                  Icons.tune_rounded,
+                  color: cs.onSurface.withOpacity(.75),
+                ),
+                tooltip: showFilters
+                    ? l10n.owner_projects_filters_hide
+                    : l10n.owner_projects_filters_show,
+              ),
+            ],
           ),
-        
+        ),
       ),
     );
   }
@@ -1001,13 +1003,13 @@ class _NoResults extends StatelessWidget {
                 OutlinedButton.icon(
                   onPressed: onClearSearch,
                   icon: const Icon(Icons.close_rounded),
-                  label: Text(l10n.owner_projects_clear_search), // ✅ localized
+                  label: Text(l10n.owner_projects_clear_search),
                 ),
               if (onResetFilters != null)
                 OutlinedButton.icon(
                   onPressed: onResetFilters,
                   icon: const Icon(Icons.refresh_rounded),
-                  label: Text(l10n.owner_projects_reset_filters), // ✅ localized
+                  label: Text(l10n.owner_projects_reset_filters),
                 ),
             ],
           ),

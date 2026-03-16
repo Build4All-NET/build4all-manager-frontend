@@ -2498,4 +2498,142 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get common_link_id_label => 'معرّف الرابط';
+
+  @override
+  String get iosInternalTestingStatusReady => 'جاهز';
+
+  @override
+  String get iosInternalTestingStatusWaitingAcceptance => 'بانتظار القبول';
+
+  @override
+  String get iosInternalTestingStatusFailed => 'فشل';
+
+  @override
+  String get iosInternalTestingStatusProcessing => 'قيد المعالجة';
+
+  @override
+  String get iosInternalTestingStatusRequested => 'تم الطلب';
+
+  @override
+  String get iosInternalTestingStatusInvitationSent => 'تم إرسال الدعوة';
+
+  @override
+  String get iosInternalTestingStatusFinalizing => 'الإنهاء الأخير';
+
+  @override
+  String get iosInternalTestingStatusCancelled => 'أُلغي';
+
+  @override
+  String get iosInternalTestingStatusNotRequested => 'لم يتم الطلب';
+
+  @override
+  String get iosInternalTestingRequestTitle => 'طلب اختبار داخلي';
+
+  @override
+  String get iosInternalTestingRequestSubtitle => 'استخدم بريد Apple ID الذي يجب أن يستلم صلاحية الاختبار الداخلي لتطبيق iOS.';
+
+  @override
+  String get iosInternalTestingAppleEmailLabel => 'بريد Apple ID';
+
+  @override
+  String get iosInternalTestingAppleEmailHint => 'name@icloud.com';
+
+  @override
+  String get iosInternalTestingFirstNameLabel => 'الاسم الأول';
+
+  @override
+  String get iosInternalTestingFirstNameHint => 'الاسم الأول';
+
+  @override
+  String get iosInternalTestingLastNameLabel => 'اسم العائلة';
+
+  @override
+  String get iosInternalTestingLastNameHint => 'اسم العائلة';
+
+  @override
+  String get iosInternalTestingInfoText => 'إذا كان هذا البريد موجودًا أصلًا كمستخدم في App Store Connect، فقد تصبح الصلاحية جاهزة فورًا. وإلا سيتم إرسال دعوة Apple أولًا.';
+
+  @override
+  String get iosInternalTestingSubmitRequest => 'إرسال الطلب';
+
+  @override
+  String get iosInternalTestingEmailRequired => 'بريد Apple مطلوب';
+
+  @override
+  String get iosInternalTestingFirstNameRequired => 'الاسم الأول مطلوب';
+
+  @override
+  String get iosInternalTestingFirstNameMin => 'يجب أن يكون الاسم الأول حرفين على الأقل';
+
+  @override
+  String get iosInternalTestingFirstNameTooLong => 'الاسم الأول طويل جدًا';
+
+  @override
+  String get iosInternalTestingLastNameRequired => 'اسم العائلة مطلوب';
+
+  @override
+  String get iosInternalTestingLastNameMin => 'يجب أن يكون اسم العائلة حرفين على الأقل';
+
+  @override
+  String get iosInternalTestingLastNameTooLong => 'اسم العائلة طويل جدًا';
+
+  @override
+  String get iosInternalTestingReadyMessage => 'الاختبار الداخلي أصبح جاهزًا.';
+
+  @override
+  String get iosInternalTestingWaitingMessage => 'تم إرسال الدعوة. بانتظار قبول Apple.';
+
+  @override
+  String get iosInternalTestingFailedMessage => 'فشل طلب الاختبار الداخلي.';
+
+  @override
+  String get iosInternalTestingSubmittedMessage => 'تم إرسال طلب الاختبار الداخلي بنجاح.';
+
+  @override
+  String get iosInternalTestingSectionSubtitle => 'اختبار داخلي لتطبيق iOS';
+
+  @override
+  String get iosInternalTestingReadyHint => 'تطبيق iOS الخاص بك جاهز للاختبار الداخلي. يمكنك تنزيله من TestFlight.';
+
+  @override
+  String get iosInternalTestingWaitingHint => 'لقد تم إرسال الدعوة إلى البريد الإلكتروني المقدم. يرجى قبولها لكي تحصل على الوصول إلى 빌드 iOS.';
+
+  @override
+  String get iosInternalTestingFailedHint => 'حدث خطأ مع طلبك. يرجى المحاولة مرة أخرى أو الاتصال بالدعم إذا استمرت المشكلة.';
+
+  @override
+  String get iosInternalTestingSectionTitle => 'اختبار داخلي لتطبيق iOS';
+
+  @override
+  String get iosInternalTestingRequestButton => 'طلب اختبار داخلي';
+
+  @override
+  String get iosInternalTestingRequestedForLabel => 'تم الطلب للبريد';
+
+  @override
+  String get iosInternalTestingOpenPageButton => 'الاختبار الداخلي';
+
+  @override
+  String get iosInternalTestingPageTitle => 'الاختبار الداخلي لـ iOS';
+
+  @override
+  String get iosInternalTestingSlotsUsedLabel => 'مستخدم';
+
+  @override
+  String get iosInternalTestingRemainingSlotsLabel => 'الخانات المتبقية';
+
+  @override
+  String get iosInternalTestingCapacityReachedMessage => 'هذا التطبيق وصل إلى الحد الأقصى للاختبار الداخلي. أزل أو ألغِ أحد المختبرين قبل إضافة مختبر جديد.';
+
+  @override
+  String get iosInternalTestingAddTesterTitle => 'إضافة مختبر';
+
+  @override
+  String get iosInternalTestingAddTesterButton => 'إضافة مختبر';
+
+  @override
+  String get iosInternalTestingTesterListTitle => 'المختبرون المدعوون';
+
+  @override
+  String get iosInternalTestingNoTestersYet => 'لم تتم إضافة أي مختبرين داخليين بعد.';
 }

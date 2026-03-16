@@ -1,5 +1,8 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:build4all_manager/features/owner/common/domain/entities/owner_project.dart';
+import 'package:build4all_manager/features/owner/ios_internal_testing/domain/usecases/create_ios_internal_testing_request_uc.dart';
+import 'package:build4all_manager/features/owner/ios_internal_testing/domain/usecases/get_ios_internal_testing_app_summary_uc.dart';
+import 'package:build4all_manager/features/owner/ios_internal_testing/presentation/screens/owner_ios_internal_testing_screen.dart';
 import 'package:build4all_manager/l10n/app_localizations.dart';
 import 'package:build4all_manager/shared/widgets/app_toast.dart';
 import 'package:flutter/material.dart';
@@ -16,7 +19,13 @@ class ProjectTile extends StatelessWidget {
   final String serverRootNoApi;
   final OwnerPublishApi publishApi;
 
-  // UI overrides so tile updates instantly (no full refresh needed)
+  final CreateIosInternalTestingRequestUc createIosInternalTestingRequestUc;
+  final GetIosInternalTestingAppSummaryUc getIosInternalTestingAppSummaryUc;
+
+  final String initialOwnerEmail;
+  final String initialOwnerFirstName;
+  final String initialOwnerLastName;
+
   final String? androidBuildStatusOverride;
   final String? iosBuildStatusOverride;
   final String? androidBuildErrorOverride;
@@ -31,6 +40,11 @@ class ProjectTile extends StatelessWidget {
     required this.project,
     required this.serverRootNoApi,
     required this.publishApi,
+    required this.createIosInternalTestingRequestUc,
+    required this.getIosInternalTestingAppSummaryUc,
+    this.initialOwnerEmail = '',
+    this.initialOwnerFirstName = '',
+    this.initialOwnerLastName = '',
     this.onRebuildAndroid,
     this.onRebuildIos,
     this.onDelete,
@@ -74,7 +88,10 @@ class ProjectTile extends StatelessWidget {
     }
 
     if (!await canLaunchUrl(uri)) {
-      AppToast.error(context, '${l10n.owner_project_err_cannot_open}: $cleaned');
+      AppToast.error(
+        context,
+        '${l10n.owner_project_err_cannot_open}: $cleaned',
+      );
       return;
     }
 
@@ -119,10 +136,6 @@ class ProjectTile extends StatelessWidget {
     }
   }
 
-  // ─────────────────────────────────────────────
-  // Build status helpers
-  // ─────────────────────────────────────────────
-
   String _normalizeBuildStatus(String? raw, {required bool hasArtifact}) {
     final s = (raw ?? '').trim();
     if (s.isEmpty || s.toLowerCase() == 'null') {
@@ -136,16 +149,31 @@ class ProjectTile extends StatelessWidget {
     return low.contains('queued') ||
         low.contains('building') ||
         low.contains('running') ||
-        low.contains('started');
+        low.contains('started') ||
+        low.contains('processing');
+  }
+
+  bool _isDone(String status) {
+    final low = status.trim().toLowerCase();
+    return low.contains('success') ||
+        low.contains('done') ||
+        low.contains('completed') ||
+        low.contains('ready') ||
+        low.contains('finished') ||
+        low.contains('uploaded');
   }
 
   Color _buildColor(ColorScheme cs, String status) {
     final low = status.toLowerCase();
 
-    if (low.contains('success') || low.contains('done')) {
+    if (low.contains('success') ||
+        low.contains('done') ||
+        low.contains('completed')) {
       return const Color(0xFF22C55E);
     }
-    if (low.contains('fail') || low.contains('error') || low.contains('reject')) {
+    if (low.contains('fail') ||
+        low.contains('error') ||
+        low.contains('reject')) {
       return const Color(0xFFEF4444);
     }
     if (low.contains('queued')) {
@@ -153,7 +181,8 @@ class ProjectTile extends StatelessWidget {
     }
     if (low.contains('building') ||
         low.contains('running') ||
-        low.contains('started')) {
+        low.contains('started') ||
+        low.contains('processing')) {
       return const Color(0xFF0B6BFF);
     }
 
@@ -165,9 +194,6 @@ class ProjectTile extends StatelessWidget {
     final low = raw.toLowerCase();
 
     if (raw.isEmpty || low == 'null') return 'UNKNOWN';
-
-    // Keep your previous behavior:
-    // "active" mapped to "test" label
     if (low.split(RegExp(r'\s+')).first == 'active') return 'test';
 
     return raw;
@@ -177,12 +203,16 @@ class ProjectTile extends StatelessWidget {
     final low = label.toLowerCase();
 
     if (low == 'unknown') return cs.outline;
-    if (low.contains('fail') || low.contains('error') || low.contains('reject')) {
+    if (low.contains('fail') ||
+        low.contains('error') ||
+        low.contains('reject')) {
       return cs.error;
     }
     if (low.contains('test')) return cs.secondary;
     if (low.contains('review')) return cs.primary;
-    if (low.contains('prod') || low.contains('production')) return cs.tertiary;
+    if (low.contains('prod') || low.contains('production')) {
+      return cs.tertiary;
+    }
     if (low.contains('local')) return cs.outlineVariant;
 
     return cs.primary;
@@ -209,28 +239,41 @@ class ProjectTile extends StatelessWidget {
     }
   }
 
+  void _openInternalTestingPage(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => OwnerIosInternalTestingScreen(
+          project: project,
+          createUc: createIosInternalTestingRequestUc,
+          summaryUc: getIosInternalTestingAppSummaryUc,
+          initialEmail: initialOwnerEmail,
+          initialFirstName: initialOwnerFirstName,
+          initialLastName: initialOwnerLastName,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
     final l10n = AppLocalizations.of(context)!;
 
-    final appName = project.appName.isNotEmpty ? project.appName : project.projectName;
+    final appName =
+        project.appName.isNotEmpty ? project.appName : project.projectName;
 
     final statusLabel = _statusLabel();
     final statusColor = _statusColor(cs, statusLabel);
 
-    // Android URLs
     final apkUrl = _abs(project.apkUrl);
     final bundleUrl = _abs(project.bundleUrl);
     final androidUrl = apkUrl.isNotEmpty ? apkUrl : bundleUrl;
     final androidHasArtifact = androidUrl.isNotEmpty;
 
-    // iOS URLs
     final iosUrl = _abs(project.ipaUrl);
     final iosHasArtifact = iosUrl.isNotEmpty;
 
-    // Base statuses from backend
     final androidBuildFromModel = _normalizeBuildStatus(
       project.androidBuildStatus,
       hasArtifact: androidHasArtifact,
@@ -241,7 +284,6 @@ class ProjectTile extends StatelessWidget {
       hasArtifact: iosHasArtifact,
     );
 
-    // Apply instant UI overrides if present
     final androidBuild = androidBuildStatusOverride ?? androidBuildFromModel;
     final iosBuild = iosBuildStatusOverride ?? iosBuildFromModel;
 
@@ -250,11 +292,13 @@ class ProjectTile extends StatelessWidget {
 
     final androidErr =
         (androidBuildErrorOverride ?? (project.androidBuildError ?? '')).trim();
-    final iosErr = (iosBuildErrorOverride ?? (project.iosBuildError ?? '')).trim();
+    final iosErr =
+        (iosBuildErrorOverride ?? (project.iosBuildError ?? '')).trim();
 
     final showAndroidErr =
         androidBuild.toLowerCase().contains('fail') && androidErr.isNotEmpty;
-    final showIosErr = iosBuild.toLowerCase().contains('fail') && iosErr.isNotEmpty;
+    final showIosErr =
+        iosBuild.toLowerCase().contains('fail') && iosErr.isNotEmpty;
 
     final androidShareLabel = l10n.owner_project_share_android(
       appName,
@@ -267,6 +311,9 @@ class ProjectTile extends StatelessWidget {
     final copyText = l10n.common_copy;
     final shareText = l10n.common_share;
     final publishText = l10n.owner_project_publish;
+
+    final androidReady = androidHasArtifact && _isDone(androidBuild);
+    final iosReady = iosHasArtifact && _isDone(iosBuild);
 
     return LayoutBuilder(
       builder: (context, c) {
@@ -304,7 +351,10 @@ class ProjectTile extends StatelessWidget {
           decoration: BoxDecoration(
             color: cs.surface,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: cs.outlineVariant.withOpacity(.85), width: 1),
+            border: Border.all(
+              color: cs.outlineVariant.withOpacity(.85),
+              width: 1,
+            ),
             boxShadow: const [
               BoxShadow(
                 color: Color(0x12000000),
@@ -316,123 +366,120 @@ class ProjectTile extends StatelessWidget {
           clipBehavior: Clip.antiAlias,
           child: Column(
             children: [
-              // HEADER
               Container(
                 decoration: BoxDecoration(gradient: headerGradient),
                 child: Padding(
                   padding: EdgeInsets.all(headerPad),
                   child: Row(
-  children: [
-    _AppIcon(
-      project: project,
-      serverRootNoApi: serverRootNoApi,
-      size: small ? 40 : 44,
-      radius: 12,
-      band: cs.primary,
-    ),
-    const SizedBox(width: 8),
-    Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          AutoSizeText(
-            appName,
-            maxLines: small ? 2 : 1,
-            minFontSize: small ? 12.0 : 14.0,
-            stepGranularity: 0.5,
-            overflow: TextOverflow.ellipsis,
-            style: tt.titleLarge?.copyWith(
-              fontWeight: FontWeight.w900,
-              fontSize: small ? 16 : 18,
-              height: 1.08,
-            ),
-          ),
-          const SizedBox(height: 4),
-          AutoSizeText(
-            project.slug,
-            maxLines: 1,
-            minFontSize: 10.5,
-            stepGranularity: 0.5,
-            overflow: TextOverflow.ellipsis,
-            style: tt.bodyMedium?.copyWith(
-              color: cs.onSurface.withOpacity(.70),
-              fontWeight: FontWeight.w700,
-              fontSize: small ? 12 : 13,
-            ),
-          ),
-          if (idLine != null) ...[
-            const SizedBox(height: 3),
-            AutoSizeText(
-              idLine,
-              maxLines: 1,
-              minFontSize: 10.0,
-              stepGranularity: 0.5,
-              overflow: TextOverflow.ellipsis,
-              style: tt.bodyMedium?.copyWith(
-                color: cs.onSurface.withOpacity(.60),
-                fontFamily: 'monospace',
-                fontSize: small ? 12 : 13,
-              ),
-            ),
-          ],
-        ],
-      ),
-    ),
-    const SizedBox(width: 6),
-
-    // right side: status + delete button
-    Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: small ? 120 : 150),
-          child: FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerRight,
-            child: _StatusPill(label: statusLabel, color: statusColor),
-          ),
-        ),
-        if (onDelete != null) ...[
-          const SizedBox(height: 4),
-          SizedBox(
-            width: small ? 34 : 36,
-            height: small ? 34 : 36,
-            child: IconButton(
-              padding: EdgeInsets.zero,
-              visualDensity: VisualDensity.compact,
-              splashRadius: 18,
-              tooltip: 'Delete',
-              onPressed: () => onDelete!(context, project),
-              icon: Icon(
-                Icons.delete_outline_rounded,
-                color: cs.error,
-                size: small ? 19 : 21,
-              ),
-            ),
-          ),
-        ],
-      ],
-    ),
-  ],
-),
+                    children: [
+                      _AppIcon(
+                        project: project,
+                        serverRootNoApi: serverRootNoApi,
+                        size: small ? 40 : 44,
+                        radius: 12,
+                        band: cs.primary,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            AutoSizeText(
+                              appName,
+                              maxLines: small ? 2 : 1,
+                              minFontSize: small ? 12.0 : 14.0,
+                              stepGranularity: 0.5,
+                              overflow: TextOverflow.ellipsis,
+                              style: tt.titleLarge?.copyWith(
+                                fontWeight: FontWeight.w900,
+                                fontSize: small ? 16 : 18,
+                                height: 1.08,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            AutoSizeText(
+                              project.slug,
+                              maxLines: 1,
+                              minFontSize: 10.5,
+                              stepGranularity: 0.5,
+                              overflow: TextOverflow.ellipsis,
+                              style: tt.bodyMedium?.copyWith(
+                                color: cs.onSurface.withOpacity(.70),
+                                fontWeight: FontWeight.w700,
+                                fontSize: small ? 12 : 13,
+                              ),
+                            ),
+                            if (idLine != null) ...[
+                              const SizedBox(height: 3),
+                              AutoSizeText(
+                                idLine,
+                                maxLines: 1,
+                                minFontSize: 10.0,
+                                stepGranularity: 0.5,
+                                overflow: TextOverflow.ellipsis,
+                                style: tt.bodyMedium?.copyWith(
+                                  color: cs.onSurface.withOpacity(.60),
+                                  fontFamily: 'monospace',
+                                  fontSize: small ? 12 : 13,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          ConstrainedBox(
+                            constraints: BoxConstraints(
+                              maxWidth: small ? 120 : 150,
+                            ),
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: Alignment.centerRight,
+                              child: _StatusPill(
+                                label: statusLabel,
+                                color: statusColor,
+                              ),
+                            ),
+                          ),
+                          if (onDelete != null) ...[
+                            const SizedBox(height: 4),
+                            SizedBox(
+                              width: small ? 34 : 36,
+                              height: small ? 34 : 36,
+                              child: IconButton(
+                                padding: EdgeInsets.zero,
+                                visualDensity: VisualDensity.compact,
+                                splashRadius: 18,
+                                tooltip: 'Delete',
+                                onPressed: () => onDelete!(context, project),
+                                icon: Icon(
+                                  Icons.delete_outline_rounded,
+                                  color: cs.error,
+                                  size: small ? 19 : 21,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
-
               Divider(height: 1, color: cs.outlineVariant.withOpacity(.7)),
-
-              // TWO CARDS ROW
               Padding(
                 padding: EdgeInsets.all(pad),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // ANDROID CARD
                     Expanded(
                       child: LayoutBuilder(
                         builder: (context, cc) {
                           final maxW = cc.maxWidth;
-                          final enabledActions = androidHasArtifact;
 
                           return _PlatformCard(
                             maxW: maxW,
@@ -443,12 +490,13 @@ class ProjectTile extends StatelessWidget {
                             statusColor: androidBuildColor,
                             showErrorBox: showAndroidErr,
                             errorBoxText: androidErr,
-                            enabledActions: enabledActions,
+                            enabledActions: androidReady,
                             copyLabel: copyText,
                             shareLabel: shareText,
                             onCopy: () => _copyLink(context, androidUrl),
                             onShare: () async {
-                              final box = context.findRenderObject() as RenderBox?;
+                              final box =
+                                  context.findRenderObject() as RenderBox?;
                               final rect = box == null
                                   ? null
                                   : (box.localToGlobal(Offset.zero) & box.size);
@@ -462,11 +510,17 @@ class ProjectTile extends StatelessWidget {
                             },
                             primaryText: l10n.common_download,
                             primaryIcon: Icons.download_rounded,
-                            primaryEnabled: androidHasArtifact,
+                            primaryEnabled: androidReady,
                             onPrimary: () => _openUrl(context, androidUrl),
+                            middleText: null,
+                            middleIcon: null,
+                            middleEnabled: false,
+                            onMiddle: null,
+                            reserveMiddleSlot: false,
+                            reserveSlotAboveRebuild: true,
                             secondaryText: publishText,
                             secondaryIcon: Icons.upload_rounded,
-                            secondaryEnabled: androidHasArtifact,
+                            secondaryEnabled: androidReady,
                             onSecondary: () => PublishWizardDialog.open(
                               context,
                               api: publishApi,
@@ -489,15 +543,11 @@ class ProjectTile extends StatelessWidget {
                         },
                       ),
                     ),
-
                     SizedBox(width: cardGap),
-
-                    // IOS CARD
                     Expanded(
                       child: LayoutBuilder(
                         builder: (context, cc) {
                           final maxW = cc.maxWidth;
-                          final enabledActions = iosHasArtifact;
 
                           return _PlatformCard(
                             maxW: maxW,
@@ -508,12 +558,13 @@ class ProjectTile extends StatelessWidget {
                             statusColor: iosBuildColor,
                             showErrorBox: showIosErr,
                             errorBoxText: iosErr,
-                            enabledActions: enabledActions,
+                            enabledActions: iosReady,
                             copyLabel: copyText,
                             shareLabel: shareText,
                             onCopy: () => _copyLink(context, iosUrl),
                             onShare: () async {
-                              final box = context.findRenderObject() as RenderBox?;
+                              final box =
+                                  context.findRenderObject() as RenderBox?;
                               final rect = box == null
                                   ? null
                                   : (box.localToGlobal(Offset.zero) & box.size);
@@ -527,12 +578,20 @@ class ProjectTile extends StatelessWidget {
                             },
                             primaryText: l10n.download_ios,
                             primaryIcon: Icons.download_rounded,
-                            primaryLeading: const _TestFlightLikeIcon(size: 18),
-                            primaryEnabled: iosHasArtifact,
+                            primaryLeading:
+                                const _TestFlightLikeIcon(size: 18),
+                            primaryEnabled: iosReady,
                             onPrimary: () => _openUrl(context, iosUrl),
+                            middleText:
+                                l10n.iosInternalTestingOpenPageButton,
+                            middleIcon: Icons.verified_user_outlined,
+                            middleEnabled: iosReady,
+                            onMiddle: () => _openInternalTestingPage(context),
+                            reserveMiddleSlot: false,
+                            reserveSlotAboveRebuild: false,
                             secondaryText: publishText,
                             secondaryIcon: Icons.upload_rounded,
-                            secondaryEnabled: iosHasArtifact,
+                            secondaryEnabled: iosReady,
                             onSecondary: () => PublishWizardDialog.open(
                               context,
                               api: publishApi,
@@ -558,7 +617,6 @@ class ProjectTile extends StatelessWidget {
                   ],
                 ),
               ),
-
               SizedBox(height: gap),
             ],
           ),
@@ -593,6 +651,13 @@ class _PlatformCard extends StatelessWidget {
   final bool primaryEnabled;
   final VoidCallback onPrimary;
 
+  final String? middleText;
+  final IconData? middleIcon;
+  final bool middleEnabled;
+  final VoidCallback? onMiddle;
+  final bool reserveMiddleSlot;
+  final bool reserveSlotAboveRebuild;
+
   final String secondaryText;
   final IconData secondaryIcon;
   final bool secondaryEnabled;
@@ -621,6 +686,12 @@ class _PlatformCard extends StatelessWidget {
     this.primaryLeading,
     required this.primaryEnabled,
     required this.onPrimary,
+    this.middleText,
+    this.middleIcon,
+    this.middleEnabled = false,
+    this.onMiddle,
+    this.reserveMiddleSlot = false,
+    this.reserveSlotAboveRebuild = false,
     required this.secondaryText,
     required this.secondaryIcon,
     required this.secondaryEnabled,
@@ -641,9 +712,10 @@ class _PlatformCard extends StatelessWidget {
 
     final bool tiny = maxW < 185;
 
-    final double pad = tiny ? 8 : 9;
-    final double btnH = tiny ? 34 : 36;
-    final double actionBtnH = tiny ? 33 : 35;
+    final double pad = tiny ? 8 : 10;
+    final double btnH = tiny ? 35 : 38;
+    final double actionBtnH = tiny ? 34 : 36;
+    final double blockGap = tiny ? 6 : 8;
 
     return Container(
       padding: EdgeInsets.all(pad),
@@ -654,6 +726,7 @@ class _PlatformCard extends StatelessWidget {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Row(
             children: [
@@ -683,9 +756,8 @@ class _PlatformCard extends StatelessWidget {
               ),
             ],
           ),
-
           if (showErrorBox) ...[
-            SizedBox(height: tiny ? 6 : 7),
+            SizedBox(height: blockGap),
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 7),
@@ -719,9 +791,8 @@ class _PlatformCard extends StatelessWidget {
                 ],
               ),
             ),
-          ] else
-            SizedBox(height: tiny ? 8 : 10),
-
+          ],
+          SizedBox(height: blockGap),
           Row(
             children: [
               Expanded(
@@ -755,16 +826,22 @@ class _PlatformCard extends StatelessWidget {
               ),
             ],
           ),
-
-          const SizedBox(height: 7),
-
+          SizedBox(height: blockGap),
+          if (reserveSlotAboveRebuild) ...[
+            SizedBox(height: btnH),
+            SizedBox(height: blockGap),
+          ],
           if (showRebuild) ...[
             SizedBox(
               width: double.infinity,
               height: btnH,
               child: OutlinedButton.icon(
                 onPressed: rebuildEnabled ? onRebuild : null,
-                icon: Icon(Icons.refresh_rounded, size: 16, color: rebuildColor),
+                icon: Icon(
+                  Icons.refresh_rounded,
+                  size: 16,
+                  color: rebuildColor,
+                ),
                 label: FittedBox(
                   fit: BoxFit.scaleDown,
                   alignment: Alignment.center,
@@ -783,9 +860,8 @@ class _PlatformCard extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 6),
+            SizedBox(height: blockGap),
           ],
-
           SizedBox(
             width: double.infinity,
             height: btnH,
@@ -816,9 +892,38 @@ class _PlatformCard extends StatelessWidget {
               ),
             ),
           ),
-
-          const SizedBox(height: 6),
-
+          SizedBox(height: blockGap),
+          if (middleText != null && onMiddle != null)
+            SizedBox(
+              width: double.infinity,
+              height: btnH,
+              child: OutlinedButton.icon(
+                onPressed: middleEnabled ? onMiddle : null,
+                icon: Icon(
+                  middleIcon ?? Icons.verified_user_outlined,
+                  size: 16,
+                ),
+                label: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.center,
+                  child: Text(
+                    middleText!,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w900,
+                      fontSize: 12.8,
+                    ),
+                  ),
+                ),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: const Color(0xFF7C3AED),
+                  side: const BorderSide(color: Color(0xFF7C3AED), width: 2),
+                  shape: const StadiumBorder(),
+                ),
+              ),
+            )
+          else if (reserveMiddleSlot)
+            SizedBox(height: btnH),
+          if (middleText != null || reserveMiddleSlot) SizedBox(height: blockGap),
           SizedBox(
             width: double.infinity,
             height: btnH,
@@ -886,7 +991,8 @@ class _AppIcon extends StatelessWidget {
 
     if (cleaned.isNotEmpty && cleaned.toLowerCase() != 'null') {
       final baseSrc = _abs(cleaned);
-      final src = '$baseSrc${baseSrc.contains('?') ? '&' : '?'}v=${project.linkId}';
+      final src =
+          '$baseSrc${baseSrc.contains('?') ? '&' : '?'}v=${project.linkId}';
 
       return ClipRRect(
         borderRadius: BorderRadius.circular(radius),
@@ -919,7 +1025,9 @@ class _AppIcon extends StatelessWidget {
   }
 
   Widget _fallback(BuildContext context) {
-    final text = (project.appName.isNotEmpty ? project.appName : project.projectName).trim();
+    final text =
+        (project.appName.isNotEmpty ? project.appName : project.projectName)
+            .trim();
     final initial = (text.isEmpty ? 'A' : text.characters.first.toUpperCase());
 
     return Container(

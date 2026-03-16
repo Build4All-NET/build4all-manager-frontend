@@ -2498,4 +2498,142 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get common_link_id_label => 'LinkId';
+
+  @override
+  String get iosInternalTestingStatusReady => 'Ready';
+
+  @override
+  String get iosInternalTestingStatusWaitingAcceptance => 'Waiting for acceptance';
+
+  @override
+  String get iosInternalTestingStatusFailed => 'Failed';
+
+  @override
+  String get iosInternalTestingStatusProcessing => 'Processing';
+
+  @override
+  String get iosInternalTestingStatusRequested => 'Requested';
+
+  @override
+  String get iosInternalTestingStatusInvitationSent => 'Invitation sent';
+
+  @override
+  String get iosInternalTestingStatusFinalizing => 'Finalizing';
+
+  @override
+  String get iosInternalTestingStatusCancelled => 'Cancelled';
+
+  @override
+  String get iosInternalTestingStatusNotRequested => 'Not requested';
+
+  @override
+  String get iosInternalTestingRequestTitle => 'Request Internal Testing';
+
+  @override
+  String get iosInternalTestingRequestSubtitle => 'Use the Apple ID email that should receive internal iOS testing access.';
+
+  @override
+  String get iosInternalTestingAppleEmailLabel => 'Apple ID Email';
+
+  @override
+  String get iosInternalTestingAppleEmailHint => 'name@icloud.com';
+
+  @override
+  String get iosInternalTestingFirstNameLabel => 'First Name';
+
+  @override
+  String get iosInternalTestingFirstNameHint => 'First name';
+
+  @override
+  String get iosInternalTestingLastNameLabel => 'Last Name';
+
+  @override
+  String get iosInternalTestingLastNameHint => 'Last name';
+
+  @override
+  String get iosInternalTestingInfoText => 'If this email is already an App Store Connect user, access may become ready immediately. Otherwise an Apple invitation will be sent first.';
+
+  @override
+  String get iosInternalTestingSubmitRequest => 'Submit Request';
+
+  @override
+  String get iosInternalTestingEmailRequired => 'Apple email is required';
+
+  @override
+  String get iosInternalTestingFirstNameRequired => 'First name is required';
+
+  @override
+  String get iosInternalTestingFirstNameMin => 'First name must be at least 2 characters';
+
+  @override
+  String get iosInternalTestingFirstNameTooLong => 'First name is too long';
+
+  @override
+  String get iosInternalTestingLastNameRequired => 'Last name is required';
+
+  @override
+  String get iosInternalTestingLastNameMin => 'Last name must be at least 2 characters';
+
+  @override
+  String get iosInternalTestingLastNameTooLong => 'Last name is too long';
+
+  @override
+  String get iosInternalTestingReadyMessage => 'Internal testing is ready.';
+
+  @override
+  String get iosInternalTestingWaitingMessage => 'Invitation sent. Waiting for Apple acceptance.';
+
+  @override
+  String get iosInternalTestingFailedMessage => 'Internal testing request failed.';
+
+  @override
+  String get iosInternalTestingSubmittedMessage => 'Internal testing request submitted successfully.';
+
+  @override
+  String get iosInternalTestingSectionSubtitle => 'Request internal iOS testing access.';
+
+  @override
+  String get iosInternalTestingReadyHint => 'You can now download the iOS build using TestFlight.';
+
+  @override
+  String get iosInternalTestingWaitingHint => 'An invitation has been sent to the provided email. Please accept it in order to get access to the iOS build.';
+
+  @override
+  String get iosInternalTestingFailedHint => 'There was an issue with your request. Please try again or contact support if the issue persists.';
+
+  @override
+  String get iosInternalTestingSectionTitle => 'iOS Internal Testing';
+
+  @override
+  String get iosInternalTestingRequestButton => 'Request Internal Testing';
+
+  @override
+  String get iosInternalTestingRequestedForLabel => 'Requested for';
+
+  @override
+  String get iosInternalTestingOpenPageButton => 'Internal Testing';
+
+  @override
+  String get iosInternalTestingPageTitle => 'iOS Internal Testing';
+
+  @override
+  String get iosInternalTestingSlotsUsedLabel => 'used';
+
+  @override
+  String get iosInternalTestingRemainingSlotsLabel => 'Remaining slots';
+
+  @override
+  String get iosInternalTestingCapacityReachedMessage => 'This app has reached the internal testing capacity. Remove or cancel a tester before adding a new one.';
+
+  @override
+  String get iosInternalTestingAddTesterTitle => 'Add tester';
+
+  @override
+  String get iosInternalTestingAddTesterButton => 'Add tester';
+
+  @override
+  String get iosInternalTestingTesterListTitle => 'Invited testers';
+
+  @override
+  String get iosInternalTestingNoTestersYet => 'No internal testers have been added yet.';
 }
