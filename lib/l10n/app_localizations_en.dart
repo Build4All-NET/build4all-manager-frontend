@@ -1828,10 +1828,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get owner_project_ios_testflight_hint => 'Installez TestFlight pour ouvrir l’application';
+  String get owner_project_ios_testflight_hint => ' Use TestFlight to open';
 
   @override
-  String get owner_project_android_download_hint => 'Télécharger pour installer :';
+  String get owner_project_android_download_hint => 'Download to install:';
 
   @override
   String get errPhoneRequired => 'Phone number is required';
@@ -2611,7 +2611,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get iosInternalTestingRequestedForLabel => 'Requested for';
 
   @override
-  String get iosInternalTestingOpenPageButton => 'Internal Testing';
+  String get iosInternalTestingOpenPageButton => 'Internal';
 
   @override
   String get iosInternalTestingPageTitle => 'iOS Internal Testing';

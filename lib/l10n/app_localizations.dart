@@ -3682,13 +3682,13 @@ abstract class AppLocalizations {
   /// No description provided for @owner_project_ios_testflight_hint.
   ///
   /// In en, this message translates to:
-  /// **'Installez TestFlight pour ouvrir l’application'**
+  /// **' Use TestFlight to open'**
   String get owner_project_ios_testflight_hint;
 
   /// No description provided for @owner_project_android_download_hint.
   ///
   /// In en, this message translates to:
-  /// **'Télécharger pour installer :'**
+  /// **'Download to install:'**
   String get owner_project_android_download_hint;
 
   /// No description provided for @errPhoneRequired.
@@ -5224,7 +5224,7 @@ abstract class AppLocalizations {
   /// No description provided for @iosInternalTestingOpenPageButton.
   ///
   /// In en, this message translates to:
-  /// **'Internal Testing'**
+  /// **'Internal'**
   String get iosInternalTestingOpenPageButton;
 
   /// No description provided for @iosInternalTestingPageTitle.

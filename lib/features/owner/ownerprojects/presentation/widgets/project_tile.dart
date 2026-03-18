@@ -114,9 +114,8 @@ class ProjectTile extends StatelessWidget {
   Future<void> _shareLink(
     BuildContext context,
     String url,
-    String label, {
-    Rect? sharePositionOrigin,
-  }) async {
+    String label,
+  ) async {
     final l10n = AppLocalizations.of(context)!;
     final cleaned = url.trim();
 
@@ -127,9 +126,8 @@ class ProjectTile extends StatelessWidget {
 
     try {
       await Share.share(
-        '$label:\n$cleaned',
+        '$label\n$cleaned',
         subject: label,
-        sharePositionOrigin: sharePositionOrigin,
       );
     } catch (_) {
       AppToast.error(context, l10n.owner_project_err_share_failed);
@@ -168,12 +166,16 @@ class ProjectTile extends StatelessWidget {
 
     if (low.contains('success') ||
         low.contains('done') ||
-        low.contains('completed')) {
+        low.contains('completed') ||
+        low.contains('ready') ||
+        low.contains('finished') ||
+        low.contains('uploaded')) {
       return const Color(0xFF22C55E);
     }
     if (low.contains('fail') ||
         low.contains('error') ||
-        low.contains('reject')) {
+        low.contains('reject') ||
+        low.contains('cancel')) {
       return const Color(0xFFEF4444);
     }
     if (low.contains('queued')) {
@@ -189,18 +191,42 @@ class ProjectTile extends StatelessWidget {
     return cs.outline;
   }
 
-  String _statusLabel() {
+  String _projectStatusRaw() {
     final raw = project.status.trim();
     final low = raw.toLowerCase();
 
-    if (raw.isEmpty || low == 'null') return 'UNKNOWN';
+    if (raw.isEmpty || low == 'null') return 'unknown';
     if (low.split(RegExp(r'\s+')).first == 'active') return 'test';
+    if (low.contains('production') || low.contains('prod')) return 'production';
+    if (low.contains('local')) return 'local';
+    if (low == 'active') return 'active';
 
-    return raw;
+    return raw.toUpperCase();
   }
 
-  Color _statusColor(ColorScheme cs, String label) {
-    final low = label.toLowerCase();
+  String _projectStatusText(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final raw = _projectStatusRaw();
+    final low = raw.toLowerCase();
+
+    switch (low) {
+      case 'unknown':
+        return l10n.common_unknown;
+      case 'test':
+        return l10n.common_status_test;
+      case 'production':
+        return l10n.common_status_production;
+      case 'local':
+        return l10n.common_status_local;
+      case 'active':
+        return l10n.common_status_active;
+      default:
+        return raw;
+    }
+  }
+
+  Color _statusColor(ColorScheme cs, String rawStatus) {
+    final low = rawStatus.toLowerCase();
 
     if (low == 'unknown') return cs.outline;
     if (low.contains('fail') ||
@@ -208,14 +234,53 @@ class ProjectTile extends StatelessWidget {
         low.contains('reject')) {
       return cs.error;
     }
-    if (low.contains('test')) return cs.secondary;
+    if (low.contains('test')) return cs.primary;
     if (low.contains('review')) return cs.primary;
     if (low.contains('prod') || low.contains('production')) {
       return cs.tertiary;
     }
     if (low.contains('local')) return cs.outlineVariant;
+    if (low.contains('active')) return cs.primary;
 
     return cs.primary;
+  }
+
+  String _buildStatusText(BuildContext context, String status) {
+    final l10n = AppLocalizations.of(context)!;
+    final low = status.trim().toLowerCase();
+
+    if (low.isEmpty || low == 'not_built') {
+      return l10n.owner_project_not_requested;
+    }
+
+    if (low.contains('success') ||
+        low.contains('done') ||
+        low.contains('completed') ||
+        low.contains('ready') ||
+        low.contains('finished') ||
+        low.contains('uploaded')) {
+      return l10n.owner_project_ready;
+    }
+
+    if (low.contains('fail') ||
+        low.contains('error') ||
+        low.contains('reject') ||
+        low.contains('cancel')) {
+      return l10n.owner_project_build_failed;
+    }
+
+    if (low.contains('queued')) {
+      return l10n.owner_projects_rebuild_queued;
+    }
+
+    if (low.contains('building') ||
+        low.contains('running') ||
+        low.contains('started') ||
+        low.contains('processing')) {
+      return l10n.owner_project_building;
+    }
+
+    return status.toUpperCase();
   }
 
   Future<void> _handleRebuild(
@@ -223,8 +288,10 @@ class ProjectTile extends StatelessWidget {
     String platformStatus, {
     required bool isAndroid,
   }) async {
+    final l10n = AppLocalizations.of(context)!;
+
     if (_isRunning(platformStatus)) {
-      AppToast.success(context, 'Already queued / building');
+      AppToast.success(context, l10n.owner_projects_rebuild_queued);
       return;
     }
 
@@ -260,11 +327,15 @@ class ProjectTile extends StatelessWidget {
     final tt = Theme.of(context).textTheme;
     final l10n = AppLocalizations.of(context)!;
 
+    final width = MediaQuery.of(context).size.width;
+    final bool small = width < 390;
+
     final appName =
         project.appName.isNotEmpty ? project.appName : project.projectName;
 
-    final statusLabel = _statusLabel();
-    final statusColor = _statusColor(cs, statusLabel);
+    final rawStatus = _projectStatusRaw();
+    final statusLabel = _projectStatusText(context);
+    final statusColor = _statusColor(cs, rawStatus);
 
     final apkUrl = _abs(project.apkUrl);
     final bundleUrl = _abs(project.bundleUrl);
@@ -278,7 +349,6 @@ class ProjectTile extends StatelessWidget {
       project.androidBuildStatus,
       hasArtifact: androidHasArtifact,
     );
-
     final iosBuildFromModel = _normalizeBuildStatus(
       project.iosBuildStatus,
       hasArtifact: iosHasArtifact,
@@ -286,6 +356,9 @@ class ProjectTile extends StatelessWidget {
 
     final androidBuild = androidBuildStatusOverride ?? androidBuildFromModel;
     final iosBuild = iosBuildStatusOverride ?? iosBuildFromModel;
+
+    final androidBuildLabel = _buildStatusText(context, androidBuild);
+    final iosBuildLabel = _buildStatusText(context, iosBuild);
 
     final androidBuildColor = _buildColor(cs, androidBuild);
     final iosBuildColor = _buildColor(cs, iosBuild);
@@ -300,335 +373,290 @@ class ProjectTile extends StatelessWidget {
     final showIosErr =
         iosBuild.toLowerCase().contains('fail') && iosErr.isNotEmpty;
 
+    final androidReady = androidHasArtifact && _isDone(androidBuild);
+    final iosReady = iosHasArtifact && _isDone(iosBuild);
+
     final androidShareLabel = l10n.owner_project_share_android(
       appName,
       apkUrl.isNotEmpty ? l10n.owner_project_apk : l10n.owner_project_aab,
     );
     final iosShareLabel = l10n.owner_project_share_ios(appName);
 
-    final idLine = project.packageOrBundleId;
+    final String idLine =
+        (project.packageOrBundleId is String ? project.packageOrBundleId as String : '')
+            .trim();
 
-    final copyText = l10n.common_copy;
-    final shareText = l10n.common_share;
-    final publishText = l10n.owner_project_publish;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    Color mix(Color a, Color b, double t) => Color.lerp(a, b, t)!;
+    final base = cs.surface;
 
-    final androidReady = androidHasArtifact && _isDone(androidBuild);
-    final iosReady = iosHasArtifact && _isDone(iosBuild);
-
-    return LayoutBuilder(
-      builder: (context, c) {
-        final w = c.maxWidth;
-
-        final bool small = w < 360;
-        final double pad = small ? 8 : 10;
-        final double headerPad = small ? 10 : 12;
-        final double gap = small ? 6 : 8;
-        final double cardGap = small ? 8 : 10;
-
-        final isDark = Theme.of(context).brightness == Brightness.dark;
-
-        Color mix(Color a, Color b, double t) => Color.lerp(a, b, t)!;
-
-        final base = cs.surface;
-        final headerGradient = LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: isDark
-              ? [
-                  mix(base, cs.primary, 0.14),
-                  mix(base, cs.primary, 0.07),
-                  mix(base, cs.secondary, 0.10),
-                ]
-              : [
-                  mix(base, Colors.white, 0.80),
-                  mix(base, cs.primary, 0.03),
-                  mix(base, cs.secondary, 0.03),
-                ],
-        );
-
-        return Container(
-          margin: const EdgeInsets.only(bottom: 12),
-          decoration: BoxDecoration(
-            color: cs.surface,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: cs.outlineVariant.withOpacity(.85),
-              width: 1,
-            ),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x12000000),
-                blurRadius: 12,
-                offset: Offset(0, 6),
-              ),
+    final headerGradient = LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: isDark
+          ? [
+              mix(base, cs.primary, 0.14),
+              mix(base, cs.primary, 0.07),
+              mix(base, cs.secondary, 0.10),
+            ]
+          : [
+              mix(base, Colors.white, 0.82),
+              mix(base, cs.primary, 0.03),
+              mix(base, cs.secondary, 0.03),
             ],
+    );
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: cs.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: cs.outlineVariant.withOpacity(.85),
+          width: 1,
+        ),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x12000000),
+            blurRadius: 12,
+            offset: Offset(0, 6),
           ),
-          clipBehavior: Clip.antiAlias,
-          child: Column(
-            children: [
-              Container(
-                decoration: BoxDecoration(gradient: headerGradient),
-                child: Padding(
-                  padding: EdgeInsets.all(headerPad),
-                  child: Row(
-                    children: [
-                      _AppIcon(
-                        project: project,
-                        serverRootNoApi: serverRootNoApi,
-                        size: small ? 40 : 44,
-                        radius: 12,
-                        band: cs.primary,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            AutoSizeText(
-                              appName,
-                              maxLines: small ? 2 : 1,
-                              minFontSize: small ? 12.0 : 14.0,
-                              stepGranularity: 0.5,
-                              overflow: TextOverflow.ellipsis,
-                              style: tt.titleLarge?.copyWith(
-                                fontWeight: FontWeight.w900,
-                                fontSize: small ? 16 : 18,
-                                height: 1.08,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            AutoSizeText(
-                              project.slug,
-                              maxLines: 1,
-                              minFontSize: 10.5,
-                              stepGranularity: 0.5,
-                              overflow: TextOverflow.ellipsis,
-                              style: tt.bodyMedium?.copyWith(
-                                color: cs.onSurface.withOpacity(.70),
-                                fontWeight: FontWeight.w700,
-                                fontSize: small ? 12 : 13,
-                              ),
-                            ),
-                            if (idLine != null) ...[
-                              const SizedBox(height: 3),
-                              AutoSizeText(
-                                idLine,
-                                maxLines: 1,
-                                minFontSize: 10.0,
-                                stepGranularity: 0.5,
-                                overflow: TextOverflow.ellipsis,
-                                style: tt.bodyMedium?.copyWith(
-                                  color: cs.onSurface.withOpacity(.60),
-                                  fontFamily: 'monospace',
-                                  fontSize: small ? 12 : 13,
-                                ),
-                              ),
-                            ],
-                          ],
+        ],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        children: [
+          Container(
+            decoration: BoxDecoration(gradient: headerGradient),
+            child: Padding(
+              padding: EdgeInsets.all(small ? 10 : 12),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _AppIcon(
+                    project: project,
+                    serverRootNoApi: serverRootNoApi,
+                    size: small ? 42 : 46,
+                    radius: 12,
+                    band: cs.primary,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        AutoSizeText(
+                          appName,
+                          maxLines: 1,
+                          minFontSize: 13,
+                          stepGranularity: 0.5,
+                          overflow: TextOverflow.ellipsis,
+                          style: tt.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w900,
+                            fontSize: small ? 16 : 18,
+                            height: 1.05,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 6),
-                      Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          ConstrainedBox(
-                            constraints: BoxConstraints(
-                              maxWidth: small ? 120 : 150,
-                            ),
-                            child: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              alignment: Alignment.centerRight,
-                              child: _StatusPill(
-                                label: statusLabel,
-                                color: statusColor,
-                              ),
+                        const SizedBox(height: 4),
+                        AutoSizeText(
+                          project.slug,
+                          maxLines: 1,
+                          minFontSize: 10.5,
+                          stepGranularity: 0.5,
+                          overflow: TextOverflow.ellipsis,
+                          style: tt.bodyMedium?.copyWith(
+                            color: cs.onSurface.withOpacity(.72),
+                            fontWeight: FontWeight.w700,
+                            fontSize: small ? 12 : 13,
+                          ),
+                        ),
+                        if (idLine.isNotEmpty) ...[
+                          const SizedBox(height: 4),
+                          AutoSizeText(
+                            idLine,
+                            maxLines: 1,
+                            minFontSize: 10,
+                            stepGranularity: 0.5,
+                            overflow: TextOverflow.ellipsis,
+                            style: tt.bodyMedium?.copyWith(
+                              color: cs.onSurface.withOpacity(.58),
+                              fontFamily: 'monospace',
+                              fontSize: small ? 11.5 : 12.5,
                             ),
                           ),
-                          if (onDelete != null) ...[
-                            const SizedBox(height: 4),
-                            SizedBox(
-                              width: small ? 34 : 36,
-                              height: small ? 34 : 36,
-                              child: IconButton(
-                                padding: EdgeInsets.zero,
-                                visualDensity: VisualDensity.compact,
-                                splashRadius: 18,
-                                tooltip: 'Delete',
-                                onPressed: () => onDelete!(context, project),
-                                icon: Icon(
-                                  Icons.delete_outline_rounded,
-                                  color: cs.error,
-                                  size: small ? 19 : 21,
-                                ),
-                              ),
-                            ),
-                          ],
                         ],
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      _StatusPill(
+                        label: statusLabel,
+                        color: statusColor,
+                        small: true,
                       ),
+                      if (onDelete != null) ...[
+                        const SizedBox(height: 6),
+                        SizedBox(
+                          width: 32,
+                          height: 32,
+                          child: IconButton(
+                            padding: EdgeInsets.zero,
+                            visualDensity: VisualDensity.compact,
+                            splashRadius: 18,
+                            tooltip: l10n.common_delete,
+                            onPressed: () => onDelete!(context, project),
+                            icon: Icon(
+                              Icons.delete_outline_rounded,
+                              color: cs.error,
+                              size: 20,
+                            ),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
-                ),
+                ],
               ),
-              Divider(height: 1, color: cs.outlineVariant.withOpacity(.7)),
-              Padding(
-                padding: EdgeInsets.all(pad),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: LayoutBuilder(
-                        builder: (context, cc) {
-                          final maxW = cc.maxWidth;
-
-                          return _PlatformCard(
-                            maxW: maxW,
-                            title: l10n.owner_project_android,
-                            icon: Icons.android_rounded,
-                            iconColor: const Color(0xFF22C55E),
-                            statusText: androidBuild,
-                            statusColor: androidBuildColor,
-                            showErrorBox: showAndroidErr,
-                            errorBoxText: androidErr,
-                            enabledActions: androidReady,
-                            copyLabel: copyText,
-                            shareLabel: shareText,
-                            onCopy: () => _copyLink(context, androidUrl),
-                            onShare: () async {
-                              final box =
-                                  context.findRenderObject() as RenderBox?;
-                              final rect = box == null
-                                  ? null
-                                  : (box.localToGlobal(Offset.zero) & box.size);
-
-                              await _shareLink(
-                                context,
-                                androidUrl,
-                                androidShareLabel,
-                                sharePositionOrigin: rect,
-                              );
-                            },
-                            primaryText: l10n.common_download,
-                            primaryIcon: Icons.download_rounded,
-                            primaryEnabled: androidReady,
-                            onPrimary: () => _openUrl(context, androidUrl),
-                            middleText: null,
-                            middleIcon: null,
-                            middleEnabled: false,
-                            onMiddle: null,
-                            reserveMiddleSlot: false,
-                            reserveSlotAboveRebuild: true,
-                            secondaryText: publishText,
-                            secondaryIcon: Icons.upload_rounded,
-                            secondaryEnabled: androidReady,
-                            onSecondary: () => PublishWizardDialog.open(
-                              context,
-                              api: publishApi,
-                              aupId: project.linkId,
-                              appName: appName,
-                              platform: PublishPlatform.android,
-                              store: PublishStore.playStore,
-                              androidPackageName: project.androidPackageName,
-                            ),
-                            showRebuild: true,
-                            rebuildEnabled: true,
-                            rebuildText: 'Rebuild',
-                            rebuildColor: const Color(0xFFEF4444),
-                            onRebuild: () => _handleRebuild(
-                              context,
-                              androidBuild,
-                              isAndroid: true,
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    SizedBox(width: cardGap),
-                    Expanded(
-                      child: LayoutBuilder(
-                        builder: (context, cc) {
-                          final maxW = cc.maxWidth;
-
-                          return _PlatformCard(
-                            maxW: maxW,
-                            title: l10n.owner_project_ios,
-                            icon: Icons.apple_rounded,
-                            iconColor: const Color(0xFF2563EB),
-                            statusText: iosBuild,
-                            statusColor: iosBuildColor,
-                            showErrorBox: showIosErr,
-                            errorBoxText: iosErr,
-                            enabledActions: iosReady,
-                            copyLabel: copyText,
-                            shareLabel: shareText,
-                            onCopy: () => _copyLink(context, iosUrl),
-                            onShare: () async {
-                              final box =
-                                  context.findRenderObject() as RenderBox?;
-                              final rect = box == null
-                                  ? null
-                                  : (box.localToGlobal(Offset.zero) & box.size);
-
-                              await _shareLink(
-                                context,
-                                iosUrl,
-                                iosShareLabel,
-                                sharePositionOrigin: rect,
-                              );
-                            },
-                            primaryText: l10n.download_ios,
-                            primaryIcon: Icons.download_rounded,
-                            primaryLeading:
-                                const _TestFlightLikeIcon(size: 18),
-                            primaryEnabled: iosReady,
-                            onPrimary: () => _openUrl(context, iosUrl),
-                            middleText:
-                                l10n.iosInternalTestingOpenPageButton,
-                            middleIcon: Icons.verified_user_outlined,
-                            middleEnabled: iosReady,
-                            onMiddle: () => _openInternalTestingPage(context),
-                            reserveMiddleSlot: false,
-                            reserveSlotAboveRebuild: false,
-                            secondaryText: publishText,
-                            secondaryIcon: Icons.upload_rounded,
-                            secondaryEnabled: iosReady,
-                            onSecondary: () => PublishWizardDialog.open(
-                              context,
-                              api: publishApi,
-                              aupId: project.linkId,
-                              appName: appName,
-                              platform: PublishPlatform.ios,
-                              store: PublishStore.appStore,
-                              iosBundleId: project.iosBundleId,
-                            ),
-                            showRebuild: true,
-                            rebuildEnabled: true,
-                            rebuildText: 'Rebuild',
-                            rebuildColor: const Color(0xFFEF4444),
-                            onRebuild: () => _handleRebuild(
-                              context,
-                              iosBuild,
-                              isAndroid: false,
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: gap),
-            ],
+            ),
           ),
-        );
-      },
+          Divider(height: 1, color: cs.outlineVariant.withOpacity(.7)),
+          Padding(
+            padding: EdgeInsets.all(small ? 8 : 10),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: _PlatformCard(
+                    title: l10n.owner_project_android,
+                    icon: Icons.android_rounded,
+                    iconColor: const Color(0xFF22C55E),
+                    statusText: androidBuildLabel,
+                    statusColor: androidBuildColor,
+                    showErrorBox: showAndroidErr,
+                    errorBoxText: androidErr,
+                    actionButtons: [
+                      _CardActionData(
+                        label: l10n.common_copy,
+                        icon: Icons.copy_rounded,
+                        enabled: androidReady,
+                        onTap: () => _copyLink(context, androidUrl),
+                      ),
+                      _CardActionData(
+                        label: l10n.common_share,
+                        icon: Icons.share_rounded,
+                        enabled: androidReady,
+                        onTap: () => _shareLink(
+                          context,
+                          androidUrl,
+                          androidShareLabel,
+                        ),
+                      ),
+                    ],
+                    primaryText: l10n.common_download,
+                    primaryIcon: Icons.download_rounded,
+                    primaryLeading: null,
+                    primaryEnabled: androidReady,
+                    onPrimary: () => _openUrl(context, androidUrl),
+                    secondaryText: l10n.owner_project_publish,
+                    secondaryIcon: Icons.upload_rounded,
+                    secondaryEnabled: androidReady,
+                    onSecondary: () => PublishWizardDialog.open(
+                      context,
+                      api: publishApi,
+                      aupId: project.linkId,
+                      appName: appName,
+                      platform: PublishPlatform.android,
+                      store: PublishStore.playStore,
+                      androidPackageName: project.androidPackageName,
+                    ),
+                    showRebuild: true,
+                    rebuildEnabled: true,
+                    rebuildText: l10n.owner_project_retry_build,
+                    rebuildColor: const Color(0xFFEF4444),
+                    onRebuild: () => _handleRebuild(
+                      context,
+                      androidBuild,
+                      isAndroid: true,
+                    ),
+                  ),
+                ),
+                SizedBox(width: small ? 8 : 10),
+                Expanded(
+                  child: _PlatformCard(
+                    title: l10n.owner_project_ios,
+                    icon: Icons.apple_rounded,
+                    iconColor: const Color(0xFF2563EB),
+                    statusText: iosBuildLabel,
+                    statusColor: iosBuildColor,
+                    showErrorBox: showIosErr,
+                    errorBoxText: iosErr,
+                    actionButtons: [
+                      _CardActionData(
+                        label: l10n.common_copy,
+                        icon: Icons.copy_rounded,
+                        enabled: iosReady,
+                        onTap: () => _copyLink(context, iosUrl),
+                      ),
+                      _CardActionData(
+                        label: l10n.common_share,
+                        icon: Icons.share_rounded,
+                        enabled: iosReady,
+                        onTap: () => _shareLink(
+                          context,
+                          iosUrl,
+                          iosShareLabel,
+                        ),
+                      ),
+                      _CardActionData(
+                        label: l10n.iosInternalTestingOpenPageButton,
+                        icon: Icons.verified_user_outlined,
+                        leading: const _TestFlightLikeIcon(size: 14),
+                        enabled: iosReady,
+                        onTap: () => _openInternalTestingPage(context),
+                      ),
+                    ],
+                    primaryText: l10n.download_ios,
+                    primaryIcon: Icons.download_rounded,
+                    primaryLeading: const _TestFlightLikeIcon(size: 16),
+                    primaryEnabled: iosReady,
+                    onPrimary: () => _openUrl(context, iosUrl),
+                    secondaryText: l10n.owner_project_publish,
+                    secondaryIcon: Icons.upload_rounded,
+                    secondaryEnabled: iosReady,
+                    onSecondary: () => PublishWizardDialog.open(
+                      context,
+                      api: publishApi,
+                      aupId: project.linkId,
+                      appName: appName,
+                      platform: PublishPlatform.ios,
+                      store: PublishStore.appStore,
+                      iosBundleId: project.iosBundleId,
+                    ),
+                    showRebuild: true,
+                    rebuildEnabled: true,
+                    rebuildText: l10n.owner_project_retry_build,
+                    rebuildColor: const Color(0xFFEF4444),
+                    onRebuild: () => _handleRebuild(
+                      context,
+                      iosBuild,
+                      isAndroid: false,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
 
 class _PlatformCard extends StatelessWidget {
-  final double maxW;
-
   final String title;
   final IconData icon;
   final Color iconColor;
@@ -639,24 +667,13 @@ class _PlatformCard extends StatelessWidget {
   final bool showErrorBox;
   final String errorBoxText;
 
-  final bool enabledActions;
-  final String copyLabel;
-  final String shareLabel;
-  final VoidCallback onCopy;
-  final VoidCallback onShare;
+  final List<_CardActionData> actionButtons;
 
   final String primaryText;
   final IconData primaryIcon;
   final Widget? primaryLeading;
   final bool primaryEnabled;
   final VoidCallback onPrimary;
-
-  final String? middleText;
-  final IconData? middleIcon;
-  final bool middleEnabled;
-  final VoidCallback? onMiddle;
-  final bool reserveMiddleSlot;
-  final bool reserveSlotAboveRebuild;
 
   final String secondaryText;
   final IconData secondaryIcon;
@@ -670,38 +687,27 @@ class _PlatformCard extends StatelessWidget {
   final VoidCallback onRebuild;
 
   const _PlatformCard({
-    required this.maxW,
     required this.title,
     required this.icon,
     required this.iconColor,
     required this.statusText,
     required this.statusColor,
-    required this.enabledActions,
-    required this.copyLabel,
-    required this.shareLabel,
-    required this.onCopy,
-    required this.onShare,
+    required this.showErrorBox,
+    required this.errorBoxText,
+    required this.actionButtons,
     required this.primaryText,
     required this.primaryIcon,
-    this.primaryLeading,
+    required this.primaryLeading,
     required this.primaryEnabled,
     required this.onPrimary,
-    this.middleText,
-    this.middleIcon,
-    this.middleEnabled = false,
-    this.onMiddle,
-    this.reserveMiddleSlot = false,
-    this.reserveSlotAboveRebuild = false,
     required this.secondaryText,
     required this.secondaryIcon,
     required this.secondaryEnabled,
     required this.onSecondary,
-    this.showErrorBox = false,
-    this.errorBoxText = '',
-    this.showRebuild = false,
-    this.rebuildEnabled = true,
-    this.rebuildText = 'Rebuild',
-    this.rebuildColor = const Color(0xFFEF4444),
+    required this.showRebuild,
+    required this.rebuildEnabled,
+    required this.rebuildText,
+    required this.rebuildColor,
     required this.onRebuild,
   });
 
@@ -709,16 +715,11 @@ class _PlatformCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
-
-    final bool tiny = maxW < 185;
-
-    final double pad = tiny ? 8 : 10;
-    final double btnH = tiny ? 35 : 38;
-    final double actionBtnH = tiny ? 34 : 36;
-    final double blockGap = tiny ? 6 : 8;
+    final width = MediaQuery.of(context).size.width;
+    final bool small = width < 390;
 
     return Container(
-      padding: EdgeInsets.all(pad),
+      padding: EdgeInsets.all(small ? 8 : 10),
       decoration: BoxDecoration(
         color: cs.surface,
         borderRadius: BorderRadius.circular(14),
@@ -730,7 +731,7 @@ class _PlatformCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(icon, color: iconColor, size: tiny ? 17 : 18),
+              Icon(icon, color: iconColor, size: 18),
               const SizedBox(width: 6),
               Expanded(
                 child: AutoSizeText(
@@ -741,23 +742,19 @@ class _PlatformCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: tt.titleMedium?.copyWith(
                     fontWeight: FontWeight.w900,
-                    fontSize: tiny ? 14 : 15,
+                    fontSize: small ? 14 : 15,
                   ),
                 ),
               ),
               const SizedBox(width: 6),
-              ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: tiny ? 95 : 115),
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: Alignment.centerRight,
-                  child: _MiniPill(text: statusText, color: statusColor),
-                ),
+              _MiniPill(
+                text: statusText,
+                color: statusColor,
               ),
             ],
           ),
           if (showErrorBox) ...[
-            SizedBox(height: blockGap),
+            const SizedBox(height: 8),
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 7),
@@ -783,8 +780,8 @@ class _PlatformCard extends StatelessWidget {
                       style: tt.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w800,
                         color: const Color(0xFF111827),
-                        fontSize: tiny ? 12 : 13,
-                        height: 1.12,
+                        fontSize: 12,
+                        height: 1.08,
                       ),
                     ),
                   ),
@@ -792,163 +789,205 @@ class _PlatformCard extends StatelessWidget {
               ),
             ),
           ],
-          SizedBox(height: blockGap),
+          const SizedBox(height: 8),
           Row(
             children: [
-              Expanded(
-                child: SizedBox(
-                  height: actionBtnH,
-                  child: _FadedSquareButton(
-                    enabled: enabledActions,
-                    icon: Icons.copy_rounded,
-                    label: copyLabel,
-                    onTap: onCopy,
-                    iconSize: tiny ? 15 : 16,
-                    fontSize: tiny ? 11.3 : 12,
-                    radius: 10,
-                  ),
+              for (int i = 0; i < actionButtons.length; i++) ...[
+                Expanded(
+                  child: _TopActionButton(data: actionButtons[i]),
                 ),
-              ),
-              const SizedBox(width: 6),
-              Expanded(
-                child: SizedBox(
-                  height: actionBtnH,
-                  child: _FadedSquareButton(
-                    enabled: enabledActions,
-                    icon: Icons.share_rounded,
-                    label: shareLabel,
-                    onTap: onShare,
-                    iconSize: tiny ? 15 : 16,
-                    fontSize: tiny ? 11.3 : 12,
-                    radius: 10,
-                  ),
-                ),
-              ),
+                if (i != actionButtons.length - 1) const SizedBox(width: 6),
+              ],
             ],
           ),
-          SizedBox(height: blockGap),
-          if (reserveSlotAboveRebuild) ...[
-            SizedBox(height: btnH),
-            SizedBox(height: blockGap),
-          ],
+          const SizedBox(height: 8),
           if (showRebuild) ...[
-            SizedBox(
-              width: double.infinity,
-              height: btnH,
-              child: OutlinedButton.icon(
-                onPressed: rebuildEnabled ? onRebuild : null,
-                icon: Icon(
-                  Icons.refresh_rounded,
-                  size: 16,
-                  color: rebuildColor,
-                ),
-                label: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: Alignment.center,
-                  child: Text(
-                    rebuildText,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w900,
-                      fontSize: 12.8,
-                      color: rebuildColor,
-                    ),
-                  ),
-                ),
-                style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: rebuildColor, width: 2),
-                  shape: const StadiumBorder(),
-                ),
-              ),
+            _WidePillButton(
+              enabled: rebuildEnabled,
+              text: rebuildText,
+              icon: Icons.refresh_rounded,
+              leading: null,
+              fillColor: Colors.transparent,
+              borderColor: rebuildColor,
+              textColor: rebuildColor,
+              onTap: onRebuild,
             ),
-            SizedBox(height: blockGap),
+            const SizedBox(height: 8),
           ],
-          SizedBox(
-            width: double.infinity,
-            height: btnH,
-            child: ElevatedButton.icon(
-              onPressed: primaryEnabled ? onPrimary : null,
-              icon: primaryLeading != null
-                  ? Opacity(
-                      opacity: primaryEnabled ? 1 : .35,
-                      child: primaryLeading!,
-                    )
-                  : Icon(primaryIcon, size: 16),
-              label: FittedBox(
-                fit: BoxFit.scaleDown,
-                alignment: Alignment.center,
-                child: Text(
-                  primaryText,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w900,
-                    fontSize: 12.8,
-                  ),
-                ),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF0B6BFF),
-                foregroundColor: Colors.white,
-                shape: const StadiumBorder(),
-                elevation: 0,
-              ),
-            ),
+          _WidePillButton(
+            enabled: primaryEnabled,
+            text: primaryText,
+            icon: primaryIcon,
+            leading: primaryLeading,
+            fillColor: const Color(0xFF0B6BFF),
+            borderColor: const Color(0xFF0B6BFF),
+            textColor: Colors.white,
+            onTap: onPrimary,
           ),
-          SizedBox(height: blockGap),
-          if (middleText != null && onMiddle != null)
-            SizedBox(
-              width: double.infinity,
-              height: btnH,
-              child: OutlinedButton.icon(
-                onPressed: middleEnabled ? onMiddle : null,
-                icon: Icon(
-                  middleIcon ?? Icons.verified_user_outlined,
-                  size: 16,
-                ),
-                label: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: Alignment.center,
-                  child: Text(
-                    middleText!,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w900,
-                      fontSize: 12.8,
-                    ),
-                  ),
-                ),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xFF7C3AED),
-                  side: const BorderSide(color: Color(0xFF7C3AED), width: 2),
-                  shape: const StadiumBorder(),
-                ),
-              ),
-            )
-          else if (reserveMiddleSlot)
-            SizedBox(height: btnH),
-          if (middleText != null || reserveMiddleSlot) SizedBox(height: blockGap),
-          SizedBox(
-            width: double.infinity,
-            height: btnH,
-            child: OutlinedButton.icon(
-              onPressed: secondaryEnabled ? onSecondary : null,
-              icon: Icon(secondaryIcon, size: 16),
-              label: FittedBox(
-                fit: BoxFit.scaleDown,
-                alignment: Alignment.center,
-                child: Text(
-                  secondaryText,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w900,
-                    fontSize: 12.8,
-                  ),
-                ),
-              ),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: const Color(0xFF16A34A),
-                side: const BorderSide(color: Color(0xFF16A34A), width: 2),
-                shape: const StadiumBorder(),
-              ),
-            ),
+          const SizedBox(height: 8),
+          _WidePillButton(
+            enabled: secondaryEnabled,
+            text: secondaryText,
+            icon: secondaryIcon,
+            leading: null,
+            fillColor: Colors.transparent,
+            borderColor: const Color(0xFF16A34A),
+            textColor: const Color(0xFF16A34A),
+            onTap: onSecondary,
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _CardActionData {
+  final String label;
+  final IconData icon;
+  final Widget? leading;
+  final bool enabled;
+  final VoidCallback onTap;
+
+  const _CardActionData({
+    required this.label,
+    required this.icon,
+    required this.enabled,
+    required this.onTap,
+    this.leading,
+  });
+}
+
+class _TopActionButton extends StatelessWidget {
+  final _CardActionData data;
+
+  const _TopActionButton({
+    required this.data,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    return Opacity(
+      opacity: data.enabled ? 1 : .35,
+      child: IgnorePointer(
+        ignoring: !data.enabled,
+        child: InkWell(
+          onTap: data.onTap,
+          borderRadius: BorderRadius.circular(10),
+          child: Container(
+            height: 38,
+            padding: const EdgeInsets.symmetric(horizontal: 6),
+            decoration: BoxDecoration(
+              color: cs.surface,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: cs.outlineVariant.withOpacity(.7)),
+            ),
+            child: Center(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    data.leading ??
+                        Icon(
+                          data.icon,
+                          size: 14,
+                          color: const Color(0xFF0B6BFF),
+                        ),
+                    const SizedBox(width: 4),
+                    Text(
+                      data.label,
+                      maxLines: 1,
+                      overflow: TextOverflow.visible,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w900,
+                        fontSize: 9.2,
+                        color: cs.onSurface.withOpacity(.90),
+                        height: 1,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _WidePillButton extends StatelessWidget {
+  final bool enabled;
+  final String text;
+  final IconData icon;
+  final Widget? leading;
+  final Color fillColor;
+  final Color borderColor;
+  final Color textColor;
+  final VoidCallback onTap;
+
+  const _WidePillButton({
+    required this.enabled,
+    required this.text,
+    required this.icon,
+    required this.leading,
+    required this.fillColor,
+    required this.borderColor,
+    required this.textColor,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Opacity(
+      opacity: enabled ? 1 : .45,
+      child: IgnorePointer(
+        ignoring: !enabled,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(999),
+          child: Container(
+            width: double.infinity,
+            height: 40,
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            decoration: BoxDecoration(
+              color: fillColor,
+              borderRadius: BorderRadius.circular(999),
+              border: Border.all(color: borderColor, width: 2),
+            ),
+            child: Center(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    leading ??
+                        Icon(
+                          icon,
+                          size: 15,
+                          color: textColor,
+                        ),
+                    const SizedBox(width: 6),
+                    Text(
+                      text,
+                      maxLines: 1,
+                      overflow: TextOverflow.visible,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w900,
+                        fontSize: 11,
+                        color: textColor,
+                        height: 1,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -1052,31 +1091,35 @@ class _AppIcon extends StatelessWidget {
 class _StatusPill extends StatelessWidget {
   final String label;
   final Color color;
+  final bool small;
 
   const _StatusPill({
     required this.label,
     required this.color,
+    this.small = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    final shown = label.trim().toUpperCase();
-
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      padding: EdgeInsets.symmetric(
+        horizontal: small ? 8 : 10,
+        vertical: small ? 4 : 5,
+      ),
       decoration: BoxDecoration(
-        color: color.withOpacity(.18),
+        color: color.withOpacity(.12),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: color.withOpacity(.45)),
+        border: Border.all(color: color.withOpacity(.40)),
       ),
       child: Text(
-        shown,
+        label,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: TextStyle(
           fontWeight: FontWeight.w900,
-          fontSize: 10.5,
+          fontSize: small ? 9 : 10.5,
           color: color,
+          height: 1,
         ),
       ),
     );
@@ -1095,9 +1138,9 @@ class _MiniPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
       decoration: BoxDecoration(
-        color: color.withOpacity(.16),
+        color: color.withOpacity(.14),
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
@@ -1106,74 +1149,9 @@ class _MiniPill extends StatelessWidget {
         overflow: TextOverflow.ellipsis,
         style: TextStyle(
           color: color,
-          fontSize: 10,
+          fontSize: 8.5,
           fontWeight: FontWeight.w900,
-        ),
-      ),
-    );
-  }
-}
-
-class _FadedSquareButton extends StatelessWidget {
-  final bool enabled;
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-
-  final double iconSize;
-  final double fontSize;
-  final double radius;
-
-  const _FadedSquareButton({
-    required this.enabled,
-    required this.icon,
-    required this.label,
-    required this.onTap,
-    this.iconSize = 16,
-    this.fontSize = 12,
-    this.radius = 10,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-
-    return Opacity(
-      opacity: enabled ? 1 : .35,
-      child: IgnorePointer(
-        ignoring: !enabled,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(radius),
-          child: Container(
-            decoration: BoxDecoration(
-              color: cs.surface,
-              borderRadius: BorderRadius.circular(radius),
-              border: Border.all(color: cs.outlineVariant.withOpacity(.7)),
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(icon, color: const Color(0xFF0B6BFF), size: iconSize),
-                const SizedBox(width: 6),
-                Flexible(
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: Alignment.center,
-                    child: Text(
-                      label,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w900,
-                        fontSize: fontSize,
-                        color: cs.onSurface.withOpacity(.90),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+          height: 1,
         ),
       ),
     );

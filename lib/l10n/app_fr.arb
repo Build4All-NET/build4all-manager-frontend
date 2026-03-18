@@ -1170,7 +1170,9 @@
   "iosInternalTestingWaitingMessage": "Invitation envoyée. En attente de l’acceptation Apple.",
   "iosInternalTestingFailedMessage": "La demande de test interne a échoué.",
   "iosInternalTestingSubmittedMessage": "La demande de test interne a été envoyée avec succès.",
-
+  "owner_project_ios_testflight_hint": "Installez TestFlight pour ouvrir l’application",
+  "owner_project_android_download_hint": "Télécharger pour installer :",
+  "common_open": "Ouvrir",
    "iosInternalTestingSectionSubtitle": "Demandez un test interne pour votre application iOS afin de recevoir un build via TestFlight.",
   "iosInternalTestingReadyHint": "Le test interne est prêt. Vous devriez recevoir un email de TestFlight avec l’accès au build iOS.",
   "iosInternalTestingWaitingHint": "L’invitation a été envoyée. Veuillez accepter l’invitation Apple pour que le test interne devienne prêt.",
