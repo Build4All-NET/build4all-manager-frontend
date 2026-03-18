@@ -1033,6 +1033,61 @@
 "iosInternalTestingAddTesterTitle": "إضافة مختبر",
 "iosInternalTestingAddTesterButton": "إضافة مختبر",
 "iosInternalTestingTesterListTitle": "المختبرون المدعوون",
-"iosInternalTestingNoTestersYet": "لم تتم إضافة أي مختبرين داخليين بعد."
+"iosInternalTestingNoTestersYet": "لم تتم إضافة أي مختبرين داخليين بعد.",
+
+  "common_working": " جارٍ العمل...",
+
+  "super_nav_ios_internal_testing": "اختبار iOS الداخلي",
+  "super_nav_notifications": "الإشعارات",
+
+  "super_ios_internal_testing_search_hint": "ابحث بالبريد الإلكتروني أو اسم المختبر…",
+  "super_ios_internal_testing_status": "الحالة",
+  "super_ios_internal_testing_sync_all_visible_pending": "مزامنة كل الطلبات المعلقة الظاهرة",
+  "super_ios_internal_testing_refresh": "تحديث",
+  "super_ios_internal_testing_empty_state": "لا توجد طلبات اختبار داخلي لتطبيق iOS.",
+
+  "super_ios_internal_testing_total": "الإجمالي",
+  "super_ios_internal_testing_waiting": "بانتظار القبول",
+  "super_ios_internal_testing_adding": "جارٍ الإضافة للاختبار الداخلي",
+  "super_ios_internal_testing_failed": "فشل",
+  "super_ios_internal_testing_ready": "جاهز",
+
+  "super_ios_internal_testing_status_all": "الكل",
+  "super_ios_internal_testing_status_requested":"تم الطلب",
+  "super_ios_internal_testing_status_processing": "قيد المعالجة",
+  "super_ios_internal_testing_status_invitation_sent": "تم إرسال الدعوة",
+  "super_ios_internal_testing_status_waiting_acceptance": "بانتظار القبول",
+  "super_ios_internal_testing_status_adding": "جارٍ الإضافة للاختبار الداخلي",
+  "super_ios_internal_testing_status_failed": "فشل",
+  "super_ios_internal_testing_status_ready": "جاهز",
+  "super_ios_internal_testing_status_cancelled": "ملغى",
+
+  "super_ios_internal_testing_process_success": " تمت معالجة الطلب بنجاح",
+  "super_ios_internal_testing_sync_success": "تمت مزامنة الطلب بنجاح",
+  "super_ios_internal_testing_no_syncable_visible": "لا توجد طلبات معلّقة ظاهرة للمزامنة",
+  "super_ios_internal_testing_sync_all_finished": "تم الانتهاء من مزامنة كل الطلبات المعلقة الظاهرة. {count} تم مزامنتها.",
+  "@super_ios_internal_testing_sync_all_finished": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "super_ios_internal_testing_process_request": "معالجة الطلب",
+  "super_ios_internal_testing_sync_request": "مزامنة الطلب",
+  "super_ios_internal_testing_copy_apple_email": "نسخ بريد Apple",
+  "super_ios_internal_testing_copy_request_id": "نسخ معرف الطلب",
+  "super_ios_internal_testing_copy_bundle_id": "نسخ معرف الحزمة",
+
+  "super_ios_internal_testing_unnamed_app": " (تطبيق بدون اسم)",
+  "super_ios_internal_testing_aup_label": "AUP",
+  "super_ios_internal_testing_request_label": "الطلب",
+  "super_ios_internal_testing_process": " معالجة",
+  "super_ios_internal_testing_sync": " مزامنة",
+  "super_ios_internal_testing_more_actions": "المزيد من الإجراءات",
+  "super_dashboard_admin_tools": "أدوات الإدارة",
+  "super_dashboard_ios_internal_testing_desc": "إدارة طلبات الاختبار الداخلي لتطبيقات iOS. راجع الطلبات، عالجها، أو مزامنتها مع Apple."
+  
  
 }

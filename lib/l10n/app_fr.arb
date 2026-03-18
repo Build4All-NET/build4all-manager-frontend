@@ -1189,5 +1189,58 @@
 "iosInternalTestingAddTesterTitle": "Ajouter un testeur",
 "iosInternalTestingAddTesterButton": "Ajouter un testeur",
 "iosInternalTestingTesterListTitle": "Testeurs invités",
-"iosInternalTestingNoTestersYet": "Aucun testeur interne n’a encore été ajouté."
+"iosInternalTestingNoTestersYet": "Aucun testeur interne n’a encore été ajouté.",
+"common_working": "En cours...",
+
+  "super_nav_ios_internal_testing": "Tests internes iOS",
+  "super_nav_notifications": "Notifications",
+
+  "super_ios_internal_testing_search_hint": "Rechercher par application, bundle, e-mail ou statut...",
+  "super_ios_internal_testing_status": "Statut",
+  "super_ios_internal_testing_sync_all_visible_pending": "Synchroniser tous les éléments visibles en attente",
+  "super_ios_internal_testing_refresh": "Actualiser",
+  "super_ios_internal_testing_empty_state": "Aucune demande de test interne iOS trouvée.",
+
+  "super_ios_internal_testing_total": "Total",
+  "super_ios_internal_testing_waiting": "En attente",
+  "super_ios_internal_testing_adding": "Ajout en cours",
+  "super_ios_internal_testing_failed": "Échoué",
+  "super_ios_internal_testing_ready": "Prêt",
+
+  "super_ios_internal_testing_status_all": "Tous",
+  "super_ios_internal_testing_status_requested": "Demandé",
+  "super_ios_internal_testing_status_processing": "En cours de traitement",
+  "super_ios_internal_testing_status_invitation_sent": "Invitation envoyée",
+  "super_ios_internal_testing_status_waiting_acceptance": "En attente d’acceptation",
+  "super_ios_internal_testing_status_adding": "Ajout aux tests internes",
+  "super_ios_internal_testing_status_failed": "Échoué",
+  "super_ios_internal_testing_status_ready": "Prêt",
+  "super_ios_internal_testing_status_cancelled": "Annulé",
+
+  "super_ios_internal_testing_process_success": "La demande a été traitée avec succès",
+  "super_ios_internal_testing_sync_success": "La demande a été synchronisée avec succès",
+  "super_ios_internal_testing_no_syncable_visible": "Aucune demande synchronisable dans la vue actuelle",
+  "super_ios_internal_testing_sync_all_finished": "Synchronisation terminée. Mis à jour : {count}",
+  "@super_ios_internal_testing_sync_all_finished": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "super_ios_internal_testing_process_request": "Traiter la demande",
+  "super_ios_internal_testing_sync_request": "Synchroniser la demande",
+  "super_ios_internal_testing_copy_apple_email": "Copier l’e-mail Apple",
+  "super_ios_internal_testing_copy_request_id": "Copier l’identifiant de la demande",
+  "super_ios_internal_testing_copy_bundle_id": "Copier le Bundle ID",
+
+  "super_ios_internal_testing_unnamed_app": "Application sans nom",
+  "super_ios_internal_testing_aup_label": "AUP",
+  "super_ios_internal_testing_request_label": "Demande",
+  "super_ios_internal_testing_process": "Traiter",
+  "super_ios_internal_testing_sync": "Synchroniser",
+  "super_ios_internal_testing_more_actions": "Plus d’actions",
+  "super_dashboard_admin_tools": "Outils d’administration",
+  "super_dashboard_ios_internal_testing_desc": "Gérez les demandes de test interne iOS, traitez-les, synchronisez-les avec Apple et surveillez leur statut"
 }

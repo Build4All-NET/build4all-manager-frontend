@@ -2636,4 +2636,123 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get iosInternalTestingNoTestersYet => 'Aucun testeur interne n’a encore été ajouté.';
+
+  @override
+  String get common_working => 'En cours...';
+
+  @override
+  String get super_nav_ios_internal_testing => 'Tests internes iOS';
+
+  @override
+  String get super_nav_notifications => 'Notifications';
+
+  @override
+  String get super_ios_internal_testing_search_hint => 'Rechercher par application, bundle, e-mail ou statut...';
+
+  @override
+  String get super_ios_internal_testing_status => 'Statut';
+
+  @override
+  String get super_ios_internal_testing_sync_all_visible_pending => 'Synchroniser tous les éléments visibles en attente';
+
+  @override
+  String get super_ios_internal_testing_refresh => 'Actualiser';
+
+  @override
+  String get super_ios_internal_testing_empty_state => 'Aucune demande de test interne iOS trouvée.';
+
+  @override
+  String get super_ios_internal_testing_total => 'Total';
+
+  @override
+  String get super_ios_internal_testing_waiting => 'En attente';
+
+  @override
+  String get super_ios_internal_testing_adding => 'Ajout en cours';
+
+  @override
+  String get super_ios_internal_testing_failed => 'Échoué';
+
+  @override
+  String get super_ios_internal_testing_ready => 'Prêt';
+
+  @override
+  String get super_ios_internal_testing_status_all => 'Tous';
+
+  @override
+  String get super_ios_internal_testing_status_requested => 'Demandé';
+
+  @override
+  String get super_ios_internal_testing_status_processing => 'En cours de traitement';
+
+  @override
+  String get super_ios_internal_testing_status_invitation_sent => 'Invitation envoyée';
+
+  @override
+  String get super_ios_internal_testing_status_waiting_acceptance => 'En attente d’acceptation';
+
+  @override
+  String get super_ios_internal_testing_status_adding => 'Ajout aux tests internes';
+
+  @override
+  String get super_ios_internal_testing_status_failed => 'Échoué';
+
+  @override
+  String get super_ios_internal_testing_status_ready => 'Prêt';
+
+  @override
+  String get super_ios_internal_testing_status_cancelled => 'Annulé';
+
+  @override
+  String get super_ios_internal_testing_process_success => 'La demande a été traitée avec succès';
+
+  @override
+  String get super_ios_internal_testing_sync_success => 'La demande a été synchronisée avec succès';
+
+  @override
+  String get super_ios_internal_testing_no_syncable_visible => 'Aucune demande synchronisable dans la vue actuelle';
+
+  @override
+  String super_ios_internal_testing_sync_all_finished(int count) {
+    return 'Synchronisation terminée. Mis à jour : $count';
+  }
+
+  @override
+  String get super_ios_internal_testing_process_request => 'Traiter la demande';
+
+  @override
+  String get super_ios_internal_testing_sync_request => 'Synchroniser la demande';
+
+  @override
+  String get super_ios_internal_testing_copy_apple_email => 'Copier l’e-mail Apple';
+
+  @override
+  String get super_ios_internal_testing_copy_request_id => 'Copier l’identifiant de la demande';
+
+  @override
+  String get super_ios_internal_testing_copy_bundle_id => 'Copier le Bundle ID';
+
+  @override
+  String get super_ios_internal_testing_unnamed_app => 'Application sans nom';
+
+  @override
+  String get super_ios_internal_testing_aup_label => 'AUP';
+
+  @override
+  String get super_ios_internal_testing_request_label => 'Demande';
+
+  @override
+  String get super_ios_internal_testing_process => 'Traiter';
+
+  @override
+  String get super_ios_internal_testing_sync => 'Synchroniser';
+
+  @override
+  String get super_ios_internal_testing_more_actions => 'Plus d’actions';
+
+  @override
+  String get super_dashboard_admin_tools => 'Outils d’administration';
+
+  @override
+  String get super_dashboard_ios_internal_testing_desc => 'Gérez les demandes de test interne iOS, traitez-les, synchronisez-les avec Apple et surveillez leur statut';
 }

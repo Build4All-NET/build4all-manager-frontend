@@ -5274,6 +5274,240 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No internal testers have been added yet.'**
   String get iosInternalTestingNoTestersYet;
+
+  /// No description provided for @common_working.
+  ///
+  /// In en, this message translates to:
+  /// **'Working...'**
+  String get common_working;
+
+  /// No description provided for @super_nav_ios_internal_testing.
+  ///
+  /// In en, this message translates to:
+  /// **'iOS Internal Testing'**
+  String get super_nav_ios_internal_testing;
+
+  /// No description provided for @super_nav_notifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get super_nav_notifications;
+
+  /// No description provided for @super_ios_internal_testing_search_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by app, bundle, email, status...'**
+  String get super_ios_internal_testing_search_hint;
+
+  /// No description provided for @super_ios_internal_testing_status.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get super_ios_internal_testing_status;
+
+  /// No description provided for @super_ios_internal_testing_sync_all_visible_pending.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync All Visible Pending'**
+  String get super_ios_internal_testing_sync_all_visible_pending;
+
+  /// No description provided for @super_ios_internal_testing_refresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get super_ios_internal_testing_refresh;
+
+  /// No description provided for @super_ios_internal_testing_empty_state.
+  ///
+  /// In en, this message translates to:
+  /// **'No iOS internal testing requests found.'**
+  String get super_ios_internal_testing_empty_state;
+
+  /// No description provided for @super_ios_internal_testing_total.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get super_ios_internal_testing_total;
+
+  /// No description provided for @super_ios_internal_testing_waiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting'**
+  String get super_ios_internal_testing_waiting;
+
+  /// No description provided for @super_ios_internal_testing_adding.
+  ///
+  /// In en, this message translates to:
+  /// **'Adding'**
+  String get super_ios_internal_testing_adding;
+
+  /// No description provided for @super_ios_internal_testing_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get super_ios_internal_testing_failed;
+
+  /// No description provided for @super_ios_internal_testing_ready.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready'**
+  String get super_ios_internal_testing_ready;
+
+  /// No description provided for @super_ios_internal_testing_status_all.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get super_ios_internal_testing_status_all;
+
+  /// No description provided for @super_ios_internal_testing_status_requested.
+  ///
+  /// In en, this message translates to:
+  /// **'Requested'**
+  String get super_ios_internal_testing_status_requested;
+
+  /// No description provided for @super_ios_internal_testing_status_processing.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing'**
+  String get super_ios_internal_testing_status_processing;
+
+  /// No description provided for @super_ios_internal_testing_status_invitation_sent.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitation Sent'**
+  String get super_ios_internal_testing_status_invitation_sent;
+
+  /// No description provided for @super_ios_internal_testing_status_waiting_acceptance.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting Acceptance'**
+  String get super_ios_internal_testing_status_waiting_acceptance;
+
+  /// No description provided for @super_ios_internal_testing_status_adding.
+  ///
+  /// In en, this message translates to:
+  /// **'Adding To Internal Testing'**
+  String get super_ios_internal_testing_status_adding;
+
+  /// No description provided for @super_ios_internal_testing_status_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get super_ios_internal_testing_status_failed;
+
+  /// No description provided for @super_ios_internal_testing_status_ready.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready'**
+  String get super_ios_internal_testing_status_ready;
+
+  /// No description provided for @super_ios_internal_testing_status_cancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get super_ios_internal_testing_status_cancelled;
+
+  /// No description provided for @super_ios_internal_testing_process_success.
+  ///
+  /// In en, this message translates to:
+  /// **'Request processed successfully'**
+  String get super_ios_internal_testing_process_success;
+
+  /// No description provided for @super_ios_internal_testing_sync_success.
+  ///
+  /// In en, this message translates to:
+  /// **'Request synced successfully'**
+  String get super_ios_internal_testing_sync_success;
+
+  /// No description provided for @super_ios_internal_testing_no_syncable_visible.
+  ///
+  /// In en, this message translates to:
+  /// **'No syncable requests in the current view'**
+  String get super_ios_internal_testing_no_syncable_visible;
+
+  /// No description provided for @super_ios_internal_testing_sync_all_finished.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync finished. Updated: {count}'**
+  String super_ios_internal_testing_sync_all_finished(int count);
+
+  /// No description provided for @super_ios_internal_testing_process_request.
+  ///
+  /// In en, this message translates to:
+  /// **'Process request'**
+  String get super_ios_internal_testing_process_request;
+
+  /// No description provided for @super_ios_internal_testing_sync_request.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync request'**
+  String get super_ios_internal_testing_sync_request;
+
+  /// No description provided for @super_ios_internal_testing_copy_apple_email.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy Apple email'**
+  String get super_ios_internal_testing_copy_apple_email;
+
+  /// No description provided for @super_ios_internal_testing_copy_request_id.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy request ID'**
+  String get super_ios_internal_testing_copy_request_id;
+
+  /// No description provided for @super_ios_internal_testing_copy_bundle_id.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy bundle ID'**
+  String get super_ios_internal_testing_copy_bundle_id;
+
+  /// No description provided for @super_ios_internal_testing_unnamed_app.
+  ///
+  /// In en, this message translates to:
+  /// **'Unnamed App'**
+  String get super_ios_internal_testing_unnamed_app;
+
+  /// No description provided for @super_ios_internal_testing_aup_label.
+  ///
+  /// In en, this message translates to:
+  /// **'AUP'**
+  String get super_ios_internal_testing_aup_label;
+
+  /// No description provided for @super_ios_internal_testing_request_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Request'**
+  String get super_ios_internal_testing_request_label;
+
+  /// No description provided for @super_ios_internal_testing_process.
+  ///
+  /// In en, this message translates to:
+  /// **'Process'**
+  String get super_ios_internal_testing_process;
+
+  /// No description provided for @super_ios_internal_testing_sync.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync'**
+  String get super_ios_internal_testing_sync;
+
+  /// No description provided for @super_ios_internal_testing_more_actions.
+  ///
+  /// In en, this message translates to:
+  /// **'More actions'**
+  String get super_ios_internal_testing_more_actions;
+
+  /// No description provided for @super_dashboard_admin_tools.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin Tools'**
+  String get super_dashboard_admin_tools;
+
+  /// No description provided for @super_dashboard_ios_internal_testing_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage waiting, failed, synced, and manual internal testing cases.'**
+  String get super_dashboard_ios_internal_testing_desc;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

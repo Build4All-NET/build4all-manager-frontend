@@ -2636,4 +2636,123 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get iosInternalTestingNoTestersYet => 'No internal testers have been added yet.';
+
+  @override
+  String get common_working => 'Working...';
+
+  @override
+  String get super_nav_ios_internal_testing => 'iOS Internal Testing';
+
+  @override
+  String get super_nav_notifications => 'Notifications';
+
+  @override
+  String get super_ios_internal_testing_search_hint => 'Search by app, bundle, email, status...';
+
+  @override
+  String get super_ios_internal_testing_status => 'Status';
+
+  @override
+  String get super_ios_internal_testing_sync_all_visible_pending => 'Sync All Visible Pending';
+
+  @override
+  String get super_ios_internal_testing_refresh => 'Refresh';
+
+  @override
+  String get super_ios_internal_testing_empty_state => 'No iOS internal testing requests found.';
+
+  @override
+  String get super_ios_internal_testing_total => 'Total';
+
+  @override
+  String get super_ios_internal_testing_waiting => 'Waiting';
+
+  @override
+  String get super_ios_internal_testing_adding => 'Adding';
+
+  @override
+  String get super_ios_internal_testing_failed => 'Failed';
+
+  @override
+  String get super_ios_internal_testing_ready => 'Ready';
+
+  @override
+  String get super_ios_internal_testing_status_all => 'All';
+
+  @override
+  String get super_ios_internal_testing_status_requested => 'Requested';
+
+  @override
+  String get super_ios_internal_testing_status_processing => 'Processing';
+
+  @override
+  String get super_ios_internal_testing_status_invitation_sent => 'Invitation Sent';
+
+  @override
+  String get super_ios_internal_testing_status_waiting_acceptance => 'Waiting Acceptance';
+
+  @override
+  String get super_ios_internal_testing_status_adding => 'Adding To Internal Testing';
+
+  @override
+  String get super_ios_internal_testing_status_failed => 'Failed';
+
+  @override
+  String get super_ios_internal_testing_status_ready => 'Ready';
+
+  @override
+  String get super_ios_internal_testing_status_cancelled => 'Cancelled';
+
+  @override
+  String get super_ios_internal_testing_process_success => 'Request processed successfully';
+
+  @override
+  String get super_ios_internal_testing_sync_success => 'Request synced successfully';
+
+  @override
+  String get super_ios_internal_testing_no_syncable_visible => 'No syncable requests in the current view';
+
+  @override
+  String super_ios_internal_testing_sync_all_finished(int count) {
+    return 'Sync finished. Updated: $count';
+  }
+
+  @override
+  String get super_ios_internal_testing_process_request => 'Process request';
+
+  @override
+  String get super_ios_internal_testing_sync_request => 'Sync request';
+
+  @override
+  String get super_ios_internal_testing_copy_apple_email => 'Copy Apple email';
+
+  @override
+  String get super_ios_internal_testing_copy_request_id => 'Copy request ID';
+
+  @override
+  String get super_ios_internal_testing_copy_bundle_id => 'Copy bundle ID';
+
+  @override
+  String get super_ios_internal_testing_unnamed_app => 'Unnamed App';
+
+  @override
+  String get super_ios_internal_testing_aup_label => 'AUP';
+
+  @override
+  String get super_ios_internal_testing_request_label => 'Request';
+
+  @override
+  String get super_ios_internal_testing_process => 'Process';
+
+  @override
+  String get super_ios_internal_testing_sync => 'Sync';
+
+  @override
+  String get super_ios_internal_testing_more_actions => 'More actions';
+
+  @override
+  String get super_dashboard_admin_tools => 'Admin Tools';
+
+  @override
+  String get super_dashboard_ios_internal_testing_desc => 'Manage waiting, failed, synced, and manual internal testing cases.';
 }

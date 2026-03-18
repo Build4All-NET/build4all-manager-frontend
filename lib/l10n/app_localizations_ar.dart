@@ -2636,4 +2636,123 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get iosInternalTestingNoTestersYet => 'لم تتم إضافة أي مختبرين داخليين بعد.';
+
+  @override
+  String get common_working => ' جارٍ العمل...';
+
+  @override
+  String get super_nav_ios_internal_testing => 'اختبار iOS الداخلي';
+
+  @override
+  String get super_nav_notifications => 'الإشعارات';
+
+  @override
+  String get super_ios_internal_testing_search_hint => 'ابحث بالبريد الإلكتروني أو اسم المختبر…';
+
+  @override
+  String get super_ios_internal_testing_status => 'الحالة';
+
+  @override
+  String get super_ios_internal_testing_sync_all_visible_pending => 'مزامنة كل الطلبات المعلقة الظاهرة';
+
+  @override
+  String get super_ios_internal_testing_refresh => 'تحديث';
+
+  @override
+  String get super_ios_internal_testing_empty_state => 'لا توجد طلبات اختبار داخلي لتطبيق iOS.';
+
+  @override
+  String get super_ios_internal_testing_total => 'الإجمالي';
+
+  @override
+  String get super_ios_internal_testing_waiting => 'بانتظار القبول';
+
+  @override
+  String get super_ios_internal_testing_adding => 'جارٍ الإضافة للاختبار الداخلي';
+
+  @override
+  String get super_ios_internal_testing_failed => 'فشل';
+
+  @override
+  String get super_ios_internal_testing_ready => 'جاهز';
+
+  @override
+  String get super_ios_internal_testing_status_all => 'الكل';
+
+  @override
+  String get super_ios_internal_testing_status_requested => 'تم الطلب';
+
+  @override
+  String get super_ios_internal_testing_status_processing => 'قيد المعالجة';
+
+  @override
+  String get super_ios_internal_testing_status_invitation_sent => 'تم إرسال الدعوة';
+
+  @override
+  String get super_ios_internal_testing_status_waiting_acceptance => 'بانتظار القبول';
+
+  @override
+  String get super_ios_internal_testing_status_adding => 'جارٍ الإضافة للاختبار الداخلي';
+
+  @override
+  String get super_ios_internal_testing_status_failed => 'فشل';
+
+  @override
+  String get super_ios_internal_testing_status_ready => 'جاهز';
+
+  @override
+  String get super_ios_internal_testing_status_cancelled => 'ملغى';
+
+  @override
+  String get super_ios_internal_testing_process_success => ' تمت معالجة الطلب بنجاح';
+
+  @override
+  String get super_ios_internal_testing_sync_success => 'تمت مزامنة الطلب بنجاح';
+
+  @override
+  String get super_ios_internal_testing_no_syncable_visible => 'لا توجد طلبات معلّقة ظاهرة للمزامنة';
+
+  @override
+  String super_ios_internal_testing_sync_all_finished(int count) {
+    return 'تم الانتهاء من مزامنة كل الطلبات المعلقة الظاهرة. $count تم مزامنتها.';
+  }
+
+  @override
+  String get super_ios_internal_testing_process_request => 'معالجة الطلب';
+
+  @override
+  String get super_ios_internal_testing_sync_request => 'مزامنة الطلب';
+
+  @override
+  String get super_ios_internal_testing_copy_apple_email => 'نسخ بريد Apple';
+
+  @override
+  String get super_ios_internal_testing_copy_request_id => 'نسخ معرف الطلب';
+
+  @override
+  String get super_ios_internal_testing_copy_bundle_id => 'نسخ معرف الحزمة';
+
+  @override
+  String get super_ios_internal_testing_unnamed_app => ' (تطبيق بدون اسم)';
+
+  @override
+  String get super_ios_internal_testing_aup_label => 'AUP';
+
+  @override
+  String get super_ios_internal_testing_request_label => 'الطلب';
+
+  @override
+  String get super_ios_internal_testing_process => ' معالجة';
+
+  @override
+  String get super_ios_internal_testing_sync => ' مزامنة';
+
+  @override
+  String get super_ios_internal_testing_more_actions => 'المزيد من الإجراءات';
+
+  @override
+  String get super_dashboard_admin_tools => 'أدوات الإدارة';
+
+  @override
+  String get super_dashboard_ios_internal_testing_desc => 'إدارة طلبات الاختبار الداخلي لتطبيقات iOS. راجع الطلبات، عالجها، أو مزامنتها مع Apple.';
 }

@@ -3,6 +3,7 @@ import 'package:build4all_manager/features/superadmin/dashboard/data/services/li
 import 'package:build4all_manager/features/superadmin/dashboard/presentation/screens/apps_licenses_screen.dart';
 import 'package:build4all_manager/features/superadmin/dashboard/presentation/screens/projects_screen.dart';
 import 'package:build4all_manager/features/superadmin/dashboard/presentation/screens/upgrade_requests_screen.dart';
+import 'package:build4all_manager/features/superadmin/ios_internal_testing/presentation/screens/super_admin_ios_internal_testing_screen.dart';
 import 'package:build4all_manager/l10n/app_localizations.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -19,27 +20,36 @@ import '../widgets/pro_project_tile.dart';
 import '../widgets/section_header.dart';
 
 class DashboardScreen extends StatelessWidget {
-  const DashboardScreen({super.key});
+  final Dio? dio;
+
+  const DashboardScreen({
+    super.key,
+    this.dio,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final Dio dio = DioClient.ensure();
+    final Dio resolvedDio = dio ?? DioClient.ensure();
 
     return BlocProvider(
       create: (_) => DashboardBloc(
         DashboardRepositoryImpl(
-          ProjectApi(dio),
-          LicensingApi(dio),
+          ProjectApi(resolvedDio),
+          LicensingApi(resolvedDio),
         ),
       )..add(LoadDashboard()),
-      child: const _DashboardContent(),
+      child: _DashboardContent(dio: resolvedDio),
     );
   }
 }
 
 /// CONTENT ONLY
 class _DashboardContent extends StatelessWidget {
-  const _DashboardContent();
+  final Dio dio;
+
+  const _DashboardContent({
+    required this.dio,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -164,6 +174,32 @@ class _DashboardContent extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                       builder: (_) => const AppsLicensesScreen(),
+                    ),
+                  );
+                },
+              ),
+
+              const SizedBox(height: 16),
+              SectionHeader(title: l10n.super_dashboard_admin_tools),
+              const SizedBox(height: 10),
+
+              _AdminToolCard(
+                icon: Icons.bug_report_rounded,
+                title: l10n.super_nav_ios_internal_testing,
+                subtitle: l10n.super_dashboard_ios_internal_testing_desc,
+                gradient: LinearGradient(
+                  colors: [
+                    Theme.of(context).colorScheme.primary,
+                    Theme.of(context).colorScheme.tertiary,
+                  ],
+                ),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => SuperAdminIosInternalTestingScreen(
+                        dio: dio,
+                      ),
                     ),
                   );
                 },
@@ -563,6 +599,166 @@ class _ProWideKpiCardState extends State<_ProWideKpiCard>
                               ),
                             ],
                           ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AdminToolCard extends StatefulWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final Gradient gradient;
+  final VoidCallback onTap;
+
+  const _AdminToolCard({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.gradient,
+    required this.onTap,
+  });
+
+  @override
+  State<_AdminToolCard> createState() => _AdminToolCardState();
+}
+
+class _AdminToolCardState extends State<_AdminToolCard>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _c = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 560),
+  );
+
+  late final Animation<double> _scale =
+      CurvedAnimation(parent: _c, curve: Curves.easeOutBack);
+
+  bool _hover = false;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(const Duration(milliseconds: 320), () {
+      if (mounted) _c.forward();
+    });
+  }
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    return ScaleTransition(
+      scale: _scale,
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        onEnter: (_) => setState(() => _hover = true),
+        onExit: (_) => setState(() => _hover = false),
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: widget.onTap,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 160),
+            curve: Curves.easeOut,
+            decoration: BoxDecoration(
+              gradient: widget.gradient,
+              borderRadius: BorderRadius.circular(18),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(_hover ? .12 : .08),
+                  blurRadius: _hover ? 18 : 14,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+              border: Border.all(
+                color: Colors.white.withOpacity(_hover ? .20 : .12),
+                width: 1,
+              ),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(18),
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: AnimatedOpacity(
+                      duration: const Duration(milliseconds: 160),
+                      opacity: _hover ? 1 : 0,
+                      child: Container(
+                        color: Colors.white.withOpacity(.06),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    margin: const EdgeInsets.all(1),
+                    decoration: BoxDecoration(
+                      color: cs.surface.withOpacity(.06),
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(.16),
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(color: Colors.white24),
+                          ),
+                          child: Icon(widget.icon, color: Colors.white),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: DefaultTextStyle(
+                            style: const TextStyle(color: Colors.white),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  widget.title,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w800,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  widget.subtitle,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white70,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        const Icon(
+                          Icons.arrow_forward_ios_rounded,
+                          color: Colors.white70,
+                          size: 18,
                         ),
                       ],
                     ),

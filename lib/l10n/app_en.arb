@@ -1096,5 +1096,59 @@
 "iosInternalTestingAddTesterTitle": "Add tester",
 "iosInternalTestingAddTesterButton": "Add tester",
 "iosInternalTestingTesterListTitle": "Invited testers",
-"iosInternalTestingNoTestersYet": "No internal testers have been added yet."
+"iosInternalTestingNoTestersYet": "No internal testers have been added yet.",
+
+  "common_working": "Working...",
+
+  "super_nav_ios_internal_testing": "iOS Internal Testing",
+  "super_nav_notifications": "Notifications",
+
+  "super_ios_internal_testing_search_hint": "Search by app, bundle, email, status...",
+  "super_ios_internal_testing_status": "Status",
+  "super_ios_internal_testing_sync_all_visible_pending": "Sync All Visible Pending",
+  "super_ios_internal_testing_refresh": "Refresh",
+  "super_ios_internal_testing_empty_state": "No iOS internal testing requests found.",
+
+  "super_ios_internal_testing_total": "Total",
+  "super_ios_internal_testing_waiting": "Waiting",
+  "super_ios_internal_testing_adding": "Adding",
+  "super_ios_internal_testing_failed": "Failed",
+  "super_ios_internal_testing_ready": "Ready",
+
+  "super_ios_internal_testing_status_all": "All",
+  "super_ios_internal_testing_status_requested": "Requested",
+  "super_ios_internal_testing_status_processing": "Processing",
+  "super_ios_internal_testing_status_invitation_sent": "Invitation Sent",
+  "super_ios_internal_testing_status_waiting_acceptance": "Waiting Acceptance",
+  "super_ios_internal_testing_status_adding": "Adding To Internal Testing",
+  "super_ios_internal_testing_status_failed": "Failed",
+  "super_ios_internal_testing_status_ready": "Ready",
+  "super_ios_internal_testing_status_cancelled": "Cancelled",
+
+  "super_ios_internal_testing_process_success": "Request processed successfully",
+  "super_ios_internal_testing_sync_success": "Request synced successfully",
+  "super_ios_internal_testing_no_syncable_visible": "No syncable requests in the current view",
+  "super_ios_internal_testing_sync_all_finished": "Sync finished. Updated: {count}",
+  "@super_ios_internal_testing_sync_all_finished": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "super_ios_internal_testing_process_request": "Process request",
+  "super_ios_internal_testing_sync_request": "Sync request",
+  "super_ios_internal_testing_copy_apple_email": "Copy Apple email",
+  "super_ios_internal_testing_copy_request_id": "Copy request ID",
+  "super_ios_internal_testing_copy_bundle_id": "Copy bundle ID",
+
+  "super_ios_internal_testing_unnamed_app": "Unnamed App",
+  "super_ios_internal_testing_aup_label": "AUP",
+  "super_ios_internal_testing_request_label": "Request",
+  "super_ios_internal_testing_process": "Process",
+  "super_ios_internal_testing_sync": "Sync",
+  "super_ios_internal_testing_more_actions": "More actions",
+  "super_dashboard_admin_tools": "Admin Tools",
+  "super_dashboard_ios_internal_testing_desc": "Manage waiting, failed, synced, and manual internal testing cases."
 }
