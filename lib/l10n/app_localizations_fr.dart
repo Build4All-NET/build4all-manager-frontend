@@ -2611,7 +2611,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get iosInternalTestingRequestedForLabel => 'Demandé pour';
 
   @override
-  String get iosInternalTestingOpenPageButton => 'Test interne';
+  String get iosInternalTestingOpenPageButton => 'testeurs';
 
   @override
   String get iosInternalTestingPageTitle => 'Test interne iOS';
@@ -2755,4 +2755,10 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get super_dashboard_ios_internal_testing_desc => 'Gérez les demandes de test interne iOS, traitez-les, synchronisez-les avec Apple et surveillez leur statut';
+
+  @override
+  String get owner_project_external_testflight => 'TestFlight externe';
+
+  @override
+  String get owner_project_add_internal_testers => 'Ajouter des testeurs internes';
 }

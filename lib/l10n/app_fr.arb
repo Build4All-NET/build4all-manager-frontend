@@ -1180,7 +1180,7 @@
   "iosInternalTestingSectionTitle": "Test interne iOS",
   "iosInternalTestingRequestButton": "Demander un test interne",
   "iosInternalTestingRequestedForLabel": "Demandé pour",
-  "iosInternalTestingOpenPageButton": "Test interne",
+  "iosInternalTestingOpenPageButton": "testeurs",
 "iosInternalTestingPageTitle": "Test interne iOS",
 "iosInternalTestingRequestedForLabel": "Demandé pour",
 "iosInternalTestingSlotsUsedLabel": "utilisés",
@@ -1242,5 +1242,7 @@
   "super_ios_internal_testing_sync": "Synchroniser",
   "super_ios_internal_testing_more_actions": "Plus d’actions",
   "super_dashboard_admin_tools": "Outils d’administration",
-  "super_dashboard_ios_internal_testing_desc": "Gérez les demandes de test interne iOS, traitez-les, synchronisez-les avec Apple et surveillez leur statut"
+  "super_dashboard_ios_internal_testing_desc": "Gérez les demandes de test interne iOS, traitez-les, synchronisez-les avec Apple et surveillez leur statut",
+  "owner_project_external_testflight": "TestFlight externe",
+"owner_project_add_internal_testers": "Ajouter des testeurs internes"
 }

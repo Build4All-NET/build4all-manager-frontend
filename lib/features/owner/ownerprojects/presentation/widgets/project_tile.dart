@@ -611,19 +611,21 @@ class ProjectTile extends StatelessWidget {
                           iosShareLabel,
                         ),
                       ),
-                      _CardActionData(
-                        label: l10n.iosInternalTestingOpenPageButton,
-                        icon: Icons.verified_user_outlined,
-                        leading: const _TestFlightLikeIcon(size: 14),
-                        enabled: iosReady,
-                        onTap: () => _openInternalTestingPage(context),
-                      ),
-                    ],
-                    primaryText: l10n.download_ios,
-                    primaryIcon: Icons.download_rounded,
+                    _CardActionData(
+                      label: l10n.owner_project_external_testflight,
+                      tooltip: l10n.owner_project_external_testflight,
+                      icon: Icons.open_in_new_rounded,
+                      leading: const _TestFlightLikeIcon(size: 14),
+                      iconOnly: true,
+                      enabled: iosReady,
+                      onTap: () => _openUrl(context, iosUrl),
+                    ),
+                                        ],
+                   primaryText: l10n.owner_project_add_internal_testers,
+                    primaryIcon: Icons.group_add_rounded,
                     primaryLeading: const _TestFlightLikeIcon(size: 16),
                     primaryEnabled: iosReady,
-                    onPrimary: () => _openUrl(context, iosUrl),
+                    onPrimary: () => _openInternalTestingPage(context),
                     secondaryText: l10n.owner_project_publish,
                     secondaryIcon: Icons.upload_rounded,
                     secondaryEnabled: iosReady,
@@ -843,9 +845,11 @@ class _PlatformCard extends StatelessWidget {
 
 class _CardActionData {
   final String label;
+  final String? tooltip;
   final IconData icon;
   final Widget? leading;
   final bool enabled;
+  final bool iconOnly;
   final VoidCallback onTap;
 
   const _CardActionData({
@@ -854,6 +858,8 @@ class _CardActionData {
     required this.enabled,
     required this.onTap,
     this.leading,
+    this.tooltip,
+    this.iconOnly = false,
   });
 }
 
@@ -872,43 +878,53 @@ class _TopActionButton extends StatelessWidget {
       opacity: data.enabled ? 1 : .35,
       child: IgnorePointer(
         ignoring: !data.enabled,
-        child: InkWell(
-          onTap: data.onTap,
-          borderRadius: BorderRadius.circular(10),
-          child: Container(
-            height: 38,
-            padding: const EdgeInsets.symmetric(horizontal: 6),
-            decoration: BoxDecoration(
-              color: cs.surface,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: cs.outlineVariant.withOpacity(.7)),
-            ),
-            child: Center(
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    data.leading ??
+        child: Tooltip(
+          message: data.tooltip ?? data.label,
+          child: InkWell(
+            onTap: data.onTap,
+            borderRadius: BorderRadius.circular(10),
+            child: Container(
+              height: 38,
+              padding: EdgeInsets.symmetric(horizontal: data.iconOnly ? 0 : 6),
+              decoration: BoxDecoration(
+                color: cs.surface,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: cs.outlineVariant.withOpacity(.7)),
+              ),
+              child: Center(
+                child: data.iconOnly
+                    ? (data.leading ??
                         Icon(
                           data.icon,
                           size: 14,
                           color: const Color(0xFF0B6BFF),
+                        ))
+                    : FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            data.leading ??
+                                Icon(
+                                  data.icon,
+                                  size: 14,
+                                  color: const Color(0xFF0B6BFF),
+                                ),
+                            const SizedBox(width: 4),
+                            Text(
+                              data.label,
+                              maxLines: 1,
+                              overflow: TextOverflow.visible,
+                              style: TextStyle(
+                                fontWeight: FontWeight.w900,
+                                fontSize: 9.2,
+                                color: cs.onSurface.withOpacity(.90),
+                                height: 1,
+                              ),
+                            ),
+                          ],
                         ),
-                    const SizedBox(width: 4),
-                    Text(
-                      data.label,
-                      maxLines: 1,
-                      overflow: TextOverflow.visible,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w900,
-                        fontSize: 9.2,
-                        color: cs.onSurface.withOpacity(.90),
-                        height: 1,
                       ),
-                    ),
-                  ],
-                ),
               ),
             ),
           ),

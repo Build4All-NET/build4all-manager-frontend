@@ -1024,7 +1024,7 @@
   "iosInternalTestingSectionTitle": "اختبار داخلي لتطبيق iOS",
   "iosInternalTestingRequestButton": "طلب اختبار داخلي",
   "iosInternalTestingRequestedForLabel": "تم الطلب للبريد" ,
-  "iosInternalTestingOpenPageButton": "الاختبار الداخلي",
+  "iosInternalTestingOpenPageButton":"مختبرين ",
 "iosInternalTestingPageTitle": "الاختبار الداخلي لـ iOS",
 "iosInternalTestingRequestedForLabel": "تم الطلب للبريد",
 "iosInternalTestingSlotsUsedLabel": "مستخدم",
@@ -1087,7 +1087,9 @@
   "super_ios_internal_testing_sync": " مزامنة",
   "super_ios_internal_testing_more_actions": "المزيد من الإجراءات",
   "super_dashboard_admin_tools": "أدوات الإدارة",
-  "super_dashboard_ios_internal_testing_desc": "إدارة طلبات الاختبار الداخلي لتطبيقات iOS. راجع الطلبات، عالجها، أو مزامنتها مع Apple."
+  "super_dashboard_ios_internal_testing_desc": "إدارة طلبات الاختبار الداخلي لتطبيقات iOS. راجع الطلبات، عالجها، أو مزامنتها مع Apple.",
+    "owner_project_external_testflight": "اختبار iOS الخارجي (TestFlight)",
+"owner_project_add_internal_testers": "إضافة مختبرين داخليين"
   
  
 }

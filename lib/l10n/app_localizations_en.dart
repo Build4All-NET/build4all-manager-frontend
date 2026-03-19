@@ -1966,7 +1966,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get owner_proj_details_ecom_m10 => 'Import/export data (CSV/Excel)';
 
   @override
-  String get download_ios => 'Install TestFlight to open';
+  String get download_ios => 'Use TestFlight to open';
 
   @override
   String get owner_profile_edit_title => 'Edit profile';
@@ -2611,7 +2611,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get iosInternalTestingRequestedForLabel => 'Requested for';
 
   @override
-  String get iosInternalTestingOpenPageButton => 'Internal';
+  String get iosInternalTestingOpenPageButton => 'Testers';
 
   @override
   String get iosInternalTestingPageTitle => 'iOS Internal Testing';
@@ -2755,4 +2755,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get super_dashboard_ios_internal_testing_desc => 'Manage waiting, failed, synced, and manual internal testing cases.';
+
+  @override
+  String get owner_project_external_testflight => 'External TestFlight';
+
+  @override
+  String get owner_project_add_internal_testers => 'Add Internal Testers';
 }

@@ -3958,7 +3958,7 @@ abstract class AppLocalizations {
   /// No description provided for @download_ios.
   ///
   /// In en, this message translates to:
-  /// **'Install TestFlight to open'**
+  /// **'Use TestFlight to open'**
   String get download_ios;
 
   /// No description provided for @owner_profile_edit_title.
@@ -5224,7 +5224,7 @@ abstract class AppLocalizations {
   /// No description provided for @iosInternalTestingOpenPageButton.
   ///
   /// In en, this message translates to:
-  /// **'Internal'**
+  /// **'Testers'**
   String get iosInternalTestingOpenPageButton;
 
   /// No description provided for @iosInternalTestingPageTitle.
@@ -5508,6 +5508,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Manage waiting, failed, synced, and manual internal testing cases.'**
   String get super_dashboard_ios_internal_testing_desc;
+
+  /// No description provided for @owner_project_external_testflight.
+  ///
+  /// In en, this message translates to:
+  /// **'External TestFlight'**
+  String get owner_project_external_testflight;
+
+  /// No description provided for @owner_project_add_internal_testers.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Internal Testers'**
+  String get owner_project_add_internal_testers;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

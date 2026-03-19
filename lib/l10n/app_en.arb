@@ -841,7 +841,7 @@
   "owner_proj_details_ecom_m8": "Admin panel: orders, products, customers",
   "owner_proj_details_ecom_m9": "Analytics: revenue, conversion, AOV",
   "owner_proj_details_ecom_m10": "Import/export data (CSV/Excel)",
-  "download_ios":"Install TestFlight to open"
+  "download_ios":"Use TestFlight to open"
 , "owner_profile_edit_title": "Edit profile",
   "owner_profile_edit_save": "Save",
   "owner_profile_edit_saved": "Profile updated",
@@ -1087,7 +1087,7 @@
   "iosInternalTestingSectionTitle": "iOS Internal Testing",
   "iosInternalTestingRequestButton": "Request Internal Testing",
   "iosInternalTestingRequestedForLabel": "Requested for",
-  "iosInternalTestingOpenPageButton": "Internal",
+  "iosInternalTestingOpenPageButton": "Testers",
 "iosInternalTestingPageTitle": "iOS Internal Testing",
 "iosInternalTestingRequestedForLabel": "Requested for",
 "iosInternalTestingSlotsUsedLabel": "used",
@@ -1150,5 +1150,10 @@
   "super_ios_internal_testing_sync": "Sync",
   "super_ios_internal_testing_more_actions": "More actions",
   "super_dashboard_admin_tools": "Admin Tools",
-  "super_dashboard_ios_internal_testing_desc": "Manage waiting, failed, synced, and manual internal testing cases."
+  "super_dashboard_ios_internal_testing_desc": "Manage waiting, failed, synced, and manual internal testing cases.",
+
+  "owner_project_external_testflight": "External TestFlight",
+"owner_project_add_internal_testers": "Add Internal Testers"
+
+
 }
