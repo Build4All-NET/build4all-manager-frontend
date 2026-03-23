@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:build4all_manager/core/utils/upload_safe_image_normalizer.dart';
 import 'package:dio/dio.dart';
+
 import '../models/currency_model.dart';
 
 class OwnerRequestApi {
@@ -98,14 +100,22 @@ class OwnerRequestApi {
     }
 
     if (logoFile != null) {
+      final safeLogo = await UploadSafeImageNormalizer.normalizeForUpload(
+        logoFile,
+        prefix: 'owner_logo_upload',
+        quality: 88,
+        maxWidth: 1600,
+        maxHeight: 1600,
+      );
+
       form.files.add(
         MapEntry(
           'logo',
           await MultipartFile.fromFile(
-            logoFile.path,
-            filename: logoFile.uri.pathSegments.isNotEmpty
-                ? logoFile.uri.pathSegments.last
-                : 'logo.png',
+            safeLogo.path,
+            filename: safeLogo.uri.pathSegments.isNotEmpty
+                ? safeLogo.uri.pathSegments.last
+                : 'logo.jpg',
           ),
         ),
       );

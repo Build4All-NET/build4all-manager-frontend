@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:build4all_manager/core/utils/upload_safe_image_normalizer.dart';
 import 'package:build4all_manager/features/owner/publish/data/services/owner_publish_api.dart';
 import 'package:build4all_manager/features/owner/publish/domain/entities/publish_draft.dart';
 import 'package:build4all_manager/l10n/app_localizations.dart';
@@ -7,6 +8,8 @@ import 'package:build4all_manager/shared/widgets/app_toast.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+
+
 
 class PublishAssetsUploaderSheet extends StatefulWidget {
   final OwnerPublishApi api;
@@ -77,16 +80,35 @@ class _PublishAssetsUploaderSheetState
       imageQuality: 90,
     );
     if (x == null) return;
-    setState(() => _icon = File(x.path));
+
+    final normalized = await UploadSafeImageNormalizer.normalizeForUpload(
+      File(x.path),
+      prefix: 'publish_icon_pick',
+      quality: 90,
+      maxWidth: 2048,
+      maxHeight: 2048,
+    );
+
+    if (!mounted) return;
+    setState(() => _icon = normalized);
   }
 
   Future<void> _pickScreenshots() async {
     final xs = await _picker.pickMultiImage(imageQuality: 90);
     if (xs.isEmpty) return;
 
+    final normalized = await UploadSafeImageNormalizer.normalizeMany(
+      xs.map((x) => File(x.path)),
+      prefix: 'publish_screenshot_pick',
+      quality: 90,
+      maxWidth: 2048,
+      maxHeight: 2048,
+    );
+
+    if (!mounted) return;
+
     setState(() {
-      for (final x in xs) {
-        final f = File(x.path);
+      for (final f in normalized) {
         if (_shots.any((e) => e.path == f.path)) continue;
         _shots.add(f);
       }

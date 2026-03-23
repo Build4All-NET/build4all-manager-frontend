@@ -1,6 +1,7 @@
 // lib/features/owner/ownerrequests/presentation/screens/owner_requests_screen.dart
 import 'dart:io';
 
+import 'package:build4all_manager/core/utils/upload_safe_image_normalizer.dart';
 import 'package:build4all_manager/features/owner/ownerrequests/presentation/widgets/runtime_draft.dart';
 import 'package:build4all_manager/features/owner/ownerrequests/presentation/widgets/runtime_section.dart';
 import 'package:build4all_manager/shared/widgets/app_toast.dart';
@@ -8,6 +9,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+
 
 import 'package:build4all_manager/l10n/app_localizations.dart';
 
@@ -132,9 +134,18 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
     );
 
     if (res == null) return;
+
+    final normalized = await UploadSafeImageNormalizer.normalizeForUpload(
+      File(res.path),
+      prefix: 'owner_logo_pick',
+      quality: 88,
+      maxWidth: 1024,
+      maxHeight: 1024,
+    );
+
     if (!mounted) return;
 
-    setState(() => _logoFile = File(res.path));
+    setState(() => _logoFile = normalized);
     AppToast.success(context, l.owner_request_logo_selected);
   }
 
