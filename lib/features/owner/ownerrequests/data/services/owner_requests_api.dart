@@ -43,88 +43,101 @@ class OwnerRequestApi {
   }
 
   Future<void> submitOwnerRequest({
-    required int ownerId,
-    required int projectId,
-    required String appName,
-    required String notes,
-    required String primaryColor,
-    required String secondaryColor,
-    required String backgroundColor,
-    required String onBackgroundColor,
-    required String errorColor,
-    required int currencyId,
-    required String navJson,
-    required String homeJson,
-    required String enabledFeaturesJson,
-    required String brandingJson,
-    String? apiBaseUrlOverride,
-    String? themeId,
-    String? slug,
-    File? logoFile,
-  }) async {
-    // validate JSON before sending
-    _ensureValidJson(navJson, 'navJson');
-    _ensureValidJson(homeJson, 'homeJson');
-    _ensureValidJson(enabledFeaturesJson, 'enabledFeaturesJson');
-    _ensureValidJson(brandingJson, 'brandingJson');
+  required int ownerId,
+  required int projectId,
+  required String appName,
+  required String notes,
+  required String primaryColor,
+  required String secondaryColor,
+  required String backgroundColor,
+  required String onBackgroundColor,
+  required String errorColor,
+  required int currencyId,
+  required String navJson,
+  required String homeJson,
+  required String enabledFeaturesJson,
+  required String brandingJson,
+  String? apiBaseUrlOverride,
+  String? themeId,
+  String? slug,
+  File? logoFile,
+}) async {
+  _ensureValidJson(navJson, 'navJson');
+  _ensureValidJson(homeJson, 'homeJson');
+  _ensureValidJson(enabledFeaturesJson, 'enabledFeaturesJson');
+  _ensureValidJson(brandingJson, 'brandingJson');
 
-    final url = '${_apiRoot()}/owner/app-requests/auto/both';
+  final url = '${_apiRoot()}/owner/app-requests/auto/both';
 
-    final form = FormData();
-    form.fields.addAll([
-      MapEntry('ownerId', ownerId.toString()),
-      MapEntry('projectId', projectId.toString()),
-      MapEntry('appName', appName.trim()),
-      MapEntry('notes', notes.trim()),
-      MapEntry('primaryColor', primaryColor.trim()),
-      MapEntry('secondaryColor', secondaryColor.trim()),
-      MapEntry('backgroundColor', backgroundColor.trim()),
-      MapEntry('onBackgroundColor', onBackgroundColor.trim()),
-      MapEntry('errorColor', errorColor.trim()),
-      MapEntry('currencyId', currencyId.toString()),
-      MapEntry('navJson', navJson),
-      MapEntry('homeJson', homeJson),
-      MapEntry('enabledFeaturesJson', enabledFeaturesJson),
-      MapEntry('brandingJson', brandingJson),
-    ]);
+  final form = FormData();
+  form.fields.addAll([
+   
+    MapEntry('projectId', projectId.toString()),
+    MapEntry('appName', appName.trim()),
+    MapEntry('notes', notes.trim()),
+    MapEntry('primaryColor', primaryColor.trim()),
+    MapEntry('secondaryColor', secondaryColor.trim()),
+    MapEntry('backgroundColor', backgroundColor.trim()),
+    MapEntry('onBackgroundColor', onBackgroundColor.trim()),
+    MapEntry('errorColor', errorColor.trim()),
+    MapEntry('currencyId', currencyId.toString()),
+    MapEntry('navJson', navJson),
+    MapEntry('homeJson', homeJson),
+    MapEntry('enabledFeaturesJson', enabledFeaturesJson),
+    MapEntry('brandingJson', brandingJson),
+  ]);
 
-    if (themeId != null && themeId.trim().isNotEmpty) {
-      form.fields.add(MapEntry('themeId', themeId.trim()));
-    }
-    if (slug != null && slug.trim().isNotEmpty) {
-      form.fields.add(MapEntry('slug', slug.trim()));
-    }
-    if (apiBaseUrlOverride != null && apiBaseUrlOverride.trim().isNotEmpty) {
-      form.fields
-          .add(MapEntry('apiBaseUrlOverride', apiBaseUrlOverride.trim()));
-    }
+  if (themeId != null && themeId.trim().isNotEmpty) {
+    form.fields.add(MapEntry('themeId', themeId.trim()));
+  }
 
-    if (logoFile != null) {
-      final safeLogo = await UploadSafeImageNormalizer.normalizeForUpload(
-        logoFile,
-        prefix: 'owner_logo_upload',
-        quality: 88,
-        maxWidth: 1600,
-        maxHeight: 1600,
-      );
+  if (slug != null && slug.trim().isNotEmpty) {
+    form.fields.add(MapEntry('slug', slug.trim()));
+  }
 
-      form.files.add(
-        MapEntry(
-          'logo',
-          await MultipartFile.fromFile(
-            safeLogo.path,
-            filename: safeLogo.uri.pathSegments.isNotEmpty
-                ? safeLogo.uri.pathSegments.last
-                : 'logo.jpg',
-          ),
+  if (apiBaseUrlOverride != null && apiBaseUrlOverride.trim().isNotEmpty) {
+    form.fields.add(MapEntry('apiBaseUrlOverride', apiBaseUrlOverride.trim()));
+  }
+
+  if (logoFile != null) {
+    final safeLogo = await UploadSafeImageNormalizer.normalizeForUpload(
+      logoFile,
+      prefix: 'owner_logo_upload',
+      quality: 88,
+      maxWidth: 1600,
+      maxHeight: 1600,
+    );
+
+    form.files.add(
+      MapEntry(
+        'logo',
+        await MultipartFile.fromFile(
+          safeLogo.path,
+          filename: safeLogo.uri.pathSegments.isNotEmpty
+              ? safeLogo.uri.pathSegments.last
+              : 'logo.jpg',
         ),
-      );
-    }
-
-    await dio.post(
-      url,
-      data: form,
-      options: Options(contentType: 'multipart/form-data'),
+      ),
     );
   }
+
+  try {
+    final res = await dio.post(
+      url,
+      data: form,
+    );
+
+    print('AUTO BOTH STATUS => ${res.statusCode}');
+    print('AUTO BOTH DATA => ${res.data}');
+  } on DioException catch (e) {
+    print('AUTO BOTH URL => $url');
+    print('AUTO BOTH STATUS => ${e.response?.statusCode}');
+    print('AUTO BOTH DATA => ${e.response?.data}');
+    print('AUTO BOTH MESSAGE => ${e.message}');
+    rethrow;
+  } catch (e) {
+    print('AUTO BOTH UNKNOWN ERROR => $e');
+    rethrow;
+  }
+}
 }
