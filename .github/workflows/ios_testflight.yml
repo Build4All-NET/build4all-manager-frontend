@@ -245,7 +245,7 @@ jobs:
             app_identifier:"$BUNDLE_ID" \
             team_id:"${IOS_TEAM_ID}" \
             api_key_path:"$GITHUB_WORKSPACE/.private/api_key.json" \
-            provisioning_name:"B4A_${BUNDLE_ID}_APPSTORE" \
+            provisioning_name:"B4A_${BUNDLE_ID}_APPSTORE_UAT" \
             readonly:false \
             output_path:"$PROFILE_DIR"
 
