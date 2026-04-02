@@ -18,7 +18,7 @@ if (keyPropertiesFile.exists()) {
 }
 
 android {
-    namespace = "com.buil4all.build4allmanager"
+    namespace = "com.build4all.build4allmanager"
     compileSdk = flutter.compileSdkVersion
     //ndkVersion = flutter.ndkVersion
     ndkVersion = "27.0.12077973"
@@ -33,7 +33,7 @@ android {
     }
 
     defaultConfig {
-    applicationId = "com.buil4all.build4allmanager"
+    applicationId = "com.build4all.build4allmanager"
  minSdk = (flutter.minSdkVersion as Number).toInt()
  //minSdk=23
     targetSdk = flutter.targetSdkVersion

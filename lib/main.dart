@@ -9,6 +9,7 @@ import 'package:build4all_manager/features/auth/data/datasources/jwt_local_datas
 import 'package:build4all_manager/l10n/app_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -18,33 +19,42 @@ import 'package:build4all_manager/features/theme_manager/data/local_theme_store.
 import 'package:build4all_manager/features/theme_manager/presentation/theme_cubit.dart';
 import 'firebase_options.dart';
 
-@pragma('vm:entry-point')
-Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  // Initialize Firebase in background isolate
+Future<void> _initFirebase() async {
+  if (kIsWeb) {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    return;
+  }
+
+  if (defaultTargetPlatform == TargetPlatform.android) {
+    await Firebase.initializeApp();
+    return;
+  }
+
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 }
 
+@pragma('vm:entry-point')
+Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await _initFirebase();
+}
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Firebase for the manager app
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await _initFirebase();
 
-  // Register background FCM handler
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
   await DioClient.init();
 
-  // Boot guard BEFORE reading token (kills stale tokens after DB reset / env switch)
   await AppBootGuard.run(
     currentApiBaseUrl: DioClient.ensure().options.baseUrl,
   );
 
-  // Read token normally
   final jwt = JwtLocalDataSource();
   final (token, _) = await jwt.read();
   if (token.isNotEmpty) {
