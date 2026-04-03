@@ -212,18 +212,32 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          echo '${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}' > service-account.json
-
-      - name: Debug service account (safe)
+      
+          if [ -z "${PLAY_SERVICE_ACCOUNT_JSON:-}" ]; then
+            echo "❌ PLAY_SERVICE_ACCOUNT_JSON secret is empty"
+            exit 1
+          fi
+      
+          printf '%s' "$PLAY_SERVICE_ACCOUNT_JSON" > service-account.json
+      
+          echo "✅ service-account.json written"
+          echo "📏 File size:"
+          wc -c service-account.json
+      
+          python3 -m json.tool service-account.json > /dev/null
+          echo "✅ service-account.json is valid JSON"
+      
+      - name: Debug service account metadata
         shell: bash
         run: |
           python3 - <<'PY'
           import json
-          j=json.load(open("service-account.json"))
-          print("client_email:", j["client_email"])
-          print("project_id:", j["project_id"])
+          with open("service-account.json", "r", encoding="utf-8") as f:
+              j = json.load(f)
+          print("client_email exists:", "client_email" in j)
+          print("project_id exists:", "project_id" in j)
+          print("type:", j.get("type"))
           PY
-
       # --------------------------------------------------
       # Upload to Google Play
       # --------------------------------------------------
