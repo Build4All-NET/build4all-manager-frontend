@@ -11,7 +11,7 @@
   "@errEmailInvalid": {
     "description": "Validation: invalid email format"
   },
-  "errEmailRequired": "Email is required",
+  "errEmailRequired": "Email is required!!",
   "@errEmailRequired": {
     "description": "Validation: empty email"
   },
