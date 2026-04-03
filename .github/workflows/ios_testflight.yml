@@ -398,7 +398,7 @@ jobs:
           print(m.group(1) if m else "1.0.0")
           PY
           )"
-          BUILD_NUMBER="${GITHUB_RUN_NUMBER}"
+          BUILD_NUMBER="$((1000 + GITHUB_RUN_NUMBER))"
 
           echo "BUILD_NAME=$BUILD_NAME" >> $GITHUB_ENV
           echo "BUILD_NUMBER=$BUILD_NUMBER" >> $GITHUB_ENV
