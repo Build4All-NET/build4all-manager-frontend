@@ -114,15 +114,15 @@ jobs:
       # --------------------------------------------------
       # Clean Gradle cache
       # --------------------------------------------------
-      - name: Clean Gradle cache
-        shell: bash
-        run: |
-          set -euo pipefail
-          cd android
-          rm -rf .gradle build
-          cd ..
-          flutter clean
-          echo "✅ Gradle cache cleaned"
+     # - name: Clean Gradle cache
+      #  shell: bash
+      #  run: |
+       #   set -euo pipefail
+        #  cd android
+         # rm -rf .gradle build
+          #cd ..
+          #flutter clean
+          #echo "✅ Gradle cache cleaned"
 
       # --------------------------------------------------
       # Android signing (NO heredoc, NO syntax traps)
