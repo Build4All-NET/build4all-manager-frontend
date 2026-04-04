@@ -124,13 +124,29 @@ class ProjectTile extends StatelessWidget {
       return;
     }
 
+    final uri = Uri.tryParse(cleaned);
+    if (uri == null || !uri.hasScheme) {
+      AppToast.error(context, l10n.owner_project_err_invalid_url);
+      return;
+    }
+
     try {
+      final overlayBox =
+          Navigator.of(context).overlay?.context.findRenderObject() as RenderBox?;
+
+      final origin = overlayBox != null
+          ? (Offset.zero & overlayBox.size)
+          : const Rect.fromLTWH(0, 0, 1, 1);
+
       await Share.share(
-        '$label\n$cleaned',
+        cleaned,
         subject: label,
+        sharePositionOrigin: origin,
       );
-    } catch (_) {
-      AppToast.error(context, l10n.owner_project_err_share_failed);
+    } catch (e, st) {
+      debugPrint('Share failed: $e');
+      debugPrint('$st');
+      AppToast.error(context, '${l10n.owner_project_err_share_failed}: $e');
     }
   }
 
