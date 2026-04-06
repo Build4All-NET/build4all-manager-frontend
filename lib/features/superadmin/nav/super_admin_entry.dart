@@ -60,7 +60,7 @@ class SuperAdminEntry extends StatelessWidget {
       SuperAdminDestination(
         icon: Icons.publish_outlined,
         selectedIcon: Icons.publish_rounded,
-        label: l10n.super_nav_publish_requests,
+        label: l10n.owner_nav_requests,
         page: PublishRequestsScreen(dio: dio),
       ),
       SuperAdminDestination(

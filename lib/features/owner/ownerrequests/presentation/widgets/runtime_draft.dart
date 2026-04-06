@@ -5,7 +5,7 @@ enum MenuType { bottom, hamburger }
 
 class NavItemDraft {
   final String id; // HOME, EXPLORE, CART, PROFILE...
-  final String label; // visible label (fallback)
+  final String label; // fallback/token-style label
   final String icon; // icon key string
   final bool enabled;
 
@@ -84,7 +84,7 @@ class RuntimeJsonOut {
 class RuntimeDraft {
   final MenuType menuType;
 
-  /// Enabled features codes (ITEMS, BOOKING, REVIEWS, ORDERS, COUPONS, NOTIFICATIONS)
+  /// Enabled feature codes (ITEMS, BOOKING, REVIEWS, ORDERS, COUPONS, NOTIFICATIONS)
   final Set<String> enabledFeatures;
 
   /// Navigation config for preview + submit
@@ -122,14 +122,14 @@ class RuntimeDraft {
   static const String navCart = "CART";
   static const String navProfile = "PROFILE";
 
-  /// Required nav tabs (as you requested):
+  /// Required nav tabs:
   /// ✅ HOME + CART + PROFILE required
   /// ❌ EXPLORE optional
   static const Set<String> requiredNavIds = {navHome, navCart, navProfile};
 
-  /// Bottom nav limits (you ship 4 items max; required already = 3)
+  /// Bottom nav limits
   static const int bottomNavMax = 4;
-  static const int bottomNavMin = 3; // since HOME+CART+PROFILE are required
+  static const int bottomNavMin = 3;
 
   /// What nav item requires what features
   /// - EXPLORE requires ITEMS
@@ -169,13 +169,12 @@ class RuntimeDraft {
   }
 
   /// ------------------------------------------------------------
-  /// NORMALIZE (the magic that prevents nonsense configs)
+  /// NORMALIZE (prevents invalid configs)
   /// ------------------------------------------------------------
   RuntimeDraft normalized() {
-    // Start with current features
     final features = <String>{...enabledFeatures.map((e) => e.toUpperCase())};
 
-    // 1) Force required features ON (because required nav tabs depend on them)
+    // 1) Force required features ON
     features.addAll(requiredFeaturesForRequiredNav());
 
     // 2) NAV: force required tabs enabled
@@ -204,7 +203,6 @@ class RuntimeDraft {
     if (menuType == MenuType.bottom) {
       final enabled = nav.where((n) => n.enabled).toList();
 
-      // Max: disable extra OPTIONAL items from end
       if (enabled.length > bottomNavMax) {
         int toDisable = enabled.length - bottomNavMax;
         for (int i = nav.length - 1; i >= 0 && toDisable > 0; i--) {
@@ -216,7 +214,6 @@ class RuntimeDraft {
         }
       }
 
-      // Min: ensure required count (should already be true, but keep safety)
       final enabled2 = nav.where((n) => n.enabled).toList();
       if (enabled2.length < bottomNavMin) {
         for (int i = 0; i < nav.length; i++) {
@@ -240,17 +237,15 @@ class RuntimeDraft {
   /// EXPORT (preview + submit payload)
   /// ------------------------------------------------------------
   RuntimeJsonOut toJsonOut() {
-    // Export ONLY enabled nav items
     final nav = navItems
         .where((x) => x.enabled)
         .map((x) => {
               "id": x.id,
-              "label": x.label, // fallback; client should localize by id
+              "label": x.label, // token/fallback; client should localize by id
               "icon": x.icon,
             })
         .toList();
 
-    // Export ONLY enabled home sections
     final home = homeSections
         .where((x) => x.enabled)
         .map((x) => {
@@ -261,7 +256,6 @@ class RuntimeDraft {
             })
         .toList();
 
-    // Export enabled features list
     final features = enabledFeatures.toList()..sort();
 
     final branding = {
@@ -279,8 +273,6 @@ class RuntimeDraft {
 
 class RuntimeDefaults {
   static RuntimeDraft defaults() {
-    // Default config is already valid.
-    // normalized() will lock ITEMS+ORDERS ON because CART is required.
     return RuntimeDraft(
       menuType: MenuType.bottom,
       enabledFeatures: {
@@ -292,10 +284,30 @@ class RuntimeDefaults {
         "NOTIFICATIONS",
       },
       navItems: const [
-        NavItemDraft(id: "HOME", label: "Home", icon: "home", enabled: true),
-        NavItemDraft(id: "EXPLORE", label: "Explore", icon: "search", enabled: true),
-        NavItemDraft(id: "CART", label: "Cart", icon: "cart", enabled: true),
-        NavItemDraft(id: "PROFILE", label: "Profile", icon: "profile", enabled: true),
+        NavItemDraft(
+          id: RuntimeDraft.navHome,
+          label: RuntimeDraft.navHome,
+          icon: "home",
+          enabled: true,
+        ),
+        NavItemDraft(
+          id: RuntimeDraft.navExplore,
+          label: RuntimeDraft.navExplore,
+          icon: "search",
+          enabled: true,
+        ),
+        NavItemDraft(
+          id: RuntimeDraft.navCart,
+          label: RuntimeDraft.navCart,
+          icon: "cart",
+          enabled: true,
+        ),
+        NavItemDraft(
+          id: RuntimeDraft.navProfile,
+          label: RuntimeDraft.navProfile,
+          icon: "profile",
+          enabled: true,
+        ),
       ],
       homeSections: const [
         HomeSectionDraft(
@@ -335,10 +347,10 @@ class RuntimeDefaults {
           feature: "ITEMS",
         ),
       ],
-    ).normalized(); // ✅ ensure locks applied from day 1
+    ).normalized();
   }
 }
 
-extension MenuTypeUi on MenuType {
-  String get uiLabel => this == MenuType.hamburger ? "Hamburger" : "Bottom";
+extension MenuTypeCode on MenuType {
+  String get code => this == MenuType.hamburger ? "hamburger" : "bottom";
 }

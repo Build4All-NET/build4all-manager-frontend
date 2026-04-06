@@ -1,3 +1,4 @@
+import 'package:build4all_manager/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 class RequestedAppsTableHeader extends StatelessWidget {
@@ -13,6 +14,7 @@ class RequestedAppsTableHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     TextStyle style() => Theme.of(context).textTheme.bodySmall!.copyWith(
           fontWeight: FontWeight.w900,
@@ -24,18 +26,35 @@ class RequestedAppsTableHeader extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
       child: Row(
         children: [
-          Expanded(flex: 38, child: Text('APP', style: style())),
-          Expanded(flex: 22, child: Text('PLATFORMS', style: style())),
+          Expanded(
+            flex: 38,
+            child: Text(l10n.publish_table_app, style: style()),
+          ),
+          Expanded(
+            flex: 22,
+            child: Text(l10n.publish_table_platforms, style: style()),
+          ),
           if (showVersion)
-            Expanded(flex: 18, child: Text('VERSION', style: style())),
-          Expanded(flex: 16, child: Text('STATUS', style: style())),
+            Expanded(
+              flex: 18,
+              child: Text(l10n.publish_table_version, style: style()),
+            ),
+          Expanded(
+            flex: 16,
+            child: Text(l10n.common_status, style: style()),
+          ),
           if (showRequested)
-            Expanded(flex: 24, child: Text('REQUESTED DATE', style: style())),
+            Expanded(
+              flex: 24,
+              child: Text(l10n.publish_table_requested_date, style: style()),
+            ),
           SizedBox(
-              width: 162,
-              child: Align(
-                  alignment: Alignment.centerRight,
-                  child: Text('ACTIONS', style: style()))),
+            width: 162,
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: Text(l10n.publish_table_actions, style: style()),
+            ),
+          ),
         ],
       ),
     );

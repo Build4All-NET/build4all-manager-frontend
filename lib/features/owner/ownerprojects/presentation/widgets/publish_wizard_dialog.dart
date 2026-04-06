@@ -1,6 +1,6 @@
 import 'package:build4all_manager/l10n/app_localizations.dart';
 import 'package:build4all_manager/shared/utils/ApiErrorHandler.dart';
-import 'package:build4all_manager/shared/widgets/app_toast.dart'; // for ToastType enum (we won't use AppToast here)
+import 'package:build4all_manager/shared/widgets/app_toast.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
@@ -80,7 +80,6 @@ class _PublishWizardDialogState extends State<PublishWizardDialog> {
 
   final _snapshotCtrl = TextEditingController();
 
-  // ✅ INLINE MESSAGE under steps bar
   String? _inlineMsg;
   ToastType _inlineType = ToastType.info;
 
@@ -125,8 +124,7 @@ class _PublishWizardDialogState extends State<PublishWizardDialog> {
           ? l10n.owner_publish_package_name
           : l10n.owner_publish_bundle_id;
 
-  /// ✅ Extract backend errors (including your 500 trace RuntimeException)
-    String _errText(Object e, AppLocalizations l10n) {
+  String _errText(Object e, AppLocalizations l10n) {
     if (e is DioException) {
       final data = e.response?.data;
 
@@ -150,6 +148,7 @@ class _PublishWizardDialogState extends State<PublishWizardDialog> {
     if (raw.isEmpty) return l10n.common_error;
     return _mapKnownErrors(raw, l10n);
   }
+
   String _extractRuntimeException(String trace) {
     if (trace.isEmpty) return '';
     final key = 'RuntimeException:';
@@ -386,7 +385,6 @@ class _PublishWizardDialogState extends State<PublishWizardDialog> {
 
       _showInline(l10n.owner_publish_submitted, type: ToastType.success);
 
-      // Let user see it for a tiny moment then close
       await Future.delayed(const Duration(milliseconds: 350));
       if (mounted) Navigator.pop(context);
     } catch (e) {
@@ -485,10 +483,7 @@ class _PublishWizardDialogState extends State<PublishWizardDialog> {
                       ],
                     ),
                   ),
-
                   _StepsBar(step: step),
-
-                  // ✅ INLINE message appears HERE (under steps)
                   if (_inlineMsg != null)
                     Padding(
                       padding: const EdgeInsets.fromLTRB(18, 0, 18, 10),
@@ -498,7 +493,6 @@ class _PublishWizardDialogState extends State<PublishWizardDialog> {
                         onClose: () => setState(() => _inlineMsg = null),
                       ),
                     ),
-
                   Expanded(
                     child: SingleChildScrollView(
                       padding: const EdgeInsets.fromLTRB(18, 16, 18, 10),
@@ -536,9 +530,9 @@ class _PublishWizardDialogState extends State<PublishWizardDialog> {
                                     setState(() => step -= 1);
                                   }
                                 },
-                          child: Text(step == 1
-                              ? l10n.common_cancel
-                              : l10n.common_back),
+                          child: Text(
+                            step == 1 ? l10n.common_cancel : l10n.common_back,
+                          ),
                         ),
                         const Spacer(),
                         FilledButton(
@@ -561,9 +555,11 @@ class _PublishWizardDialogState extends State<PublishWizardDialog> {
                                   child:
                                       CircularProgressIndicator(strokeWidth: 2),
                                 )
-                              : Text(step < 4
-                                  ? l10n.common_continue
-                                  : l10n.owner_publish_submit),
+                              : Text(
+                                  step < 4
+                                      ? l10n.common_continue
+                                      : l10n.owner_publish_submit,
+                                ),
                         ),
                       ],
                     ),
@@ -725,10 +721,12 @@ class _InlineBanner extends StatelessWidget {
             ),
             IconButton(
               onPressed: onClose,
-              icon: Icon(Icons.close_rounded,
-                  color: cs.onSurface.withOpacity(.7)),
+              icon: Icon(
+                Icons.close_rounded,
+                color: cs.onSurface.withOpacity(.7),
+              ),
               splashRadius: 18,
-              tooltip: 'Close',
+              tooltip: AppLocalizations.of(context)!.common_close,
             )
           ],
         ),
@@ -776,6 +774,20 @@ class _StepBody extends StatelessWidget {
     required this.onOpenUploader,
   });
 
+  String _countryLabel(BuildContext context, String raw) {
+    final l10n = AppLocalizations.of(context)!;
+    switch (raw) {
+      case 'United States':
+        return l10n.owner_publish_country_us;
+      case 'Lebanon':
+        return l10n.owner_publish_country_lb;
+      case 'France':
+        return l10n.owner_publish_country_fr;
+      default:
+        return raw;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
@@ -785,7 +797,7 @@ class _StepBody extends StatelessWidget {
     final allowedCountries = const ['United States', 'Lebanon', 'France'];
     final selectedCountry =
         allowedCountries.contains(country) ? country : 'United States';
-        
+
     InputDecoration deco(String hint) => InputDecoration(
           hintText: hint,
           filled: true,
@@ -804,35 +816,46 @@ class _StepBody extends StatelessWidget {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(l10n.owner_publish_step1_title,
-              style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w900)),
+          Text(
+            l10n.owner_publish_step1_title,
+            style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+          ),
           const SizedBox(height: 4),
-          Text(l10n.owner_publish_step1_sub,
-              style:
-                  tt.bodySmall?.copyWith(color: cs.onSurface.withOpacity(.65))),
+          Text(
+            l10n.owner_publish_step1_sub,
+            style: tt.bodySmall?.copyWith(color: cs.onSurface.withOpacity(.65)),
+          ),
           const SizedBox(height: 18),
-          Text(l10n.owner_publish_app_name,
-              style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w900)),
+          Text(
+            l10n.owner_publish_app_name,
+            style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w900),
+          ),
           const SizedBox(height: 6),
           TextField(
             controller: appNameCtrl,
             decoration: deco(l10n.owner_publish_app_name_hint),
           ),
           const SizedBox(height: 14),
-          Text(snapshotLabel,
-              style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w900)),
+          Text(
+            snapshotLabel,
+            style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w900),
+          ),
           const SizedBox(height: 6),
           TextField(
             controller: snapshotCtrl,
             readOnly: true,
             decoration: deco('').copyWith(
-              suffixIcon:
-                  Icon(Icons.lock_rounded, color: cs.onSurface.withOpacity(.5)),
+              suffixIcon: Icon(
+                Icons.lock_rounded,
+                color: cs.onSurface.withOpacity(.5),
+              ),
             ),
           ),
           const SizedBox(height: 14),
-          Text(l10n.owner_publish_short_desc,
-              style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w900)),
+          Text(
+            l10n.owner_publish_short_desc,
+            style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w900),
+          ),
           const SizedBox(height: 6),
           TextField(
             controller: shortCtrl,
@@ -840,12 +863,14 @@ class _StepBody extends StatelessWidget {
             decoration: deco(l10n.owner_publish_short_desc_hint),
           ),
           const SizedBox(height: 8),
-          Text(l10n.owner_publish_full_desc,
-              style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w900)),
+          Text(
+            l10n.owner_publish_full_desc,
+            style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w900),
+          ),
           const SizedBox(height: 6),
           TextField(
             controller: fullCtrl,
-            maxLines: 5,
+            maxLines: 6,
             decoration: deco(l10n.owner_publish_full_desc_hint),
           ),
         ],
@@ -856,93 +881,84 @@ class _StepBody extends StatelessWidget {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(l10n.owner_publish_step2_title,
-              style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w900)),
+          Text(
+            l10n.owner_publish_step2_title,
+            style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+          ),
           const SizedBox(height: 4),
-          Text(l10n.owner_publish_step2_sub,
-              style:
-                  tt.bodySmall?.copyWith(color: cs.onSurface.withOpacity(.65))),
+          Text(
+            l10n.owner_publish_step2_sub,
+            style: tt.bodySmall?.copyWith(color: cs.onSurface.withOpacity(.65)),
+          ),
           const SizedBox(height: 18),
-          Text(l10n.owner_publish_category,
-              style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w900)),
+          Text(
+            l10n.owner_publish_category,
+            style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w900),
+          ),
           const SizedBox(height: 6),
           TextField(
             controller: categoryCtrl,
             decoration: deco(l10n.owner_publish_category_hint),
           ),
           const SizedBox(height: 14),
-          Text(l10n.owner_publish_country,
-              style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w900)),
+          Text(
+            l10n.owner_publish_country,
+            style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w900),
+          ),
           const SizedBox(height: 6),
-DropdownButtonFormField<String>(
-  value: selectedCountry, // ✅ not initialValue
-  decoration: deco(''),
-  items: [
-    DropdownMenuItem(
-      value: 'United States',
-      child: Text(l10n.owner_publish_country_us),
-    ),
-    DropdownMenuItem(
-      value: 'Lebanon',
-      child: Text(l10n.owner_publish_country_lb),
-    ),
-    DropdownMenuItem(
-      value: 'France',
-      child: Text(l10n.owner_publish_country_fr),
-    ),
-  ],
-  onChanged: (v) => onCountryChanged(v ?? 'United States'),
-),
+          DropdownButtonFormField<String>(
+            initialValue: selectedCountry,
+            items: allowedCountries
+                .map(
+                  (e) => DropdownMenuItem(
+                    value: e,
+                    child: Text(_countryLabel(context, e)),
+                  ),
+                )
+                .toList(),
+            onChanged: (v) {
+              if (v != null) onCountryChanged(v);
+            },
+            decoration: deco(''),
+          ),
           const SizedBox(height: 14),
-          Text(l10n.owner_publish_pricing,
-              style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w900)),
+          Text(
+            l10n.owner_publish_pricing,
+            style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w900),
+          ),
           const SizedBox(height: 8),
           Row(
             children: [
               Expanded(
-                child: _ChoiceChipBtn(
-                  active: pricing == PricingType.free,
-                  label: l10n.owner_publish_free,
-                  onTap: () => onPricingChanged(PricingType.free),
+                child: RadioListTile<PricingType>(
+                  value: PricingType.free,
+                  groupValue: pricing,
+                  onChanged: (v) {
+                    if (v != null) onPricingChanged(v);
+                  },
+                  title: Text(l10n.owner_publish_price_free),
+                  contentPadding: EdgeInsets.zero,
                 ),
               ),
-              const SizedBox(width: 10),
               Expanded(
-                child: _ChoiceChipBtn(
-                  active: pricing == PricingType.paid,
-                  label: l10n.owner_publish_paid,
-                  onTap: () => onPricingChanged(PricingType.paid),
+                child: RadioListTile<PricingType>(
+                  value: PricingType.paid,
+                  groupValue: pricing,
+                  onChanged: (v) {
+                    if (v != null) onPricingChanged(v);
+                  },
+                  title: Text(l10n.owner_publish_price_paid),
+                  contentPadding: EdgeInsets.zero,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 14),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: cs.tertiaryContainer.withOpacity(.35),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: cs.tertiary.withOpacity(.25)),
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Checkbox(
-                  value: contentConfirmed,
-                  onChanged: (v) => onContentConfirmChanged(v ?? false),
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 6),
-                    child: Text(
-                      l10n.owner_publish_content_confirm,
-                      style:
-                          tt.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+          const SizedBox(height: 8),
+          CheckboxListTile(
+            value: contentConfirmed,
+            onChanged: (v) => onContentConfirmChanged(v ?? false),
+            contentPadding: EdgeInsets.zero,
+            title: Text(l10n.owner_publish_content_confirm),
           ),
         ],
       );
@@ -952,12 +968,15 @@ DropdownButtonFormField<String>(
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(l10n.owner_publish_step3_title,
-              style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w900)),
+          Text(
+            l10n.owner_publish_step3_title,
+            style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+          ),
           const SizedBox(height: 4),
-          Text(l10n.owner_publish_step3_sub,
-              style:
-                  tt.bodySmall?.copyWith(color: cs.onSurface.withOpacity(.65))),
+          Text(
+            l10n.owner_publish_step3_sub,
+            style: tt.bodySmall?.copyWith(color: cs.onSurface.withOpacity(.65)),
+          ),
           const SizedBox(height: 18),
           _ReadOnlyBox(
             label: l10n.owner_publish_privacy_url,
@@ -977,7 +996,6 @@ DropdownButtonFormField<String>(
       );
     }
 
-    // STEP 4 preview
     final d = draft;
     final dio = DioClient.ensure();
     final serverRootNoApi = serverRootNoApiFromBaseUrl(dio.options.baseUrl);
@@ -996,12 +1014,15 @@ DropdownButtonFormField<String>(
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(l10n.owner_publish_step4_title,
-            style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w900)),
+        Text(
+          l10n.owner_publish_step4_title,
+          style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+        ),
         const SizedBox(height: 4),
-        Text(l10n.owner_publish_step4_sub,
-            style:
-                tt.bodySmall?.copyWith(color: cs.onSurface.withOpacity(.65))),
+        Text(
+          l10n.owner_publish_step4_sub,
+          style: tt.bodySmall?.copyWith(color: cs.onSurface.withOpacity(.65)),
+        ),
         const SizedBox(height: 18),
         SizedBox(
           width: double.infinity,
@@ -1014,7 +1035,8 @@ DropdownButtonFormField<String>(
             ),
             style: ElevatedButton.styleFrom(
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(18)),
+                borderRadius: BorderRadius.circular(18),
+              ),
               padding: const EdgeInsets.symmetric(vertical: 14),
               elevation: 0,
             ),
@@ -1023,8 +1045,10 @@ DropdownButtonFormField<String>(
         const SizedBox(height: 14),
         Divider(height: 1, color: cs.outlineVariant.withOpacity(.6)),
         const SizedBox(height: 14),
-        Text(l10n.owner_publish_current_icon,
-            style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w900)),
+        Text(
+          l10n.owner_publish_current_icon,
+          style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w900),
+        ),
         const SizedBox(height: 10),
         if (icon.isEmpty)
           Text(
@@ -1034,12 +1058,18 @@ DropdownButtonFormField<String>(
         else
           ClipRRect(
             borderRadius: BorderRadius.circular(16),
-            child:
-                Image.network(icon, width: 84, height: 84, fit: BoxFit.cover),
+            child: Image.network(
+              icon,
+              width: 84,
+              height: 84,
+              fit: BoxFit.cover,
+            ),
           ),
         const SizedBox(height: 18),
-        Text(l10n.owner_publish_current_screenshots,
-            style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w900)),
+        Text(
+          l10n.owner_publish_current_screenshots,
+          style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w900),
+        ),
         const SizedBox(height: 10),
         if (shots.isEmpty)
           Text(
@@ -1053,58 +1083,20 @@ DropdownButtonFormField<String>(
               scrollDirection: Axis.horizontal,
               itemCount: shots.length,
               separatorBuilder: (_, __) => const SizedBox(width: 10),
-              itemBuilder: (_, i) => ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: Image.network(shots[i],
-                    width: 140, height: 92, fit: BoxFit.cover),
-              ),
+              itemBuilder: (_, i) {
+                return ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: Image.network(
+                    shots[i],
+                    width: 140,
+                    height: 92,
+                    fit: BoxFit.cover,
+                  ),
+                );
+              },
             ),
           ),
-        const SizedBox(height: 12),
-        Text(
-          l10n.owner_publish_rule_shots_2_8,
-          style: tt.bodySmall?.copyWith(color: cs.onSurface.withOpacity(.65)),
-        ),
       ],
-    );
-  }
-}
-
-class _ChoiceChipBtn extends StatelessWidget {
-  final bool active;
-  final String label;
-  final VoidCallback onTap;
-
-  const _ChoiceChipBtn({
-    required this.active,
-    required this.label,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        decoration: BoxDecoration(
-          color:
-              active ? cs.primary.withOpacity(.12) : cs.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: active ? cs.primary : cs.outlineVariant),
-        ),
-        alignment: Alignment.center,
-        child: Text(
-          label,
-          style: TextStyle(
-            fontWeight: FontWeight.w900,
-            color: active ? cs.primary : cs.onSurface.withOpacity(.8),
-          ),
-        ),
-      ),
     );
   }
 }
@@ -1112,33 +1104,41 @@ class _ChoiceChipBtn extends StatelessWidget {
 class _ReadOnlyBox extends StatelessWidget {
   final String label;
   final String value;
-  const _ReadOnlyBox({required this.label, required this.value});
+
+  const _ReadOnlyBox({
+    required this.label,
+    required this.value,
+  });
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label,
-            style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w900)),
-        const SizedBox(height: 6),
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-          decoration: BoxDecoration(
-            color: cs.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: cs.outlineVariant),
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: cs.outlineVariant),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w900),
           ),
-          child: Text(
+          const SizedBox(height: 6),
+          Text(
             value,
-            style: tt.bodyMedium?.copyWith(color: cs.onSurface.withOpacity(.7)),
+            style: tt.bodyMedium?.copyWith(
+              color: cs.onSurface.withOpacity(.75),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

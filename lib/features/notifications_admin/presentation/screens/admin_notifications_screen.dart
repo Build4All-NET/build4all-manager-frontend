@@ -1,12 +1,11 @@
 import 'package:build4all_manager/core/network/dio_client.dart';
 import 'package:build4all_manager/features/notifications_admin/data/model/admin_notification_model.dart';
-
 import 'package:build4all_manager/features/notifications_admin/data/service/admin_notifications_api.dart';
-
 import 'package:build4all_manager/features/notifications_admin/presentation/bloc/admin_notifications_bloc.dart';
 import 'package:build4all_manager/features/notifications_admin/presentation/bloc/admin_notifications_event.dart';
 import 'package:build4all_manager/features/notifications_admin/presentation/bloc/admin_notifications_state.dart';
 import 'package:build4all_manager/features/notifications_admin/presentation/cubit/admin_unread_count_cubit.dart';
+import 'package:build4all_manager/l10n/app_localizations.dart';
 import 'package:build4all_manager/shared/widgets/app_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -31,45 +30,62 @@ class _AdminNotificationsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return BlocConsumer<AdminNotificationsBloc, AdminNotificationsState>(
       listenWhen: (p, c) => p.error != c.error && c.error != null,
-    listener: (context, state) {
-  final error = state.error;
-  if (error != null && error.trim().isNotEmpty) {
-    AppToast.error(context, error);
-  }
+      listener: (context, state) {
+        final error = state.error;
+        if (error != null && error.trim().isNotEmpty) {
+          AppToast.error(context, error);
+        }
 
-  final unreadCubit = context.read<AdminUnreadCountCubit?>();
-  unreadCubit?.setCount(state.unreadCount);
-},
+       AdminUnreadCountCubit? unreadCubit;
+try {
+  unreadCubit = BlocProvider.of<AdminUnreadCountCubit>(
+    context,
+    listen: false,
+  );
+} catch (_) {
+  unreadCubit = null;
+}
+unreadCubit?.setCount(state.unreadCount);
+      },
       builder: (context, state) {
-        return Scaffold(
-          backgroundColor: cs.surface,
-          appBar: AppBar(
-            title: const Text('Notifications'),
-            actions: [
-              IconButton(
-                tooltip: 'Refresh',
-                onPressed: state.loading
-                    ? null
-                    : () {
-                        context.read<AdminNotificationsBloc>().add(
-                              const AdminNotificationsRefreshed(),
-                            );
-                      },
-                icon: const Icon(Icons.refresh),
-              ),
-            ],
-          ),
-          body: SafeArea(
-            child: RefreshIndicator(
-              onRefresh: () async {
-                context.read<AdminNotificationsBloc>().add(
-                      const AdminNotificationsRefreshed(),
-                    );
-              },
-              child: _buildBody(context, state),
+        return ColoredBox(
+          color: cs.surface,
+          child: SafeArea(
+            top: false,
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: OutlinedButton.icon(
+                      onPressed: state.loading
+                          ? null
+                          : () {
+                              context.read<AdminNotificationsBloc>().add(
+                                    const AdminNotificationsRefreshed(),
+                                  );
+                            },
+                      icon: const Icon(Icons.refresh),
+                      label: Text(l10n.common_refresh),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: RefreshIndicator(
+                    onRefresh: () async {
+                      context.read<AdminNotificationsBloc>().add(
+                            const AdminNotificationsRefreshed(),
+                          );
+                    },
+                    child: _buildBody(context, state),
+                  ),
+                ),
+              ],
             ),
           ),
         );
@@ -78,16 +94,30 @@ class _AdminNotificationsView extends StatelessWidget {
   }
 
   Widget _buildBody(BuildContext context, AdminNotificationsState state) {
+    final l10n = AppLocalizations.of(context)!;
+
     if (state.loading) {
-      return const Center(
-        child: CircularProgressIndicator(),
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: [
+          const SizedBox(height: 140),
+          Center(
+            child: Column(
+              children: [
+                const CircularProgressIndicator(),
+                const SizedBox(height: 12),
+                Text(l10n.common_loading),
+              ],
+            ),
+          ),
+        ],
       );
     }
 
     if (state.items.isEmpty) {
       return ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        children: const [
+        physics: AlwaysScrollableScrollPhysics(),
+        children: [
           SizedBox(height: 140),
           _EmptyState(),
         ],
@@ -117,6 +147,7 @@ class _NotificationCard extends StatelessWidget {
     final bloc = context.read<AdminNotificationsBloc>();
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     final bg = item.isRead
         ? cs.surfaceContainerHighest.withOpacity(.35)
@@ -160,9 +191,8 @@ class _NotificationCard extends StatelessWidget {
                       Text(
                         item.message,
                         style: theme.textTheme.bodyLarge?.copyWith(
-                          fontWeight: item.isRead
-                              ? FontWeight.w500
-                              : FontWeight.w700,
+                          fontWeight:
+                              item.isRead ? FontWeight.w500 : FontWeight.w700,
                           height: 1.35,
                         ),
                       ),
@@ -177,7 +207,7 @@ class _NotificationCard extends StatelessWidget {
                           const SizedBox(width: 5),
                           Expanded(
                             child: Text(
-                              _formatDate(item.createdAt),
+                              _formatDate(context, item.createdAt),
                               style: theme.textTheme.bodySmall?.copyWith(
                                 color: cs.outline,
                               ),
@@ -185,25 +215,6 @@ class _NotificationCard extends StatelessWidget {
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          if (!item.isRead)
-                            Container(
-                              margin: const EdgeInsets.only(left: 8),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 3,
-                              ),
-                              decoration: BoxDecoration(
-                                color: cs.primary,
-                                borderRadius: BorderRadius.circular(999),
-                              ),
-                              child: Text(
-                                'NEW',
-                                style: theme.textTheme.labelSmall?.copyWith(
-                                  color: cs.onPrimary,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                            ),
                         ],
                       ),
                     ],
@@ -211,7 +222,6 @@ class _NotificationCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 PopupMenuButton<String>(
-                  tooltip: 'Actions',
                   onSelected: (value) {
                     if (value == 'read' && !item.isRead) {
                       bloc.add(AdminNotificationMarkedRead(item.id));
@@ -221,23 +231,23 @@ class _NotificationCard extends StatelessWidget {
                   },
                   itemBuilder: (context) => [
                     if (!item.isRead)
-                      const PopupMenuItem<String>(
+                      PopupMenuItem<String>(
                         value: 'read',
                         child: Row(
                           children: [
-                            Icon(Icons.mark_email_read_outlined, size: 18),
-                            SizedBox(width: 8),
-                            Text('Mark as read'),
+                            const Icon(Icons.mark_email_read_outlined, size: 18),
+                            const SizedBox(width: 8),
+                            Text(l10n.admin_notifications_mark_as_read),
                           ],
                         ),
                       ),
-                    const PopupMenuItem<String>(
+                    PopupMenuItem<String>(
                       value: 'delete',
                       child: Row(
                         children: [
-                          Icon(Icons.delete_outline, size: 18),
-                          SizedBox(width: 8),
-                          Text('Delete'),
+                          const Icon(Icons.delete_outline, size: 18),
+                          const SizedBox(width: 8),
+                          Text(l10n.common_delete),
                         ],
                       ),
                     ),
@@ -255,17 +265,19 @@ class _NotificationCard extends StatelessWidget {
     );
   }
 
-  String _formatDate(DateTime? dt) {
-    if (dt == null) return 'Unknown date';
+  String _formatDate(BuildContext context, DateTime? dt) {
+    final l10n = AppLocalizations.of(context)!;
+
+    if (dt == null) return l10n.common_unknown;
 
     final local = dt.toLocal();
     final now = DateTime.now();
     final diff = now.difference(local);
 
-    if (diff.inMinutes < 1) return 'Just now';
-    if (diff.inMinutes < 60) return '${diff.inMinutes} min ago';
-    if (diff.inHours < 24) return '${diff.inHours} h ago';
-    if (diff.inDays < 7) return '${diff.inDays} d ago';
+    if (diff.inMinutes < 1) return l10n.timeago_just_now;
+    if (diff.inMinutes < 60) return l10n.timeago_minutes(diff.inMinutes);
+    if (diff.inHours < 24) return l10n.timeago_hours(diff.inHours);
+    if (diff.inDays < 7) return l10n.timeago_days(diff.inDays);
 
     final y = local.year.toString().padLeft(4, '0');
     final m = local.month.toString().padLeft(2, '0');
@@ -310,6 +322,7 @@ class _EmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -322,7 +335,7 @@ class _EmptyState extends StatelessWidget {
           ),
           const SizedBox(height: 14),
           Text(
-            'No notifications yet',
+            l10n.admin_notifications_empty_title,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w700,
             ),
@@ -330,7 +343,7 @@ class _EmptyState extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'When something important happens, it will show up here.',
+            l10n.admin_notifications_empty_subtitle,
             style: theme.textTheme.bodyMedium?.copyWith(
               color: cs.outline,
               height: 1.4,

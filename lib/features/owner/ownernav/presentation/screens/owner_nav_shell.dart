@@ -1,6 +1,7 @@
 import 'package:build4all_manager/core/network/dio_client.dart';
 import 'package:build4all_manager/features/notifications_admin/data/service/admin_notifications_api.dart';
 import 'package:build4all_manager/features/notifications_admin/presentation/cubit/admin_unread_count_cubit.dart';
+import 'package:build4all_manager/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -139,130 +140,132 @@ class _OwnerNavShellState extends State<OwnerNavShell>
   }
 
   @override
-Widget build(BuildContext context) {
-  final pages = widget.destinations;
-  final width = MediaQuery.of(context).size.width;
-  final useRail = width >= 900 && _mode == OwnerMenuType.bottom;
+  Widget build(BuildContext context) {
+    final pages = widget.destinations;
+    final width = MediaQuery.of(context).size.width;
+    final useRail = width >= 900 && _mode == OwnerMenuType.bottom;
 
-  return BlocProvider(
-    create: (_) => AdminUnreadCountCubit(
-      AdminNotificationsApi(DioClient.ensure()),
-    )..start(),
-    child: BlocBuilder<OwnerNavCubit, OwnerNavState>(
-      builder: (context, navState) {
-        final unreadCount =
-            context.watch<AdminUnreadCountCubit>().state.count;
+    return BlocProvider(
+      create: (_) => AdminUnreadCountCubit(
+        AdminNotificationsApi(DioClient.ensure()),
+      )..start(),
+      child: BlocBuilder<OwnerNavCubit, OwnerNavState>(
+        builder: (context, navState) {
+          final unreadCount =
+              context.watch<AdminUnreadCountCubit>().state.count;
 
-        final index =
-            pages.isEmpty ? 0 : navState.index.clamp(0, pages.length - 1);
+          final index =
+              pages.isEmpty ? 0 : navState.index.clamp(0, pages.length - 1);
 
-        if (_mode == OwnerMenuType.top && _tab != null && _tab!.index != index) {
-          _tab!.index = index;
-        }
+          if (_mode == OwnerMenuType.top && _tab != null && _tab!.index != index) {
+            _tab!.index = index;
+          }
 
-        final body = AnimatedSwitcher(
-          duration: const Duration(milliseconds: 220),
-          child: KeyedSubtree(
-            key: ValueKey(GoRouterState.of(context).uri.toString()),
-            child: widget.child,
-          ),
-        );
-
-        if (pages.isEmpty) {
-          return Scaffold(
-            key: _scaffoldKey,
-            body: SafeArea(child: body),
+          final body = AnimatedSwitcher(
+            duration: const Duration(milliseconds: 220),
+            child: KeyedSubtree(
+              key: ValueKey(GoRouterState.of(context).uri.toString()),
+              child: widget.child,
+            ),
           );
-        }
 
-        switch (_mode) {
-          case OwnerMenuType.top:
+          if (pages.isEmpty) {
             return Scaffold(
               key: _scaffoldKey,
-              body: SafeArea(
-                child: Column(
-                  children: [
-                    if (_tab != null) _TopTabsStrip(tab: _tab!, pages: pages),
-                    const SizedBox(height: 8),
-                    Expanded(child: body),
-                  ],
-                ),
-              ),
+              body: SafeArea(child: body),
             );
+          }
 
-          case OwnerMenuType.drawer:
-            return Scaffold(
-              key: _scaffoldKey,
-              drawer: _buildDrawer(context, pages, index),
-              body: SafeArea(
-                child: Stack(
-                  children: [
-                    Positioned.fill(child: body),
-                    Positioned(
-                      top: 12,
-                      left: 12,
-                      child: _FabHamburger(
-                        onTap: () => _scaffoldKey.currentState?.openDrawer(),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-
-          case OwnerMenuType.bottom:
-          default:
-            if (useRail) {
+          switch (_mode) {
+            case OwnerMenuType.top:
               return Scaffold(
                 key: _scaffoldKey,
                 body: SafeArea(
-                  child: Row(
+                  child: Column(
                     children: [
-                      _OwnerRail(
-                        index: index,
-                        onSelect: (i) => _goTo(i),
-                        pages: pages,
-                      ),
-                      const VerticalDivider(width: 1),
+                      if (_tab != null) _TopTabsStrip(tab: _tab!, pages: pages),
+                      const SizedBox(height: 8),
                       Expanded(child: body),
                     ],
                   ),
                 ),
               );
-            }
 
-            return Scaffold(
-              key: _scaffoldKey,
-              body: SafeArea(child: body),
-              bottomNavigationBar: OwnerPillNavBar(
-                currentIndex: index,
-                onTap: (i) => _goTo(i),
-                items: List.generate(pages.length, (i) {
-                  final d = pages[i];
-                  final iconData = (i == index) ? d.selectedIcon : d.icon;
+            case OwnerMenuType.drawer:
+              return Scaffold(
+                key: _scaffoldKey,
+                drawer: _buildDrawer(context, pages, index),
+                body: SafeArea(
+                  child: Stack(
+                    children: [
+                      Positioned.fill(child: body),
+                      Positioned(
+                        top: 12,
+                        left: 12,
+                        child: _FabHamburger(
+                          onTap: () => _scaffoldKey.currentState?.openDrawer(),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
 
-                  final isNotificationsTab =
-                      d.route.startsWith('/owner/notifications');
+            case OwnerMenuType.bottom:
+            default:
+              if (useRail) {
+                return Scaffold(
+                  key: _scaffoldKey,
+                  body: SafeArea(
+                    child: Row(
+                      children: [
+                        _OwnerRail(
+                          index: index,
+                          onSelect: (i) => _goTo(i),
+                          pages: pages,
+                        ),
+                        const VerticalDivider(width: 1),
+                        Expanded(child: body),
+                      ],
+                    ),
+                  ),
+                );
+              }
 
-                  return OwnerPillNavItem(
-                    icon: Icon(iconData),
-                    label: d.label,
-                    badgeCount: isNotificationsTab ? unreadCount : 0,
-                  );
-                }),
-              ),
-            );
-        }
-      },
-    ),
-  );
-}
+              return Scaffold(
+                key: _scaffoldKey,
+                body: SafeArea(child: body),
+                bottomNavigationBar: OwnerPillNavBar(
+                  currentIndex: index,
+                  onTap: (i) => _goTo(i),
+                  items: List.generate(pages.length, (i) {
+                    final d = pages[i];
+                    final iconData = (i == index) ? d.selectedIcon : d.icon;
+
+                    final isNotificationsTab =
+                        d.route.startsWith('/owner/notifications');
+
+                    return OwnerPillNavItem(
+                      icon: Icon(iconData),
+                      label: d.label,
+                      badgeCount: isNotificationsTab ? unreadCount : 0,
+                    );
+                  }),
+                ),
+              );
+          }
+        },
+      ),
+    );
+  }
+
   Widget _buildDrawer(
     BuildContext context,
     List<OwnerDestination> pages,
     int index,
   ) {
     final cs = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return NavigationDrawer(
       selectedIndex: index,
@@ -282,7 +285,7 @@ Widget build(BuildContext context) {
           child: Align(
             alignment: Alignment.bottomLeft,
             child: Text(
-              'Owner',
+              l10n.owner_nav_drawer_title,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     color: cs.onPrimary,
                     fontWeight: FontWeight.w800,

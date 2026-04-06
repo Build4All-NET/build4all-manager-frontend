@@ -1,3 +1,4 @@
+import 'package:build4all_manager/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../domain/entities/app_publish_request_admin.dart';
 
@@ -20,10 +21,8 @@ class RequestedAppRow extends StatelessWidget {
     return LayoutBuilder(
       builder: (ctx, c) {
         final w = c.maxWidth;
-
-        // 🔥 Breakpoints — tweak if you want
-        final compact = w < 700; // phones / small tablets
-        final tiny = w < 420; // very small phones
+        final compact = w < 700;
+        final tiny = w < 420;
 
         if (compact) {
           return _compactRow(context, tiny: tiny);
@@ -34,28 +33,27 @@ class RequestedAppRow extends StatelessWidget {
     );
   }
 
-  // =========================
-  // ✅ COMPACT (NO OVERFLOW)
-  // =========================
   Widget _compactRow(BuildContext context, {required bool tiny}) {
     final cs = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Top: App
           Row(
             children: [
-              _AppIcon(),
+              const _AppIcon(),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      item.appName ?? 'App',
+                      item.appName?.trim().isNotEmpty == true
+                          ? item.appName!
+                          : l10n.publish_unknown_app,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -64,7 +62,7 @@ class RequestedAppRow extends StatelessWidget {
                     ),
                     const SizedBox(height: 3),
                     Text(
-                      'AUP ${item.aupId ?? "-"} • ${item.store}',
+                      'AUP ${item.aupId ?? "-"} • ${_storeLabel(context, item.store)}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -76,27 +74,25 @@ class RequestedAppRow extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 10),
-              _MoreMenu(item: item),
+              const _MoreMenu(),
             ],
           ),
-
           const SizedBox(height: 10),
-
-          // Middle: platforms + status (wrap)
           Wrap(
             spacing: 10,
             runSpacing: 10,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              _PlatformBadge.android(ready: true),
-              _PlatformBadge.ios(ready: true),
+              _PlatformBadge.android(
+                label: _platformBadgeLabel(context, true),
+              ),
+              _PlatformBadge.ios(
+                label: _platformBadgeLabel(context, true),
+              ),
               _StatusPill(status: item.status),
             ],
           ),
-
           const SizedBox(height: 10),
-
-          // Requested date / request id (optional)
           if (showRequested) ...[
             Text(
               _prettyDate(item.requestedAt),
@@ -118,8 +114,6 @@ class RequestedAppRow extends StatelessWidget {
             ),
             const SizedBox(height: 10),
           ],
-
-          // Bottom: action button full width (no overflow ever)
           SizedBox(
             width: double.infinity,
             height: 44,
@@ -134,10 +128,10 @@ class RequestedAppRow extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    'View & Publish',
+                    l10n.publish_action_view_publish,
                     style: TextStyle(
                       fontWeight: FontWeight.w900,
-                      fontSize: tiny ? 13 : 14, // ✅ tiny screens shrink text
+                      fontSize: tiny ? 13 : 14,
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -151,10 +145,9 @@ class RequestedAppRow extends StatelessWidget {
     );
   }
 
-  // =========================
-  // ✅ TABLE (WIDE SCREENS)
-  // =========================
   Widget _tableRow(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
       child: Row(
@@ -164,14 +157,16 @@ class RequestedAppRow extends StatelessWidget {
             flex: 38,
             child: Row(
               children: [
-                _AppIcon(),
+                const _AppIcon(),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        item.appName ?? 'App',
+                        item.appName?.trim().isNotEmpty == true
+                            ? item.appName!
+                            : l10n.publish_unknown_app,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style:
@@ -181,7 +176,7 @@ class RequestedAppRow extends StatelessWidget {
                       ),
                       const SizedBox(height: 3),
                       Text(
-                        'AUP ${item.aupId ?? "-"} • ${item.store}',
+                        'AUP ${item.aupId ?? "-"} • ${_storeLabel(context, item.store)}',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -194,33 +189,33 @@ class RequestedAppRow extends StatelessWidget {
               ],
             ),
           ),
-
           Expanded(
             flex: 22,
             child: Wrap(
               spacing: 10,
               runSpacing: 8,
               children: [
-                _PlatformBadge.android(ready: true),
-                _PlatformBadge.ios(ready: true),
+                _PlatformBadge.android(
+                  label: _platformBadgeLabel(context, true),
+                ),
+                _PlatformBadge.ios(
+                  label: _platformBadgeLabel(context, true),
+                ),
               ],
             ),
           ),
-
           if (showVersion)
             Expanded(
               flex: 18,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  // keep placeholders
-                  Text('Android: —'),
-                  SizedBox(height: 6),
-                  Text('iOS: —'),
+                children: [
+                  Text(_androidVersionLine(context)),
+                  const SizedBox(height: 6),
+                  Text(_iosVersionLine(context)),
                 ],
               ),
             ),
-
           Expanded(
             flex: 16,
             child: Align(
@@ -228,15 +223,17 @@ class RequestedAppRow extends StatelessWidget {
               child: _StatusPill(status: item.status),
             ),
           ),
-
           if (showRequested)
             Expanded(
               flex: 24,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(_prettyDate(item.requestedAt),
-                      maxLines: 1, overflow: TextOverflow.ellipsis),
+                  Text(
+                    _prettyDate(item.requestedAt),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                   const SizedBox(height: 4),
                   Text(
                     'REQ-${item.id.toString().padLeft(6, "0")}',
@@ -246,8 +243,6 @@ class RequestedAppRow extends StatelessWidget {
                 ],
               ),
             ),
-
-          // ✅ IMPORTANT: Actions should be flexible, not fixed width
           Flexible(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -262,27 +257,81 @@ class RequestedAppRow extends StatelessWidget {
                         borderRadius: BorderRadius.circular(999),
                       ),
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          'View & Publish',
-                          style: TextStyle(fontWeight: FontWeight.w900),
+                          l10n.publish_action_view_publish,
+                          style: const TextStyle(fontWeight: FontWeight.w900),
                         ),
-                        SizedBox(width: 8),
-                        Icon(Icons.arrow_forward_rounded, size: 18),
+                        const SizedBox(width: 8),
+                        const Icon(Icons.arrow_forward_rounded, size: 18),
                       ],
                     ),
                   ),
                 ),
                 const SizedBox(width: 10),
-                _MoreMenu(item: item),
+                const _MoreMenu(),
               ],
             ),
           ),
         ],
       ),
     );
+  }
+
+  String _platformBadgeLabel(BuildContext context, bool ready) {
+    final l10n = AppLocalizations.of(context)!;
+    return ready ? l10n.owner_project_ready : l10n.status_pending;
+  }
+
+  String _storeLabel(BuildContext context, String store) {
+    final l10n = AppLocalizations.of(context)!;
+    final s = store.toUpperCase();
+
+    if (s == 'PLAY_STORE') return l10n.publish_store_play;
+    if (s == 'APP_STORE') return l10n.publish_store_app;
+    return store;
+  }
+
+  String _androidVersionLine(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final name = item.androidVersionName?.trim();
+    final code = item.androidVersionCode;
+
+    if ((name == null || name.isEmpty) && code == null) {
+      return '${l10n.owner_publish_platform_android}: —';
+    }
+
+    if (name != null && name.isNotEmpty && code != null) {
+      return '${l10n.owner_publish_platform_android}: $name ($code)';
+    }
+
+    if (name != null && name.isNotEmpty) {
+      return '${l10n.owner_publish_platform_android}: $name';
+    }
+
+    return '${l10n.owner_publish_platform_android}: $code';
+  }
+
+  String _iosVersionLine(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final name = item.iosVersionName?.trim();
+    final build = item.iosBuildNumber;
+
+    if ((name == null || name.isEmpty) && build == null) {
+      return '${l10n.owner_publish_platform_ios}: —';
+    }
+
+    if (name != null && name.isNotEmpty && build != null) {
+      return '${l10n.owner_publish_platform_ios}: $name ($build)';
+    }
+
+    if (name != null && name.isNotEmpty) {
+      return '${l10n.owner_publish_platform_ios}: $name';
+    }
+
+    return '${l10n.owner_publish_platform_ios}: $build';
   }
 
   String _prettyDate(DateTime? dt) {
@@ -296,9 +345,9 @@ class RequestedAppRow extends StatelessWidget {
   }
 }
 
-// ======= same helpers you had (keep them) =======
-
 class _AppIcon extends StatelessWidget {
+  const _AppIcon();
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
@@ -318,27 +367,23 @@ class _AppIcon extends StatelessWidget {
 class _PlatformBadge extends StatelessWidget {
   final IconData icon;
   final String label;
-  final bool ready;
   final Color tint;
 
   const _PlatformBadge._({
     required this.icon,
     required this.label,
-    required this.ready,
     required this.tint,
   });
 
-  factory _PlatformBadge.android({required bool ready}) => _PlatformBadge._(
+  factory _PlatformBadge.android({required String label}) => _PlatformBadge._(
         icon: Icons.android_rounded,
-        label: ready ? 'Ready' : 'Pending',
-        ready: ready,
+        label: label,
         tint: Colors.green,
       );
 
-  factory _PlatformBadge.ios({required bool ready}) => _PlatformBadge._(
+  factory _PlatformBadge.ios({required String label}) => _PlatformBadge._(
         icon: Icons.apple,
-        label: ready ? 'Ready' : 'Pending',
-        ready: ready,
+        label: label,
         tint: Colors.blue,
       );
 
@@ -362,7 +407,7 @@ class _PlatformBadge extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
           decoration: BoxDecoration(
-            color: (ready ? tint : cs.outlineVariant).withOpacity(.12),
+            color: tint.withOpacity(.12),
             borderRadius: BorderRadius.circular(999),
           ),
           child: Row(
@@ -372,7 +417,7 @@ class _PlatformBadge extends StatelessWidget {
                 width: 8,
                 height: 8,
                 decoration: BoxDecoration(
-                  color: ready ? tint : cs.onSurfaceVariant,
+                  color: tint,
                   shape: BoxShape.circle,
                 ),
               ),
@@ -403,14 +448,15 @@ class _StatusPill extends StatelessWidget {
     Color c;
     if (s == 'SUBMITTED' || s == 'IN_REVIEW') {
       c = cs.primary;
-    } else if (s == 'APPROVED')
+    } else if (s == 'APPROVED') {
       c = Colors.green;
-    else if (s == 'REJECTED')
+    } else if (s == 'REJECTED') {
       c = Colors.red;
-    else if (s == 'PUBLISHED')
+    } else if (s == 'PUBLISHED') {
       c = Colors.teal;
-    else
+    } else {
       c = cs.secondary;
+    }
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
@@ -422,12 +468,16 @@ class _StatusPill extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-              width: 10,
-              height: 10,
-              decoration: BoxDecoration(color: c, shape: BoxShape.circle)),
+            width: 10,
+            height: 10,
+            decoration: BoxDecoration(
+              color: c,
+              shape: BoxShape.circle,
+            ),
+          ),
           const SizedBox(width: 8),
           Text(
-            status,
+            _statusLabel(context, status),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -438,23 +488,48 @@ class _StatusPill extends StatelessWidget {
       ),
     );
   }
+
+  String _statusLabel(BuildContext context, String status) {
+    final l10n = AppLocalizations.of(context)!;
+    switch (status.toUpperCase()) {
+      case 'SUBMITTED':
+        return l10n.publish_status_submitted;
+      case 'IN_REVIEW':
+        return l10n.publish_status_in_review;
+      case 'APPROVED':
+        return l10n.publish_status_approved;
+      case 'REJECTED':
+        return l10n.publish_status_rejected;
+      case 'PUBLISHED':
+        return l10n.publish_status_published;
+      case 'DRAFT':
+        return l10n.publish_status_draft;
+      default:
+        return status;
+    }
+  }
 }
 
 class _MoreMenu extends StatelessWidget {
-  final AppPublishRequestAdmin item;
-  const _MoreMenu({required this.item});
+  const _MoreMenu();
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return PopupMenuButton<String>(
-      tooltip: 'More',
+      tooltip: l10n.common_more,
       onSelected: (_) {},
-      itemBuilder: (_) => const [
+      itemBuilder: (_) => [
         PopupMenuItem(
-            value: 'history', child: Text('CI/CD History (Coming soon)')),
-        PopupMenuItem(value: 'logs', child: Text('View Logs (Coming soon)')),
+          value: 'history',
+          child: Text(l10n.publish_action_cicd_history_soon),
+        ),
+        PopupMenuItem(
+          value: 'logs',
+          child: Text(l10n.publish_action_view_logs_soon),
+        ),
       ],
       child: Container(
         width: 40,

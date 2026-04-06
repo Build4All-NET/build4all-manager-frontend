@@ -2761,4 +2761,475 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get owner_project_add_internal_testers => 'Add Internal Testers';
+
+  @override
+  String get admin_notifications_mark_as_read => 'Mark as read';
+
+  @override
+  String get admin_notifications_empty_title => 'No notifications yet';
+
+  @override
+  String get admin_notifications_empty_subtitle => 'When something important happens, it will show up here.';
+
+  @override
+  String get publish_table_app => 'App';
+
+  @override
+  String get publish_table_platforms => 'Platforms';
+
+  @override
+  String get publish_table_version => 'Version';
+
+  @override
+  String get publish_table_requested_date => 'Requested Date';
+
+  @override
+  String get publish_table_actions => 'Actions';
+
+  @override
+  String get publish_unknown_app => 'App';
+
+  @override
+  String get publish_action_view_publish => 'View & Publish';
+
+  @override
+  String get publish_action_cicd_history_soon => 'CI/CD History (Coming soon)';
+
+  @override
+  String get publish_action_view_logs_soon => 'View Logs (Coming soon)';
+
+  @override
+  String get publish_details_no_file_yet => 'No file available yet';
+
+  @override
+  String get publish_details_invalid_url => 'Invalid URL';
+
+  @override
+  String get publish_details_could_not_open_link => 'Could not open link';
+
+  @override
+  String get publish_details_store_play => 'Google Play';
+
+  @override
+  String get publish_details_store_app => 'App Store';
+
+  @override
+  String get publish_details_android_title => 'Android — Google Play';
+
+  @override
+  String get publish_details_android_subtitle => 'Build and publish to Play Store';
+
+  @override
+  String get publish_details_ios_title => 'iOS — App Store';
+
+  @override
+  String get publish_details_ios_subtitle => 'Build and publish to App Store';
+
+  @override
+  String get publish_details_label_package_name => 'Package Name';
+
+  @override
+  String get publish_details_label_version_code => 'Version Code';
+
+  @override
+  String get publish_details_label_last_build => 'Last Build';
+
+  @override
+  String get publish_details_label_bundle_identifier => 'Bundle Identifier';
+
+  @override
+  String get publish_details_label_build_number => 'Build Number';
+
+  @override
+  String get publish_details_available => 'Available';
+
+  @override
+  String get publish_details_download_ipa => 'Download IPA';
+
+  @override
+  String get publish_details_cta_play_store => 'Publish to Play Store';
+
+  @override
+  String get publish_details_cta_app_store => 'Publish to App Store';
+
+  @override
+  String get publish_details_coming_soon => 'Coming soon';
+
+  @override
+  String get publish_details_download_builds => 'Download Builds';
+
+  @override
+  String get publish_details_manual_publish_instructions => 'Manual Publish Instructions';
+
+  @override
+  String get publish_details_file_apk => 'APK';
+
+  @override
+  String get publish_details_file_aab => 'AAB';
+
+  @override
+  String get publish_details_file_ipa => 'IPA';
+
+  @override
+  String get upgrade_requests_empty_search_title => 'No matching requests found';
+
+  @override
+  String get upgrade_requests_empty_search_subtitle => 'Try another keyword for app name, slug, request ID, or plan.';
+
+  @override
+  String get upgrade_requests_hero_subtitle => 'Review, approve, or reject owner plan upgrade requests.';
+
+  @override
+  String get upgrade_requests_stat_total => 'Total';
+
+  @override
+  String get upgrade_requests_stat_shown => 'Shown';
+
+  @override
+  String get upgrade_requests_stat_pending => 'Pending';
+
+  @override
+  String get upgrade_requests_search_hint => 'Search by app, slug, request ID, or plan...';
+
+  @override
+  String upgrade_requests_visible_count(Object count) {
+    return '$count requests visible';
+  }
+
+  @override
+  String get upgrade_requests_status_pending => 'Pending';
+
+  @override
+  String get upgrade_requests_no_slug_available => 'No slug available';
+
+  @override
+  String get app_licenses_filter_all => 'All';
+
+  @override
+  String get app_licenses_filter_pending => 'Pending';
+
+  @override
+  String get app_licenses_filter_blocked => 'Blocked';
+
+  @override
+  String get app_licenses_filter_free => 'Free';
+
+  @override
+  String get app_licenses_filter_pro_hosted => 'Pro Hosted';
+
+  @override
+  String get app_licenses_filter_dedicated => 'Dedicated';
+
+  @override
+  String get app_licenses_stat_total => 'Total';
+
+  @override
+  String get app_licenses_stat_pending => 'Pending';
+
+  @override
+  String get app_licenses_stat_blocked => 'Blocked';
+
+  @override
+  String get app_licenses_stat_free => 'Free';
+
+  @override
+  String get app_licenses_stat_pro_hosted => 'Pro Hosted';
+
+  @override
+  String get app_licenses_stat_dedicated => 'Dedicated';
+
+  @override
+  String get app_licenses_pending_request => 'Pending Request';
+
+  @override
+  String get app_licenses_pending_banner => 'This app has a pending upgrade request.';
+
+  @override
+  String get app_licenses_request_status_label => 'Request Status';
+
+  @override
+  String get app_licenses_empty_subtitle => 'No app license rows are available yet.';
+
+  @override
+  String get app_licenses_empty_search_subtitle => 'Try another search or filter combination.';
+
+  @override
+  String get app_licenses_plan_free => 'Free';
+
+  @override
+  String get app_licenses_plan_pro_hosted => 'Pro Hosted';
+
+  @override
+  String get app_licenses_plan_dedicated => 'Dedicated';
+
+  @override
+  String get app_licenses_status_expired => 'Expired';
+
+  @override
+  String get app_licenses_status_suspended => 'Suspended';
+
+  @override
+  String get app_licenses_status_deleted => 'Deleted';
+
+  @override
+  String get app_licenses_status_canceled => 'Canceled';
+
+  @override
+  String get tutorial_ownerGuide_upload_replace_video => 'Upload / Replace video';
+
+  @override
+  String get tutorial_ownerGuide_invalid_video_url => 'Invalid video URL.';
+
+  @override
+  String get tutorial_ownerGuide_could_not_open_video => 'Could not open the video.';
+
+  @override
+  String get tutorial_ownerGuide_copied_link => 'Copied link.';
+
+  @override
+  String get tutorial_ownerGuide_could_not_read_selected_file_path => 'Could not read selected file path.';
+
+  @override
+  String tutorial_ownerGuide_upload_progress(Object percent) {
+    return 'Uploading... $percent%';
+  }
+
+  @override
+  String get owner_request_logo_label_required => 'App logo *';
+
+  @override
+  String get owner_request_submit_ready_state => 'Ready to submit';
+
+  @override
+  String get owner_request_submit_missing_required => 'App name + logo required';
+
+  @override
+  String get preview_phone_nav_home => 'Home';
+
+  @override
+  String get preview_phone_nav_explore => 'Explore';
+
+  @override
+  String get preview_phone_nav_cart => 'Cart';
+
+  @override
+  String get preview_phone_nav_profile => 'Profile';
+
+  @override
+  String get preview_phone_nav_tab => 'Tab';
+
+  @override
+  String get preview_phone_search_products => 'Search products...';
+
+  @override
+  String get preview_phone_welcome => 'Welcome';
+
+  @override
+  String get preview_phone_search => 'Search...';
+
+  @override
+  String get preview_phone_hero_banner => 'Hero Banner';
+
+  @override
+  String get preview_phone_product_name => 'Product Name';
+
+  @override
+  String get preview_phone_add_to_cart => 'Add to Cart';
+
+  @override
+  String get palette_primary => 'Primary';
+
+  @override
+  String get palette_secondary => 'Secondary';
+
+  @override
+  String get palette_background => 'Background';
+
+  @override
+  String get palette_text_on_background => 'Text (onBackground)';
+
+  @override
+  String get palette_error => 'Error';
+
+  @override
+  String get palette_auto_theme_hint => 'Owners pick colors visually. We generate themeJson automatically.';
+
+  @override
+  String get palette_pick_color => 'Pick color';
+
+  @override
+  String get palette_use_color => 'Use';
+
+  @override
+  String get palette_preset_pink_pop => 'Pink Pop';
+
+  @override
+  String get palette_preset_ocean_blue => 'Ocean Blue';
+
+  @override
+  String get palette_preset_forest => 'Forest';
+
+  @override
+  String get palette_preset_sunset => 'Sunset';
+
+  @override
+  String get palette_preset_midnight => 'Midnight';
+
+  @override
+  String get palette_selected => 'Selected';
+
+  @override
+  String get palette_tap_to_apply => 'Tap to apply';
+
+  @override
+  String get palette_preview_app_name => 'Your App';
+
+  @override
+  String get palette_preview_hello_owner => 'Hello owner';
+
+  @override
+  String get palette_preview_theme_looks => 'This is how your theme looks.';
+
+  @override
+  String get palette_preview_primary_button => 'Primary Button';
+
+  @override
+  String get runtime_menu_type_title => 'Menu Type';
+
+  @override
+  String get runtime_enabled_features_title => 'Enabled Features';
+
+  @override
+  String get runtime_navigation_title => 'Navigation';
+
+  @override
+  String get runtime_navigation_subtitle => 'Home + Cart + Profile are required. Explore is optional.';
+
+  @override
+  String get runtime_home_sections_title => 'Home Sections';
+
+  @override
+  String get runtime_home_sections_subtitle => 'Sections requiring disabled features will auto-hide.';
+
+  @override
+  String get runtime_menu_bottom => 'Bottom';
+
+  @override
+  String get runtime_menu_hamburger => 'Hamburger';
+
+  @override
+  String get runtime_required => 'Required';
+
+  @override
+  String runtime_requires_features(Object features) {
+    return 'Requires: $features';
+  }
+
+  @override
+  String runtime_max_bottom_tabs(Object count) {
+    return 'Max $count tabs in bottom menu';
+  }
+
+  @override
+  String get runtime_pick_limit => 'Pick limit';
+
+  @override
+  String runtime_limit_value(Object count) {
+    return 'Limit $count';
+  }
+
+  @override
+  String get runtime_section_header => 'Header';
+
+  @override
+  String get runtime_section_search => 'Search';
+
+  @override
+  String get runtime_section_banner => 'Hero Banner';
+
+  @override
+  String get runtime_section_categories => 'Categories';
+
+  @override
+  String get runtime_section_hero_items => 'Hero Items';
+
+  @override
+  String get runtime_feature_items => 'Items';
+
+  @override
+  String get runtime_feature_booking => 'Booking';
+
+  @override
+  String get runtime_feature_reviews => 'Reviews';
+
+  @override
+  String get runtime_feature_orders => 'Orders';
+
+  @override
+  String get runtime_feature_coupons => 'Coupons';
+
+  @override
+  String get runtime_feature_notifications => 'Notifications';
+
+  @override
+  String get owner_projects_delete_title => 'Delete project';
+
+  @override
+  String owner_projects_delete_confirm(Object appName) {
+    return 'Are you sure you want to delete \"$appName\"?';
+  }
+
+  @override
+  String get owner_projects_delete_success => 'Project deleted successfully';
+
+  @override
+  String get owner_projects_delete_failed => 'Delete failed';
+
+  @override
+  String get owner_profile_edit_phone_used => 'Phone number already used';
+
+  @override
+  String get owner_profile_edit_phone_requires_verification => 'Phone change requires verification';
+
+  @override
+  String get owner_profile_edit_phone_change_sent => 'Verification code sent';
+
+  @override
+  String get owner_profile_edit_phone_change_resend_ok => 'Code resent';
+
+  @override
+  String get owner_profile_edit_phone_change_resend_fail => 'Failed to resend';
+
+  @override
+  String get owner_profile_edit_phone_change_resend => 'Resend';
+
+  @override
+  String get owner_profile_edit_phone_change_invalid_code => 'Invalid code';
+
+  @override
+  String get owner_profile_edit_phone_change_verify => 'Verify';
+
+  @override
+  String get owner_profile_edit_phone_change_title => 'Verify new phone';
+
+  @override
+  String get owner_profile_edit_phone_change_code_hint => '6-digit code';
+
+  @override
+  String get owner_profile_edit_phone_change_verified => 'Phone number updated';
+
+  @override
+  String get owner_nav_drawer_title => 'Owner';
+
+  @override
+  String get owner_nav_notifications => 'Notifications';
+
+  @override
+  String get owner_publish_price_free => 'Free';
+
+  @override
+  String get owner_publish_price_paid => 'Paid';
+
+  @override
+  String get owner_publish_assets_upload_now => 'Upload now';
 }

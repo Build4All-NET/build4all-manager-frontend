@@ -168,11 +168,6 @@ class _HomeBodyState extends State<_HomeBody> {
     return s.split(RegExp(r'\s+')).first.trim();
   }
 
-  String _safe(String? s, String fallback) {
-    final t = (s ?? '').trim();
-    return t.isEmpty ? fallback : t;
-  }
-
   String? _errText(OwnerHomeState s) {
     try {
       final dynamic d = s;
@@ -225,8 +220,8 @@ class _HomeBodyState extends State<_HomeBody> {
         ? const EdgeInsets.symmetric(horizontal: 20, vertical: 16)
         : ux.pagePad;
 
-    final hello = _safe(l10n.owner_home_hello, 'Hello');
-    final subtitle = _safe(l10n.owner_home_subtitle, 'Welcome back 👋');
+    final hello = l10n.owner_home_hello;
+    final subtitle = l10n.owner_home_subtitle;
 
     return Padding(
       padding: pagePad,
@@ -310,14 +305,10 @@ class _HomeBodyState extends State<_HomeBody> {
                   ),
                 ),
                 const SliverToBoxAdapter(child: SizedBox(height: 12)),
-
                 SliverToBoxAdapter(
                   child: _OwnerProjectsSearchField(
                     controller: _searchCtrl,
-                    hintText: _safe(
-                      l10n.owner_home_search_hint,
-                      l10n.owner_home_search_projects,
-                    ),
+                    hintText: l10n.owner_home_search_hint,
                     onChanged: (value) {
                       setState(() {
                         _searchQuery = value;
@@ -332,13 +323,9 @@ class _HomeBodyState extends State<_HomeBody> {
                   ),
                 ),
                 const SliverToBoxAdapter(child: SizedBox(height: 16)),
-
                 SliverToBoxAdapter(
                   child: AutoSizeText(
-                    _safe(
-                      l10n.owner_home_chooseProject,
-                      'Choose your project',
-                    ),
+                    l10n.owner_home_chooseProject,
                     maxLines: 1,
                     minFontSize: 14,
                     stepGranularity: 0.5,
@@ -350,7 +337,6 @@ class _HomeBodyState extends State<_HomeBody> {
                   ),
                 ),
                 const SliverToBoxAdapter(child: SizedBox(height: 12)),
-
                 SliverPadding(
                   padding: EdgeInsets.only(bottom: ux.radiusMd),
                   sliver: SliverLayoutBuilder(
@@ -423,13 +409,12 @@ class _HomeBodyState extends State<_HomeBody> {
                     },
                   ),
                 ),
-
                 SliverToBoxAdapter(
                   child: Row(
                     children: [
                       Expanded(
                         child: AutoSizeText(
-                          _safe(l10n.owner_projects_title, 'My apps'),
+                          l10n.owner_projects_title,
                           maxLines: 1,
                           minFontSize: 14,
                           stepGranularity: 0.5,
@@ -443,7 +428,7 @@ class _HomeBodyState extends State<_HomeBody> {
                       TextButton(
                         onPressed: () => context.push('/owner/projects'),
                         child: AutoSizeText(
-                          _safe(l10n.owner_home_viewAll, 'View all'),
+                          l10n.owner_home_viewAll,
                           maxLines: 1,
                           minFontSize: 12,
                           stepGranularity: 0.5,
@@ -454,7 +439,6 @@ class _HomeBodyState extends State<_HomeBody> {
                   ),
                 ),
                 const SliverToBoxAdapter(child: SizedBox(height: 10)),
-
                 if (state.loading && state.myApps.isEmpty)
                   const SliverToBoxAdapter(child: _LoadingList())
                 else if (visibleApps.isEmpty)
@@ -482,7 +466,6 @@ class _HomeBodyState extends State<_HomeBody> {
                       );
                     },
                   ),
-
                 const SliverToBoxAdapter(child: SizedBox(height: 12)),
               ],
             ),

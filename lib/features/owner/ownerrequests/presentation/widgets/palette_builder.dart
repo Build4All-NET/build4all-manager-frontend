@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:build4all_manager/l10n/app_localizations.dart';
 
 /// ----------------------------
 /// THEME DRAFT (what owner edits)
@@ -41,12 +42,10 @@ class ThemeDraft {
 /// ----------------------------
 class ThemePreset {
   final String id;
-  final String label;
   final ThemeDraft draft;
 
   const ThemePreset({
     required this.id,
-    required this.label,
     required this.draft,
   });
 }
@@ -55,7 +54,6 @@ class ThemePresets {
   static const presets = <ThemePreset>[
     ThemePreset(
       id: 'pink_pop',
-      label: 'Pink Pop',
       draft: ThemeDraft(
         primary: Color(0xFFEC4899),
         secondary: Color(0xFF111827),
@@ -66,7 +64,6 @@ class ThemePresets {
     ),
     ThemePreset(
       id: 'ocean_blue',
-      label: 'Ocean Blue',
       draft: ThemeDraft(
         primary: Color(0xFF2563EB),
         secondary: Color.fromARGB(255, 51, 80, 147),
@@ -77,7 +74,6 @@ class ThemePresets {
     ),
     ThemePreset(
       id: 'forest',
-      label: 'Forest',
       draft: ThemeDraft(
         primary: Color(0xFF16A34A),
         secondary: Color(0xFF064E3B),
@@ -88,7 +84,6 @@ class ThemePresets {
     ),
     ThemePreset(
       id: 'sunset',
-      label: 'Sunset',
       draft: ThemeDraft(
         primary: Color(0xFFF97316),
         secondary: Color(0xFF7C2D12),
@@ -99,7 +94,6 @@ class ThemePresets {
     ),
     ThemePreset(
       id: 'midnight',
-      label: 'Midnight',
       draft: ThemeDraft(
         primary: Color(0xFF8B5CF6),
         secondary: Color.fromARGB(255, 97, 64, 174),
@@ -133,7 +127,7 @@ class PaletteSection extends StatelessWidget {
   final ValueChanged<ThemeDraft> onChanged;
   final ValueChanged<String?> onPresetChanged;
 
-  /// ✅ If false, hide the bottom "Preview" block (as requested).
+  /// If false, hide the bottom preview block.
   final bool showPreview;
 
   const PaletteSection({
@@ -148,11 +142,15 @@ class PaletteSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Palette', style: Theme.of(context).textTheme.titleMedium),
+        Text(
+          l10n.owner_request_palette_title,
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
         const SizedBox(height: 10),
 
         _PresetGrid(
@@ -166,7 +164,7 @@ class PaletteSection extends StatelessWidget {
         const SizedBox(height: 12),
 
         _TileRow(
-          label: 'Primary',
+          label: l10n.palette_primary,
           color: draft.primary,
           onTap: () async {
             final picked = await _pick(context, draft.primary);
@@ -176,7 +174,7 @@ class PaletteSection extends StatelessWidget {
           },
         ),
         _TileRow(
-          label: 'Secondary',
+          label: l10n.palette_secondary,
           color: draft.secondary,
           onTap: () async {
             final picked = await _pick(context, draft.secondary);
@@ -186,7 +184,7 @@ class PaletteSection extends StatelessWidget {
           },
         ),
         _TileRow(
-          label: 'Background',
+          label: l10n.palette_background,
           color: draft.background,
           onTap: () async {
             final picked = await _pick(context, draft.background);
@@ -196,7 +194,7 @@ class PaletteSection extends StatelessWidget {
           },
         ),
         _TileRow(
-          label: 'Text (onBackground)',
+          label: l10n.palette_text_on_background,
           color: draft.onBackground,
           onTap: () async {
             final picked = await _pick(context, draft.onBackground);
@@ -206,7 +204,7 @@ class PaletteSection extends StatelessWidget {
           },
         ),
         _TileRow(
-          label: 'Error',
+          label: l10n.palette_error,
           color: draft.error,
           onTap: () async {
             final picked = await _pick(context, draft.error);
@@ -216,7 +214,6 @@ class PaletteSection extends StatelessWidget {
           },
         ),
 
-        // ✅ Hide the bottom "Preview" block if requested
         if (showPreview) ...[
           const SizedBox(height: 12),
           _ThemePreview(draft: draft),
@@ -227,11 +224,10 @@ class PaletteSection extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'Owners pick colors visually. We generate themeJson automatically.',
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodySmall
-                      ?.copyWith(color: cs.onSurface.withOpacity(.65)),
+                  l10n.palette_auto_theme_hint,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: cs.onSurface.withOpacity(.65),
+                      ),
                 ),
               ),
             ],
@@ -241,59 +237,55 @@ class PaletteSection extends StatelessWidget {
     );
   }
 
-  // Simple color picker using showDialog (no extra deps)
   static Future<Color?> _pick(BuildContext context, Color start) async {
-  Color temp = start;
+    final l10n = AppLocalizations.of(context)!;
+    Color temp = start;
 
-  return showDialog<Color>(
-    context: context,
-    builder: (ctx) {
-      final cs = Theme.of(ctx).colorScheme;
+    return showDialog<Color>(
+      context: context,
+      builder: (ctx) {
+        final cs = Theme.of(ctx).colorScheme;
 
-      return AlertDialog(
-        title: const Text('Pick color'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // ✅ Color wheel + saturation/value (best UX)
-              ColorPicker(
-                pickerColor: temp,
-                onColorChanged: (c) => temp = c,
-                enableAlpha: false, // set true if you want alpha
-                labelTypes: const [], // hides RGBA labels
-                portraitOnly: true,
-              ),
-
-              const SizedBox(height: 12),
-
-              // ✅ Optional: show selected color preview
-              Container(
-                height: 44,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: temp,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: cs.outlineVariant),
+        return AlertDialog(
+          title: Text(l10n.palette_pick_color),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ColorPicker(
+                  pickerColor: temp,
+                  onColorChanged: (c) => temp = c,
+                  enableAlpha: false,
+                  labelTypes: const [],
+                  portraitOnly: true,
                 ),
-              ),
-            ],
+                const SizedBox(height: 12),
+                Container(
+                  height: 44,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: temp,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: cs.outlineVariant),
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(ctx, temp),
-            child: const Text('Use'),
-          ),
-        ],
-      );
-    },
-  );
-}
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(l10n.common_cancel),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(ctx, temp),
+              child: Text(l10n.palette_use_color),
+            ),
+          ],
+        );
+      },
+    );
+  }
 }
 
 class _PresetGrid extends StatelessWidget {
@@ -305,9 +297,29 @@ class _PresetGrid extends StatelessWidget {
     required this.onSelect,
   });
 
+  String _presetLabel(BuildContext context, String id) {
+    final l10n = AppLocalizations.of(context)!;
+
+    switch (id) {
+      case 'pink_pop':
+        return l10n.palette_preset_pink_pop;
+      case 'ocean_blue':
+        return l10n.palette_preset_ocean_blue;
+      case 'forest':
+        return l10n.palette_preset_forest;
+      case 'sunset':
+        return l10n.palette_preset_sunset;
+      case 'midnight':
+        return l10n.palette_preset_midnight;
+      default:
+        return id;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return SizedBox(
       height: 92,
@@ -339,14 +351,16 @@ class _PresetGrid extends StatelessWidget {
                   _MiniSwatches(draft: p.draft),
                   const SizedBox(height: 10),
                   Text(
-                    p.label,
+                    _presetLabel(ctx, p.id),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(ctx).textTheme.labelLarge,
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    selected ? 'Selected' : 'Tap to apply',
+                    selected
+                        ? l10n.palette_selected
+                        : l10n.palette_tap_to_apply,
                     style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
                           color: cs.onSurface.withOpacity(.6),
                         ),
@@ -423,7 +437,10 @@ class _TileRow extends StatelessWidget {
           child: Row(
             children: [
               Expanded(
-                child: Text(label, style: Theme.of(context).textTheme.bodyLarge),
+                child: Text(
+                  label,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
               ),
               Container(
                 width: 44,
@@ -451,6 +468,7 @@ class _ThemePreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return Container(
       padding: const EdgeInsets.all(14),
@@ -462,7 +480,10 @@ class _ThemePreview extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Preview', style: Theme.of(context).textTheme.titleSmall),
+          Text(
+            l10n.preview,
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
           const SizedBox(height: 10),
           Container(
             height: 42,
@@ -476,15 +497,18 @@ class _ThemePreview extends StatelessWidget {
                 Icon(Icons.apps_rounded, color: _on(draft.primary), size: 18),
                 const SizedBox(width: 8),
                 Text(
-                  'Your App',
+                  l10n.palette_preview_app_name,
                   style: TextStyle(
                     color: _on(draft.primary),
                     fontWeight: FontWeight.w700,
                   ),
                 ),
                 const Spacer(),
-                Icon(Icons.notifications_none_rounded,
-                    color: _on(draft.primary), size: 18),
+                Icon(
+                  Icons.notifications_none_rounded,
+                  color: _on(draft.primary),
+                  size: 18,
+                ),
               ],
             ),
           ),
@@ -500,7 +524,7 @@ class _ThemePreview extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Hello owner 👋',
+                  l10n.palette_preview_hello_owner,
                   style: TextStyle(
                     color: draft.onBackground,
                     fontWeight: FontWeight.w800,
@@ -508,8 +532,10 @@ class _ThemePreview extends StatelessWidget {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'This is how your theme looks.',
-                  style: TextStyle(color: draft.onBackground.withOpacity(.85)),
+                  l10n.palette_preview_theme_looks,
+                  style: TextStyle(
+                    color: draft.onBackground.withOpacity(.85),
+                  ),
                 ),
                 const SizedBox(height: 10),
                 Row(
@@ -523,7 +549,7 @@ class _ThemePreview extends StatelessWidget {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
-                          'Primary Button',
+                          l10n.palette_preview_primary_button,
                           style: TextStyle(
                             color: _on(draft.primary),
                             fontWeight: FontWeight.w700,
@@ -539,10 +565,12 @@ class _ThemePreview extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: draft.error.withOpacity(.12),
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: draft.error.withOpacity(.35)),
+                        border: Border.all(
+                          color: draft.error.withOpacity(.35),
+                        ),
                       ),
                       child: Text(
-                        'Error',
+                        l10n.palette_error,
                         style: TextStyle(
                           color: draft.error,
                           fontWeight: FontWeight.w700,

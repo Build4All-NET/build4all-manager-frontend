@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:build4all_manager/l10n/app_localizations.dart';
 
 import '../../data/models/currency_model.dart';
 import 'palette_builder.dart';
@@ -32,8 +33,9 @@ class PhonePreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
-    final navItems = _tryParseNav(navJson);
+    final navItems = _tryParseNav(context, navJson);
     final menuType = _tryBrandingMenuType(brandingJson);
     final features = _tryParseFeatures(enabledFeaturesJson);
     final sections = _tryParseHome(homeJson);
@@ -65,7 +67,7 @@ class PhonePreview extends StatelessWidget {
                     child: Row(
                       children: [
                         Text(
-                          "9:41",
+                          '9:41',
                           style: TextStyle(
                             color: _on(_headerBlue(draft.primary)),
                             fontWeight: FontWeight.w800,
@@ -111,17 +113,23 @@ class PhonePreview extends StatelessWidget {
                     _BottomNav(
                       draft: draft,
                       items: navItems.isEmpty
-                          ? const [
-                              _NavItem(label: 'Home', icon: Icons.home_rounded),
+                          ? [
                               _NavItem(
-                                  label: 'Explore',
-                                  icon: Icons.search_rounded),
+                                label: l10n.preview_phone_nav_home,
+                                icon: Icons.home_rounded,
+                              ),
                               _NavItem(
-                                  label: 'Cart',
-                                  icon: Icons.shopping_cart_rounded),
+                                label: l10n.preview_phone_nav_explore,
+                                icon: Icons.search_rounded,
+                              ),
                               _NavItem(
-                                  label: 'Profile',
-                                  icon: Icons.person_rounded),
+                                label: l10n.preview_phone_nav_cart,
+                                icon: Icons.shopping_cart_rounded,
+                              ),
+                              _NavItem(
+                                label: l10n.preview_phone_nav_profile,
+                                icon: Icons.person_rounded,
+                              ),
                             ]
                           : navItems,
                     ),
@@ -134,7 +142,9 @@ class PhonePreview extends StatelessWidget {
     );
   }
 
-  List<_NavItem> _tryParseNav(String navJson) {
+  List<_NavItem> _tryParseNav(BuildContext context, String navJson) {
+    final l10n = AppLocalizations.of(context)!;
+
     try {
       final d = jsonDecode(navJson);
 
@@ -152,7 +162,7 @@ class PhonePreview extends StatelessWidget {
         final icon = (m['icon'] ?? '').toString();
 
         return _NavItem(
-          label: label.isEmpty ? 'Tab' : label,
+          label: label.isEmpty ? l10n.preview_phone_nav_tab : label,
           icon: _icon(icon),
         );
       }).toList();
@@ -265,6 +275,7 @@ class _Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final onHeader = PhonePreview._on(headerColor);
     final isHamburger = menuType == 'hamburger';
 
@@ -314,8 +325,11 @@ class _Header extends StatelessWidget {
               ),
               Icon(Icons.search_rounded, color: onHeader, size: 20),
               const SizedBox(width: 10),
-              Icon(Icons.shopping_cart_outlined,
-                  color: onHeader, size: 20),
+              Icon(
+                Icons.shopping_cart_outlined,
+                color: onHeader,
+                size: 20,
+              ),
             ],
           ),
           const SizedBox(height: 10),
@@ -337,7 +351,7 @@ class _Header extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    "Search products...",
+                    l10n.preview_phone_search_products,
                     style: TextStyle(
                       color: onHeader.withOpacity(.92),
                       fontSize: 12,
@@ -371,10 +385,11 @@ class _Body extends StatelessWidget {
   Widget build(BuildContext context) {
     final bg = const Color(0xFFF3FAFF);
     final on = draft.onBackground;
+    final l10n = AppLocalizations.of(context)!;
 
     final money = (currency?.symbol.trim().isNotEmpty == true)
         ? currency!.symbol.trim()
-        : "\$";
+        : '\$';
 
     final list = sections.isEmpty
         ? const [
@@ -401,7 +416,9 @@ class _Body extends StatelessWidget {
                 for (final f in features.take(6))
                   Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 6),
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: draft.primary.withOpacity(.12),
                       borderRadius: BorderRadius.circular(999),
@@ -422,20 +439,24 @@ class _Body extends StatelessWidget {
             ),
             const SizedBox(height: 12),
           ],
-          for (final s in list) ..._renderSection(context, s, on, money),
+          for (final s in list) ..._renderSection(context, s, on, money, l10n),
         ],
       ),
     );
   }
 
   List<Widget> _renderSection(
-      BuildContext context, _HomeSection s, Color on, String money) {
+    BuildContext context,
+    _HomeSection s,
+    Color on,
+    String money,
+    AppLocalizations l10n,
+  ) {
     switch (s.type.toUpperCase()) {
       case 'HEADER':
         return [
           Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(16),
@@ -466,7 +487,7 @@ class _Body extends StatelessWidget {
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    "Welcome",
+                    l10n.preview_phone_welcome,
                     style: TextStyle(
                       color: on,
                       fontWeight: FontWeight.w900,
@@ -499,7 +520,7 @@ class _Body extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  "Search...",
+                  l10n.preview_phone_search,
                   style: TextStyle(
                     color: on.withOpacity(.55),
                     fontWeight: FontWeight.w700,
@@ -523,7 +544,7 @@ class _Body extends StatelessWidget {
             ),
             alignment: Alignment.center,
             child: Text(
-              "Hero Banner",
+              l10n.preview_phone_hero_banner,
               style: TextStyle(
                 color: draft.primary,
                 fontWeight: FontWeight.w900,
@@ -539,9 +560,19 @@ class _Body extends StatelessWidget {
         return [
           Row(
             children: [
-              Expanded(child: _ProductCard(draft: draft, money: money)),
+              Expanded(
+                child: _ProductCard(
+                  draft: draft,
+                  money: money,
+                ),
+              ),
               const SizedBox(width: 10),
-              Expanded(child: _ProductCard(draft: draft, money: money)),
+              Expanded(
+                child: _ProductCard(
+                  draft: draft,
+                  money: money,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 12),
@@ -562,6 +593,7 @@ class _ProductCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final on = draft.onBackground;
+    final l10n = AppLocalizations.of(context)!;
 
     return Container(
       height: 170,
@@ -599,7 +631,7 @@ class _ProductCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Product\nName",
+                  l10n.preview_phone_product_name,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
@@ -611,7 +643,7 @@ class _ProductCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  "${money}99.99",
+                  '${money}99.99',
                   style: TextStyle(
                     color: on.withOpacity(.85),
                     fontWeight: FontWeight.w800,
@@ -633,9 +665,9 @@ class _ProductCard extends StatelessWidget {
                       padding: EdgeInsets.zero,
                       elevation: 0,
                     ),
-                    child: const Text(
-                      "Add to Cart",
-                      style: TextStyle(
+                    child: Text(
+                      l10n.preview_phone_add_to_cart,
+                      style: const TextStyle(
                         fontWeight: FontWeight.w900,
                         fontSize: 10,
                       ),
@@ -701,6 +733,7 @@ class _NavButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final fg = active ? draft.primary : Colors.black.withOpacity(.55);
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -724,7 +757,11 @@ class _NavButton extends StatelessWidget {
 class _NavItem {
   final String label;
   final IconData icon;
-  const _NavItem({required this.label, required this.icon});
+
+  const _NavItem({
+    required this.label,
+    required this.icon,
+  });
 }
 
 class _HomeSection {

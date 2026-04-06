@@ -8,7 +8,6 @@ import 'package:build4all_manager/features/owner/ios_internal_testing/data/repos
 import 'package:build4all_manager/features/owner/ios_internal_testing/data/services/owner_ios_internal_testing_api.dart';
 import 'package:build4all_manager/features/owner/ios_internal_testing/domain/usecases/create_ios_internal_testing_request_uc.dart';
 import 'package:build4all_manager/features/owner/ios_internal_testing/domain/usecases/get_ios_internal_testing_app_summary_uc.dart';
-import 'package:build4all_manager/features/owner/ios_internal_testing/domain/usecases/get_latest_ios_internal_testing_request_uc.dart';
 
 import 'package:build4all_manager/features/owner/ownernav/presentation/controllers/owner_nav_cubit.dart';
 import 'package:build4all_manager/features/owner/ownerprojects/presentation/widgets/project_tile.dart';
@@ -82,7 +81,8 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
       OwnerIosInternalTestingApi(widget.dio),
     );
     _createIosInternalUc = CreateIosInternalTestingRequestUc(_iosInternalRepo);
-   _getIosInternalTestingSummaryUc = GetIosInternalTestingAppSummaryUc(_iosInternalRepo);
+    _getIosInternalTestingSummaryUc =
+        GetIosInternalTestingAppSummaryUc(_iosInternalRepo);
 
     _bloc = OwnerProjectsBloc(getMyApps: GetMyAppsUc(_repo))
       ..add(OwnerProjectsStarted(widget.ownerId));
@@ -107,6 +107,8 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
   }
 
   Future<void> _deleteProject(BuildContext ctx, OwnerProject p) async {
+    final l10n = AppLocalizations.of(ctx)!;
+
     final appName = (p.appName ?? '').trim().isNotEmpty
         ? p.appName!.trim()
         : p.projectName;
@@ -117,12 +119,12 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
             final cs = Theme.of(dialogCtx).colorScheme;
 
             return AlertDialog(
-              title: const Text('Delete project'),
-              content: Text('Are you sure you want to delete "$appName"?'),
+              title: Text(l10n.owner_projects_delete_title),
+              content: Text(l10n.owner_projects_delete_confirm(appName)),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(dialogCtx, false),
-                  child: const Text('Cancel'),
+                  child: Text(l10n.common_cancel),
                 ),
                 FilledButton.icon(
                   style: FilledButton.styleFrom(
@@ -131,7 +133,7 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
                   ),
                   onPressed: () => Navigator.pop(dialogCtx, true),
                   icon: const Icon(Icons.delete_rounded),
-                  label: const Text('Delete'),
+                  label: Text(l10n.common_delete),
                 ),
               ],
             );
@@ -158,12 +160,12 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
       });
 
       if (ctx.mounted) {
-        AppToast.success(ctx, 'Project deleted successfully');
+        AppToast.success(ctx, l10n.owner_projects_delete_success);
       }
 
       _bloc.add(OwnerProjectsRefreshed(widget.ownerId));
     } on DioException catch (e) {
-      String msg = 'Delete failed';
+      String msg = l10n.owner_projects_delete_failed;
 
       final data = e.response?.data;
       if (data is Map<String, dynamic>) {
@@ -179,7 +181,7 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
       if (ctx.mounted) {
         AppToast.error(ctx, msg);
       }
-        } catch (e) {
+    } catch (e) {
       if (ctx.mounted) {
         AppToast.error(ctx, ApiErrorHandler.message(e));
       }
@@ -246,7 +248,7 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
         });
       }
 
-               if (ctx.mounted) {
+      if (ctx.mounted) {
         AppToast.error(
           ctx,
           l10n.owner_projects_rebuild_failed(ApiErrorHandler.message(e)),
@@ -280,7 +282,7 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
   bool _matchEnv(OwnerProject p) {
     if (_env == _EnvironmentFilter.all) return true;
 
-    final s = (p.status).toLowerCase();
+    final s = p.status.toLowerCase();
 
     if (_env == _EnvironmentFilter.local) return s.contains('local');
     if (_env == _EnvironmentFilter.test) return s.contains('test');
@@ -337,7 +339,9 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
       value: _bloc,
       child: BlocListener<OwnerProjectsBloc, OwnerProjectsState>(
         listener: (context, state) {
-          if (_androidBuildOverride.isEmpty && _iosBuildOverride.isEmpty) return;
+          if (_androidBuildOverride.isEmpty && _iosBuildOverride.isEmpty) {
+            return;
+          }
 
           final removeAndroid = <int>[];
           final removeIos = <int>[];
@@ -378,7 +382,6 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
                         children: [
                           const _Header(),
                           const SizedBox(height: 10),
-
                           BlocBuilder<OwnerProjectsBloc, OwnerProjectsState>(
                             builder: (context, state) {
                               final l10n = AppLocalizations.of(context)!;
@@ -408,7 +411,6 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
                               );
                             },
                           ),
-
                           if (_showFilters) ...[
                             const SizedBox(height: 10),
                             _FiltersBar(
@@ -429,9 +431,7 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
                               },
                             ),
                           ],
-
                           const SizedBox(height: 10),
-
                           Expanded(
                             child: BlocBuilder<OwnerProjectsBloc, OwnerProjectsState>(
                               builder: (context, state) {
@@ -562,11 +562,13 @@ class _OwnerProjectsScreenState extends State<OwnerProjectsScreen> {
                                               _androidErrOverride[item.linkId],
                                           iosBuildErrorOverride:
                                               _iosErrOverride[item.linkId],
-                                          createIosInternalTestingRequestUc: _createIosInternalUc,
-getIosInternalTestingAppSummaryUc: _getIosInternalTestingSummaryUc,
-initialOwnerEmail: '',
-initialOwnerFirstName: '',
-initialOwnerLastName: '',
+                                          createIosInternalTestingRequestUc:
+                                              _createIosInternalUc,
+                                          getIosInternalTestingAppSummaryUc:
+                                              _getIosInternalTestingSummaryUc,
+                                          initialOwnerEmail: '',
+                                          initialOwnerFirstName: '',
+                                          initialOwnerLastName: '',
                                         );
                                       },
                                     );
@@ -930,7 +932,7 @@ class _CenteredMessage extends StatelessWidget {
               minFontSize: 12,
               stepGranularity: 0.5,
               overflow: TextOverflow.ellipsis,
-              style: tt.bodyLarge?.copyWith(color: (color ?? cs.onSurface)),
+              style: tt.bodyLarge?.copyWith(color: color ?? cs.onSurface),
             ),
           ],
         ),
@@ -964,7 +966,9 @@ class _NoResults extends StatelessWidget {
     final q = query?.trim();
     final body = () {
       if (q != null && q.isNotEmpty) {
-        if (hasFilters) return l10n.owner_projects_no_results_body_query_and_filters(q);
+        if (hasFilters) {
+          return l10n.owner_projects_no_results_body_query_and_filters(q);
+        }
         return l10n.owner_projects_no_results_body_query(q);
       }
       if (hasFilters) return l10n.owner_projects_no_results_body_filters;

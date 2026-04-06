@@ -1,5 +1,5 @@
-// lib/features/owner/ownerrequests/presentation/widgets/runtime_section.dart
 import 'package:flutter/material.dart';
+import 'package:build4all_manager/l10n/app_localizations.dart';
 import 'runtime_draft.dart';
 
 class RuntimeSection extends StatelessWidget {
@@ -15,53 +15,55 @@ class RuntimeSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Runtime', style: TextStyle(fontWeight: FontWeight.w900)),
+        Text(
+          l10n.owner_request_runtime_title,
+          style: const TextStyle(fontWeight: FontWeight.w900),
+        ),
         const SizedBox(height: 12),
-
         _BlockCard(
-          title: 'Menu Type',
+          title: l10n.runtime_menu_type_title,
           child: _MenuTypePills(
             value: draft.menuType,
             onChanged: (v) => onChanged(draft.copyWith(menuType: v).normalized()),
           ),
         ),
         const SizedBox(height: 12),
-
         _BlockCard(
-          title: 'Enabled Features',
+          title: l10n.runtime_enabled_features_title,
           child: _FeaturesPills(
             selected: draft.enabledFeatures,
             locked: RuntimeDraft.requiredFeaturesForRequiredNav(),
-            onChanged: (set) => onChanged(draft.copyWith(enabledFeatures: set).normalized()),
+            onChanged: (set) =>
+                onChanged(draft.copyWith(enabledFeatures: set).normalized()),
           ),
         ),
         const SizedBox(height: 12),
-
         _BlockCard(
-          title: 'Navigation',
-          subtitle: 'HOME + CART + PROFILE are required. EXPLORE is optional.',
+          title: l10n.runtime_navigation_title,
+          subtitle: l10n.runtime_navigation_subtitle,
           child: _NavEditorCompact(
             menuType: draft.menuType,
             enabledFeatures: draft.enabledFeatures,
             navItems: draft.navItems,
-            onChanged: (list) => onChanged(draft.copyWith(navItems: list).normalized()),
+            onChanged: (list) =>
+                onChanged(draft.copyWith(navItems: list).normalized()),
           ),
         ),
         const SizedBox(height: 12),
-
         _BlockCard(
-          title: 'Home Sections',
-          subtitle: 'Sections requiring disabled features will auto-hide.',
+          title: l10n.runtime_home_sections_title,
+          subtitle: l10n.runtime_home_sections_subtitle,
           child: _HomeEditorCompact(
             sections: draft.homeSections,
-            onChanged: (list) => onChanged(draft.copyWith(homeSections: list).normalized()),
+            onChanged: (list) =>
+                onChanged(draft.copyWith(homeSections: list).normalized()),
           ),
         ),
-
         const SizedBox(height: 6),
         Divider(color: cs.outlineVariant),
       ],
@@ -69,9 +71,6 @@ class RuntimeSection extends StatelessWidget {
   }
 }
 
-/// ===============================================================
-/// Menu Type pills
-/// ===============================================================
 class _MenuTypePills extends StatelessWidget {
   final MenuType value;
   final ValueChanged<MenuType> onChanged;
@@ -84,6 +83,7 @@ class _MenuTypePills extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     Widget pill({
       required bool selected,
@@ -108,7 +108,11 @@ class _MenuTypePills extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(icon, size: 18, color: selected ? cs.primary : cs.onSurfaceVariant),
+                Icon(
+                  icon,
+                  size: 18,
+                  color: selected ? cs.primary : cs.onSurfaceVariant,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   text,
@@ -129,14 +133,14 @@ class _MenuTypePills extends StatelessWidget {
       children: [
         pill(
           selected: value == MenuType.bottom,
-          text: 'Bottom',
+          text: l10n.runtime_menu_bottom,
           icon: Icons.view_agenda_rounded,
           onTap: () => onChanged(MenuType.bottom),
         ),
         const SizedBox(width: 10),
         pill(
           selected: value == MenuType.hamburger,
-          text: 'Hamburger',
+          text: l10n.runtime_menu_hamburger,
           icon: Icons.menu_rounded,
           onTap: () => onChanged(MenuType.hamburger),
         ),
@@ -145,9 +149,6 @@ class _MenuTypePills extends StatelessWidget {
   }
 }
 
-/// ===============================================================
-/// Enabled Features pills (locks ITEMS/ORDERS because CART is required)
-/// ===============================================================
 class _FeaturesPills extends StatelessWidget {
   final Set<String> selected;
   final Set<String> locked;
@@ -167,6 +168,26 @@ class _FeaturesPills extends StatelessWidget {
     "COUPONS",
     "NOTIFICATIONS",
   ];
+
+  String _featureLabel(BuildContext context, String code) {
+    final l10n = AppLocalizations.of(context)!;
+    switch (code.toUpperCase()) {
+      case 'ITEMS':
+        return l10n.runtime_feature_items;
+      case 'BOOKING':
+        return l10n.runtime_feature_booking;
+      case 'REVIEWS':
+        return l10n.runtime_feature_reviews;
+      case 'ORDERS':
+        return l10n.runtime_feature_orders;
+      case 'COUPONS':
+        return l10n.runtime_feature_coupons;
+      case 'NOTIFICATIONS':
+        return l10n.runtime_feature_notifications;
+      default:
+        return code;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -231,7 +252,7 @@ class _FeaturesPills extends StatelessWidget {
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          f,
+                          _featureLabel(context, f),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
@@ -253,9 +274,6 @@ class _FeaturesPills extends StatelessWidget {
   }
 }
 
-/// ===============================================================
-/// Navigation editor (locks HOME/CART/PROFILE, Explore optional)
-/// ===============================================================
 class _NavEditorCompact extends StatelessWidget {
   final MenuType menuType;
   final Set<String> enabledFeatures;
@@ -269,8 +287,45 @@ class _NavEditorCompact extends StatelessWidget {
     required this.onChanged,
   });
 
+  String _featureLabel(BuildContext context, String code) {
+    final l10n = AppLocalizations.of(context)!;
+    switch (code.toUpperCase()) {
+      case 'ITEMS':
+        return l10n.runtime_feature_items;
+      case 'BOOKING':
+        return l10n.runtime_feature_booking;
+      case 'REVIEWS':
+        return l10n.runtime_feature_reviews;
+      case 'ORDERS':
+        return l10n.runtime_feature_orders;
+      case 'COUPONS':
+        return l10n.runtime_feature_coupons;
+      case 'NOTIFICATIONS':
+        return l10n.runtime_feature_notifications;
+      default:
+        return code;
+    }
+  }
+
+  String _navLabel(BuildContext context, NavItemDraft item) {
+    final l10n = AppLocalizations.of(context)!;
+    switch (item.id.toUpperCase()) {
+      case 'HOME':
+        return l10n.preview_phone_nav_home;
+      case 'EXPLORE':
+        return l10n.preview_phone_nav_explore;
+      case 'CART':
+        return l10n.preview_phone_nav_cart;
+      case 'PROFILE':
+        return l10n.preview_phone_nav_profile;
+      default:
+        return item.label;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final enabled = navItems.where((e) => e.enabled).toList();
     final disabled = navItems.where((e) => !e.enabled).toList();
 
@@ -296,11 +351,11 @@ class _NavEditorCompact extends StatelessWidget {
 
             return _NavRow(
               key: ValueKey(item.id),
-              label: item.label,
+              label: _navLabel(context, item),
               enabled: true,
-              helper: required ? 'Required' : null,
+              helper: required ? l10n.runtime_required : null,
               onToggle: (v) {
-                if (!v && required) return; // ✅ can't disable required tabs
+                if (!v && required) return;
                 final next = navItems
                     .map((x) => x.id == item.id ? x.copyWith(enabled: v) : x)
                     .toList();
@@ -314,20 +369,27 @@ class _NavEditorCompact extends StatelessWidget {
           ...disabled.map((item) {
             final required = RuntimeDraft.navIsRequired(item.id);
             final missing = RuntimeDraft.navMissingFeatures(item.id, enabledFeatures);
-            final lockEnable = required || missing.isNotEmpty || bottomMaxReachedForEnable();
+            final lockEnable =
+                required || missing.isNotEmpty || bottomMaxReachedForEnable();
 
             final helper = required
-                ? 'Required'
+                ? l10n.runtime_required
                 : (missing.isNotEmpty
-                    ? 'Requires: ${missing.join(", ")}'
-                    : (bottomMaxReachedForEnable() ? 'Max ${RuntimeDraft.bottomNavMax} tabs in bottom menu' : null));
+                    ? l10n.runtime_requires_features(
+                        missing.map((e) => _featureLabel(context, e)).join(', '),
+                      )
+                    : (bottomMaxReachedForEnable()
+                        ? l10n.runtime_max_bottom_tabs(
+                            RuntimeDraft.bottomNavMax.toString(),
+                          )
+                        : null));
 
             return _NavRow(
-              label: item.label,
+              label: _navLabel(context, item),
               enabled: false,
               helper: helper,
               onToggle: (v) {
-                if (v && lockEnable) return; // ✅ can’t enable invalid
+                if (v && lockEnable) return;
                 final next = navItems
                     .map((x) => x.id == item.id ? x.copyWith(enabled: v) : x)
                     .toList();
@@ -408,9 +470,6 @@ class _NavRow extends StatelessWidget {
   }
 }
 
-/// ===============================================================
-/// Home sections editor (unchanged)
-/// ===============================================================
 class _HomeEditorCompact extends StatelessWidget {
   final List<HomeSectionDraft> sections;
   final ValueChanged<List<HomeSectionDraft>> onChanged;
@@ -444,12 +503,20 @@ class _HomeEditorCompact extends StatelessWidget {
               key: ValueKey(s.id),
               section: s,
               onToggle: (v) {
-                onChanged(sections.map((x) => x.id == s.id ? x.copyWith(enabled: v) : x).toList());
+                onChanged(
+                  sections
+                      .map((x) => x.id == s.id ? x.copyWith(enabled: v) : x)
+                      .toList(),
+                );
               },
               onLimitTap: () async {
                 final next = await _pickLimit(context, s.limit);
                 if (next != null) {
-                  onChanged(sections.map((x) => x.id == s.id ? x.copyWith(limit: next) : x).toList());
+                  onChanged(
+                    sections
+                        .map((x) => x.id == s.id ? x.copyWith(limit: next) : x)
+                        .toList(),
+                  );
                 }
               },
             );
@@ -461,12 +528,20 @@ class _HomeEditorCompact extends StatelessWidget {
             (s) => _HomeRow(
               section: s,
               onToggle: (v) {
-                onChanged(sections.map((x) => x.id == s.id ? x.copyWith(enabled: v) : x).toList());
+                onChanged(
+                  sections
+                      .map((x) => x.id == s.id ? x.copyWith(enabled: v) : x)
+                      .toList(),
+                );
               },
               onLimitTap: () async {
                 final next = await _pickLimit(context, s.limit);
                 if (next != null) {
-                  onChanged(sections.map((x) => x.id == s.id ? x.copyWith(limit: next) : x).toList());
+                  onChanged(
+                    sections
+                        .map((x) => x.id == s.id ? x.copyWith(limit: next) : x)
+                        .toList(),
+                  );
                 }
               },
             ),
@@ -477,7 +552,9 @@ class _HomeEditorCompact extends StatelessWidget {
   }
 
   Future<int?> _pickLimit(BuildContext context, int current) async {
+    final l10n = AppLocalizations.of(context)!;
     final values = [1, 2, 3, 5, 8, 10, 12, 16, 20];
+
     return showModalBottomSheet<int>(
       context: context,
       showDragHandle: true,
@@ -485,11 +562,14 @@ class _HomeEditorCompact extends StatelessWidget {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            Text('Pick limit', style: Theme.of(ctx).textTheme.titleMedium),
+            Text(
+              l10n.runtime_pick_limit,
+              style: Theme.of(ctx).textTheme.titleMedium,
+            ),
             const SizedBox(height: 10),
             for (final v in values)
               ListTile(
-                title: Text('$v'),
+                title: Text(l10n.runtime_limit_value(v.toString())),
                 trailing: v == current ? const Icon(Icons.check_circle) : null,
                 onTap: () => Navigator.pop(ctx, v),
               ),
@@ -512,9 +592,31 @@ class _HomeRow extends StatelessWidget {
     required this.onLimitTap,
   });
 
+  String _prettyType(BuildContext context, String type) {
+    final l10n = AppLocalizations.of(context)!;
+    final t = type.toUpperCase();
+
+    switch (t) {
+      case 'HEADER':
+        return l10n.runtime_section_header;
+      case 'SEARCH':
+        return l10n.runtime_section_search;
+      case 'BANNER':
+        return l10n.runtime_section_banner;
+      case 'CATEGORY_CHIPS':
+        return l10n.runtime_section_categories;
+      case 'ITEM_LIST':
+        return l10n.runtime_section_hero_items;
+      default:
+        final s = t.toLowerCase().replaceAll('_', ' ');
+        return s.isEmpty ? type : '${s[0].toUpperCase()}${s.substring(1)}';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -536,7 +638,7 @@ class _HomeRow extends StatelessWidget {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              _prettyType(section.type),
+              _prettyType(context, section.type),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13),
@@ -553,7 +655,7 @@ class _HomeRow extends StatelessWidget {
                 border: Border.all(color: cs.outlineVariant),
               ),
               child: Text(
-                'Limit ${section.limit}',
+                l10n.runtime_limit_value(section.limit.toString()),
                 style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 11),
               ),
             ),
@@ -579,21 +681,6 @@ class _HomeRow extends StatelessWidget {
         return Icons.view_carousel_outlined;
       default:
         return Icons.widgets_outlined;
-    }
-  }
-
-  static String _prettyType(String type) {
-    final t = type.toUpperCase();
-    switch (t) {
-      case 'CATEGORY_CHIPS':
-        return 'Categories';
-      case 'ITEM_LIST':
-        return 'Hero Items';
-      case 'BANNER':
-        return 'Hero Banner';
-      default:
-        final s = t.toLowerCase().replaceAll('_', ' ');
-        return s.isEmpty ? type : '${s[0].toUpperCase()}${s.substring(1)}';
     }
   }
 }
@@ -623,7 +710,10 @@ class _BlockCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13)),
+          Text(
+            title,
+            style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13),
+          ),
           if (subtitle != null) ...[
             const SizedBox(height: 4),
             Text(

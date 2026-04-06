@@ -82,14 +82,18 @@ class _SuperAdminNavShellState extends State<SuperAdminNavShell>
 
   void _clampIndex() {
     if (widget.destinations.isEmpty) {
-      if (_index != 0) setState(() => _index = 0);
+      if (_index != 0) {
+        setState(() => _index = 0);
+      }
       return;
     }
 
     final max = widget.destinations.length - 1;
     final safe = _index.clamp(0, max);
 
-    if (safe != _index) setState(() => _index = safe);
+    if (safe != _index) {
+      setState(() => _index = safe);
+    }
 
     if (_mode == SuperMenuType.top && _tab != null && _tab!.index != safe) {
       _tab!.index = safe;
@@ -106,8 +110,11 @@ class _SuperAdminNavShellState extends State<SuperAdminNavShell>
       _tab!.addListener(() {
         if (_tab!.indexIsChanging) return;
         if (!mounted) return;
+
         final safe = _tab!.index.clamp(0, widget.destinations.length - 1);
-        if (safe != _index) setState(() => _index = safe);
+        if (safe != _index) {
+          setState(() => _index = safe);
+        }
       });
 
       final safe = _index.clamp(0, widget.destinations.length - 1);
@@ -137,77 +144,78 @@ class _SuperAdminNavShellState extends State<SuperAdminNavShell>
   String _title(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     if (widget.destinations.isEmpty) return l10n.nav_super_admin;
+
     return widget
         .destinations[_index.clamp(0, widget.destinations.length - 1)].label;
   }
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
-  final cs = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
+    final cs = Theme.of(context).colorScheme;
 
-  final notificationsIndex = widget.destinations.indexWhere(
-    (d) => d.label.toLowerCase() == 'notifications',
-  );
+    final notificationsIndex = widget.destinations.indexWhere(
+      (d) => d.label == l10n.super_nav_notifications,
+    );
 
-  return AppBar(
-    titleSpacing: 14,
-    title: Row(
-      children: [
-        Container(
-          width: 10,
-          height: 10,
-          margin: const EdgeInsets.only(right: 10),
-          decoration: BoxDecoration(
-            color: cs.primary,
-            borderRadius: BorderRadius.circular(4),
-          ),
-        ),
-        Expanded(
-          child: Text(
-            _title(context),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w800,
-                ),
-          ),
-        ),
-      ],
-    ),
-    actions: [
-      if (notificationsIndex != -1)
-        AdminNotificationBell(
-          onTap: () async {
-            _goTo(notificationsIndex);
-          },
-        ),
-      const SizedBox(width: 6),
-    ],
-    bottom: (_mode == SuperMenuType.top && _tab != null)
-        ? PreferredSize(
-            preferredSize: const Size.fromHeight(54),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: TabBar(
-                controller: _tab,
-                isScrollable: true,
-                tabAlignment: TabAlignment.start,
-                dividerHeight: 0,
-                labelStyle: const TextStyle(fontWeight: FontWeight.w800),
-                tabs: [
-                  for (final d in widget.destinations)
-                    Tab(
-                      text: d.label,
-                      icon: Icon(d.icon),
-                    ),
-                ],
-              ),
+    return AppBar(
+      titleSpacing: 14,
+      title: Row(
+        children: [
+          Container(
+            width: 10,
+            height: 10,
+            margin: const EdgeInsets.only(right: 10),
+            decoration: BoxDecoration(
+              color: cs.primary,
+              borderRadius: BorderRadius.circular(4),
             ),
-          )
-        : null,
-  );
-}
+          ),
+          Expanded(
+            child: Text(
+              _title(context),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        if (notificationsIndex != -1)
+          AdminNotificationBell(
+            onTap: () async {
+              _goTo(notificationsIndex);
+            },
+          ),
+        const SizedBox(width: 6),
+      ],
+      bottom: (_mode == SuperMenuType.top && _tab != null)
+          ? PreferredSize(
+              preferredSize: const Size.fromHeight(54),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: TabBar(
+                  controller: _tab,
+                  isScrollable: true,
+                  tabAlignment: TabAlignment.start,
+                  dividerHeight: 0,
+                  labelStyle: const TextStyle(fontWeight: FontWeight.w800),
+                  tabs: [
+                    for (final d in widget.destinations)
+                      Tab(
+                        text: d.label,
+                        icon: Icon(d.icon),
+                      ),
+                  ],
+                ),
+              ),
+            )
+          : null,
+    );
+  }
 
-  /// ✅ Pro transitions + keep state
   Widget _buildBodyStack(List<SuperAdminDestination> pages) {
     return Stack(
       children: [
@@ -221,8 +229,6 @@ class _SuperAdminNavShellState extends State<SuperAdminNavShell>
               ),
           ],
         ),
-
-        // ✨ subtle fade between tabs (doesn't rebuild pages)
         IgnorePointer(
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 180),
@@ -240,12 +246,15 @@ class _SuperAdminNavShellState extends State<SuperAdminNavShell>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final pages = widget.destinations;
 
     if (pages.isEmpty) {
       return Scaffold(
         appBar: _buildAppBar(context),
-        body: const Center(child: Text("No destinations configured")),
+        body: Center(
+          child: Text(l10n.nav_super_admin),
+        ),
       );
     }
 
@@ -271,8 +280,6 @@ class _SuperAdminNavShellState extends State<SuperAdminNavShell>
         return Scaffold(
           appBar: _buildAppBar(context),
           body: _buildBodyStack(pages),
-
-          // ✅ Pro bottom bar wrapper (floating look)
           bottomNavigationBar: _ProBottomBar(
             index: _index,
             onTap: _goTo,
@@ -313,8 +320,10 @@ class _SuperAdminNavShellState extends State<SuperAdminNavShell>
                   color: cs.onPrimary.withOpacity(.16),
                   borderRadius: BorderRadius.circular(14),
                 ),
-                child: Icon(Icons.admin_panel_settings_rounded,
-                    color: cs.onPrimary),
+                child: Icon(
+                  Icons.admin_panel_settings_rounded,
+                  color: cs.onPrimary,
+                ),
               ),
               const SizedBox(height: 10),
               Text(
@@ -322,14 +331,6 @@ class _SuperAdminNavShellState extends State<SuperAdminNavShell>
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       color: cs.onPrimary,
                       fontWeight: FontWeight.w900,
-                    ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Manage everything in one place',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: cs.onPrimary.withOpacity(.85),
-                      height: 1.2,
                     ),
               ),
             ],
@@ -348,7 +349,6 @@ class _SuperAdminNavShellState extends State<SuperAdminNavShell>
   }
 }
 
-/// ✅ Clean, “pro” looking bottom bar (floating container + shadow)
 class _ProBottomBar extends StatelessWidget {
   final int index;
   final ValueChanged<int> onTap;
@@ -364,38 +364,73 @@ class _ProBottomBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
 
-    return SafeArea(
-      top: false,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
-        child: Container(
-          decoration: BoxDecoration(
-            color: cs.surface,
-            borderRadius: BorderRadius.circular(22),
-            border: Border.all(color: cs.outlineVariant.withOpacity(.35)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(.10),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
+    return MediaQuery(
+      data: MediaQuery.of(context).copyWith(
+        textScaler: const TextScaler.linear(1.0),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(8, 6, 8, 8),
+          child: Container(
+            decoration: BoxDecoration(
+              color: cs.surface,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(
+                color: cs.outlineVariant.withOpacity(.25),
               ),
-            ],
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(22),
-            child: NavigationBar(
-              height: 68,
-              selectedIndex: index,
-              onDestinationSelected: onTap,
-              labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-              destinations: [
-                for (final d in destinations)
-                  NavigationDestination(
-                    icon: Icon(d.icon),
-                    selectedIcon: Icon(d.selectedIcon),
-                    label: d.label,
-                  ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(.08),
+                  blurRadius: 16,
+                  offset: const Offset(0, 6),
+                ),
               ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(18),
+              child: NavigationBarTheme(
+                data: NavigationBarThemeData(
+                  height: 68,
+                  labelTextStyle: MaterialStateProperty.resolveWith<TextStyle>(
+                    (states) {
+                      return const TextStyle(
+                        fontSize: 9.5,
+                        fontWeight: FontWeight.w600,
+                        height: 1.0,
+                      );
+                    },
+                  ),
+                  iconTheme: MaterialStateProperty.resolveWith<IconThemeData>(
+                    (states) {
+                      final selected = states.contains(MaterialState.selected);
+                      return IconThemeData(
+                        size: selected ? 21 : 20,
+                      );
+                    },
+                  ),
+                ),
+                child: NavigationBar(
+                  selectedIndex: index,
+                  onDestinationSelected: onTap,
+                  labelBehavior:
+                      NavigationDestinationLabelBehavior.alwaysShow,
+                  destinations: [
+                    for (final d in destinations)
+                      NavigationDestination(
+                        icon: Padding(
+                          padding: const EdgeInsets.only(top: 2),
+                          child: Icon(d.icon),
+                        ),
+                        selectedIcon: Padding(
+                          padding: const EdgeInsets.only(top: 2),
+                          child: Icon(d.selectedIcon),
+                        ),
+                        label: d.label,
+                      ),
+                  ],
+                ),
+              ),
             ),
           ),
         ),

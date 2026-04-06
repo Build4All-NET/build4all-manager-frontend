@@ -11,7 +11,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
-
 import 'package:build4all_manager/l10n/app_localizations.dart';
 
 import '../../data/models/currency_model.dart';
@@ -175,7 +174,7 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
     }
 
     if (_logoFile == null) {
-      AppToast.error(context, 'Logo is required. Please upload a logo.');
+      AppToast.error(context, l.owner_publish_err_logo_required);
       return;
     }
 
@@ -229,10 +228,10 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
 
       AppToast.success(context, l.owner_request_submit_success);
       context.go('/owner/projects');
-        } catch (e) {
+    } catch (e) {
       final msg = ApiErrorHandler.message(e);
       AppToast.error(context, l.owner_request_submit_failed(msg));
-    }finally {
+    } finally {
       if (mounted) setState(() => _loading = false);
     }
   }
@@ -636,11 +635,13 @@ class _CustomizeColumn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'App Settings',
+          l.owner_request_settings_title,
           style: Theme.of(context)
               .textTheme
               .titleMedium
@@ -710,6 +711,7 @@ class _PillTabs extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final l = AppLocalizations.of(context)!;
 
     Widget tab({
       required _Panel value,
@@ -733,9 +735,11 @@ class _PillTabs extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(icon,
-                    size: 16,
-                    color: active ? Colors.white : cs.onSurfaceVariant),
+                Icon(
+                  icon,
+                  size: 16,
+                  color: active ? Colors.white : cs.onSurfaceVariant,
+                ),
                 const SizedBox(width: 6),
                 Text(
                   label,
@@ -763,17 +767,17 @@ class _PillTabs extends StatelessWidget {
         children: [
           tab(
             value: _Panel.identity,
-            label: 'Identity',
+            label: l.owner_request_basics_title,
             icon: Icons.badge_outlined,
           ),
           tab(
             value: _Panel.palette,
-            label: 'Palette',
+            label: l.owner_request_palette_title,
             icon: Icons.palette_outlined,
           ),
           tab(
             value: _Panel.runtime,
-            label: 'Runtime',
+            label: l.owner_request_runtime_title,
             icon: Icons.tune_rounded,
           ),
         ],
@@ -811,6 +815,7 @@ class _IdentityPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final hint = cs.onSurface.withOpacity(.45);
+    final l = AppLocalizations.of(context)!;
 
     return _PanelCard(
       child: Theme(
@@ -841,7 +846,7 @@ class _IdentityPanel extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'App name',
+              l.owner_request_app_name,
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w800,
@@ -855,14 +860,14 @@ class _IdentityPanel extends StatelessWidget {
               decoration: InputDecoration(
                 prefixIcon:
                     Icon(Icons.apps_rounded, size: 18, color: hint),
-                hintText: 'My Shop',
+                hintText: l.owner_request_app_name_hint,
               ),
               validator: (v) =>
-                  (v == null || v.trim().isEmpty) ? 'Required' : null,
+                  (v == null || v.trim().isEmpty) ? l.err_required : null,
             ),
             const SizedBox(height: 14),
             Text(
-              'App Logo *',
+              l.owner_request_logo_label_required,
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w800,
@@ -900,9 +905,9 @@ class _IdentityPanel extends StatelessWidget {
                     child: ElevatedButton.icon(
                       onPressed: loading ? null : onPickLogo,
                       icon: const Icon(Icons.upload_rounded, size: 18),
-                      label: const Text(
-                        'Upload',
-                        style: TextStyle(fontWeight: FontWeight.w900),
+                      label: Text(
+                        l.owner_request_upload_logo,
+                        style: const TextStyle(fontWeight: FontWeight.w900),
                       ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF16A34A),
@@ -920,14 +925,14 @@ class _IdentityPanel extends StatelessWidget {
                   IconButton(
                     onPressed: loading ? null : onRemoveLogo,
                     icon: Icon(Icons.delete_outline, color: cs.error),
-                    tooltip: 'Remove',
+                    tooltip: l.common_remove,
                   ),
                 ],
               ],
             ),
             const SizedBox(height: 14),
             Text(
-              'Select currency',
+              l.owner_request_select_currency,
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w800,
@@ -953,7 +958,7 @@ class _IdentityPanel extends StatelessWidget {
                     Expanded(
                       child: Text(
                         selectedCurrency == null
-                            ? 'USD (\$)'
+                            ? l.owner_request_tap_to_choose
                             : selectedCurrency!.shortLabel,
                         style: const TextStyle(
                           fontWeight: FontWeight.w900,
@@ -970,7 +975,7 @@ class _IdentityPanel extends StatelessWidget {
             ),
             const SizedBox(height: 14),
             Text(
-              'Notes',
+              l.owner_request_notes,
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w800,
@@ -982,8 +987,8 @@ class _IdentityPanel extends StatelessWidget {
               controller: notesCtrl,
               enabled: !loading,
               maxLines: 3,
-              decoration: const InputDecoration(
-                hintText: 'Add any additional notes...',
+              decoration: InputDecoration(
+                hintText: l.owner_request_notes_hint,
               ),
             ),
           ],
@@ -1034,8 +1039,8 @@ class _SubmitBar extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     enabled
-                        ? 'Ready to submit ✅'
-                        : 'App name + logo required',
+                        ? l.owner_request_submit_ready_state
+                        : l.owner_request_submit_missing_required,
                     style: t.bodySmall?.copyWith(
                       color: cs.onSurface.withOpacity(.65),
                     ),

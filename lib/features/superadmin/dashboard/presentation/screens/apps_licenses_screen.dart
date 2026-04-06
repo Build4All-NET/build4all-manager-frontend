@@ -35,7 +35,7 @@ class _AppsLicensesScreenState extends State<AppsLicensesScreen> {
     _load();
   }
 
-    Future<void> _load() async {
+  Future<void> _load() async {
     setState(() {
       _loading = true;
       _error = null;
@@ -55,22 +55,6 @@ class _AppsLicensesScreenState extends State<AppsLicensesScreen> {
         _loading = false;
       });
     }
-  }
-
-   String _extractError(DioException e) {
-    final data = e.response?.data;
-
-    if (data is Map<String, dynamic>) {
-      final error = data['error']?.toString();
-      final message = data['message']?.toString();
-      final code = data['code']?.toString();
-
-      if (error != null && error.trim().isNotEmpty) return error;
-      if (message != null && message.trim().isNotEmpty) return message;
-      if (code != null && code.trim().isNotEmpty) return code;
-    }
-
-    return e.message ?? 'Request failed';
   }
 
   bool _matchesSearch(SuperAdminAppLicenseRow item) {
@@ -172,6 +156,61 @@ class _AppsLicensesScreenState extends State<AppsLicensesScreen> {
     return l10n.unknownLabel;
   }
 
+  String _filterLabel(_LicenseFilter filter, AppLocalizations l10n) {
+    switch (filter) {
+      case _LicenseFilter.all:
+        return l10n.app_licenses_filter_all;
+      case _LicenseFilter.pending:
+        return l10n.app_licenses_filter_pending;
+      case _LicenseFilter.blocked:
+        return l10n.app_licenses_filter_blocked;
+      case _LicenseFilter.free:
+        return l10n.app_licenses_filter_free;
+      case _LicenseFilter.proHosted:
+        return l10n.app_licenses_filter_pro_hosted;
+      case _LicenseFilter.dedicated:
+        return l10n.app_licenses_filter_dedicated;
+    }
+  }
+
+  String _planLabel(AppLocalizations l10n, String? code, String? planName) {
+    final raw = (code ?? '').toUpperCase();
+
+    if (raw == 'FREE') return l10n.app_licenses_plan_free;
+    if (raw == 'PRO_HOSTEDB') return l10n.app_licenses_plan_pro_hosted;
+    if (raw == 'DEDICATED') return l10n.app_licenses_plan_dedicated;
+
+    if ((planName ?? '').trim().isNotEmpty) return planName!.trim();
+    if ((code ?? '').trim().isNotEmpty) return code!;
+    return l10n.unknownLabel;
+  }
+
+  String _statusLabel(AppLocalizations l10n, String? value) {
+    final s = (value ?? '').toUpperCase();
+
+    switch (s) {
+      case 'ACTIVE':
+        return l10n.common_status_active;
+      case 'PENDING':
+        return l10n.status_pending;
+      case 'APPROVED':
+        return l10n.publish_status_approved;
+      case 'REJECTED':
+        return l10n.publish_status_rejected;
+      case 'EXPIRED':
+        return l10n.app_licenses_status_expired;
+      case 'SUSPENDED':
+        return l10n.app_licenses_status_suspended;
+      case 'DELETED':
+        return l10n.app_licenses_status_deleted;
+      case 'CANCELED':
+      case 'CANCELLED':
+        return l10n.app_licenses_status_canceled;
+      default:
+        return (value ?? '').trim().isEmpty ? l10n.unknownLabel : value!;
+    }
+  }
+
   Color _statusColor(BuildContext context, String? value) {
     final cs = Theme.of(context).colorScheme;
     final s = (value ?? '').toUpperCase();
@@ -193,6 +232,7 @@ class _AppsLicensesScreenState extends State<AppsLicensesScreen> {
       case 'SUSPENDED':
       case 'DELETED':
       case 'CANCELED':
+      case 'CANCELLED':
         return cs.error;
       default:
         return cs.secondary;
@@ -426,42 +466,42 @@ class _AppsLicensesScreenState extends State<AppsLicensesScreen> {
             children: [
               _filterChip(
                 context,
-                label: 'All',
+                label: _filterLabel(_LicenseFilter.all, l10n),
                 selected: _filter == _LicenseFilter.all,
                 icon: Icons.apps_rounded,
                 onTap: () => setState(() => _filter = _LicenseFilter.all),
               ),
               _filterChip(
                 context,
-                label: 'Pending',
+                label: _filterLabel(_LicenseFilter.pending, l10n),
                 selected: _filter == _LicenseFilter.pending,
                 icon: Icons.schedule_rounded,
                 onTap: () => setState(() => _filter = _LicenseFilter.pending),
               ),
               _filterChip(
                 context,
-                label: 'Blocked',
+                label: _filterLabel(_LicenseFilter.blocked, l10n),
                 selected: _filter == _LicenseFilter.blocked,
                 icon: Icons.block_rounded,
                 onTap: () => setState(() => _filter = _LicenseFilter.blocked),
               ),
               _filterChip(
                 context,
-                label: 'Free',
+                label: _filterLabel(_LicenseFilter.free, l10n),
                 selected: _filter == _LicenseFilter.free,
                 icon: Icons.workspace_premium_outlined,
                 onTap: () => setState(() => _filter = _LicenseFilter.free),
               ),
               _filterChip(
                 context,
-                label: 'Pro Hosted',
+                label: _filterLabel(_LicenseFilter.proHosted, l10n),
                 selected: _filter == _LicenseFilter.proHosted,
                 icon: Icons.cloud_done_rounded,
                 onTap: () => setState(() => _filter = _LicenseFilter.proHosted),
               ),
               _filterChip(
                 context,
-                label: 'Dedicated',
+                label: _filterLabel(_LicenseFilter.dedicated, l10n),
                 selected: _filter == _LicenseFilter.dedicated,
                 icon: Icons.dns_rounded,
                 onTap: () => setState(() => _filter = _LicenseFilter.dedicated),
@@ -473,18 +513,42 @@ class _AppsLicensesScreenState extends State<AppsLicensesScreen> {
             spacing: 10,
             runSpacing: 10,
             children: [
-              _chip(context, '${_items.length} total', cs.primary,
-                  icon: Icons.inventory_2_outlined),
-              _chip(context, '$pendingCount pending', Colors.orange,
-                  icon: Icons.schedule_rounded),
-              _chip(context, '$blockedCount blocked', cs.error,
-                  icon: Icons.block_rounded),
-              _chip(context, '$freeCount free', cs.primary,
-                  icon: Icons.workspace_premium_outlined),
-              _chip(context, '$proCount pro hosted', Colors.blue,
-                  icon: Icons.cloud_done_rounded),
-              _chip(context, '$dedicatedCount dedicated', Colors.deepPurple,
-                  icon: Icons.dns_rounded),
+              _chip(
+                context,
+                '${l10n.app_licenses_stat_total}: ${_items.length}',
+                cs.primary,
+                icon: Icons.inventory_2_outlined,
+              ),
+              _chip(
+                context,
+                '${l10n.app_licenses_stat_pending}: $pendingCount',
+                Colors.orange,
+                icon: Icons.schedule_rounded,
+              ),
+              _chip(
+                context,
+                '${l10n.app_licenses_stat_blocked}: $blockedCount',
+                cs.error,
+                icon: Icons.block_rounded,
+              ),
+              _chip(
+                context,
+                '${l10n.app_licenses_stat_free}: $freeCount',
+                cs.primary,
+                icon: Icons.workspace_premium_outlined,
+              ),
+              _chip(
+                context,
+                '${l10n.app_licenses_stat_pro_hosted}: $proCount',
+                Colors.blue,
+                icon: Icons.cloud_done_rounded,
+              ),
+              _chip(
+                context,
+                '${l10n.app_licenses_stat_dedicated}: $dedicatedCount',
+                Colors.deepPurple,
+                icon: Icons.dns_rounded,
+              ),
             ],
           ),
         ],
@@ -547,13 +611,11 @@ class _AppsLicensesScreenState extends State<AppsLicensesScreen> {
                             ].join(' • '),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
-                                ?.copyWith(
-                                  color: cs.onSurfaceVariant,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                            style:
+                                Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                      color: cs.onSurfaceVariant,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                           ),
                         ],
                       ),
@@ -575,27 +637,27 @@ class _AppsLicensesScreenState extends State<AppsLicensesScreen> {
                   children: [
                     _chip(
                       context,
-                      item.planCode ?? l10n.unknownLabel,
+                      _planLabel(l10n, item.planCode, item.planName),
                       planColor,
                       icon: Icons.workspace_premium_outlined,
                     ),
                     _chip(
                       context,
-                      item.subscriptionStatus ?? l10n.unknownLabel,
+                      _statusLabel(l10n, item.subscriptionStatus),
                       subColor,
                       icon: Icons.verified_rounded,
                     ),
                     if (isPending)
                       _chip(
                         context,
-                        'Pending Request',
+                        l10n.app_licenses_pending_request,
                         Colors.orange,
                         icon: Icons.schedule_rounded,
                       ),
                     if (isBlocked)
                       _chip(
                         context,
-                        'Blocked',
+                        l10n.app_licenses_filter_blocked,
                         cs.error,
                         icon: Icons.block_rounded,
                       ),
@@ -665,7 +727,7 @@ class _AppsLicensesScreenState extends State<AppsLicensesScreen> {
                   _StatusBanner(
                     icon: Icons.schedule_rounded,
                     color: Colors.orange,
-                    text: 'This app has a pending upgrade request.',
+                    text: l10n.app_licenses_pending_banner,
                   ),
                 ],
                 if (isBlocked) ...[
@@ -674,7 +736,7 @@ class _AppsLicensesScreenState extends State<AppsLicensesScreen> {
                     icon: Icons.warning_amber_rounded,
                     color: cs.error,
                     text:
-                        'Blocked: ${item.blockingReason ?? l10n.unknownLabel}',
+                        '${l10n.app_licenses_filter_blocked}: ${item.blockingReason ?? l10n.unknownLabel}',
                   ),
                 ],
               ],
@@ -699,12 +761,12 @@ class _AppsLicensesScreenState extends State<AppsLicensesScreen> {
                   _detailRow(
                     context,
                     l10n.planLabel,
-                    item.planName ?? item.planCode ?? '-',
+                    _planLabel(l10n, item.planCode, item.planName),
                   ),
                   _detailRow(
                     context,
                     l10n.subscriptionStatusLabel,
-                    item.subscriptionStatus ?? '-',
+                    _statusLabel(l10n, item.subscriptionStatus),
                   ),
                   _detailRow(
                     context,
@@ -733,8 +795,8 @@ class _AppsLicensesScreenState extends State<AppsLicensesScreen> {
                   ),
                   _detailRow(
                     context,
-                    'Request Status',
-                    item.upgradeRequestStatus ?? '-',
+                    l10n.app_licenses_request_status_label,
+                    _statusLabel(l10n, item.upgradeRequestStatus),
                   ),
                 ],
               ),
@@ -756,7 +818,7 @@ class _AppsLicensesScreenState extends State<AppsLicensesScreen> {
         actions: [
           IconButton(
             onPressed: _load,
-            tooltip: l10n.refresh,
+            tooltip: l10n.common_refresh,
             icon: const Icon(Icons.refresh_rounded),
           ),
         ],
@@ -772,7 +834,7 @@ class _AppsLicensesScreenState extends State<AppsLicensesScreen> {
                       _ScreenErrorCard(
                         title: l10n.failedToLoadAppLicenses,
                         message: _error!,
-                        retryLabel: l10n.retry,
+                        retryLabel: l10n.common_retry,
                         onRetry: _load,
                       ),
                     ],
@@ -790,8 +852,8 @@ class _AppsLicensesScreenState extends State<AppsLicensesScreen> {
                               ? l10n.noAppsLicensesFound
                               : l10n.noSearchResults,
                           subtitle: _query.trim().isEmpty
-                              ? 'No app license rows are available yet.'
-                              : 'Try another search or filter combination.',
+                              ? l10n.app_licenses_empty_subtitle
+                              : l10n.app_licenses_empty_search_subtitle,
                         )
                       else
                         ...items.map((e) => _buildCard(context, e)),

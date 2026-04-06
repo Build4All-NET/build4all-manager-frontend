@@ -1674,13 +1674,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get owner_publish_err_logo_required => 'Le logo est requis';
 
   @override
-  String get owner_publish_country_us => 'États-Unis';
+  String get owner_publish_country_us => 'الولايات المتحدة';
 
   @override
-  String get owner_publish_country_lb => 'Liban';
+  String get owner_publish_country_lb => 'لبنان';
 
   @override
-  String get owner_publish_country_fr => 'France';
+  String get owner_publish_country_fr => 'فرنسا';
 
   @override
   String get owner_publish_upload_assets => 'Uploader les assets (Icône + Captures)';
@@ -2761,4 +2761,475 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get owner_project_add_internal_testers => 'Ajouter des testeurs internes';
+
+  @override
+  String get admin_notifications_mark_as_read => 'Marquer comme lu';
+
+  @override
+  String get admin_notifications_empty_title => 'Aucune notification pour le moment';
+
+  @override
+  String get admin_notifications_empty_subtitle => 'Quand quelque chose d’important se produira, cela apparaîtra ici.';
+
+  @override
+  String get publish_table_app => 'Application';
+
+  @override
+  String get publish_table_platforms => 'Plateformes';
+
+  @override
+  String get publish_table_version => 'Version';
+
+  @override
+  String get publish_table_requested_date => 'Date de demande';
+
+  @override
+  String get publish_table_actions => 'Actions';
+
+  @override
+  String get publish_unknown_app => 'Application';
+
+  @override
+  String get publish_action_view_publish => 'Voir et publier';
+
+  @override
+  String get publish_action_cicd_history_soon => 'Historique CI/CD (bientôt disponible)';
+
+  @override
+  String get publish_action_view_logs_soon => 'Voir les journaux (bientôt disponible)';
+
+  @override
+  String get publish_details_no_file_yet => 'Aucun fichier disponible pour le moment';
+
+  @override
+  String get publish_details_invalid_url => 'URL invalide';
+
+  @override
+  String get publish_details_could_not_open_link => 'Impossible d’ouvrir le lien';
+
+  @override
+  String get publish_details_store_play => 'Google Play';
+
+  @override
+  String get publish_details_store_app => 'App Store';
+
+  @override
+  String get publish_details_android_title => 'Android — Google Play';
+
+  @override
+  String get publish_details_android_subtitle => 'Créer et publier sur le Play Store';
+
+  @override
+  String get publish_details_ios_title => 'iOS — App Store';
+
+  @override
+  String get publish_details_ios_subtitle => 'Créer et publier sur l’App Store';
+
+  @override
+  String get publish_details_label_package_name => 'Nom du package';
+
+  @override
+  String get publish_details_label_version_code => 'Code de version';
+
+  @override
+  String get publish_details_label_last_build => 'Dernier build';
+
+  @override
+  String get publish_details_label_bundle_identifier => 'Identifiant du bundle';
+
+  @override
+  String get publish_details_label_build_number => 'Numéro de build';
+
+  @override
+  String get publish_details_available => 'Disponible';
+
+  @override
+  String get publish_details_download_ipa => 'Télécharger l’IPA';
+
+  @override
+  String get publish_details_cta_play_store => 'Publier sur le Play Store';
+
+  @override
+  String get publish_details_cta_app_store => 'Publier sur l’App Store';
+
+  @override
+  String get publish_details_coming_soon => 'Bientôt disponible';
+
+  @override
+  String get publish_details_download_builds => 'Télécharger les builds';
+
+  @override
+  String get publish_details_manual_publish_instructions => 'Instructions de publication manuelle';
+
+  @override
+  String get publish_details_file_apk => 'APK';
+
+  @override
+  String get publish_details_file_aab => 'AAB';
+
+  @override
+  String get publish_details_file_ipa => 'IPA';
+
+  @override
+  String get upgrade_requests_empty_search_title => 'Aucune demande correspondante trouvée';
+
+  @override
+  String get upgrade_requests_empty_search_subtitle => 'Essayez un autre mot-clé pour le nom de l’application, le slug, l’identifiant de la demande ou le plan.';
+
+  @override
+  String get upgrade_requests_hero_subtitle => 'Examinez, approuvez ou rejetez les demandes de mise à niveau du plan propriétaire.';
+
+  @override
+  String get upgrade_requests_stat_total => 'Total';
+
+  @override
+  String get upgrade_requests_stat_shown => 'Affichées';
+
+  @override
+  String get upgrade_requests_stat_pending => 'En attente';
+
+  @override
+  String get upgrade_requests_search_hint => 'Rechercher par application, slug, identifiant de demande ou plan...';
+
+  @override
+  String upgrade_requests_visible_count(Object count) {
+    return '$count demandes visibles';
+  }
+
+  @override
+  String get upgrade_requests_status_pending => 'En attente';
+
+  @override
+  String get upgrade_requests_no_slug_available => 'Aucun slug disponible';
+
+  @override
+  String get app_licenses_filter_all => 'Toutes';
+
+  @override
+  String get app_licenses_filter_pending => 'En attente';
+
+  @override
+  String get app_licenses_filter_blocked => 'Bloquée';
+
+  @override
+  String get app_licenses_filter_free => 'Gratuit';
+
+  @override
+  String get app_licenses_filter_pro_hosted => 'Pro hébergé';
+
+  @override
+  String get app_licenses_filter_dedicated => 'Dédié';
+
+  @override
+  String get app_licenses_stat_total => 'Total';
+
+  @override
+  String get app_licenses_stat_pending => 'En attente';
+
+  @override
+  String get app_licenses_stat_blocked => 'Bloquées';
+
+  @override
+  String get app_licenses_stat_free => 'Gratuit';
+
+  @override
+  String get app_licenses_stat_pro_hosted => 'Pro hébergé';
+
+  @override
+  String get app_licenses_stat_dedicated => 'Dédié';
+
+  @override
+  String get app_licenses_pending_request => 'Demande en attente';
+
+  @override
+  String get app_licenses_pending_banner => 'Cette application a une demande de mise à niveau en attente.';
+
+  @override
+  String get app_licenses_request_status_label => 'Statut de la demande';
+
+  @override
+  String get app_licenses_empty_subtitle => 'Aucune ligne de licence d’application n’est encore disponible.';
+
+  @override
+  String get app_licenses_empty_search_subtitle => 'Essayez une autre recherche ou une autre combinaison de filtres.';
+
+  @override
+  String get app_licenses_plan_free => 'Gratuit';
+
+  @override
+  String get app_licenses_plan_pro_hosted => 'Pro hébergé';
+
+  @override
+  String get app_licenses_plan_dedicated => 'Dédié';
+
+  @override
+  String get app_licenses_status_expired => 'Expiré';
+
+  @override
+  String get app_licenses_status_suspended => 'Suspendu';
+
+  @override
+  String get app_licenses_status_deleted => 'Supprimé';
+
+  @override
+  String get app_licenses_status_canceled => 'Annulé';
+
+  @override
+  String get tutorial_ownerGuide_upload_replace_video => 'Téléverser / remplacer la vidéo';
+
+  @override
+  String get tutorial_ownerGuide_invalid_video_url => 'URL vidéo invalide.';
+
+  @override
+  String get tutorial_ownerGuide_could_not_open_video => 'Impossible d’ouvrir la vidéo.';
+
+  @override
+  String get tutorial_ownerGuide_copied_link => 'Lien copié.';
+
+  @override
+  String get tutorial_ownerGuide_could_not_read_selected_file_path => 'Impossible de lire le chemin du fichier sélectionné.';
+
+  @override
+  String tutorial_ownerGuide_upload_progress(Object percent) {
+    return 'Téléversement... $percent%';
+  }
+
+  @override
+  String get owner_request_logo_label_required => 'Logo de l’application *';
+
+  @override
+  String get owner_request_submit_ready_state => 'Prêt à envoyer';
+
+  @override
+  String get owner_request_submit_missing_required => 'Nom de l’application + logo requis';
+
+  @override
+  String get preview_phone_nav_home => 'Accueil';
+
+  @override
+  String get preview_phone_nav_explore => 'Explorer';
+
+  @override
+  String get preview_phone_nav_cart => 'Panier';
+
+  @override
+  String get preview_phone_nav_profile => 'Profil';
+
+  @override
+  String get preview_phone_nav_tab => 'Onglet';
+
+  @override
+  String get preview_phone_search_products => 'Rechercher des produits...';
+
+  @override
+  String get preview_phone_welcome => 'Bienvenue';
+
+  @override
+  String get preview_phone_search => 'Rechercher...';
+
+  @override
+  String get preview_phone_hero_banner => 'Bannière principale';
+
+  @override
+  String get preview_phone_product_name => 'Nom du produit';
+
+  @override
+  String get preview_phone_add_to_cart => 'Ajouter au panier';
+
+  @override
+  String get palette_primary => 'Primaire';
+
+  @override
+  String get palette_secondary => 'Secondaire';
+
+  @override
+  String get palette_background => 'Arrière-plan';
+
+  @override
+  String get palette_text_on_background => 'Texte (onBackground)';
+
+  @override
+  String get palette_error => 'Erreur';
+
+  @override
+  String get palette_auto_theme_hint => 'Les propriétaires choisissent les couleurs visuellement. Nous générons themeJson automatiquement.';
+
+  @override
+  String get palette_pick_color => 'Choisir une couleur';
+
+  @override
+  String get palette_use_color => 'Utiliser';
+
+  @override
+  String get palette_preset_pink_pop => 'Rose pop';
+
+  @override
+  String get palette_preset_ocean_blue => 'Bleu océan';
+
+  @override
+  String get palette_preset_forest => 'Forêt';
+
+  @override
+  String get palette_preset_sunset => 'Coucher de soleil';
+
+  @override
+  String get palette_preset_midnight => 'Minuit';
+
+  @override
+  String get palette_selected => 'Sélectionné';
+
+  @override
+  String get palette_tap_to_apply => 'Touchez pour appliquer';
+
+  @override
+  String get palette_preview_app_name => 'Votre application';
+
+  @override
+  String get palette_preview_hello_owner => 'Bonjour propriétaire';
+
+  @override
+  String get palette_preview_theme_looks => 'Voici à quoi ressemble votre thème.';
+
+  @override
+  String get palette_preview_primary_button => 'Bouton principal';
+
+  @override
+  String get runtime_menu_type_title => 'نوع القائمة';
+
+  @override
+  String get runtime_enabled_features_title => 'الميزات المفعلة';
+
+  @override
+  String get runtime_navigation_title => 'التنقل';
+
+  @override
+  String get runtime_navigation_subtitle => 'الرئيسية + السلة + الملف الشخصي مطلوبة. الاستكشاف اختياري.';
+
+  @override
+  String get runtime_home_sections_title => 'أقسام الصفحة الرئيسية';
+
+  @override
+  String get runtime_home_sections_subtitle => 'الأقسام التي تتطلب ميزات معطلة سيتم إخفاؤها تلقائيًا.';
+
+  @override
+  String get runtime_menu_bottom => 'سفلية';
+
+  @override
+  String get runtime_menu_hamburger => 'هامبرغر';
+
+  @override
+  String get runtime_required => 'مطلوب';
+
+  @override
+  String runtime_requires_features(Object features) {
+    return 'يتطلب: $features';
+  }
+
+  @override
+  String runtime_max_bottom_tabs(Object count) {
+    return 'الحد الأقصى $count تبويبات في القائمة السفلية';
+  }
+
+  @override
+  String get runtime_pick_limit => 'اختر الحد';
+
+  @override
+  String runtime_limit_value(Object count) {
+    return 'الحد $count';
+  }
+
+  @override
+  String get runtime_section_header => 'الرأس';
+
+  @override
+  String get runtime_section_search => 'بحث';
+
+  @override
+  String get runtime_section_banner => 'البانر الرئيسي';
+
+  @override
+  String get runtime_section_categories => 'الفئات';
+
+  @override
+  String get runtime_section_hero_items => 'العناصر الرئيسية';
+
+  @override
+  String get runtime_feature_items => 'العناصر';
+
+  @override
+  String get runtime_feature_booking => 'الحجوزات';
+
+  @override
+  String get runtime_feature_reviews => 'المراجعات';
+
+  @override
+  String get runtime_feature_orders => 'الطلبات';
+
+  @override
+  String get runtime_feature_coupons => 'الكوبونات';
+
+  @override
+  String get runtime_feature_notifications => 'الإشعارات';
+
+  @override
+  String get owner_projects_delete_title => 'Supprimer le projet';
+
+  @override
+  String owner_projects_delete_confirm(Object appName) {
+    return 'Êtes-vous sûr de vouloir supprimer \"$appName\" ?';
+  }
+
+  @override
+  String get owner_projects_delete_success => 'Projet supprimé avec succès';
+
+  @override
+  String get owner_projects_delete_failed => 'Échec de la suppression';
+
+  @override
+  String get owner_profile_edit_phone_used => 'Numéro de téléphone déjà utilisé';
+
+  @override
+  String get owner_profile_edit_phone_requires_verification => 'Le changement de téléphone nécessite une vérification';
+
+  @override
+  String get owner_profile_edit_phone_change_sent => 'Code de vérification envoyé';
+
+  @override
+  String get owner_profile_edit_phone_change_resend_ok => 'Code renvoyé';
+
+  @override
+  String get owner_profile_edit_phone_change_resend_fail => 'Échec du renvoi';
+
+  @override
+  String get owner_profile_edit_phone_change_resend => 'Renvoyer';
+
+  @override
+  String get owner_profile_edit_phone_change_invalid_code => 'Code invalide';
+
+  @override
+  String get owner_profile_edit_phone_change_verify => 'Vérifier';
+
+  @override
+  String get owner_profile_edit_phone_change_title => 'Vérifier le nouveau téléphone';
+
+  @override
+  String get owner_profile_edit_phone_change_code_hint => 'Code à 6 chiffres';
+
+  @override
+  String get owner_profile_edit_phone_change_verified => 'Numéro de téléphone mis à jour';
+
+  @override
+  String get owner_nav_drawer_title => 'propriétaire';
+
+  @override
+  String get owner_nav_notifications => 'Notifications';
+
+  @override
+  String get owner_publish_price_free => 'Free';
+
+  @override
+  String get owner_publish_price_paid => 'Paid';
+
+  @override
+  String get owner_publish_assets_upload_now => 'Upload now';
 }

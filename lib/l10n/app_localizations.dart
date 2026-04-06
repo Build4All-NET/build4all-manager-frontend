@@ -5520,6 +5520,924 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add Internal Testers'**
   String get owner_project_add_internal_testers;
+
+  /// No description provided for @admin_notifications_mark_as_read.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as read'**
+  String get admin_notifications_mark_as_read;
+
+  /// No description provided for @admin_notifications_empty_title.
+  ///
+  /// In en, this message translates to:
+  /// **'No notifications yet'**
+  String get admin_notifications_empty_title;
+
+  /// No description provided for @admin_notifications_empty_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'When something important happens, it will show up here.'**
+  String get admin_notifications_empty_subtitle;
+
+  /// No description provided for @publish_table_app.
+  ///
+  /// In en, this message translates to:
+  /// **'App'**
+  String get publish_table_app;
+
+  /// No description provided for @publish_table_platforms.
+  ///
+  /// In en, this message translates to:
+  /// **'Platforms'**
+  String get publish_table_platforms;
+
+  /// No description provided for @publish_table_version.
+  ///
+  /// In en, this message translates to:
+  /// **'Version'**
+  String get publish_table_version;
+
+  /// No description provided for @publish_table_requested_date.
+  ///
+  /// In en, this message translates to:
+  /// **'Requested Date'**
+  String get publish_table_requested_date;
+
+  /// No description provided for @publish_table_actions.
+  ///
+  /// In en, this message translates to:
+  /// **'Actions'**
+  String get publish_table_actions;
+
+  /// No description provided for @publish_unknown_app.
+  ///
+  /// In en, this message translates to:
+  /// **'App'**
+  String get publish_unknown_app;
+
+  /// No description provided for @publish_action_view_publish.
+  ///
+  /// In en, this message translates to:
+  /// **'View & Publish'**
+  String get publish_action_view_publish;
+
+  /// No description provided for @publish_action_cicd_history_soon.
+  ///
+  /// In en, this message translates to:
+  /// **'CI/CD History (Coming soon)'**
+  String get publish_action_cicd_history_soon;
+
+  /// No description provided for @publish_action_view_logs_soon.
+  ///
+  /// In en, this message translates to:
+  /// **'View Logs (Coming soon)'**
+  String get publish_action_view_logs_soon;
+
+  /// No description provided for @publish_details_no_file_yet.
+  ///
+  /// In en, this message translates to:
+  /// **'No file available yet'**
+  String get publish_details_no_file_yet;
+
+  /// No description provided for @publish_details_invalid_url.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid URL'**
+  String get publish_details_invalid_url;
+
+  /// No description provided for @publish_details_could_not_open_link.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open link'**
+  String get publish_details_could_not_open_link;
+
+  /// No description provided for @publish_details_store_play.
+  ///
+  /// In en, this message translates to:
+  /// **'Google Play'**
+  String get publish_details_store_play;
+
+  /// No description provided for @publish_details_store_app.
+  ///
+  /// In en, this message translates to:
+  /// **'App Store'**
+  String get publish_details_store_app;
+
+  /// No description provided for @publish_details_android_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Android — Google Play'**
+  String get publish_details_android_title;
+
+  /// No description provided for @publish_details_android_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Build and publish to Play Store'**
+  String get publish_details_android_subtitle;
+
+  /// No description provided for @publish_details_ios_title.
+  ///
+  /// In en, this message translates to:
+  /// **'iOS — App Store'**
+  String get publish_details_ios_title;
+
+  /// No description provided for @publish_details_ios_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Build and publish to App Store'**
+  String get publish_details_ios_subtitle;
+
+  /// No description provided for @publish_details_label_package_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Package Name'**
+  String get publish_details_label_package_name;
+
+  /// No description provided for @publish_details_label_version_code.
+  ///
+  /// In en, this message translates to:
+  /// **'Version Code'**
+  String get publish_details_label_version_code;
+
+  /// No description provided for @publish_details_label_last_build.
+  ///
+  /// In en, this message translates to:
+  /// **'Last Build'**
+  String get publish_details_label_last_build;
+
+  /// No description provided for @publish_details_label_bundle_identifier.
+  ///
+  /// In en, this message translates to:
+  /// **'Bundle Identifier'**
+  String get publish_details_label_bundle_identifier;
+
+  /// No description provided for @publish_details_label_build_number.
+  ///
+  /// In en, this message translates to:
+  /// **'Build Number'**
+  String get publish_details_label_build_number;
+
+  /// No description provided for @publish_details_available.
+  ///
+  /// In en, this message translates to:
+  /// **'Available'**
+  String get publish_details_available;
+
+  /// No description provided for @publish_details_download_ipa.
+  ///
+  /// In en, this message translates to:
+  /// **'Download IPA'**
+  String get publish_details_download_ipa;
+
+  /// No description provided for @publish_details_cta_play_store.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish to Play Store'**
+  String get publish_details_cta_play_store;
+
+  /// No description provided for @publish_details_cta_app_store.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish to App Store'**
+  String get publish_details_cta_app_store;
+
+  /// No description provided for @publish_details_coming_soon.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming soon'**
+  String get publish_details_coming_soon;
+
+  /// No description provided for @publish_details_download_builds.
+  ///
+  /// In en, this message translates to:
+  /// **'Download Builds'**
+  String get publish_details_download_builds;
+
+  /// No description provided for @publish_details_manual_publish_instructions.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual Publish Instructions'**
+  String get publish_details_manual_publish_instructions;
+
+  /// No description provided for @publish_details_file_apk.
+  ///
+  /// In en, this message translates to:
+  /// **'APK'**
+  String get publish_details_file_apk;
+
+  /// No description provided for @publish_details_file_aab.
+  ///
+  /// In en, this message translates to:
+  /// **'AAB'**
+  String get publish_details_file_aab;
+
+  /// No description provided for @publish_details_file_ipa.
+  ///
+  /// In en, this message translates to:
+  /// **'IPA'**
+  String get publish_details_file_ipa;
+
+  /// No description provided for @upgrade_requests_empty_search_title.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching requests found'**
+  String get upgrade_requests_empty_search_title;
+
+  /// No description provided for @upgrade_requests_empty_search_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Try another keyword for app name, slug, request ID, or plan.'**
+  String get upgrade_requests_empty_search_subtitle;
+
+  /// No description provided for @upgrade_requests_hero_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review, approve, or reject owner plan upgrade requests.'**
+  String get upgrade_requests_hero_subtitle;
+
+  /// No description provided for @upgrade_requests_stat_total.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get upgrade_requests_stat_total;
+
+  /// No description provided for @upgrade_requests_stat_shown.
+  ///
+  /// In en, this message translates to:
+  /// **'Shown'**
+  String get upgrade_requests_stat_shown;
+
+  /// No description provided for @upgrade_requests_stat_pending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get upgrade_requests_stat_pending;
+
+  /// No description provided for @upgrade_requests_search_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by app, slug, request ID, or plan...'**
+  String get upgrade_requests_search_hint;
+
+  /// No description provided for @upgrade_requests_visible_count.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} requests visible'**
+  String upgrade_requests_visible_count(Object count);
+
+  /// No description provided for @upgrade_requests_status_pending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get upgrade_requests_status_pending;
+
+  /// No description provided for @upgrade_requests_no_slug_available.
+  ///
+  /// In en, this message translates to:
+  /// **'No slug available'**
+  String get upgrade_requests_no_slug_available;
+
+  /// No description provided for @app_licenses_filter_all.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get app_licenses_filter_all;
+
+  /// No description provided for @app_licenses_filter_pending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get app_licenses_filter_pending;
+
+  /// No description provided for @app_licenses_filter_blocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked'**
+  String get app_licenses_filter_blocked;
+
+  /// No description provided for @app_licenses_filter_free.
+  ///
+  /// In en, this message translates to:
+  /// **'Free'**
+  String get app_licenses_filter_free;
+
+  /// No description provided for @app_licenses_filter_pro_hosted.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro Hosted'**
+  String get app_licenses_filter_pro_hosted;
+
+  /// No description provided for @app_licenses_filter_dedicated.
+  ///
+  /// In en, this message translates to:
+  /// **'Dedicated'**
+  String get app_licenses_filter_dedicated;
+
+  /// No description provided for @app_licenses_stat_total.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get app_licenses_stat_total;
+
+  /// No description provided for @app_licenses_stat_pending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get app_licenses_stat_pending;
+
+  /// No description provided for @app_licenses_stat_blocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked'**
+  String get app_licenses_stat_blocked;
+
+  /// No description provided for @app_licenses_stat_free.
+  ///
+  /// In en, this message translates to:
+  /// **'Free'**
+  String get app_licenses_stat_free;
+
+  /// No description provided for @app_licenses_stat_pro_hosted.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro Hosted'**
+  String get app_licenses_stat_pro_hosted;
+
+  /// No description provided for @app_licenses_stat_dedicated.
+  ///
+  /// In en, this message translates to:
+  /// **'Dedicated'**
+  String get app_licenses_stat_dedicated;
+
+  /// No description provided for @app_licenses_pending_request.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Request'**
+  String get app_licenses_pending_request;
+
+  /// No description provided for @app_licenses_pending_banner.
+  ///
+  /// In en, this message translates to:
+  /// **'This app has a pending upgrade request.'**
+  String get app_licenses_pending_banner;
+
+  /// No description provided for @app_licenses_request_status_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Request Status'**
+  String get app_licenses_request_status_label;
+
+  /// No description provided for @app_licenses_empty_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No app license rows are available yet.'**
+  String get app_licenses_empty_subtitle;
+
+  /// No description provided for @app_licenses_empty_search_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Try another search or filter combination.'**
+  String get app_licenses_empty_search_subtitle;
+
+  /// No description provided for @app_licenses_plan_free.
+  ///
+  /// In en, this message translates to:
+  /// **'Free'**
+  String get app_licenses_plan_free;
+
+  /// No description provided for @app_licenses_plan_pro_hosted.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro Hosted'**
+  String get app_licenses_plan_pro_hosted;
+
+  /// No description provided for @app_licenses_plan_dedicated.
+  ///
+  /// In en, this message translates to:
+  /// **'Dedicated'**
+  String get app_licenses_plan_dedicated;
+
+  /// No description provided for @app_licenses_status_expired.
+  ///
+  /// In en, this message translates to:
+  /// **'Expired'**
+  String get app_licenses_status_expired;
+
+  /// No description provided for @app_licenses_status_suspended.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspended'**
+  String get app_licenses_status_suspended;
+
+  /// No description provided for @app_licenses_status_deleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted'**
+  String get app_licenses_status_deleted;
+
+  /// No description provided for @app_licenses_status_canceled.
+  ///
+  /// In en, this message translates to:
+  /// **'Canceled'**
+  String get app_licenses_status_canceled;
+
+  /// No description provided for @tutorial_ownerGuide_upload_replace_video.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload / Replace video'**
+  String get tutorial_ownerGuide_upload_replace_video;
+
+  /// No description provided for @tutorial_ownerGuide_invalid_video_url.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid video URL.'**
+  String get tutorial_ownerGuide_invalid_video_url;
+
+  /// No description provided for @tutorial_ownerGuide_could_not_open_video.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open the video.'**
+  String get tutorial_ownerGuide_could_not_open_video;
+
+  /// No description provided for @tutorial_ownerGuide_copied_link.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied link.'**
+  String get tutorial_ownerGuide_copied_link;
+
+  /// No description provided for @tutorial_ownerGuide_could_not_read_selected_file_path.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not read selected file path.'**
+  String get tutorial_ownerGuide_could_not_read_selected_file_path;
+
+  /// No description provided for @tutorial_ownerGuide_upload_progress.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading... {percent}%'**
+  String tutorial_ownerGuide_upload_progress(Object percent);
+
+  /// No description provided for @owner_request_logo_label_required.
+  ///
+  /// In en, this message translates to:
+  /// **'App logo *'**
+  String get owner_request_logo_label_required;
+
+  /// No description provided for @owner_request_submit_ready_state.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to submit'**
+  String get owner_request_submit_ready_state;
+
+  /// No description provided for @owner_request_submit_missing_required.
+  ///
+  /// In en, this message translates to:
+  /// **'App name + logo required'**
+  String get owner_request_submit_missing_required;
+
+  /// No description provided for @preview_phone_nav_home.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get preview_phone_nav_home;
+
+  /// No description provided for @preview_phone_nav_explore.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore'**
+  String get preview_phone_nav_explore;
+
+  /// No description provided for @preview_phone_nav_cart.
+  ///
+  /// In en, this message translates to:
+  /// **'Cart'**
+  String get preview_phone_nav_cart;
+
+  /// No description provided for @preview_phone_nav_profile.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get preview_phone_nav_profile;
+
+  /// No description provided for @preview_phone_nav_tab.
+  ///
+  /// In en, this message translates to:
+  /// **'Tab'**
+  String get preview_phone_nav_tab;
+
+  /// No description provided for @preview_phone_search_products.
+  ///
+  /// In en, this message translates to:
+  /// **'Search products...'**
+  String get preview_phone_search_products;
+
+  /// No description provided for @preview_phone_welcome.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome'**
+  String get preview_phone_welcome;
+
+  /// No description provided for @preview_phone_search.
+  ///
+  /// In en, this message translates to:
+  /// **'Search...'**
+  String get preview_phone_search;
+
+  /// No description provided for @preview_phone_hero_banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Hero Banner'**
+  String get preview_phone_hero_banner;
+
+  /// No description provided for @preview_phone_product_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Product Name'**
+  String get preview_phone_product_name;
+
+  /// No description provided for @preview_phone_add_to_cart.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to Cart'**
+  String get preview_phone_add_to_cart;
+
+  /// No description provided for @palette_primary.
+  ///
+  /// In en, this message translates to:
+  /// **'Primary'**
+  String get palette_primary;
+
+  /// No description provided for @palette_secondary.
+  ///
+  /// In en, this message translates to:
+  /// **'Secondary'**
+  String get palette_secondary;
+
+  /// No description provided for @palette_background.
+  ///
+  /// In en, this message translates to:
+  /// **'Background'**
+  String get palette_background;
+
+  /// No description provided for @palette_text_on_background.
+  ///
+  /// In en, this message translates to:
+  /// **'Text (onBackground)'**
+  String get palette_text_on_background;
+
+  /// No description provided for @palette_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get palette_error;
+
+  /// No description provided for @palette_auto_theme_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Owners pick colors visually. We generate themeJson automatically.'**
+  String get palette_auto_theme_hint;
+
+  /// No description provided for @palette_pick_color.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick color'**
+  String get palette_pick_color;
+
+  /// No description provided for @palette_use_color.
+  ///
+  /// In en, this message translates to:
+  /// **'Use'**
+  String get palette_use_color;
+
+  /// No description provided for @palette_preset_pink_pop.
+  ///
+  /// In en, this message translates to:
+  /// **'Pink Pop'**
+  String get palette_preset_pink_pop;
+
+  /// No description provided for @palette_preset_ocean_blue.
+  ///
+  /// In en, this message translates to:
+  /// **'Ocean Blue'**
+  String get palette_preset_ocean_blue;
+
+  /// No description provided for @palette_preset_forest.
+  ///
+  /// In en, this message translates to:
+  /// **'Forest'**
+  String get palette_preset_forest;
+
+  /// No description provided for @palette_preset_sunset.
+  ///
+  /// In en, this message translates to:
+  /// **'Sunset'**
+  String get palette_preset_sunset;
+
+  /// No description provided for @palette_preset_midnight.
+  ///
+  /// In en, this message translates to:
+  /// **'Midnight'**
+  String get palette_preset_midnight;
+
+  /// No description provided for @palette_selected.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected'**
+  String get palette_selected;
+
+  /// No description provided for @palette_tap_to_apply.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to apply'**
+  String get palette_tap_to_apply;
+
+  /// No description provided for @palette_preview_app_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Your App'**
+  String get palette_preview_app_name;
+
+  /// No description provided for @palette_preview_hello_owner.
+  ///
+  /// In en, this message translates to:
+  /// **'Hello owner'**
+  String get palette_preview_hello_owner;
+
+  /// No description provided for @palette_preview_theme_looks.
+  ///
+  /// In en, this message translates to:
+  /// **'This is how your theme looks.'**
+  String get palette_preview_theme_looks;
+
+  /// No description provided for @palette_preview_primary_button.
+  ///
+  /// In en, this message translates to:
+  /// **'Primary Button'**
+  String get palette_preview_primary_button;
+
+  /// No description provided for @runtime_menu_type_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Menu Type'**
+  String get runtime_menu_type_title;
+
+  /// No description provided for @runtime_enabled_features_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Enabled Features'**
+  String get runtime_enabled_features_title;
+
+  /// No description provided for @runtime_navigation_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Navigation'**
+  String get runtime_navigation_title;
+
+  /// No description provided for @runtime_navigation_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Home + Cart + Profile are required. Explore is optional.'**
+  String get runtime_navigation_subtitle;
+
+  /// No description provided for @runtime_home_sections_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Home Sections'**
+  String get runtime_home_sections_title;
+
+  /// No description provided for @runtime_home_sections_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sections requiring disabled features will auto-hide.'**
+  String get runtime_home_sections_subtitle;
+
+  /// No description provided for @runtime_menu_bottom.
+  ///
+  /// In en, this message translates to:
+  /// **'Bottom'**
+  String get runtime_menu_bottom;
+
+  /// No description provided for @runtime_menu_hamburger.
+  ///
+  /// In en, this message translates to:
+  /// **'Hamburger'**
+  String get runtime_menu_hamburger;
+
+  /// No description provided for @runtime_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Required'**
+  String get runtime_required;
+
+  /// No description provided for @runtime_requires_features.
+  ///
+  /// In en, this message translates to:
+  /// **'Requires: {features}'**
+  String runtime_requires_features(Object features);
+
+  /// No description provided for @runtime_max_bottom_tabs.
+  ///
+  /// In en, this message translates to:
+  /// **'Max {count} tabs in bottom menu'**
+  String runtime_max_bottom_tabs(Object count);
+
+  /// No description provided for @runtime_pick_limit.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick limit'**
+  String get runtime_pick_limit;
+
+  /// No description provided for @runtime_limit_value.
+  ///
+  /// In en, this message translates to:
+  /// **'Limit {count}'**
+  String runtime_limit_value(Object count);
+
+  /// No description provided for @runtime_section_header.
+  ///
+  /// In en, this message translates to:
+  /// **'Header'**
+  String get runtime_section_header;
+
+  /// No description provided for @runtime_section_search.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get runtime_section_search;
+
+  /// No description provided for @runtime_section_banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Hero Banner'**
+  String get runtime_section_banner;
+
+  /// No description provided for @runtime_section_categories.
+  ///
+  /// In en, this message translates to:
+  /// **'Categories'**
+  String get runtime_section_categories;
+
+  /// No description provided for @runtime_section_hero_items.
+  ///
+  /// In en, this message translates to:
+  /// **'Hero Items'**
+  String get runtime_section_hero_items;
+
+  /// No description provided for @runtime_feature_items.
+  ///
+  /// In en, this message translates to:
+  /// **'Items'**
+  String get runtime_feature_items;
+
+  /// No description provided for @runtime_feature_booking.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking'**
+  String get runtime_feature_booking;
+
+  /// No description provided for @runtime_feature_reviews.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviews'**
+  String get runtime_feature_reviews;
+
+  /// No description provided for @runtime_feature_orders.
+  ///
+  /// In en, this message translates to:
+  /// **'Orders'**
+  String get runtime_feature_orders;
+
+  /// No description provided for @runtime_feature_coupons.
+  ///
+  /// In en, this message translates to:
+  /// **'Coupons'**
+  String get runtime_feature_coupons;
+
+  /// No description provided for @runtime_feature_notifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get runtime_feature_notifications;
+
+  /// No description provided for @owner_projects_delete_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete project'**
+  String get owner_projects_delete_title;
+
+  /// No description provided for @owner_projects_delete_confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete \"{appName}\"?'**
+  String owner_projects_delete_confirm(Object appName);
+
+  /// No description provided for @owner_projects_delete_success.
+  ///
+  /// In en, this message translates to:
+  /// **'Project deleted successfully'**
+  String get owner_projects_delete_success;
+
+  /// No description provided for @owner_projects_delete_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete failed'**
+  String get owner_projects_delete_failed;
+
+  /// No description provided for @owner_profile_edit_phone_used.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone number already used'**
+  String get owner_profile_edit_phone_used;
+
+  /// No description provided for @owner_profile_edit_phone_requires_verification.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone change requires verification'**
+  String get owner_profile_edit_phone_requires_verification;
+
+  /// No description provided for @owner_profile_edit_phone_change_sent.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification code sent'**
+  String get owner_profile_edit_phone_change_sent;
+
+  /// No description provided for @owner_profile_edit_phone_change_resend_ok.
+  ///
+  /// In en, this message translates to:
+  /// **'Code resent'**
+  String get owner_profile_edit_phone_change_resend_ok;
+
+  /// No description provided for @owner_profile_edit_phone_change_resend_fail.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to resend'**
+  String get owner_profile_edit_phone_change_resend_fail;
+
+  /// No description provided for @owner_profile_edit_phone_change_resend.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend'**
+  String get owner_profile_edit_phone_change_resend;
+
+  /// No description provided for @owner_profile_edit_phone_change_invalid_code.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid code'**
+  String get owner_profile_edit_phone_change_invalid_code;
+
+  /// No description provided for @owner_profile_edit_phone_change_verify.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify'**
+  String get owner_profile_edit_phone_change_verify;
+
+  /// No description provided for @owner_profile_edit_phone_change_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify new phone'**
+  String get owner_profile_edit_phone_change_title;
+
+  /// No description provided for @owner_profile_edit_phone_change_code_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'6-digit code'**
+  String get owner_profile_edit_phone_change_code_hint;
+
+  /// No description provided for @owner_profile_edit_phone_change_verified.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone number updated'**
+  String get owner_profile_edit_phone_change_verified;
+
+  /// No description provided for @owner_nav_drawer_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner'**
+  String get owner_nav_drawer_title;
+
+  /// No description provided for @owner_nav_notifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get owner_nav_notifications;
+
+  /// No description provided for @owner_publish_price_free.
+  ///
+  /// In en, this message translates to:
+  /// **'Free'**
+  String get owner_publish_price_free;
+
+  /// No description provided for @owner_publish_price_paid.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid'**
+  String get owner_publish_price_paid;
+
+  /// No description provided for @owner_publish_assets_upload_now.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload now'**
+  String get owner_publish_assets_upload_now;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

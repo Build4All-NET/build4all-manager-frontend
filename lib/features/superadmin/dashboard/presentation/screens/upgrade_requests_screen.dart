@@ -68,7 +68,7 @@ class _SuperAdminUpgradeRequestsScreenState
         _items = items;
         _loading = false;
       });
-     } catch (e) {
+    } catch (e) {
       final msg = ApiErrorHandler.message(e);
       if (!mounted) return;
       setState(() {
@@ -88,7 +88,7 @@ class _SuperAdminUpgradeRequestsScreenState
       if (!mounted) return;
       setState(() => _items.removeWhere((x) => x.id == r.id));
       _toast(l10n.upgrade_requests_approve_success);
-      } catch (e) {
+    } catch (e) {
       _toast(ApiErrorHandler.message(e), error: true);
     } finally {
       if (mounted) setState(() => _busyIds.remove(r.id));
@@ -110,7 +110,7 @@ class _SuperAdminUpgradeRequestsScreenState
       if (!mounted) return;
       setState(() => _items.removeWhere((x) => x.id == r.id));
       _toast(l10n.upgrade_requests_reject_success);
-       } catch (e) {
+    } catch (e) {
       _toast(ApiErrorHandler.message(e), error: true);
     } finally {
       if (mounted) setState(() => _busyIds.remove(r.id));
@@ -192,7 +192,6 @@ class _SuperAdminUpgradeRequestsScreenState
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final cs = Theme.of(context).colorScheme;
     final items = _filteredItems;
 
     return Scaffold(
@@ -236,10 +235,10 @@ class _SuperAdminUpgradeRequestsScreenState
                           icon: Icons.inbox_rounded,
                           title: _query.trim().isEmpty
                               ? l10n.upgrade_requests_empty
-                              : 'No matching requests found',
+                              : l10n.upgrade_requests_empty_search_title,
                           subtitle: _query.trim().isEmpty
                               ? l10n.upgrade_requests_empty_sub
-                              : 'Try another keyword for app name, slug, request ID, or plan.',
+                              : l10n.upgrade_requests_empty_search_subtitle,
                         )
                       else
                         ...items.map((r) {
@@ -259,7 +258,9 @@ class _SuperAdminUpgradeRequestsScreenState
       ),
       floatingActionButton: !_loading && _error == null
           ? FloatingActionButton.extended(
-              onPressed: () => _toast('${items.length} requests visible'),
+              onPressed: () => _toast(
+                l10n.upgrade_requests_visible_count(items.length.toString()),
+              ),
               icon: const Icon(Icons.pending_actions_rounded),
               label: Text('${items.length}'),
             )
@@ -337,7 +338,7 @@ class _UpgradeHeroPanel extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Review, approve, or reject owner plan upgrade requests.',
+                      l10n.upgrade_requests_hero_subtitle,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color: cs.onSurfaceVariant,
                             fontWeight: FontWeight.w500,
@@ -355,19 +356,19 @@ class _UpgradeHeroPanel extends StatelessWidget {
             children: [
               _TinyStatChip(
                 icon: Icons.inventory_2_outlined,
-                label: 'Total',
+                label: l10n.upgrade_requests_stat_total,
                 value: '$total',
                 color: cs.primary,
               ),
               _TinyStatChip(
                 icon: Icons.visibility_outlined,
-                label: 'Shown',
+                label: l10n.upgrade_requests_stat_shown,
                 value: '$filtered',
                 color: cs.secondary,
               ),
               _TinyStatChip(
                 icon: Icons.schedule_rounded,
-                label: 'Pending',
+                label: l10n.upgrade_requests_stat_pending,
                 value: '$total',
                 color: Colors.orange,
               ),
@@ -378,7 +379,7 @@ class _UpgradeHeroPanel extends StatelessWidget {
             onChanged: onSearch,
             decoration: InputDecoration(
               prefixIcon: const Icon(Icons.search_rounded),
-              hintText: 'Search by app, slug, request ID, or plan...',
+              hintText: l10n.upgrade_requests_search_hint,
               filled: true,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
@@ -530,7 +531,11 @@ class _ProUpgradeRequestCard extends StatelessWidget {
                         fontWeight: FontWeight.w900,
                       ),
                 ),
-                softChip('PENDING', Colors.orange, icon: Icons.schedule_rounded),
+                softChip(
+                  l10n.upgrade_requests_status_pending,
+                  Colors.orange,
+                  icon: Icons.schedule_rounded,
+                ),
                 softChip(
                   row.requestedPlanCode.isEmpty ? '—' : row.requestedPlanCode,
                   cs.primary,
@@ -540,7 +545,9 @@ class _ProUpgradeRequestCard extends StatelessWidget {
             ),
             const SizedBox(height: 6),
             Text(
-              row.slug.trim().isNotEmpty ? row.slug : 'No slug available',
+              row.slug.trim().isNotEmpty
+                  ? row.slug
+                  : l10n.upgrade_requests_no_slug_available,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: cs.onSurfaceVariant,
                     fontWeight: FontWeight.w600,
@@ -866,24 +873,28 @@ class UpgradeRequestRow {
     required this.requestedAt,
   });
 
-  factory UpgradeRequestRow.fromJson(Map<String, dynamic> json) {
-    int i(dynamic v) => (v is num) ? v.toInt() : int.tryParse('$v') ?? 0;
-
-    DateTime? dt(dynamic v) {
+  factory UpgradeRequestRow.fromJson(Map<String, dynamic> j) {
+    DateTime? parseDt(dynamic v) {
       if (v == null) return null;
-      if (v is DateTime) return v;
       return DateTime.tryParse(v.toString());
     }
 
+    int asInt(dynamic v) {
+      if (v == null) return 0;
+      if (v is int) return v;
+      return int.tryParse(v.toString()) ?? 0;
+    }
+
     return UpgradeRequestRow(
-      id: i(json['id']),
-      aupId: i(json['aupId']),
-      appName: (json['appName'] ?? '').toString(),
-      slug: (json['slug'] ?? '').toString(),
-      requestedPlanCode: (json['requestedPlanCode'] ?? '').toString(),
-      usersAllowedOverride:
-          json['usersAllowedOverride'] == null ? null : i(json['usersAllowedOverride']),
-      requestedAt: dt(json['requestedAt']),
+      id: asInt(j['id']),
+      aupId: asInt(j['aupId']),
+      appName: (j['appName'] ?? '').toString(),
+      slug: (j['slug'] ?? '').toString(),
+      requestedPlanCode: (j['requestedPlanCode'] ?? '').toString(),
+      usersAllowedOverride: j['usersAllowedOverride'] == null
+          ? null
+          : int.tryParse(j['usersAllowedOverride'].toString()),
+      requestedAt: parseDt(j['requestedAt']),
     );
   }
 }

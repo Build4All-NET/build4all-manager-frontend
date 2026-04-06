@@ -10,8 +10,6 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
-
-
 class PublishAssetsUploaderSheet extends StatefulWidget {
   final OwnerPublishApi api;
   final int requestId;
@@ -118,10 +116,11 @@ class _PublishAssetsUploaderSheetState
   Future<void> _upload() async {
     final l10n = AppLocalizations.of(context)!;
 
-    // ✅ clear, specific validation
     if (_icon == null && _shots.isEmpty) {
       AppToast.error(
-          context, l10n.owner_publish_assets_err_pick_icon_or_screens);
+        context,
+        l10n.owner_publish_assets_err_pick_icon_or_screens,
+      );
       return;
     }
 
@@ -200,10 +199,11 @@ class _PublishAssetsUploaderSheetState
                     ),
                   ),
                   IconButton(
-                    onPressed: _uploading ? null : () => Navigator.pop(context),
+                    onPressed:
+                        _uploading ? null : () => Navigator.pop(context),
                     icon: const Icon(Icons.close_rounded),
                     tooltip: l10n.common_close,
-                  )
+                  ),
                 ],
               ),
               const SizedBox(height: 14),
@@ -228,8 +228,10 @@ class _PublishAssetsUploaderSheetState
                     ),
                     clipBehavior: Clip.antiAlias,
                     child: _icon == null
-                        ? Icon(Icons.image_rounded,
-                            color: cs.onSurface.withOpacity(.6))
+                        ? Icon(
+                            Icons.image_rounded,
+                            color: cs.onSurface.withOpacity(.6),
+                          )
                         : Image.file(_icon!, fit: BoxFit.cover),
                   ),
                   const SizedBox(width: 12),
@@ -249,9 +251,8 @@ class _PublishAssetsUploaderSheetState
                   if (_icon != null) ...[
                     const SizedBox(width: 10),
                     IconButton(
-                      onPressed: _uploading
-                          ? null
-                          : () => setState(() => _icon = null),
+                      onPressed:
+                          _uploading ? null : () => setState(() => _icon = null),
                       icon: const Icon(Icons.delete_outline_rounded),
                       color: cs.error,
                       tooltip: l10n.owner_publish_assets_remove_icon,
@@ -346,10 +347,10 @@ class _PublishAssetsUploaderSheetState
                     },
                   ),
                 ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 18),
               SizedBox(
                 width: double.infinity,
-                child: ElevatedButton.icon(
+                child: FilledButton.icon(
                   onPressed: _uploading ? null : _upload,
                   icon: _uploading
                       ? const SizedBox(
@@ -361,15 +362,13 @@ class _PublishAssetsUploaderSheetState
                   label: Text(
                     _uploading
                         ? l10n.common_uploading
-                        : l10n.owner_publish_assets_upload_assets,
-                    style: const TextStyle(fontWeight: FontWeight.w900),
+                        : l10n.owner_publish_assets_upload_now,
                   ),
-                  style: ElevatedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(18),
-                    ),
+                  style: FilledButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                   ),
                 ),
               ),

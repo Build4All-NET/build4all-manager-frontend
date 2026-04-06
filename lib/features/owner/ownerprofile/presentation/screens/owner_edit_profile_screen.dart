@@ -49,7 +49,6 @@ class _OwnerEditProfileScreenState extends State<OwnerEditProfileScreen> {
   late final TextEditingController _email =
       TextEditingController(text: widget.initial.email);
 
-  // ✅ Phone
   late final TextEditingController _phoneCtrl = TextEditingController();
   String _initialCountryCode = 'LB';
   String _originalPhone = '';
@@ -57,21 +56,17 @@ class _OwnerEditProfileScreenState extends State<OwnerEditProfileScreen> {
   bool _phoneWasManuallyEdited = false;
   late final FocusNode _phoneFocusNode = FocusNode();
 
-  // ✅ Password change
   final TextEditingController _currentPass = TextEditingController();
   final TextEditingController _newPass = TextEditingController();
   bool _hideCurrent = true;
   bool _hideNew = true;
 
-  // ✅ Phone OTP pending state
   bool _phoneOtpPending = false;
   String? _pendingNewPhone;
 
-  // ✅ Email OTP pending state
   bool _emailOtpPending = false;
   String? _pendingNewEmail;
 
-  // ✅ Clean architecture instances
   late final OwnerProfileApi _api = OwnerProfileApi(widget.dio);
   late final OwnerProfileRepositoryImpl _repo = OwnerProfileRepositoryImpl(_api);
 
@@ -152,7 +147,6 @@ class _OwnerEditProfileScreenState extends State<OwnerEditProfileScreen> {
       v = '+${v.substring(2)}';
     }
 
-    // local Lebanese format -> normalize to +961
     if (!v.startsWith('+')) {
       if (RegExp(r'^(3|70|71|76|78|79|81)\d{6}$').hasMatch(v)) {
         v = '+961$v';
@@ -172,15 +166,12 @@ class _OwnerEditProfileScreenState extends State<OwnerEditProfileScreen> {
     return RegExp(r'^\+[1-9]\d{7,14}$').hasMatch(v);
   }
 
-  /// ✅ If IntlPhoneField clears/changes its internal value unexpectedly,
-  /// fallback to controller text instead of treating phone as invalid.
   String _effectivePhoneValue() {
     final full = (_fullPhone ?? '').trim();
     if (full.isNotEmpty) return full;
     return _phoneCtrl.text.trim();
   }
 
-  /// ✅ Only consider phone changed if user actually interacted with phone field.
   bool _phoneChanged() {
     if (!_phoneWasManuallyEdited) return false;
 
@@ -199,7 +190,7 @@ class _OwnerEditProfileScreenState extends State<OwnerEditProfileScreen> {
     return (e.message ?? '').trim();
   }
 
-   String _friendlyError(AppLocalizations l10n, Object err) {
+  String _friendlyError(AppLocalizations l10n, Object err) {
     if (err is DioException) {
       final code = err.response?.statusCode;
       final msgRaw = _extractBackendMessage(err);
@@ -207,15 +198,15 @@ class _OwnerEditProfileScreenState extends State<OwnerEditProfileScreen> {
 
       if (code == 409 &&
           (msg.contains('username') || msg.contains('user name'))) {
-        return l10n.owner_profile_edit_username_used ?? 'Username already used';
+        return l10n.owner_profile_edit_username_used;
       }
 
       if (code == 409 && msg.contains('email')) {
-        return l10n.owner_profile_edit_email_used ?? 'Email already used';
+        return l10n.owner_profile_edit_email_used;
       }
 
       if (code == 409 && msg.contains('phone')) {
-        return 'Phone number already used';
+        return l10n.owner_profile_edit_phone_used;
       }
 
       if ((code == 400 || code == 401) &&
@@ -223,27 +214,22 @@ class _OwnerEditProfileScreenState extends State<OwnerEditProfileScreen> {
               msg.contains('old password') ||
               msg.contains('wrong password') ||
               msg.contains('invalid password'))) {
-        return l10n.owner_profile_edit_wrong_current_password ??
-            'Current password is not correct';
+        return l10n.owner_profile_edit_wrong_current_password;
       }
 
       if (msg.contains('email change') && msg.contains('verification')) {
-        return l10n.owner_profile_edit_email_requires_verification ??
-            'Email change requires verification';
+        return l10n.owner_profile_edit_email_requires_verification;
       }
 
       if (msg.contains('phone change') && msg.contains('verification')) {
-        return 'Phone change requires verification';
+        return l10n.owner_profile_edit_phone_requires_verification;
       }
     }
 
     final fallback = ApiErrorHandler.message(err).trim();
-    return fallback.isEmpty
-        ? (l10n.common_error ?? 'Something went wrong')
-        : fallback;
+    return fallback.isEmpty ? l10n.common_error : fallback;
   }
-  
-  // ✅ Build PATCH body (email optional, phone NEVER included anymore)
+
   Map<String, dynamic> _buildBody({required bool includeEmail}) {
     final p = widget.initial;
     final body = <String, dynamic>{};
@@ -289,49 +275,41 @@ class _OwnerEditProfileScreenState extends State<OwnerEditProfileScreen> {
       min3RequiredIfChanged(
         newValue: _username.text,
         oldValue: widget.initial.username,
-        requiredMsg:
-            l10n.owner_profile_edit_username_required ?? 'Username is required',
-        minMsg: l10n.owner_profile_edit_username_min3 ??
-            'Username must be at least 3 characters',
+        requiredMsg: l10n.owner_profile_edit_username_required,
+        minMsg: l10n.owner_profile_edit_username_min3,
       );
 
       min3RequiredIfChanged(
         newValue: _firstName.text,
         oldValue: widget.initial.firstName,
-        requiredMsg: l10n.owner_profile_edit_first_name_required ??
-            'First name is required',
-        minMsg: l10n.owner_profile_edit_first_name_min3 ??
-            'First name must be at least 3 characters',
+        requiredMsg: l10n.owner_profile_edit_first_name_required,
+        minMsg: l10n.owner_profile_edit_first_name_min3,
       );
 
       min3RequiredIfChanged(
         newValue: _lastName.text,
         oldValue: widget.initial.lastName,
-        requiredMsg:
-            l10n.owner_profile_edit_last_name_required ?? 'Last name is required',
-        minMsg: l10n.owner_profile_edit_last_name_min3 ??
-            'Last name must be at least 3 characters',
+        requiredMsg: l10n.owner_profile_edit_last_name_required,
+        minMsg: l10n.owner_profile_edit_last_name_min3,
       );
 
       final em = t(_email.text);
       if (_emailChanged()) {
         if (em.isEmpty) {
-          throw l10n.owner_profile_edit_email_required ?? 'Email is required';
+          throw l10n.owner_profile_edit_email_required;
         }
         if (!_looksLikeEmail(em)) {
-          throw l10n.owner_profile_edit_invalid_email ?? 'Invalid email';
+          throw l10n.owner_profile_edit_invalid_email;
         }
       }
 
       final newPw = _newPass.text.trim();
       if (newPw.isNotEmpty && newPw.length < 6) {
-        throw l10n.owner_profile_edit_new_password_length ??
-            'New password must be at least 6 characters';
+        throw l10n.owner_profile_edit_new_password_length;
       }
 
       if (newPw.isNotEmpty && _currentPass.text.trim().isEmpty) {
-        throw l10n.owner_profile_edit_need_current_password ??
-            'Enter current password to change it';
+        throw l10n.owner_profile_edit_need_current_password;
       }
 
       final normalizedPhone =
@@ -339,7 +317,7 @@ class _OwnerEditProfileScreenState extends State<OwnerEditProfileScreen> {
 
       if (_phoneChanged()) {
         if (normalizedPhone.isEmpty || !_isValidFullPhone(normalizedPhone)) {
-          throw l10n.errPhoneInvalid ?? 'Invalid phone number';
+          throw l10n.errPhoneInvalid;
         }
       }
 
@@ -357,7 +335,7 @@ class _OwnerEditProfileScreenState extends State<OwnerEditProfileScreen> {
 
       AppToast.success(
         context,
-        l10n.owner_profile_edit_email_change_sent ?? 'Verification code sent',
+        l10n.owner_profile_edit_email_change_sent,
       );
 
       final codeCtrl = TextEditingController();
@@ -394,20 +372,18 @@ class _OwnerEditProfileScreenState extends State<OwnerEditProfileScreen> {
                             if (!ctx.mounted) return;
                             AppToast.success(
                               ctx,
-                              l10n.owner_profile_edit_email_change_resend_ok ??
-                                  'Code resent',
+                              l10n.owner_profile_edit_email_change_resend_ok,
                             );
                           } catch (_) {
                             if (!ctx.mounted) return;
                             AppToast.error(
                               ctx,
-                              l10n.owner_profile_edit_email_change_resend_fail ??
-                                  'Failed to resend',
+                              l10n.owner_profile_edit_email_change_resend_fail,
                             );
                           }
                         },
                         child: AutoSizeText(
-                          l10n.owner_profile_edit_email_change_resend ?? 'Resend',
+                          l10n.owner_profile_edit_email_change_resend,
                           maxLines: 1,
                           minFontSize: 12,
                           stepGranularity: 0.5,
@@ -421,8 +397,7 @@ class _OwnerEditProfileScreenState extends State<OwnerEditProfileScreen> {
                           if (code.length < 4) {
                             AppToast.error(
                               ctx,
-                              l10n.owner_profile_edit_email_change_invalid_code ??
-                                  'Enter the code',
+                              l10n.owner_profile_edit_email_change_invalid_code,
                             );
                             return;
                           }
@@ -434,13 +409,12 @@ class _OwnerEditProfileScreenState extends State<OwnerEditProfileScreen> {
                             if (!ctx.mounted) return;
                             AppToast.error(
                               ctx,
-                              l10n.owner_profile_edit_email_change_invalid_code ??
-                                  'Invalid code',
+                              l10n.owner_profile_edit_email_change_invalid_code,
                             );
                           }
                         },
                         child: AutoSizeText(
-                          l10n.owner_profile_edit_email_change_verify ?? 'Verify',
+                          l10n.owner_profile_edit_email_change_verify,
                           maxLines: 1,
                           minFontSize: 12,
                           stepGranularity: 0.5,
@@ -457,8 +431,7 @@ class _OwnerEditProfileScreenState extends State<OwnerEditProfileScreen> {
                         ListTile(
                           contentPadding: EdgeInsets.zero,
                           title: AutoSizeText(
-                            l10n.owner_profile_edit_email_change_title ??
-                                'Verify new email',
+                            l10n.owner_profile_edit_email_change_title,
                             maxLines: 2,
                             minFontSize: 12,
                             stepGranularity: 0.5,
@@ -492,8 +465,7 @@ class _OwnerEditProfileScreenState extends State<OwnerEditProfileScreen> {
                           decoration: InputDecoration(
                             counterText: '',
                             hintText:
-                                l10n.owner_profile_edit_email_change_code_hint ??
-                                    '6-digit code',
+                                l10n.owner_profile_edit_email_change_code_hint,
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -536,7 +508,7 @@ class _OwnerEditProfileScreenState extends State<OwnerEditProfileScreen> {
 
       AppToast.success(
         context,
-        'Verification code sent',
+        l10n.owner_profile_edit_phone_change_sent,
       );
 
       final codeCtrl = TextEditingController();
@@ -571,14 +543,20 @@ class _OwnerEditProfileScreenState extends State<OwnerEditProfileScreen> {
                           try {
                             await _resendPhoneUc();
                             if (!ctx.mounted) return;
-                            AppToast.success(ctx, 'Code resent');
+                            AppToast.success(
+                              ctx,
+                              l10n.owner_profile_edit_phone_change_resend_ok,
+                            );
                           } catch (_) {
                             if (!ctx.mounted) return;
-                            AppToast.error(ctx, 'Failed to resend');
+                            AppToast.error(
+                              ctx,
+                              l10n.owner_profile_edit_phone_change_resend_fail,
+                            );
                           }
                         },
-                        child: const AutoSizeText(
-                          'Resend',
+                        child: AutoSizeText(
+                          l10n.owner_profile_edit_phone_change_resend,
                           maxLines: 1,
                           minFontSize: 12,
                           stepGranularity: 0.5,
@@ -590,7 +568,10 @@ class _OwnerEditProfileScreenState extends State<OwnerEditProfileScreen> {
                         onPressed: () async {
                           final code = codeCtrl.text.trim();
                           if (code.length < 4) {
-                            AppToast.error(ctx, 'Enter the code');
+                            AppToast.error(
+                              ctx,
+                              l10n.owner_profile_edit_phone_change_invalid_code,
+                            );
                             return;
                           }
                           try {
@@ -599,11 +580,14 @@ class _OwnerEditProfileScreenState extends State<OwnerEditProfileScreen> {
                             Navigator.of(ctx).pop(true);
                           } catch (_) {
                             if (!ctx.mounted) return;
-                            AppToast.error(ctx, 'Invalid code');
+                            AppToast.error(
+                              ctx,
+                              l10n.owner_profile_edit_phone_change_invalid_code,
+                            );
                           }
                         },
-                        child: const AutoSizeText(
-                          'Verify',
+                        child: AutoSizeText(
+                          l10n.owner_profile_edit_phone_change_verify,
                           maxLines: 1,
                           minFontSize: 12,
                           stepGranularity: 0.5,
@@ -620,7 +604,7 @@ class _OwnerEditProfileScreenState extends State<OwnerEditProfileScreen> {
                         ListTile(
                           contentPadding: EdgeInsets.zero,
                           title: AutoSizeText(
-                            'Verify new phone',
+                            l10n.owner_profile_edit_phone_change_title,
                             maxLines: 2,
                             minFontSize: 12,
                             stepGranularity: 0.5,
@@ -648,9 +632,10 @@ class _OwnerEditProfileScreenState extends State<OwnerEditProfileScreen> {
                           keyboardType: TextInputType.number,
                           textInputAction: TextInputAction.done,
                           maxLength: 6,
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             counterText: '',
-                            hintText: '6-digit code',
+                            hintText:
+                                l10n.owner_profile_edit_phone_change_code_hint,
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -734,7 +719,6 @@ class _OwnerEditProfileScreenState extends State<OwnerEditProfileScreen> {
                 [first, last].where((e) => e.isNotEmpty).join(' ').trim();
             OwnerMeStore.I.setName(full.isNotEmpty ? full : up.username.trim());
 
-            // ✅ After profile save, run pending OTP flows (email then phone)
             if (_emailOtpPending || _phoneOtpPending) {
               if (_emailOtpPending && _pendingNewEmail != null) {
                 final ok = await _emailOtpFlow(l10n, _pendingNewEmail!);
@@ -746,8 +730,7 @@ class _OwnerEditProfileScreenState extends State<OwnerEditProfileScreen> {
 
                 AppToast.success(
                   context,
-                  l10n.owner_profile_edit_email_change_verified ??
-                      'Email updated',
+                  l10n.owner_profile_edit_email_change_verified,
                 );
               }
 
@@ -761,7 +744,7 @@ class _OwnerEditProfileScreenState extends State<OwnerEditProfileScreen> {
 
                 AppToast.success(
                   context,
-                  'Phone number updated',
+                  l10n.owner_profile_edit_phone_change_verified,
                 );
               }
 
@@ -773,7 +756,7 @@ class _OwnerEditProfileScreenState extends State<OwnerEditProfileScreen> {
 
             AppToast.success(
               context,
-              l10n.owner_profile_edit_saved ?? 'Profile updated',
+              l10n.owner_profile_edit_saved,
             );
 
             await Future.delayed(const Duration(milliseconds: 50));
@@ -796,18 +779,14 @@ class _OwnerEditProfileScreenState extends State<OwnerEditProfileScreen> {
                   _normalizePhoneForCompare(_effectivePhoneValue());
               final phoneChanged = _phoneChanged();
 
-              // email changed => exclude email from PATCH
-              // phone changed => NEVER include phone in PATCH
               final body = _buildBody(includeEmail: !emailChanged);
 
-              // nothing changed
               if (body.isEmpty && !emailChanged && !phoneChanged) {
-                AppToast.success(context, l10n.common_saved ?? 'Saved');
+                AppToast.success(context, l10n.owner_profile_edit_saved);
                 Navigator.of(context).pop(false);
                 return;
               }
 
-              // only OTP flows changed (no normal profile fields)
               if (body.isEmpty) {
                 if (emailChanged) {
                   final ok = await _emailOtpFlow(l10n, newEmail);
@@ -815,8 +794,7 @@ class _OwnerEditProfileScreenState extends State<OwnerEditProfileScreen> {
 
                   AppToast.success(
                     context,
-                    l10n.owner_profile_edit_email_change_verified ??
-                        'Email updated',
+                    l10n.owner_profile_edit_email_change_verified,
                   );
                 }
 
@@ -824,7 +802,10 @@ class _OwnerEditProfileScreenState extends State<OwnerEditProfileScreen> {
                   final ok = await _phoneOtpFlow(l10n, newPhone);
                   if (!mounted || !ok) return;
 
-                  AppToast.success(context, 'Phone number updated');
+                  AppToast.success(
+                    context,
+                    l10n.owner_profile_edit_phone_change_verified,
+                  );
                 }
 
                 if (!mounted) return;
@@ -832,7 +813,6 @@ class _OwnerEditProfileScreenState extends State<OwnerEditProfileScreen> {
                 return;
               }
 
-              // save normal profile fields first, then OTP flows in listener
               if (emailChanged) {
                 _emailOtpPending = true;
                 _pendingNewEmail = newEmail;
@@ -884,7 +864,7 @@ class _OwnerEditProfileScreenState extends State<OwnerEditProfileScreen> {
 
             InputDecoration phoneDeco() {
               return InputDecoration(
-                hintText: l10n.hintPhone ?? '70 123 456',
+                hintText: l10n.hintPhone,
                 prefixIcon: const Icon(Icons.phone_outlined),
                 filled: true,
                 fillColor: cs.surface,
@@ -908,7 +888,7 @@ class _OwnerEditProfileScreenState extends State<OwnerEditProfileScreen> {
             return Scaffold(
               appBar: AppBar(
                 title: AutoSizeText(
-                  l10n.owner_profile_edit_title ?? 'Edit profile',
+                  l10n.owner_profile_edit_title,
                   maxLines: 1,
                   minFontSize: 14,
                   stepGranularity: .5,
@@ -927,7 +907,7 @@ class _OwnerEditProfileScreenState extends State<OwnerEditProfileScreen> {
                             ),
                           )
                         : AutoSizeText(
-                            l10n.owner_profile_edit_save ?? 'Save',
+                            l10n.owner_profile_edit_save,
                             maxLines: 1,
                             minFontSize: 12,
                             stepGranularity: .5,
@@ -948,21 +928,18 @@ class _OwnerEditProfileScreenState extends State<OwnerEditProfileScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             sectionTitle(
-                              l10n.owner_profile_edit_basic ?? 'Basic info',
+                              l10n.owner_profile_edit_basic,
                             ),
-
                             _topHint(
                               l10n,
-                              l10n.owner_profile_username ?? 'Username',
+                              l10n.owner_profile_username,
                             ),
                             TextField(
                               controller: _username,
                               textInputAction: TextInputAction.next,
                               decoration: deco(),
                             ),
-
                             const SizedBox(height: 12),
-
                             Row(
                               children: [
                                 Expanded(
@@ -972,8 +949,7 @@ class _OwnerEditProfileScreenState extends State<OwnerEditProfileScreen> {
                                     children: [
                                       _topHint(
                                         l10n,
-                                        l10n.owner_profile_first_name ??
-                                            'First name',
+                                        l10n.owner_profile_first_name,
                                       ),
                                       TextField(
                                         controller: _firstName,
@@ -991,8 +967,7 @@ class _OwnerEditProfileScreenState extends State<OwnerEditProfileScreen> {
                                     children: [
                                       _topHint(
                                         l10n,
-                                        l10n.owner_profile_last_name ??
-                                            'Last name',
+                                        l10n.owner_profile_last_name,
                                       ),
                                       TextField(
                                         controller: _lastName,
@@ -1004,20 +979,16 @@ class _OwnerEditProfileScreenState extends State<OwnerEditProfileScreen> {
                                 ),
                               ],
                             ),
-
                             const SizedBox(height: 12),
-
-                            _topHint(l10n, l10n.owner_profile_email ?? 'Email'),
+                            _topHint(l10n, l10n.owner_profile_email),
                             TextField(
                               controller: _email,
                               keyboardType: TextInputType.emailAddress,
                               textInputAction: TextInputAction.next,
                               decoration: deco(),
                             ),
-
                             const SizedBox(height: 12),
-
-                            _topHint(l10n, l10n.owner_profile_phone ?? 'Phone'),
+                            _topHint(l10n, l10n.owner_profile_phone),
                             IntlPhoneField(
                               controller: _phoneCtrl,
                               focusNode: _phoneFocusNode,
@@ -1052,9 +1023,7 @@ class _OwnerEditProfileScreenState extends State<OwnerEditProfileScreen> {
                         ),
                       ),
                     ),
-
                     const SizedBox(height: 12),
-
                     card(
                       child: Padding(
                         padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
@@ -1062,13 +1031,11 @@ class _OwnerEditProfileScreenState extends State<OwnerEditProfileScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             sectionTitle(
-                              l10n.owner_profile_edit_security ?? 'Security',
+                              l10n.owner_profile_edit_security,
                             ),
-
                             _topHint(
                               l10n,
-                              l10n.owner_profile_edit_current_password ??
-                                  'Current password',
+                              l10n.owner_profile_edit_current_password,
                             ),
                             TextField(
                               controller: _currentPass,
@@ -1088,13 +1055,10 @@ class _OwnerEditProfileScreenState extends State<OwnerEditProfileScreen> {
                                 ),
                               ),
                             ),
-
                             const SizedBox(height: 12),
-
                             _topHint(
                               l10n,
-                              l10n.owner_profile_edit_new_password ??
-                                  'New password',
+                              l10n.owner_profile_edit_new_password,
                             ),
                             TextField(
                               controller: _newPass,
@@ -1113,11 +1077,9 @@ class _OwnerEditProfileScreenState extends State<OwnerEditProfileScreen> {
                                 ),
                               ),
                             ),
-
                             const SizedBox(height: 8),
                             Text(
-                              l10n.owner_profile_edit_password_hint ??
-                                  'Leave blank to keep your password.',
+                              l10n.owner_profile_edit_password_hint,
                               style: tt.bodySmall?.copyWith(
                                 color: cs.onSurfaceVariant,
                               ),
@@ -1126,15 +1088,13 @@ class _OwnerEditProfileScreenState extends State<OwnerEditProfileScreen> {
                         ),
                       ),
                     ),
-
                     const SizedBox(height: 16),
-
                     SizedBox(
                       width: double.infinity,
                       child: FilledButton(
                         onPressed: saving ? null : onSave,
                         child: AutoSizeText(
-                          l10n.owner_profile_edit_save ?? 'Save',
+                          l10n.owner_profile_edit_save,
                           maxLines: 1,
                           minFontSize: 12,
                           stepGranularity: .5,

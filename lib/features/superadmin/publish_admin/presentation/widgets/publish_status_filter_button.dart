@@ -1,3 +1,4 @@
+import 'package:build4all_manager/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 class PublishStatusFilterButton extends StatelessWidget {
@@ -25,20 +26,21 @@ class PublishStatusFilterButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
+    final currentLabel = _label(context, value);
 
     return PopupMenuButton<String>(
-      tooltip: 'All Status',
+      tooltip: currentLabel,
       onSelected: (s) {
-        // map ALL -> SUBMITTED? or keep ALL if backend supports
         if (s == 'ALL') {
-          onChanged('SUBMITTED'); // simplest behavior with your backend
+          onChanged('SUBMITTED');
           return;
         }
         onChanged(s);
       },
       itemBuilder: (_) => statuses
           .map(
-            (s) => PopupMenuItem(
+            (s) => PopupMenuItem<String>(
               value: s,
               child: Row(
                 children: [
@@ -48,7 +50,7 @@ class PublishStatusFilterButton extends StatelessWidget {
                     color: cs.onSurface.withOpacity(.75),
                   ),
                   const SizedBox(width: 10),
-                  Text(labelOf(s)),
+                  Text(_label(context, s)),
                 ],
               ),
             ),
@@ -65,11 +67,14 @@ class PublishStatusFilterButton extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.filter_alt_outlined,
-                color: cs.onSurface.withOpacity(.8), size: 18),
+            Icon(
+              Icons.filter_alt_outlined,
+              color: cs.onSurface.withOpacity(.8),
+              size: 18,
+            ),
             const SizedBox(width: 10),
             Text(
-              'All Status',
+              currentLabel,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w800,
                   ),
@@ -78,5 +83,15 @@ class PublishStatusFilterButton extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _label(BuildContext context, String status) {
+    final l10n = AppLocalizations.of(context)!;
+
+    if (status.toUpperCase() == 'ALL') {
+      return l10n.owner_projects_filter_all;
+    }
+
+    return labelOf(status);
   }
 }

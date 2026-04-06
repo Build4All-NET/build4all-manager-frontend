@@ -82,174 +82,168 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
           },
         ),
       ],
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(l10n.super_create_project_title), // ✅ NEW key
-        ),
-        body: SafeArea(
-          child: ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              const SizedBox(height: 6),
-              Text(
-                l10n.super_create_project_subtitle,
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-              const SizedBox(height: 16),
+      child: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            const SizedBox(height: 6),
+            Text(
+              l10n.super_create_project_subtitle,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 16),
 
-              // ✅ THIS IS THE UPLOAD UI
-              TutorialVideoCard(dioBaseUrl: widget.dio.options.baseUrl),
-              const SizedBox(height: 16),
+            TutorialVideoCard(dioBaseUrl: widget.dio.options.baseUrl),
+            const SizedBox(height: 16),
 
-              BlocConsumer<CreateProjectBloc, CreateProjectState>(
-                listener: (context, state) {
-                  if (state is CreateProjectSuccess) {
-                    AppToast.success(
-                      context,
-                      l10n.super_create_project_success(
-                        state.project.projectName,
+            BlocConsumer<CreateProjectBloc, CreateProjectState>(
+              listener: (context, state) {
+                if (state is CreateProjectSuccess) {
+                  AppToast.success(
+                    context,
+                    l10n.super_create_project_success(
+                      state.project.projectName,
+                    ),
+                  );
+                }
+                if (state is CreateProjectFailure) {
+                  AppToast.error(context, state.message);
+                }
+              },
+              builder: (context, state) {
+                final loading = state is CreateProjectLoading;
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (state is CreateProjectFailure)
+                      _InlineBanner(
+                        kind: _BannerKind.error,
+                        text: _prettyError(context, state.message),
                       ),
-                    );
-                  }
-                  if (state is CreateProjectFailure) {
-                    AppToast.error(context, state.message);
-                  }
-                },
-                builder: (context, state) {
-                  final loading = state is CreateProjectLoading;
-
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (state is CreateProjectFailure)
-                        _InlineBanner(
-                          kind: _BannerKind.error,
-                          text: _prettyError(context, state.message),
-                        ),
-                      if (state is CreateProjectSuccess)
-                        _InlineBanner(
-                          kind: _BannerKind.success,
-                          text: l10n.super_create_project_created_id(
-                            state.project.id.toString(),
-                          ),
-                        ),
-                      const SizedBox(height: 12),
-
-                      TextField(
-                        controller: _name,
-                        textInputAction: TextInputAction.next,
-                        decoration: InputDecoration(
-                          labelText: l10n.super_project_name,
-                          hintText: l10n.super_project_name_hint,
-                          border: const OutlineInputBorder(),
+                    if (state is CreateProjectSuccess)
+                      _InlineBanner(
+                        kind: _BannerKind.success,
+                        text: l10n.super_create_project_created_id(
+                          state.project.id.toString(),
                         ),
                       ),
-                      const SizedBox(height: 12),
+                    const SizedBox(height: 12),
 
-                      TextField(
-                        controller: _desc,
-                        minLines: 3,
-                        maxLines: 6,
-                        decoration: InputDecoration(
-                          labelText: l10n.super_project_description,
-                          hintText: l10n.super_project_description_hint,
-                          border: const OutlineInputBorder(),
+                    TextField(
+                      controller: _name,
+                      textInputAction: TextInputAction.next,
+                      decoration: InputDecoration(
+                        labelText: l10n.super_project_name,
+                        hintText: l10n.super_project_name_hint,
+                        border: const OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+
+                    TextField(
+                      controller: _desc,
+                      minLines: 3,
+                      maxLines: 6,
+                      decoration: InputDecoration(
+                        labelText: l10n.super_project_description,
+                        hintText: l10n.super_project_description_hint,
+                        border: const OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+
+                    Text(
+                      l10n.super_project_type,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                    ),
+                    const SizedBox(height: 8),
+
+                    Wrap(
+                      spacing: 10,
+                      runSpacing: 10,
+                      children: [
+                        ProjectTypeChip(
+                          type: ProjectType.ECOMMERCE,
+                          selected: _type == ProjectType.ECOMMERCE,
+                          label: l10n.project_type_ecommerce,
+                          onTap: () =>
+                              setState(() => _type = ProjectType.ECOMMERCE),
+                        ),
+                        ProjectTypeChip(
+                          type: ProjectType.SERVICES,
+                          selected: _type == ProjectType.SERVICES,
+                          label: l10n.project_type_services,
+                          onTap: () =>
+                              setState(() => _type = ProjectType.SERVICES),
+                        ),
+                        ProjectTypeChip(
+                          type: ProjectType.ACTIVITIES,
+                          selected: _type == ProjectType.ACTIVITIES,
+                          label: l10n.project_type_activities,
+                          onTap: () =>
+                              setState(() => _type = ProjectType.ACTIVITIES),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+
+                    SwitchListTile(
+                      value: _active,
+                      onChanged:
+                          loading ? null : (v) => setState(() => _active = v),
+                      title: Text(l10n.super_project_active),
+                      subtitle: Text(l10n.super_project_active_hint),
+                    ),
+                    const SizedBox(height: 16),
+
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton.icon(
+                        onPressed: loading ? null : () => _submit(context),
+                        icon: loading
+                            ? const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child:
+                                    CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : const Icon(Icons.check_circle_outline),
+                        label: Text(
+                          loading
+                              ? l10n.common_loading
+                              : l10n.super_create_project_btn,
                         ),
                       ),
-                      const SizedBox(height: 12),
+                    ),
+                    const SizedBox(height: 10),
 
-                      Text(
-                        l10n.super_project_type,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w700,
-                            ),
-                      ),
-                      const SizedBox(height: 8),
-
-                      Wrap(
-                        spacing: 10,
-                        runSpacing: 10,
-                        children: [
-                          ProjectTypeChip(
-                            type: ProjectType.ECOMMERCE,
-                            selected: _type == ProjectType.ECOMMERCE,
-                            label: l10n.project_type_ecommerce,
-                            onTap: () =>
-                                setState(() => _type = ProjectType.ECOMMERCE),
-                          ),
-                          ProjectTypeChip(
-                            type: ProjectType.SERVICES,
-                            selected: _type == ProjectType.SERVICES,
-                            label: l10n.project_type_services,
-                            onTap: () =>
-                                setState(() => _type = ProjectType.SERVICES),
-                          ),
-                          ProjectTypeChip(
-                            type: ProjectType.ACTIVITIES,
-                            selected: _type == ProjectType.ACTIVITIES,
-                            label: l10n.project_type_activities,
-                            onTap: () =>
-                                setState(() => _type = ProjectType.ACTIVITIES),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-
-                      SwitchListTile(
-                        value: _active,
-                        onChanged:
-                            loading ? null : (v) => setState(() => _active = v),
-                        title: Text(l10n.super_project_active),
-                        subtitle: Text(l10n.super_project_active_hint),
-                      ),
-                      const SizedBox(height: 16),
-
+                    if (state is CreateProjectSuccess)
                       SizedBox(
                         width: double.infinity,
-                        child: FilledButton.icon(
-                          onPressed: loading ? null : () => _submit(context),
-                          icon: loading
-                              ? const SizedBox(
-                                  width: 18,
-                                  height: 18,
-                                  child:
-                                      CircularProgressIndicator(strokeWidth: 2),
-                                )
-                              : const Icon(Icons.check_circle_outline),
-                          label: Text(
-                            loading
-                                ? l10n.common_loading
-                                : l10n.super_create_project_btn,
-                          ),
+                        child: OutlinedButton.icon(
+                          onPressed: () {
+                            context
+                                .read<CreateProjectBloc>()
+                                .add(CreateProjectReset());
+                            _name.clear();
+                            _desc.clear();
+                            setState(() {
+                              _active = true;
+                              _type = ProjectType.ECOMMERCE;
+                            });
+                          },
+                          icon: const Icon(Icons.add),
+                          label: Text(l10n.super_create_another),
                         ),
                       ),
-                      const SizedBox(height: 10),
-
-                      if (state is CreateProjectSuccess)
-                        SizedBox(
-                          width: double.infinity,
-                          child: OutlinedButton.icon(
-                            onPressed: () {
-                              context
-                                  .read<CreateProjectBloc>()
-                                  .add(CreateProjectReset());
-                              _name.clear();
-                              _desc.clear();
-                              setState(() {
-                                _active = true;
-                                _type = ProjectType.ECOMMERCE;
-                              });
-                            },
-                            icon: const Icon(Icons.add),
-                            label: Text(l10n.super_create_another),
-                          ),
-                        ),
-                    ],
-                  );
-                },
-              ),
-            ],
-          ),
+                  ],
+                );
+              },
+            ),
+          ],
         ),
       ),
     );

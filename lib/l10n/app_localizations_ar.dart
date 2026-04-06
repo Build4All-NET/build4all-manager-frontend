@@ -2761,4 +2761,475 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get owner_project_add_internal_testers => 'إضافة مختبرين داخليين';
+
+  @override
+  String get admin_notifications_mark_as_read => 'تحديد كمقروء';
+
+  @override
+  String get admin_notifications_empty_title => 'لا توجد إشعارات بعد';
+
+  @override
+  String get admin_notifications_empty_subtitle => 'عندما يحدث شيء مهم، سيظهر هنا.';
+
+  @override
+  String get publish_table_app => 'التطبيق';
+
+  @override
+  String get publish_table_platforms => 'المنصات';
+
+  @override
+  String get publish_table_version => 'الإصدار';
+
+  @override
+  String get publish_table_requested_date => 'تاريخ الطلب';
+
+  @override
+  String get publish_table_actions => 'الإجراءات';
+
+  @override
+  String get publish_unknown_app => 'التطبيق';
+
+  @override
+  String get publish_action_view_publish => 'عرض والنشر';
+
+  @override
+  String get publish_action_cicd_history_soon => 'سجل CI/CD (قريبًا)';
+
+  @override
+  String get publish_action_view_logs_soon => 'عرض السجلات (قريبًا)';
+
+  @override
+  String get publish_details_no_file_yet => 'لا يوجد ملف متاح بعد';
+
+  @override
+  String get publish_details_invalid_url => 'رابط غير صالح';
+
+  @override
+  String get publish_details_could_not_open_link => 'تعذر فتح الرابط';
+
+  @override
+  String get publish_details_store_play => 'Google Play';
+
+  @override
+  String get publish_details_store_app => 'App Store';
+
+  @override
+  String get publish_details_android_title => 'Android — Google Play';
+
+  @override
+  String get publish_details_android_subtitle => 'إنشاء ونشر إلى Play Store';
+
+  @override
+  String get publish_details_ios_title => 'iOS — App Store';
+
+  @override
+  String get publish_details_ios_subtitle => 'إنشاء ونشر إلى App Store';
+
+  @override
+  String get publish_details_label_package_name => 'اسم الحزمة';
+
+  @override
+  String get publish_details_label_version_code => 'رمز الإصدار';
+
+  @override
+  String get publish_details_label_last_build => 'آخر بناء';
+
+  @override
+  String get publish_details_label_bundle_identifier => 'معرّف الحزمة';
+
+  @override
+  String get publish_details_label_build_number => 'رقم البناء';
+
+  @override
+  String get publish_details_available => 'متاح';
+
+  @override
+  String get publish_details_download_ipa => 'تنزيل IPA';
+
+  @override
+  String get publish_details_cta_play_store => 'النشر إلى Play Store';
+
+  @override
+  String get publish_details_cta_app_store => 'النشر إلى App Store';
+
+  @override
+  String get publish_details_coming_soon => 'قريبًا';
+
+  @override
+  String get publish_details_download_builds => 'تنزيل ملفات البناء';
+
+  @override
+  String get publish_details_manual_publish_instructions => 'تعليمات النشر اليدوي';
+
+  @override
+  String get publish_details_file_apk => 'APK';
+
+  @override
+  String get publish_details_file_aab => 'AAB';
+
+  @override
+  String get publish_details_file_ipa => 'IPA';
+
+  @override
+  String get upgrade_requests_empty_search_title => 'لم يتم العثور على طلبات مطابقة';
+
+  @override
+  String get upgrade_requests_empty_search_subtitle => 'جرّب كلمة أخرى لاسم التطبيق أو الرابط أو رقم الطلب أو الخطة.';
+
+  @override
+  String get upgrade_requests_hero_subtitle => 'راجع ووافق أو ارفض طلبات ترقية خطة المالك.';
+
+  @override
+  String get upgrade_requests_stat_total => 'الإجمالي';
+
+  @override
+  String get upgrade_requests_stat_shown => 'المعروض';
+
+  @override
+  String get upgrade_requests_stat_pending => 'قيد الانتظار';
+
+  @override
+  String get upgrade_requests_search_hint => 'ابحث باسم التطبيق أو الرابط أو رقم الطلب أو الخطة...';
+
+  @override
+  String upgrade_requests_visible_count(Object count) {
+    return '$count طلبات ظاهرة';
+  }
+
+  @override
+  String get upgrade_requests_status_pending => 'قيد الانتظار';
+
+  @override
+  String get upgrade_requests_no_slug_available => 'لا يوجد رابط متاح';
+
+  @override
+  String get app_licenses_filter_all => 'الكل';
+
+  @override
+  String get app_licenses_filter_pending => 'قيد الانتظار';
+
+  @override
+  String get app_licenses_filter_blocked => 'محظور';
+
+  @override
+  String get app_licenses_filter_free => 'مجاني';
+
+  @override
+  String get app_licenses_filter_pro_hosted => 'استضافة احترافية';
+
+  @override
+  String get app_licenses_filter_dedicated => 'مخصص';
+
+  @override
+  String get app_licenses_stat_total => 'الإجمالي';
+
+  @override
+  String get app_licenses_stat_pending => 'قيد الانتظار';
+
+  @override
+  String get app_licenses_stat_blocked => 'محظور';
+
+  @override
+  String get app_licenses_stat_free => 'مجاني';
+
+  @override
+  String get app_licenses_stat_pro_hosted => 'استضافة احترافية';
+
+  @override
+  String get app_licenses_stat_dedicated => 'مخصص';
+
+  @override
+  String get app_licenses_pending_request => 'طلب معلّق';
+
+  @override
+  String get app_licenses_pending_banner => 'هذا التطبيق لديه طلب ترقية معلّق.';
+
+  @override
+  String get app_licenses_request_status_label => 'حالة الطلب';
+
+  @override
+  String get app_licenses_empty_subtitle => 'لا توجد صفوف تراخيص تطبيقات متاحة بعد.';
+
+  @override
+  String get app_licenses_empty_search_subtitle => 'جرّب بحثًا آخر أو تركيبة فلاتر مختلفة.';
+
+  @override
+  String get app_licenses_plan_free => 'مجاني';
+
+  @override
+  String get app_licenses_plan_pro_hosted => 'استضافة احترافية';
+
+  @override
+  String get app_licenses_plan_dedicated => 'مخصص';
+
+  @override
+  String get app_licenses_status_expired => 'منتهي';
+
+  @override
+  String get app_licenses_status_suspended => 'موقوف';
+
+  @override
+  String get app_licenses_status_deleted => 'محذوف';
+
+  @override
+  String get app_licenses_status_canceled => 'ملغي';
+
+  @override
+  String get tutorial_ownerGuide_upload_replace_video => 'رفع / استبدال الفيديو';
+
+  @override
+  String get tutorial_ownerGuide_invalid_video_url => 'رابط الفيديو غير صالح.';
+
+  @override
+  String get tutorial_ownerGuide_could_not_open_video => 'تعذر فتح الفيديو.';
+
+  @override
+  String get tutorial_ownerGuide_copied_link => 'تم نسخ الرابط.';
+
+  @override
+  String get tutorial_ownerGuide_could_not_read_selected_file_path => 'تعذر قراءة مسار الملف المحدد.';
+
+  @override
+  String tutorial_ownerGuide_upload_progress(Object percent) {
+    return 'جارٍ الرفع... $percent%';
+  }
+
+  @override
+  String get owner_request_logo_label_required => 'شعار التطبيق *';
+
+  @override
+  String get owner_request_submit_ready_state => 'جاهز للإرسال';
+
+  @override
+  String get owner_request_submit_missing_required => 'اسم التطبيق + الشعار مطلوبان';
+
+  @override
+  String get preview_phone_nav_home => 'الرئيسية';
+
+  @override
+  String get preview_phone_nav_explore => 'استكشاف';
+
+  @override
+  String get preview_phone_nav_cart => 'السلة';
+
+  @override
+  String get preview_phone_nav_profile => 'الملف الشخصي';
+
+  @override
+  String get preview_phone_nav_tab => 'تبويب';
+
+  @override
+  String get preview_phone_search_products => 'ابحث عن المنتجات...';
+
+  @override
+  String get preview_phone_welcome => 'مرحبًا';
+
+  @override
+  String get preview_phone_search => 'بحث...';
+
+  @override
+  String get preview_phone_hero_banner => 'البانر الرئيسي';
+
+  @override
+  String get preview_phone_product_name => 'اسم المنتج';
+
+  @override
+  String get preview_phone_add_to_cart => 'أضف إلى السلة';
+
+  @override
+  String get palette_primary => 'الأساسي';
+
+  @override
+  String get palette_secondary => 'الثانوي';
+
+  @override
+  String get palette_background => 'الخلفية';
+
+  @override
+  String get palette_text_on_background => 'النص (onBackground)';
+
+  @override
+  String get palette_error => 'الخطأ';
+
+  @override
+  String get palette_auto_theme_hint => 'يختار المالكون الألوان بصريًا. ونحن ننشئ themeJson تلقائيًا.';
+
+  @override
+  String get palette_pick_color => 'اختر لونًا';
+
+  @override
+  String get palette_use_color => 'استخدام';
+
+  @override
+  String get palette_preset_pink_pop => 'وردي نابض';
+
+  @override
+  String get palette_preset_ocean_blue => 'أزرق المحيط';
+
+  @override
+  String get palette_preset_forest => 'الغابة';
+
+  @override
+  String get palette_preset_sunset => 'الغروب';
+
+  @override
+  String get palette_preset_midnight => 'منتصف الليل';
+
+  @override
+  String get palette_selected => 'محدد';
+
+  @override
+  String get palette_tap_to_apply => 'اضغط للتطبيق';
+
+  @override
+  String get palette_preview_app_name => 'تطبيقك';
+
+  @override
+  String get palette_preview_hello_owner => 'مرحبًا أيها المالك';
+
+  @override
+  String get palette_preview_theme_looks => 'هكذا سيبدو الثيم الخاص بك.';
+
+  @override
+  String get palette_preview_primary_button => 'الزر الأساسي';
+
+  @override
+  String get runtime_menu_type_title => 'نوع القائمة';
+
+  @override
+  String get runtime_enabled_features_title => 'الميزات المفعلة';
+
+  @override
+  String get runtime_navigation_title => 'التنقل';
+
+  @override
+  String get runtime_navigation_subtitle => 'الرئيسية + السلة + الملف الشخصي مطلوبة. الاستكشاف اختياري.';
+
+  @override
+  String get runtime_home_sections_title => 'أقسام الصفحة الرئيسية';
+
+  @override
+  String get runtime_home_sections_subtitle => 'الأقسام التي تتطلب ميزات معطلة سيتم إخفاؤها تلقائيًا.';
+
+  @override
+  String get runtime_menu_bottom => 'سفلية';
+
+  @override
+  String get runtime_menu_hamburger => 'هامبرغر';
+
+  @override
+  String get runtime_required => 'مطلوب';
+
+  @override
+  String runtime_requires_features(Object features) {
+    return 'يتطلب: $features';
+  }
+
+  @override
+  String runtime_max_bottom_tabs(Object count) {
+    return 'الحد الأقصى $count تبويبات في القائمة السفلية';
+  }
+
+  @override
+  String get runtime_pick_limit => 'اختر الحد';
+
+  @override
+  String runtime_limit_value(Object count) {
+    return 'الحد $count';
+  }
+
+  @override
+  String get runtime_section_header => 'الرأس';
+
+  @override
+  String get runtime_section_search => 'بحث';
+
+  @override
+  String get runtime_section_banner => 'البانر الرئيسي';
+
+  @override
+  String get runtime_section_categories => 'الفئات';
+
+  @override
+  String get runtime_section_hero_items => 'العناصر الرئيسية';
+
+  @override
+  String get runtime_feature_items => 'العناصر';
+
+  @override
+  String get runtime_feature_booking => 'الحجوزات';
+
+  @override
+  String get runtime_feature_reviews => 'المراجعات';
+
+  @override
+  String get runtime_feature_orders => 'الطلبات';
+
+  @override
+  String get runtime_feature_coupons => 'الكوبونات';
+
+  @override
+  String get runtime_feature_notifications => 'الإشعارات';
+
+  @override
+  String get owner_projects_delete_title => 'حذف المشروع';
+
+  @override
+  String owner_projects_delete_confirm(Object appName) {
+    return 'هل أنت متأكد أنك تريد حذف \"$appName\"؟';
+  }
+
+  @override
+  String get owner_projects_delete_success => 'تم حذف المشروع بنجاح';
+
+  @override
+  String get owner_projects_delete_failed => 'فشل الحذف';
+
+  @override
+  String get owner_profile_edit_phone_used => 'رقم الهاتف مستخدم بالفعل';
+
+  @override
+  String get owner_profile_edit_phone_requires_verification => 'تغيير رقم الهاتف يتطلب التحقق';
+
+  @override
+  String get owner_profile_edit_phone_change_sent => 'تم إرسال رمز التحقق';
+
+  @override
+  String get owner_profile_edit_phone_change_resend_ok => 'تمت إعادة إرسال الرمز';
+
+  @override
+  String get owner_profile_edit_phone_change_resend_fail => 'فشلت إعادة الإرسال';
+
+  @override
+  String get owner_profile_edit_phone_change_resend => 'إعادة الإرسال';
+
+  @override
+  String get owner_profile_edit_phone_change_invalid_code => 'رمز غير صالح';
+
+  @override
+  String get owner_profile_edit_phone_change_verify => 'تحقق';
+
+  @override
+  String get owner_profile_edit_phone_change_title => 'تحقق من رقم الهاتف الجديد';
+
+  @override
+  String get owner_profile_edit_phone_change_code_hint => 'رمز من 6 أرقام';
+
+  @override
+  String get owner_profile_edit_phone_change_verified => 'تم تحديث رقم الهاتف';
+
+  @override
+  String get owner_nav_drawer_title => 'المالك';
+
+  @override
+  String get owner_nav_notifications => 'الإشعارات';
+
+  @override
+  String get owner_publish_price_free => 'Free';
+
+  @override
+  String get owner_publish_price_paid => 'Paid';
+
+  @override
+  String get owner_publish_assets_upload_now => 'Upload now';
 }

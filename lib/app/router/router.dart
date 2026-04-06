@@ -450,7 +450,7 @@ final destinations = <OwnerDestination>[
   OwnerDestination(
     icon: Icons.notifications_none_outlined,
     selectedIcon: Icons.notifications,
-    label: 'Notifications',
+    label: l10n.owner_nav_notifications,
     route: '/owner/notifications',
   ),
   OwnerDestination(
