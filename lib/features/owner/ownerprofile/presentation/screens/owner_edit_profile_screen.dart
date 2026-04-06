@@ -5,6 +5,7 @@ import 'package:build4all_manager/features/owner/ownerprofile/domain/usecases/re
 import 'package:build4all_manager/features/owner/ownerprofile/domain/usecases/resend_owner_phone_change_usecase.dart';
 import 'package:build4all_manager/features/owner/ownerprofile/domain/usecases/verify_owner_phone_change_usecase.dart';
 import 'package:build4all_manager/shared/state/owner_me_store.dart';
+import 'package:build4all_manager/shared/utils/ApiErrorHandler.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -198,7 +199,7 @@ class _OwnerEditProfileScreenState extends State<OwnerEditProfileScreen> {
     return (e.message ?? '').trim();
   }
 
-  String _friendlyError(AppLocalizations l10n, Object err) {
+   String _friendlyError(AppLocalizations l10n, Object err) {
     if (err is DioException) {
       final code = err.response?.statusCode;
       final msgRaw = _extractBackendMessage(err);
@@ -234,15 +235,14 @@ class _OwnerEditProfileScreenState extends State<OwnerEditProfileScreen> {
       if (msg.contains('phone change') && msg.contains('verification')) {
         return 'Phone change requires verification';
       }
-
-      if (msgRaw.isNotEmpty) return msgRaw;
-      return l10n.common_error ?? 'Something went wrong';
     }
 
-    final s = err.toString().trim();
-    return s.isEmpty ? (l10n.common_error ?? 'Something went wrong') : s;
+    final fallback = ApiErrorHandler.message(err).trim();
+    return fallback.isEmpty
+        ? (l10n.common_error ?? 'Something went wrong')
+        : fallback;
   }
-
+  
   // ✅ Build PATCH body (email optional, phone NEVER included anymore)
   Map<String, dynamic> _buildBody({required bool includeEmail}) {
     final p = widget.initial;

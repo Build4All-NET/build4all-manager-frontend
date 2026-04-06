@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:build4all_manager/shared/utils/ApiErrorHandler.dart';
 
 import '../../data/services/super_admin_ios_internal_testing_api.dart';
 import 'super_admin_ios_internal_testing_event.dart';
@@ -41,7 +42,7 @@ class SuperAdminIosInternalTestingBloc extends Bloc<
     } catch (e) {
       emit(state.copyWith(
         loading: false,
-        error: e.toString().replaceFirst('Exception: ', ''),
+        error: ApiErrorHandler.message(e),
       ));
     }
   }
@@ -85,7 +86,7 @@ class SuperAdminIosInternalTestingBloc extends Bloc<
       emit(state.copyWith(
         acting: false,
         clearActionRequestId: true,
-        error: e.toString().replaceFirst('Exception: ', ''),
+        error: ApiErrorHandler.message(e),
       ));
     }
   }
@@ -115,7 +116,7 @@ class SuperAdminIosInternalTestingBloc extends Bloc<
       emit(state.copyWith(
         acting: false,
         clearActionRequestId: true,
-        error: e.toString().replaceFirst('Exception: ', ''),
+        error: ApiErrorHandler.message(e),
       ));
     }
   }
@@ -158,7 +159,7 @@ class SuperAdminIosInternalTestingBloc extends Bloc<
       emit(state.copyWith(
         acting: false,
         clearActionRequestId: true,
-        error: e.toString().replaceFirst('Exception: ', ''),
+        error: ApiErrorHandler.message(e),
       ));
     }
   }

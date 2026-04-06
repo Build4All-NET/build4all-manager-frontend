@@ -1,5 +1,6 @@
 import 'package:build4all_manager/features/owner/ownerhome/presentation/widgets/request_card.dart';
 import 'package:build4all_manager/l10n/app_localizations.dart';
+import 'package:build4all_manager/shared/utils/ApiErrorHandler.dart';
 import 'package:build4all_manager/shared/widgets/app_toast.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -9,7 +10,6 @@ import '../../../common/data/repositories/owner_repository_impl.dart';
 import '../../../common/data/services/owner_api.dart';
 import '../../../common/domain/entities/app_request.dart';
 import '../../../common/domain/usecases/get_my_requests_uc.dart';
-
 
 class OwnerRequestsListScreen extends StatelessWidget {
   final int ownerId;
@@ -116,7 +116,6 @@ class _RequestsCubit extends Cubit<_RequestsState> {
   Future<void> load(int ownerId) async {
     emit(state.copyWith(ownerId: ownerId, loading: true, error: null));
     try {
-      // Assumes your UC is callable: await getMyRequests(ownerId)
       final List<AppRequest> all = await getMyRequests();
 
       all.sort((a, b) => b.createdAt.compareTo(a.createdAt));
@@ -129,7 +128,7 @@ class _RequestsCubit extends Cubit<_RequestsState> {
     } catch (e) {
       emit(state.copyWith(
         loading: false,
-        error: e.toString(),
+        error: ApiErrorHandler.message(e),
       ));
     }
   }

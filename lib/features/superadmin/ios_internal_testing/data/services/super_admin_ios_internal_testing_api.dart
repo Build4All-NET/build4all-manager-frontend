@@ -49,11 +49,11 @@ class SuperAdminIosInternalTestingApi {
         title: 'GET SUPER ADMIN IOS INTERNAL REQUESTS ERROR',
         error: e,
       );
-      throw Exception(_extractErrorMessage(e));
+      rethrow;
     } catch (e, stackTrace) {
       debugPrint('❌ GET SUPER ADMIN IOS INTERNAL REQUESTS UNKNOWN ERROR => $e');
       debugPrintStack(stackTrace: stackTrace);
-      throw Exception('Failed to load iOS internal testing requests: $e');
+      rethrow;
     }
   }
 
@@ -79,11 +79,11 @@ class SuperAdminIosInternalTestingApi {
         title: 'PROCESS SUPER ADMIN IOS INTERNAL REQUEST ERROR',
         error: e,
       );
-      throw Exception(_extractErrorMessage(e));
+      rethrow;
     } catch (e, stackTrace) {
       debugPrint('❌ PROCESS SUPER ADMIN IOS INTERNAL REQUEST UNKNOWN => $e');
       debugPrintStack(stackTrace: stackTrace);
-      throw Exception('Failed to process request: $e');
+      rethrow;
     }
   }
 
@@ -109,11 +109,11 @@ class SuperAdminIosInternalTestingApi {
         title: 'SYNC SUPER ADMIN IOS INTERNAL REQUEST ERROR',
         error: e,
       );
-      throw Exception(_extractErrorMessage(e));
+      rethrow;
     } catch (e, stackTrace) {
       debugPrint('❌ SYNC SUPER ADMIN IOS INTERNAL REQUEST UNKNOWN => $e');
       debugPrintStack(stackTrace: stackTrace);
-      throw Exception('Failed to sync request: $e');
+      rethrow;
     }
   }
 
@@ -145,25 +145,6 @@ class SuperAdminIosInternalTestingApi {
     if (request is Map<String, dynamic>) return request;
     if (request is Map) return Map<String, dynamic>.from(request);
     return raw;
-  }
-
-  String _extractErrorMessage(DioException e) {
-    final data = e.response?.data;
-
-    if (data is Map) {
-      final map = Map<String, dynamic>.from(data);
-      final error = map['error']?.toString();
-      final details = map['details']?.toString();
-
-      if (error != null && error.trim().isNotEmpty) {
-        if (details != null && details.trim().isNotEmpty) {
-          return '${error.trim()} | ${details.trim()}';
-        }
-        return error.trim();
-      }
-    }
-
-    return e.message ?? 'Request failed';
   }
 
   void _logSuccess({

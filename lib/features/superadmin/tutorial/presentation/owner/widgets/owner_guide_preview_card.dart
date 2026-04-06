@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:build4all_manager/features/superadmin/tutorial/data/services/tutorial_api.dart';
 import 'package:build4all_manager/l10n/app_localizations.dart';
+import 'package:build4all_manager/shared/utils/ApiErrorHandler.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -141,12 +142,12 @@ class _OwnerGuidePreviewCardState extends State<OwnerGuidePreviewCard> {
         _videoLoading = false;
         _showControls = true;
       });
-    } catch (e) {
+       } catch (e) {
       if (!mounted) return;
       setState(() {
         _loading = false;
         _videoLoading = false;
-        _error = e.toString();
+        _error = ApiErrorHandler.message(e);
       });
     }
   }

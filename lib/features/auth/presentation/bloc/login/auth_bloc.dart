@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:build4all_manager/core/exceptions/auth_failure.dart';
+import 'package:build4all_manager/shared/utils/ApiErrorHandler.dart';
 
 import '../../../domain/usecases/login_usecase.dart';
 import '../../../domain/usecases/logout_usecase.dart';
@@ -27,7 +28,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       loading: true,
       error: null,
       errorCode: null,
-      role: null, // ✅ clear any old role
+      role: null,
     ));
 
     try {
@@ -45,15 +46,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         emit(state.copyWith(
           loading: false,
           role: null,
-          error: err.message,     // ✅ clean
-          errorCode: err.code,    // ✅ for mapping if you want
+          error: err.message,
+          errorCode: err.code,
         ));
       } else {
-        final msg = err.toString().replaceFirst('Exception: ', '');
         emit(state.copyWith(
           loading: false,
           role: null,
-          error: msg,
+          error: ApiErrorHandler.message(err),
           errorCode: 'UNKNOWN',
         ));
       }
@@ -62,7 +62,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   Future<void> _onLogout(LoggedOut e, Emitter<AuthState> emit) async {
     await logoutUseCase();
-    emit(const AuthState(loading: false, role: null, error: null, errorCode: null));
+    emit(const AuthState(
+      loading: false,
+      role: null,
+      error: null,
+      errorCode: null,
+    ));
   }
 
   Future<void> _onCheck(CheckSession e, Emitter<AuthState> emit) async {

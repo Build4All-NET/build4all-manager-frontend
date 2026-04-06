@@ -5,13 +5,12 @@ import 'package:build4all_manager/features/superadmin/dashboard/domain/entities/
 import 'package:build4all_manager/features/superadmin/dashboard/presentation/screens/OwnersByProjectScreen.dart';
 import 'package:build4all_manager/features/superadmin/dashboard/presentation/widgets/pro_project_tile.dart';
 import 'package:build4all_manager/l10n/app_localizations.dart';
+import 'package:build4all_manager/shared/utils/ApiErrorHandler.dart';
 import 'package:build4all_manager/shared/utils/search_match.dart';
 import 'package:build4all_manager/shared/widgets/app_search_bar.dart';
 import 'package:build4all_manager/shared/widgets/app_toast.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-
-
 
 class ProjectsScreen extends StatefulWidget {
   const ProjectsScreen({super.key});
@@ -56,7 +55,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
         _loading = false;
       });
     } catch (e) {
-      final msg = e.toString();
+      final msg = ApiErrorHandler.message(e);
       setState(() {
         _error = msg;
         _loading = false;

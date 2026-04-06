@@ -1,3 +1,4 @@
+import 'package:build4all_manager/shared/utils/ApiErrorHandler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/usecases/get_owner_ai_status.dart';
 import '../../domain/usecases/toggle_owner_ai.dart';
@@ -25,29 +26,36 @@ class SuperAdminAiBloc extends Bloc<SuperAdminAiEvent, SuperAdminAiState> {
       final s = await getStatus(ownerId: e.ownerId);
       emit(state.copyWith(loading: false, status: s));
     } catch (err) {
-      emit(state.copyWith(loading: false, error: err.toString()));
+      emit(state.copyWith(
+        loading: false,
+        error: ApiErrorHandler.message(err),
+      ));
     }
   }
 
   Future<void> _onToggled(
-  SuperAdminAiToggled e,
-  Emitter<SuperAdminAiState> emit,
-) async {
-  final old = state.status;
+    SuperAdminAiToggled e,
+    Emitter<SuperAdminAiState> emit,
+  ) async {
+    final old = state.status;
 
-  emit(state.copyWith(
-    updating: true,
-    clearError: true,
-    status: old?.copyWith(aiEnabled: e.enabled),
-  ));
+    emit(state.copyWith(
+      updating: true,
+      clearError: true,
+      status: old?.copyWith(aiEnabled: e.enabled),
+    ));
 
-  try {
-    final s = await toggle(ownerId: e.ownerId, enabled: e.enabled);
-    emit(state.copyWith(updating: false, status: s));
-  } catch (err) {
-    emit(state.copyWith(updating: false, error: err.toString(), status: old));
+    try {
+      final s = await toggle(ownerId: e.ownerId, enabled: e.enabled);
+      emit(state.copyWith(updating: false, status: s));
+    } catch (err) {
+      emit(state.copyWith(
+        updating: false,
+        error: ApiErrorHandler.message(err),
+        status: old,
+      ));
+    }
   }
-}
 }
 
 extension _CopyOwnerAiStatus on dynamic {

@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../../shared/utils/ApiErrorHandler.dart';
 import '../../../common/domain/entities/app_config.dart';
 import '../../../common/domain/entities/owner_project.dart';
 import '../../../common/domain/usecases/get_app_config_uc.dart';
@@ -14,8 +15,6 @@ import 'owner_home_state.dart';
 class OwnerHomeBloc extends Bloc<OwnerHomeEvent, OwnerHomeState> {
   final GetAppConfigUc getAppConfig;
   final GetMyAppsUc getMyApps;
-
-  // ✅ NEW
   final GetPlatformProjectsUc getPlatformProjects;
 
   OwnerHomeBloc({
@@ -27,11 +26,9 @@ class OwnerHomeBloc extends Bloc<OwnerHomeEvent, OwnerHomeState> {
     on<OwnerHomeRefreshed>(_onLoad);
   }
 
-  // ✅ maps backend project -> template kind
   String? _mapProjectToKind(BackendProject p) {
     final type = (p.projectType ?? '').trim().toUpperCase();
 
-    // Prefer projectType if backend sends it
     if (type.isNotEmpty) {
       switch (type) {
         case 'ECOMMERCE':
@@ -50,7 +47,6 @@ class OwnerHomeBloc extends Bloc<OwnerHomeEvent, OwnerHomeState> {
       }
     }
 
-    // fallback heuristics (name/desc)
     final raw = '${p.name} ${p.description}'.toLowerCase();
     if (raw.contains('ecom') || raw.contains('shop')) return 'ecommerce';
     if (raw.contains('activ')) return 'activities';
@@ -71,7 +67,6 @@ class OwnerHomeBloc extends Bloc<OwnerHomeEvent, OwnerHomeState> {
     ));
 
     try {
-      // config (optional)
       AppConfig? cfg;
       try {
         cfg = await getAppConfig();
@@ -79,24 +74,20 @@ class OwnerHomeBloc extends Bloc<OwnerHomeEvent, OwnerHomeState> {
         cfg = null;
       }
 
-      // ✅ load both in parallel
       final results = await Future.wait([
-        getMyApps(),            // /owner/my-apps
-        getPlatformProjects(),  // /api/projects
+        getMyApps(),
+        getPlatformProjects(),
       ]);
 
       final List<OwnerProject> apps = results[0] as List<OwnerProject>;
       final List<BackendProject> projects = results[1] as List<BackendProject>;
 
-      // ✅ enable templates from ACTIVE platform projects
       final activeProjects = projects.where((p) => p.active == true).toList();
 
       final Map<String, int> kindToProjectId = {};
       for (final p in activeProjects) {
         final k = _mapProjectToKind(p);
         if (k == null) continue;
-
-        // project id = DB project id from /projects
         kindToProjectId.putIfAbsent(k, () => p.id);
       }
 
@@ -112,7 +103,7 @@ class OwnerHomeBloc extends Bloc<OwnerHomeEvent, OwnerHomeState> {
     } catch (err) {
       emit(state.copyWith(
         loading: false,
-        error: err.toString(),
+        error: ApiErrorHandler.message(err),
         myApps: const [],
         platformProjects: const [],
         availableKinds: const {},

@@ -1,4 +1,5 @@
 import 'package:build4all_manager/l10n/app_localizations.dart';
+import 'package:build4all_manager/shared/utils/ApiErrorHandler.dart';
 import 'package:build4all_manager/shared/widgets/app_toast.dart'; // for ToastType enum (we won't use AppToast here)
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -125,7 +126,7 @@ class _PublishWizardDialogState extends State<PublishWizardDialog> {
           : l10n.owner_publish_bundle_id;
 
   /// ✅ Extract backend errors (including your 500 trace RuntimeException)
-  String _errText(Object e, AppLocalizations l10n) {
+    String _errText(Object e, AppLocalizations l10n) {
     if (e is DioException) {
       final data = e.response?.data;
 
@@ -142,18 +143,13 @@ class _PublishWizardDialogState extends State<PublishWizardDialog> {
         final extracted = _extractRuntimeException(trace);
         if (extracted.isNotEmpty) return _mapKnownErrors(extracted, l10n);
       }
-
-      final m = (e.message ?? '').trim();
-      if (m.isNotEmpty) return m;
-
-      return l10n.common_network_error_try_again;
     }
 
-    final raw = e.toString().replaceFirst('Exception: ', '').trim();
+    final raw =
+        ApiErrorHandler.message(e).replaceFirst('Exception: ', '').trim();
     if (raw.isEmpty) return l10n.common_error;
     return _mapKnownErrors(raw, l10n);
   }
-
   String _extractRuntimeException(String trace) {
     if (trace.isEmpty) return '';
     final key = 'RuntimeException:';

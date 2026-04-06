@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:build4all_manager/shared/utils/ApiErrorHandler.dart';
 
 import '../../../domain/usecases/get_owner_guide_video.dart';
 import 'owner_guide_preview_event.dart';
@@ -37,7 +38,7 @@ class OwnerGuidePreviewBloc
     } catch (err) {
       emit(state.copyWith(
         loading: false,
-        error: err.toString(),
+        error: ApiErrorHandler.message(err),
       ));
     }
   }

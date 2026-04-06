@@ -1,4 +1,5 @@
 import 'package:build4all_manager/features/owner/ownerprofile/domain/usecases/get_owner_profile_usecase.dart';
+import 'package:build4all_manager/shared/utils/ApiErrorHandler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'owner_profile_event.dart';
 import 'owner_profile_state.dart';
@@ -19,7 +20,10 @@ class OwnerProfileBloc extends Bloc<OwnerProfileEvent, OwnerProfileState> {
       final profile = await getProfile(adminId: e.adminId);
       emit(state.copyWith(loading: false, profile: profile));
     } catch (err) {
-      emit(state.copyWith(loading: false, error: err.toString()));
+      emit(state.copyWith(
+        loading: false,
+        error: ApiErrorHandler.message(err),
+      ));
     }
   }
 
@@ -35,7 +39,10 @@ class OwnerProfileBloc extends Bloc<OwnerProfileEvent, OwnerProfileState> {
       final profile = await getProfile(adminId: currentId);
       emit(state.copyWith(loading: false, profile: profile));
     } catch (err) {
-      emit(state.copyWith(loading: false, error: err.toString()));
+      emit(state.copyWith(
+        loading: false,
+        error: ApiErrorHandler.message(err),
+      ));
     }
   }
 }

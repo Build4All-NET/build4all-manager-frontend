@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:build4all_manager/features/notifications_admin/data/service/admin_notifications_api.dart';
+import 'package:build4all_manager/shared/utils/ApiErrorHandler.dart';
 
 import 'admin_notifications_event.dart';
 import 'admin_notifications_state.dart';
@@ -34,7 +35,7 @@ class AdminNotificationsBloc
     } catch (e) {
       emit(state.copyWith(
         loading: false,
-        error: e.toString(),
+        error: ApiErrorHandler.message(e),
       ));
     }
   }
@@ -60,7 +61,7 @@ class AdminNotificationsBloc
         unreadCount: unread,
       ));
     } catch (e) {
-      emit(state.copyWith(error: e.toString()));
+      emit(state.copyWith(error: ApiErrorHandler.message(e)));
     }
   }
 
@@ -79,7 +80,7 @@ class AdminNotificationsBloc
         unreadCount: unread,
       ));
     } catch (e) {
-      emit(state.copyWith(error: e.toString()));
+      emit(state.copyWith(error: ApiErrorHandler.message(e)));
     }
   }
 }

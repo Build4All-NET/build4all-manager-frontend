@@ -1,5 +1,6 @@
 import 'package:build4all_manager/features/superadmin/tutorial/domain/usecases/get_owner_guide_video.dart';
 import 'package:build4all_manager/features/superadmin/tutorial/domain/usecases/upload_owner_guide_video.dart';
+import 'package:build4all_manager/shared/utils/ApiErrorHandler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'tutorial_video_event.dart';
@@ -19,7 +20,6 @@ class TutorialVideoBloc extends Bloc<TutorialVideoEvent, TutorialVideoState> {
     on<TutorialVideoRefreshRequested>(_onLoad);
     on<TutorialVideoUploadRequested>(_onUpload);
 
-    // ✅ FIX: handle progress updates
     on<_TutorialVideoProgressInternal>((e, emit) {
       emit(state.copyWith(progress: e.progress));
     });
@@ -36,7 +36,7 @@ class TutorialVideoBloc extends Bloc<TutorialVideoEvent, TutorialVideoState> {
     emit(state.copyWith(loading: true, clearError: true, clearMessage: true));
 
     try {
-      final token = await tokenProvider(); // may be null
+      final token = await tokenProvider();
       final path = await getOwnerGuide(token: token);
 
       emit(state.copyWith(
@@ -46,7 +46,7 @@ class TutorialVideoBloc extends Bloc<TutorialVideoEvent, TutorialVideoState> {
     } catch (err) {
       emit(state.copyWith(
         loading: false,
-        error: err.toString(),
+        error: ApiErrorHandler.message(err),
       ));
     }
   }
@@ -93,7 +93,7 @@ class TutorialVideoBloc extends Bloc<TutorialVideoEvent, TutorialVideoState> {
     } catch (err) {
       emit(state.copyWith(
         uploading: false,
-        error: err.toString(),
+        error: ApiErrorHandler.message(err),
       ));
     }
   }

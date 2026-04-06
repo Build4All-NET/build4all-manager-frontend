@@ -3,6 +3,7 @@ import 'package:build4all_manager/features/superadmin/dashboard/data/models/Proj
 import 'package:build4all_manager/features/superadmin/dashboard/data/services/project_api.dart';
 import 'package:build4all_manager/features/superadmin/dashboard/presentation/screens/owner_apps_in_project_screen.dart';
 import 'package:build4all_manager/l10n/app_localizations.dart';
+import 'package:build4all_manager/shared/utils/ApiErrorHandler.dart';
 import 'package:build4all_manager/shared/utils/search_match.dart';
 import 'package:build4all_manager/shared/widgets/app_search_bar.dart';
 import 'package:build4all_manager/shared/widgets/app_toast.dart';
@@ -55,8 +56,8 @@ class _OwnersByProjectScreenState extends State<OwnersByProjectScreen> {
         _owners = items;
         _loading = false;
       });
-    } catch (e) {
-      final msg = e.toString();
+      } catch (e) {
+      final msg = ApiErrorHandler.message(e);
       setState(() {
         _error = msg;
         _loading = false;

@@ -48,13 +48,11 @@ class OwnerIosInternalTestingApi {
         title: 'CREATE IOS INTERNAL REQUEST ERROR',
         error: e,
       );
-
-      throw Exception(_extractErrorMessage(e));
+      rethrow;
     } catch (e, stackTrace) {
       debugPrint('❌ CREATE IOS INTERNAL REQUEST UNKNOWN ERROR => $e');
       debugPrintStack(stackTrace: stackTrace);
-
-      throw Exception('Failed to create iOS internal testing request: $e');
+      rethrow;
     }
   }
 
@@ -84,7 +82,9 @@ class OwnerIosInternalTestingApi {
       return model;
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {
-        debugPrint('ℹ️ No latest iOS internal testing request found for linkId=$linkId');
+        debugPrint(
+          'ℹ️ No latest iOS internal testing request found for linkId=$linkId',
+        );
         return null;
       }
 
@@ -92,13 +92,11 @@ class OwnerIosInternalTestingApi {
         title: 'GET LATEST IOS INTERNAL REQUEST ERROR',
         error: e,
       );
-
-      throw Exception(_extractErrorMessage(e));
+      rethrow;
     } catch (e, stackTrace) {
       debugPrint('❌ GET LATEST IOS INTERNAL REQUEST UNKNOWN ERROR => $e');
       debugPrintStack(stackTrace: stackTrace);
-
-      throw Exception('Failed to load latest iOS internal testing request: $e');
+      rethrow;
     }
   }
 
@@ -135,13 +133,11 @@ class OwnerIosInternalTestingApi {
         title: 'GET IOS INTERNAL REQUESTS SUMMARY ERROR',
         error: e,
       );
-
-      throw Exception(_extractErrorMessage(e));
+      rethrow;
     } catch (e, stackTrace) {
       debugPrint('❌ GET IOS INTERNAL REQUESTS SUMMARY UNKNOWN ERROR => $e');
       debugPrintStack(stackTrace: stackTrace);
-
-      throw Exception('Failed to load iOS internal testing requests: $e');
+      rethrow;
     }
   }
 
@@ -149,7 +145,9 @@ class OwnerIosInternalTestingApi {
     if (raw is Map<String, dynamic>) return raw;
     if (raw is Map) return Map<String, dynamic>.from(raw);
 
-    throw Exception('Invalid response format: expected Map but got ${raw.runtimeType}');
+    throw Exception(
+      'Invalid response format: expected Map but got ${raw.runtimeType}',
+    );
   }
 
   Map<String, dynamic> _extractRequestMap(Map<String, dynamic> raw) {
@@ -164,50 +162,6 @@ class OwnerIosInternalTestingApi {
     }
 
     return raw;
-  }
-
-  String _extractErrorMessage(DioException e) {
-    final data = e.response?.data;
-
-    if (data is Map) {
-      final map = Map<String, dynamic>.from(data);
-
-      final error = map['error']?.toString();
-      final details = map['details']?.toString();
-
-      final request = map['request'];
-      String? requestStatus;
-      String? requestLastError;
-
-      if (request is Map) {
-        requestStatus = request['status']?.toString();
-        requestLastError = request['lastError']?.toString();
-      }
-
-      final parts = <String>[];
-
-      if (error != null && error.trim().isNotEmpty) {
-        parts.add(error.trim());
-      }
-
-      if (details != null && details.trim().isNotEmpty) {
-        parts.add(details.trim());
-      }
-
-      if (requestStatus != null && requestStatus.trim().isNotEmpty) {
-        parts.add('status=$requestStatus');
-      }
-
-      if (requestLastError != null && requestLastError.trim().isNotEmpty) {
-        parts.add('lastError=$requestLastError');
-      }
-
-      if (parts.isNotEmpty) {
-        return parts.join(' | ');
-      }
-    }
-
-    return e.message ?? 'Request failed';
   }
 
   void _logSuccess({

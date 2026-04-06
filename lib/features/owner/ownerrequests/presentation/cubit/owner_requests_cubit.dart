@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:build4all_manager/shared/utils/ApiErrorHandler.dart';
 import '../../domain/entities/project.dart';
 import '../../domain/repositories/i_owner_requests_repository.dart';
 import 'owner_requests_state.dart';
@@ -24,7 +25,10 @@ class OwnerRequestsCubit extends Cubit<OwnerRequestsState> {
         themes: themes,
       ));
     } catch (e) {
-      emit(state.copyWith(loading: false, error: e.toString()));
+      emit(state.copyWith(
+        loading: false,
+        error: ApiErrorHandler.message(e),
+      ));
     }
   }
 
@@ -104,13 +108,15 @@ class OwnerRequestsCubit extends Cubit<OwnerRequestsState> {
         submitting: false,
         myRequests: reqs,
         lastCreated: created,
-        // reset only light fields if you want
         appName: '',
         notes: '',
         logoFilePath: null,
       ));
     } catch (e) {
-      emit(state.copyWith(submitting: false, error: e.toString()));
+      emit(state.copyWith(
+        submitting: false,
+        error: ApiErrorHandler.message(e),
+      ));
     }
   }
 }

@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:build4all_manager/core/utils/upload_safe_image_normalizer.dart';
 import 'package:build4all_manager/features/owner/ownerrequests/presentation/widgets/runtime_draft.dart';
 import 'package:build4all_manager/features/owner/ownerrequests/presentation/widgets/runtime_section.dart';
+import 'package:build4all_manager/shared/utils/ApiErrorHandler.dart';
 import 'package:build4all_manager/shared/widgets/app_toast.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -228,21 +229,10 @@ class _OwnerRequestScreenState extends State<OwnerRequestScreen> {
 
       AppToast.success(context, l.owner_request_submit_success);
       context.go('/owner/projects');
-    } catch (e) {
-      if (!mounted) return;
-
-      String msg = e.toString();
-      if (e is DioException) {
-        final data = e.response?.data;
-        if (data is Map && data['error'] != null) {
-          msg = data['error'].toString();
-        } else if (data is String && data.isNotEmpty) {
-          msg = data;
-        }
-      }
-
+        } catch (e) {
+      final msg = ApiErrorHandler.message(e);
       AppToast.error(context, l.owner_request_submit_failed(msg));
-    } finally {
+    }finally {
       if (mounted) setState(() => _loading = false);
     }
   }

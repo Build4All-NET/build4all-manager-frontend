@@ -1,4 +1,5 @@
 import 'package:build4all_manager/features/superadmin/publish_admin/domain/entities/app_publish_request_admin.dart';
+import 'package:build4all_manager/shared/utils/ApiErrorHandler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/usecases/get_publish_requests.dart';
 import 'publish_requests_event.dart';
@@ -27,7 +28,10 @@ class PublishRequestsBloc
         filtered: _filter(items, state.query),
       ));
     } catch (err) {
-      emit(state.copyWith(loading: false, error: err.toString()));
+      emit(state.copyWith(
+        loading: false,
+        error: ApiErrorHandler.message(err),
+      ));
     }
   }
 

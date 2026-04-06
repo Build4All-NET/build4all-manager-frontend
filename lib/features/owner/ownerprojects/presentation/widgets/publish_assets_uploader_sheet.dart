@@ -4,6 +4,7 @@ import 'package:build4all_manager/core/utils/upload_safe_image_normalizer.dart';
 import 'package:build4all_manager/features/owner/publish/data/services/owner_publish_api.dart';
 import 'package:build4all_manager/features/owner/publish/domain/entities/publish_draft.dart';
 import 'package:build4all_manager/l10n/app_localizations.dart';
+import 'package:build4all_manager/shared/utils/ApiErrorHandler.dart';
 import 'package:build4all_manager/shared/widgets/app_toast.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -55,7 +56,6 @@ class _PublishAssetsUploaderSheetState
   bool _uploading = false;
 
   String _errText(dynamic e, AppLocalizations l10n) {
-    // ✅ Best effort extraction from backend
     if (e is DioException) {
       final data = e.response?.data;
 
@@ -63,15 +63,11 @@ class _PublishAssetsUploaderSheetState
         final err = (data['error'] ?? data['message'] ?? '').toString().trim();
         if (err.isNotEmpty) return err;
       }
-
-      final msg = e.message?.trim() ?? '';
-      if (msg.isNotEmpty) return msg;
-
-      return l10n.common_network_error_try_again;
     }
 
-    final s = e.toString();
-    return s.replaceFirst('Exception: ', '');
+    final s = ApiErrorHandler.message(e).replaceFirst('Exception: ', '').trim();
+    if (s.isEmpty) return l10n.common_network_error_try_again;
+    return s;
   }
 
   Future<void> _pickIcon() async {

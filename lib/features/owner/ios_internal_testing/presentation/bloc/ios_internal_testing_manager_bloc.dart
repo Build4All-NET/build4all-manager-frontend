@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:build4all_manager/shared/utils/ApiErrorHandler.dart';
 
 import '../../domain/entities/ios_internal_testing_app_summary.dart';
 import '../../domain/usecases/create_ios_internal_testing_request_uc.dart';
@@ -53,7 +54,7 @@ class IosInternalTestingManagerBloc extends Bloc<
     } catch (e) {
       emit(state.copyWith(
         loading: false,
-        error: e.toString(),
+        error: ApiErrorHandler.message(e),
       ));
     }
   }
@@ -87,7 +88,7 @@ class IosInternalTestingManagerBloc extends Bloc<
     } catch (e) {
       emit(state.copyWith(
         submitting: false,
-        error: e.toString(),
+        error: ApiErrorHandler.message(e),
       ));
     }
   }

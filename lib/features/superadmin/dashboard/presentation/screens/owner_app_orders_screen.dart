@@ -1,3 +1,4 @@
+import 'package:build4all_manager/shared/utils/ApiErrorHandler.dart';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 
@@ -70,8 +71,8 @@ class _OwnerAppOrdersScreenState extends State<OwnerAppOrdersScreen> {
         _orders = items;
         _loading = false;
       });
-    } catch (e) {
-      final msg = e.toString();
+      } catch (e) {
+      final msg = ApiErrorHandler.message(e);
       setState(() {
         _error = msg;
         _loading = false;

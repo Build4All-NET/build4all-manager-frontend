@@ -1,5 +1,6 @@
 import 'package:build4all_manager/core/network/dio_client.dart';
 import 'package:build4all_manager/l10n/app_localizations.dart';
+import 'package:build4all_manager/shared/utils/ApiErrorHandler.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
@@ -34,7 +35,7 @@ class _AppsLicensesScreenState extends State<AppsLicensesScreen> {
     _load();
   }
 
-  Future<void> _load() async {
+    Future<void> _load() async {
     setState(() {
       _loading = true;
       _error = null;
@@ -47,22 +48,16 @@ class _AppsLicensesScreenState extends State<AppsLicensesScreen> {
         _items = items;
         _loading = false;
       });
-    } on DioException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _error = _extractError(e);
-        _loading = false;
-      });
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _error = e.toString();
+        _error = ApiErrorHandler.message(e);
         _loading = false;
       });
     }
   }
 
-  String _extractError(DioException e) {
+   String _extractError(DioException e) {
     final data = e.response?.data;
 
     if (data is Map<String, dynamic>) {

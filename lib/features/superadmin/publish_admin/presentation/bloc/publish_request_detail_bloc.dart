@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:build4all_manager/shared/utils/ApiErrorHandler.dart';
 import '../../domain/usecases/approve_request.dart';
 import '../../domain/usecases/reject_request.dart';
 import '../../../publish_admin/domain/entities/app_publish_request_admin.dart';
@@ -26,7 +27,10 @@ class PublishRequestDetailBloc
       await approve(requestId: state.item.id, notes: e.notes);
       emit(state.copyWith(acting: false, success: 'approved'));
     } catch (err) {
-      emit(state.copyWith(acting: false, error: err.toString()));
+      emit(state.copyWith(
+        acting: false,
+        error: ApiErrorHandler.message(err),
+      ));
     }
   }
 
@@ -37,7 +41,10 @@ class PublishRequestDetailBloc
       await reject(requestId: state.item.id, notes: e.notes);
       emit(state.copyWith(acting: false, success: 'rejected'));
     } catch (err) {
-      emit(state.copyWith(acting: false, error: err.toString()));
+      emit(state.copyWith(
+        acting: false,
+        error: ApiErrorHandler.message(err),
+      ));
     }
   }
 }

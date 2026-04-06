@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:build4all_manager/features/superadmin/tutorial/data/repositories/tutorial_repository_impl.dart';
 import 'package:build4all_manager/features/superadmin/tutorial/data/services/tutorial_api.dart';
 import 'package:build4all_manager/features/superadmin/tutorial/domain/usecases/get_owner_guide_video.dart';
+import 'package:build4all_manager/shared/utils/ApiErrorHandler.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
@@ -88,11 +89,11 @@ class _OwnerGuideInlinePlayerCardState extends State<OwnerGuideInlinePlayerCard>
       setState(() {
         _loading = false;
       });
-    } catch (e) {
+       } catch (e) {
       if (!mounted) return;
       setState(() {
         _loading = false;
-        _error = e.toString();
+        _error = ApiErrorHandler.message(e);
       });
     }
   }
