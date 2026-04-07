@@ -906,21 +906,21 @@ class _StepBody extends StatelessWidget {
             style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w900),
           ),
           const SizedBox(height: 6),
-          DropdownButtonFormField<String>(
-            initialValue: selectedCountry,
-            items: allowedCountries
-                .map(
-                  (e) => DropdownMenuItem(
-                    value: e,
-                    child: Text(_countryLabel(context, e)),
-                  ),
-                )
-                .toList(),
-            onChanged: (v) {
-              if (v != null) onCountryChanged(v);
-            },
-            decoration: deco(''),
-          ),
+         DropdownButtonFormField<String>(
+  value: selectedCountry,
+  items: allowedCountries
+      .map(
+        (e) => DropdownMenuItem<String>(
+          value: e,
+          child: Text(_countryLabel(context, e)),
+        ),
+      )
+      .toList(),
+  onChanged: (v) {
+    if (v != null) onCountryChanged(v);
+  },
+  decoration: deco(''),
+),
           const SizedBox(height: 14),
           Text(
             l10n.owner_publish_pricing,
