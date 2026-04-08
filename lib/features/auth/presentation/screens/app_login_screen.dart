@@ -172,7 +172,9 @@ class AppLoginScreen extends StatelessWidget {
         listenWhen: (p, c) => p.role != c.role || p.error != c.error,
         listener: (context, state) {
           final role = (state.role ?? '').toUpperCase();
-          final friendlyError = _mapLoginError(context, state.error);
+          final friendlyError = state.errorCode == 'SERVER_DOWN'
+    ? 'Server unavailable. Please try again shortly.'
+    : _mapLoginError(context, state.error);
 
           if (friendlyError != null && friendlyError.isNotEmpty) {
             AppToast.error(context, friendlyError);

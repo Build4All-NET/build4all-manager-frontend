@@ -55,18 +55,38 @@ class AuthRepositoryImpl implements IAuthRepository {
 
     // ✅ IMPORTANT: parse {code, error} coming from backend
     on DioException catch (e) {
-      final data = e.response?.data;
+  final status = e.response?.statusCode;
 
-      if (data is Map) {
-        final code = (data['code'] ?? 'AUTH_ERROR').toString();
-        final msg = (data['error'] ?? ApiErrorHandler.message(e)).toString();
-        throw AuthFailure(code: code, message: msg);
-      }
+  final isServerDown =
+      e.type == DioExceptionType.connectionError ||
+      e.type == DioExceptionType.connectionTimeout ||
+      e.type == DioExceptionType.receiveTimeout ||
+      e.type == DioExceptionType.sendTimeout ||
+      (status != null && status >= 500);
 
-      // no body => network / timeout / etc.
-      throw AuthFailure(code: 'NETWORK_ERROR', message: ApiErrorHandler.message(e));
-    }
+  if (isServerDown) {
+    throw const AuthFailure(
+      code: 'SERVER_DOWN',
+      message: 'Server unavailable. Please try again shortly.',
+    );
+  }
 
+  final data = e.response?.data;
+
+  if (data is Map) {
+    final code = (data['code'] ?? 'AUTH_ERROR').toString();
+    final msg =
+        (data['error'] ?? data['message'] ?? ApiErrorHandler.message(e))
+            .toString();
+
+    throw AuthFailure(code: code, message: msg);
+  }
+
+  throw AuthFailure(
+    code: 'NETWORK_ERROR',
+    message: ApiErrorHandler.message(e),
+  );
+}
     // ✅ fallback
     catch (e) {
       throw AuthFailure(code: 'AUTH_ERROR', message: ApiErrorHandler.message(e));

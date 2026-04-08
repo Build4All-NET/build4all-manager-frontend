@@ -10,7 +10,7 @@ class ServerStatusController {
   static final ValueNotifier<ServerUiStatus> status =
       ValueNotifier(ServerUiStatus.ok);
 
-  static const Duration popupDelay = Duration(seconds: 15);
+  static const Duration popupDelay = Duration(seconds: 3);
   static const Duration retryInterval = Duration(seconds: 3);
 
   static Timer? _popupTimer;
