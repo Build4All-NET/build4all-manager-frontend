@@ -1,3 +1,5 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -9,12 +11,35 @@ import 'package:build4all_manager/core/network/dio_client.dart';
 import 'package:build4all_manager/features/theme_manager/data/local_theme_store.dart';
 import 'package:build4all_manager/features/theme_manager/presentation/theme_cubit.dart';
 import 'package:build4all_manager/l10n/app_localizations.dart';
+import 'firebase_options.dart';
+
+Future<void> _initFirebase() async {
+  if (kIsWeb) {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    return;
+  }
+
+  if (defaultTargetPlatform == TargetPlatform.android) {
+    await Firebase.initializeApp();
+    return;
+  }
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+}
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   try {
     await DioClient.init();
+  } catch (_) {}
+
+  try {
+    await _initFirebase();
   } catch (_) {}
 
   runApp(const Build4AllManagerApp());
