@@ -1,92 +1,21 @@
-import 'package:build4all_manager/core/config/app_boot_guard.dart';
-import 'package:build4all_manager/core/localization/locale_cubit.dart';
-import 'package:build4all_manager/core/localization/locale_storage.dart';
-import 'package:build4all_manager/core/network/connecting/connection_banner.dart';
-import 'package:build4all_manager/core/network/connecting/connection_cubit.dart';
-import 'package:build4all_manager/core/network/connecting/server_down_overlay.dart';
-import 'package:build4all_manager/core/network/dio_client.dart';
-import 'package:build4all_manager/core/notifications/local_notification_service.dart';
-import 'package:build4all_manager/features/auth/data/datasources/jwt_local_datasource.dart';
-import 'package:build4all_manager/l10n/app_localizations.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'package:build4all_manager/app/router/router.dart' as nav;
+import 'package:build4all_manager/core/localization/locale_cubit.dart';
+import 'package:build4all_manager/core/localization/locale_storage.dart';
+import 'package:build4all_manager/core/network/dio_client.dart';
 import 'package:build4all_manager/features/theme_manager/data/local_theme_store.dart';
 import 'package:build4all_manager/features/theme_manager/presentation/theme_cubit.dart';
-import 'firebase_options.dart';
-
-Future<void> _initFirebase() async {
-  if (kIsWeb) {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
-    return;
-  }
-
-  if (defaultTargetPlatform == TargetPlatform.android) {
-    await Firebase.initializeApp();
-    return;
-  }
-
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-}
-
-@pragma('vm:entry-point')
-Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await _initFirebase();
-}
+import 'package:build4all_manager/l10n/app_localizations.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await _initFirebase();
-
-  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
-
-  await LocalNotificationService().init();
-
-  FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
-    final title =
-        message.notification?.title ??
-        message.data['title']?.toString() ??
-        'Build4All Manager';
-
-    final body =
-        message.notification?.body ??
-        message.data['body']?.toString() ??
-        'You have a new notification';
-
-    debugPrint('Foreground FCM received => title=$title, body=$body');
-
-    await LocalNotificationService().show(
-      title: title,
-      body: body,
-    );
-  });
-
-  await DioClient.init();
-
   try {
-    await AppBootGuard.run(
-      currentApiBaseUrl: DioClient.ensure().options.baseUrl,
-    ).timeout(const Duration(seconds: 8));
-  } catch (e, st) {
-    debugPrint('AppBootGuard.run failed or timed out => $e');
-    debugPrintStack(stackTrace: st);
-  }
-
-  final jwt = JwtLocalDataSource();
-  final (token, _) = await jwt.read();
-  if (token.isNotEmpty) {
-    DioClient.setToken(token);
-  }
+    await DioClient.init();
+  } catch (_) {}
 
   runApp(const Build4AllManagerApp());
 }
@@ -99,11 +28,6 @@ class Build4AllManagerApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => ThemeCubit(LocalThemeStore())..load()),
-        BlocProvider(
-          create: (_) => ConnectionCubit(
-            baseUrl: DioClient.ensure().options.baseUrl,
-          ),
-        ),
         BlocProvider(
           create: (_) => LocaleCubit(LocaleStorage())..loadSavedLocale(),
         ),
@@ -120,18 +44,6 @@ class Build4AllManagerApp extends StatelessWidget {
                 themeMode: vm.mode,
                 routerConfig: nav.router,
                 locale: locale,
-                builder: (context, child) {
-                  return Stack(
-                    children: [
-                      child ?? const SizedBox.shrink(),
-                      const Align(
-                        alignment: Alignment.topCenter,
-                        child: ConnectionBanner(),
-                      ),
-                      const ServerDownOverlay(),
-                    ],
-                  );
-                },
                 supportedLocales: AppLocalizations.supportedLocales,
                 localizationsDelegates: const [
                   AppLocalizations.delegate,
