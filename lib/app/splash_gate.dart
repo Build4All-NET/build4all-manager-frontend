@@ -73,16 +73,18 @@ class _SplashGateState extends State<SplashGate> {
       DioClient.setToken(access);
     }
 
-    // IMPORTANT:
-    // Re-init push on restored session too, not only after login.
-    try {
-      await FirebasePushService().initForAdmin();
-    } catch (e) {
-      debugPrint('Push init from SplashGate failed: $e');
-    }
+if (!mounted) return;
+context.go(role == 'SUPER_ADMIN' ? '/manager' : '/owner');
 
-    if (!mounted) return;
-    context.go(role == 'SUPER_ADMIN' ? '/manager' : '/owner');
+Future.microtask(() async {
+  try {
+    await FirebasePushService()
+        .initForAdmin()
+        .timeout(const Duration(seconds: 8));
+  } catch (e) {
+    debugPrint('Push init from SplashGate failed or timed out: $e');
+  }
+});
   }
 
   bool _isJwtExpired(String token) {

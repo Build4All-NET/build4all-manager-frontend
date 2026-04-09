@@ -73,9 +73,14 @@ Future<void> main() async {
 
   await DioClient.init();
 
+  try {
   await AppBootGuard.run(
     currentApiBaseUrl: DioClient.ensure().options.baseUrl,
-  );
+  ).timeout(const Duration(seconds: 8));
+} catch (e, st) {
+  debugPrint('AppBootGuard.run failed or timed out => $e');
+  debugPrintStack(stackTrace: st);
+}
 
   final jwt = JwtLocalDataSource();
   final (token, _) = await jwt.read();
