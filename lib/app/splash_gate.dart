@@ -1,10 +1,10 @@
 import 'dart:convert';
 
 import 'package:build4all_manager/core/network/dio_client.dart';
+import 'package:build4all_manager/core/notifications/firebase_push_service.dart';
 import 'package:build4all_manager/features/auth/data/services/auth_api.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-
 
 import 'package:build4all_manager/features/auth/data/datasources/jwt_local_datasource.dart';
 
@@ -21,85 +21,91 @@ class _SplashGateState extends State<SplashGate> {
     super.initState();
     _boot();
   }
-Future<void> _boot() async {
-  final store = JwtLocalDataSource();
-  final api = AuthApi(DioClient.ensure()); // ✅ add this import
-  final (token, roleRaw) = await store.read();
-  final refresh = (await store.readRefreshToken())?.trim() ?? '';
 
-  if (!mounted) return;
+  Future<void> _boot() async {
+    final store = JwtLocalDataSource();
+    final api = AuthApi(DioClient.ensure());
+    final (token, roleRaw) = await store.read();
+    final refresh = (await store.readRefreshToken())?.trim() ?? '';
 
-  final role = roleRaw.toUpperCase().trim();
+    if (!mounted) return;
 
-  // If no role => must login
-  if (role.isEmpty) {
-    context.go('/login');
-    return;
-  }
+    final role = roleRaw.toUpperCase().trim();
 
-  // ✅ If token missing, try refresh (if available)
-  String access = token.trim();
-
-  // If access missing OR expired => try refresh if we have refreshToken
-  if (access.isEmpty || _isJwtExpired(access)) {
-    if (refresh.isEmpty) {
-      await store.clear();
-      if (!mounted) return;
+    if (role.isEmpty) {
       context.go('/login');
       return;
     }
 
+    String access = token.trim();
+
+    if (access.isEmpty || _isJwtExpired(access)) {
+      if (refresh.isEmpty) {
+        await store.clear();
+        if (!mounted) return;
+        context.go('/login');
+        return;
+      }
+
+      try {
+        final res = await api.refresh(refresh);
+        final data = res.data;
+
+        if (data is! Map) throw Exception('BAD_REFRESH');
+
+        final newToken = (data['token'] ?? '').toString().trim();
+        final newRefresh = (data['refreshToken'] ?? '').toString().trim();
+
+        if (newToken.isEmpty || newRefresh.isEmpty) {
+          throw Exception('MISSING_TOKENS');
+        }
+
+        await store.save(token: newToken, role: role, refreshToken: newRefresh);
+        DioClient.setToken(newToken);
+        access = newToken;
+      } catch (_) {
+        await store.clear();
+        if (!mounted) return;
+        context.go('/login');
+        return;
+      }
+    } else {
+      DioClient.setToken(access);
+    }
+
+    // IMPORTANT:
+    // Re-init push on restored session too, not only after login.
     try {
-      final res = await api.refresh(refresh);
-      final data = res.data;
-
-      if (data is! Map) throw Exception('BAD_REFRESH');
-
-      final newToken = (data['token'] ?? '').toString().trim();
-      final newRefresh = (data['refreshToken'] ?? '').toString().trim();
-
-      if (newToken.isEmpty || newRefresh.isEmpty) throw Exception('MISSING_TOKENS');
-
-      await store.save(token: newToken, role: role, refreshToken: newRefresh);
-      DioClient.setToken(newToken);
-      access = newToken;
-    } catch (_) {
-      await store.clear();
-      if (!mounted) return;
-      context.go('/login');
-      return;
+      await FirebasePushService().initForAdmin();
+    } catch (e) {
+      debugPrint('Push init from SplashGate failed: $e');
     }
-  } else {
-    // token still valid
-    DioClient.setToken(access);
+
+    if (!mounted) return;
+    context.go(role == 'SUPER_ADMIN' ? '/manager' : '/owner');
   }
 
-  if (!mounted) return;
-  context.go(role == 'SUPER_ADMIN' ? '/manager' : '/owner');
-}
+  bool _isJwtExpired(String token) {
+    try {
+      final parts = token.split('.');
+      if (parts.length < 2) return true;
 
-bool _isJwtExpired(String token) {
-  try {
-    final parts = token.split('.');
-    if (parts.length < 2) return true;
+      final payload = base64Url.normalize(parts[1]);
+      final decoded = utf8.decode(base64Url.decode(payload));
+      final map = jsonDecode(decoded);
 
-    final payload = base64Url.normalize(parts[1]);
-    final decoded = utf8.decode(base64Url.decode(payload));
-    final map = jsonDecode(decoded);
+      if (map is! Map) return true;
+      final exp = map['exp'];
+      if (exp == null) return true;
 
-    if (map is! Map) return true;
-    final exp = map['exp'];
+      final expSeconds = (exp is num) ? exp.toInt() : int.parse(exp.toString());
+      final nowSeconds = DateTime.now().millisecondsSinceEpoch ~/ 1000;
 
-    if (exp == null) return true;
-
-    final expSeconds = (exp is num) ? exp.toInt() : int.parse(exp.toString());
-    final nowSeconds = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-
-    return nowSeconds >= expSeconds;
-  } catch (_) {
-    return true;
+      return nowSeconds >= expSeconds;
+    } catch (_) {
+      return true;
+    }
   }
-}
 
   @override
   Widget build(BuildContext context) {

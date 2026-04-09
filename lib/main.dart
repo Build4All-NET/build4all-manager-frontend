@@ -5,6 +5,7 @@ import 'package:build4all_manager/core/network/connecting/connection_banner.dart
 import 'package:build4all_manager/core/network/connecting/connection_cubit.dart';
 import 'package:build4all_manager/core/network/connecting/server_down_overlay.dart';
 import 'package:build4all_manager/core/network/dio_client.dart';
+import 'package:build4all_manager/core/notifications/local_notification_service.dart';
 import 'package:build4all_manager/features/auth/data/datasources/jwt_local_datasource.dart';
 import 'package:build4all_manager/l10n/app_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -48,6 +49,27 @@ Future<void> main() async {
   await _initFirebase();
 
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+
+  await LocalNotificationService().init();
+
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
+    final title =
+        message.notification?.title ??
+        message.data['title']?.toString() ??
+        'Build4All Manager';
+
+    final body =
+        message.notification?.body ??
+        message.data['body']?.toString() ??
+        'You have a new notification';
+
+    debugPrint('Foreground FCM received => title=$title, body=$body');
+
+    await LocalNotificationService().show(
+      title: title,
+      body: body,
+    );
+  });
 
   await DioClient.init();
 
