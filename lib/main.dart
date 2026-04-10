@@ -10,6 +10,7 @@ import 'package:build4all_manager/core/notifications/local_notification_service.
 import 'package:build4all_manager/features/auth/data/datasources/jwt_local_datasource.dart';
 import 'package:build4all_manager/l10n/app_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -58,6 +59,29 @@ Future<void> main() async {
   } catch (e) {
     debugPrint('LocalNotificationService.init failed => $e');
   }
+
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
+    final title =
+        message.notification?.title ??
+        message.data['title']?.toString() ??
+        'Build4All Manager';
+
+    final body =
+        message.notification?.body ??
+        message.data['body']?.toString() ??
+        'You have a new notification';
+
+    debugPrint('Foreground FCM received => title=$title, body=$body');
+
+    try {
+      await LocalNotificationService().show(
+        title: title,
+        body: body,
+      );
+    } catch (e) {
+      debugPrint('Local foreground notification show failed => $e');
+    }
+  });
 
   try {
     final jwt = JwtLocalDataSource();
