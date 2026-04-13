@@ -13,14 +13,14 @@ class ProjectsRepositoryImpl implements ProjectsRepository {
     required String projectName,
     String? description,
     bool? active,
-    required ProjectType projectType,
+    required String projectType,
   }) async {
     final dto = await api.createProject(
       token: token,
       projectName: projectName,
       description: description,
       active: active,
-      projectType: projectType.name, // enum -> "ECOMMERCE"
+      projectType: projectType,
     );
 
     return Project(
@@ -28,7 +28,14 @@ class ProjectsRepositoryImpl implements ProjectsRepository {
       projectName: dto.projectName,
       description: dto.description,
       active: dto.active,
-      projectType: ProjectTypeX.fromName(dto.projectType),
+      projectType: dto.projectType,
     );
+  }
+
+  @override
+  Future<List<String>> fetchProjectTypes({
+    required String token,
+  }) {
+    return api.fetchProjectTypes(token: token);
   }
 }

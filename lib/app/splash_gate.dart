@@ -3,10 +3,10 @@ import 'dart:convert';
 import 'package:build4all_manager/core/network/dio_client.dart';
 import 'package:build4all_manager/core/notifications/firebase_push_service.dart';
 import 'package:build4all_manager/features/auth/data/services/auth_api.dart';
+import 'package:build4all_manager/features/auth/data/datasources/jwt_local_datasource.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-
-import 'package:build4all_manager/features/auth/data/datasources/jwt_local_datasource.dart';
 
 class SplashGate extends StatefulWidget {
   const SplashGate({super.key});
@@ -25,12 +25,13 @@ class _SplashGateState extends State<SplashGate> {
   Future<void> _boot() async {
     final store = JwtLocalDataSource();
     final api = AuthApi(DioClient.ensure());
+
     final (token, roleRaw) = await store.read();
     final refresh = (await store.readRefreshToken())?.trim() ?? '';
 
     if (!mounted) return;
 
-    final role = roleRaw.toUpperCase().trim();
+    final role = roleRaw.trim().toUpperCase();
 
     if (role.isEmpty) {
       context.go('/login');
@@ -51,7 +52,9 @@ class _SplashGateState extends State<SplashGate> {
         final res = await api.refresh(refresh);
         final data = res.data;
 
-        if (data is! Map) throw Exception('BAD_REFRESH');
+        if (data is! Map) {
+          throw Exception('BAD_REFRESH_RESPONSE');
+        }
 
         final newToken = (data['token'] ?? '').toString().trim();
         final newRefresh = (data['refreshToken'] ?? '').toString().trim();
@@ -60,11 +63,24 @@ class _SplashGateState extends State<SplashGate> {
           throw Exception('MISSING_TOKENS');
         }
 
-        await store.save(token: newToken, role: role, refreshToken: newRefresh);
+        await store.save(
+          token: newToken,
+          role: role,
+          refreshToken: newRefresh,
+        );
+
         DioClient.setToken(newToken);
         access = newToken;
-      } catch (_) {
-        await store.clear();
+      } catch (e, st) {
+        debugPrint('Splash refresh failed: $e');
+        debugPrint('$st');
+
+        final shouldClear = _shouldClearAfterRefreshFailure(e);
+
+        if (shouldClear) {
+          await store.clear();
+        }
+
         if (!mounted) return;
         context.go('/login');
         return;
@@ -73,18 +89,41 @@ class _SplashGateState extends State<SplashGate> {
       DioClient.setToken(access);
     }
 
-if (!mounted) return;
-context.go(role == 'SUPER_ADMIN' ? '/manager' : '/owner');
+    if (!mounted) return;
+    context.go(role == 'SUPER_ADMIN' ? '/manager' : '/owner');
 
-Future.microtask(() async {
-  try {
-    await FirebasePushService()
-        .initForAdmin()
-        .timeout(const Duration(seconds: 8));
-  } catch (e) {
-    debugPrint('Push init from SplashGate failed or timed out: $e');
+    Future.microtask(() async {
+      try {
+        await FirebasePushService()
+            .initForAdmin()
+            .timeout(const Duration(seconds: 8));
+      } catch (e) {
+        debugPrint('Push init from SplashGate failed or timed out: $e');
+      }
+    });
   }
-});
+
+  bool _shouldClearAfterRefreshFailure(Object e) {
+    if (e is DioException) {
+      final status = e.response?.statusCode;
+
+      // Only clear session if refresh token is really rejected/unauthorized
+      if (status == 401 || status == 403) {
+        return true;
+      }
+
+      // Network/server/timeout problems should NOT wipe saved session
+      return false;
+    }
+
+    final msg = e.toString().toUpperCase();
+
+    return msg.contains('NO_REFRESH') ||
+        msg.contains('BAD_REFRESH') ||
+        msg.contains('BAD_REFRESH_RESPONSE') ||
+        msg.contains('MISSING_TOKENS') ||
+        msg.contains('REFRESH TOKEN') ||
+        msg.contains('INVALID_REFRESH');
   }
 
   bool _isJwtExpired(String token) {
@@ -97,10 +136,12 @@ Future.microtask(() async {
       final map = jsonDecode(decoded);
 
       if (map is! Map) return true;
+
       final exp = map['exp'];
       if (exp == null) return true;
 
-      final expSeconds = (exp is num) ? exp.toInt() : int.parse(exp.toString());
+      final expSeconds =
+          (exp is num) ? exp.toInt() : int.parse(exp.toString());
       final nowSeconds = DateTime.now().millisecondsSinceEpoch ~/ 1000;
 
       return nowSeconds >= expSeconds;

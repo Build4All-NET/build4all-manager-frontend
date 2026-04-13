@@ -38,17 +38,23 @@ class AuthInterceptor extends Interceptor {
 
     try {
       final refresh = (await jwtStore.readRefreshToken())?.trim() ?? '';
-      if (refresh.isEmpty) throw Exception('NO_REFRESH');
+      if (refresh.isEmpty) {
+        throw Exception('NO_REFRESH');
+      }
 
       final res = await api.refresh(refresh);
       final data = res.data;
 
-      if (data is! Map) throw Exception('BAD_REFRESH_RESPONSE');
+      if (data is! Map) {
+        throw Exception('BAD_REFRESH_RESPONSE');
+      }
 
-      final newToken = (data['token'] ?? '').toString();
-      final newRefresh = (data['refreshToken'] ?? '').toString();
+      final newToken = (data['token'] ?? '').toString().trim();
+      final newRefresh = (data['refreshToken'] ?? '').toString().trim();
 
-      if (newToken.isEmpty || newRefresh.isEmpty) throw Exception('BAD_REFRESH');
+      if (newToken.isEmpty || newRefresh.isEmpty) {
+        throw Exception('BAD_REFRESH');
+      }
 
       final (_, role) = await jwtStore.read();
 
@@ -61,12 +67,16 @@ class AuthInterceptor extends Interceptor {
       DioClient.setToken(newToken);
 
       for (final w in _waiters) {
-        if (!w.isCompleted) w.complete();
+        if (!w.isCompleted) {
+          w.complete();
+        }
       }
       _waiters.clear();
     } catch (e) {
       for (final w in _waiters) {
-        if (!w.isCompleted) w.completeError(e);
+        if (!w.isCompleted) {
+          w.completeError(e);
+        }
       }
       _waiters.clear();
       rethrow;
@@ -76,7 +86,10 @@ class AuthInterceptor extends Interceptor {
   }
 
   @override
-  void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
+  void onRequest(
+    RequestOptions options,
+    RequestInterceptorHandler handler,
+  ) async {
     final (token, _) = await jwtStore.read();
     final t = token.trim();
 
@@ -88,62 +101,71 @@ class AuthInterceptor extends Interceptor {
     handler.next(options);
   }
 
- @override
-void onError(DioException err, ErrorInterceptorHandler handler) async {
-  final status = err.response?.statusCode ?? 0;
+  @override
+  void onError(DioException err, ErrorInterceptorHandler handler) async {
+    final status = err.response?.statusCode ?? 0;
 
-  // ✅ refresh ONLY on 401
-  if (status != 401 || _isAuthPath(err.requestOptions)) {
-    return handler.next(err);
-  }
-
-  // ✅ avoid infinite loop
-  if (err.requestOptions.extra['__retried'] == true) {
-    return handler.next(err);
-  }
-
-  // ✅ if request had no auth at all, don't try refresh
-  final authHeader =
-      (err.requestOptions.headers['Authorization'] ?? '').toString().trim();
-  if (authHeader.isEmpty) {
-    return handler.next(err);
-  }
-
-  try {
-    await _refresh();
-
-    final retryReq = err.requestOptions;
-    retryReq.extra['__retried'] = true;
-
-    final dio = DioClient.ensure();
-    final res = await dio.fetch(retryReq);
-
-    return handler.resolve(res);
-  } catch (e) {
-    // ✅ clear session ONLY if refresh itself is truly invalid
-    final shouldClear = _shouldClearAfterRefreshFailure(e);
-
-    if (shouldClear) {
-      await jwtStore.clear();
-      DioClient.clearToken();
+    // Refresh only on protected-request 401
+    if (status != 401 || _isAuthPath(err.requestOptions)) {
+      return handler.next(err);
     }
 
-    return handler.next(err);
+    // Avoid infinite retry loop
+    if (err.requestOptions.extra['__retried'] == true) {
+      return handler.next(err);
+    }
+
+    // If request had no auth header, don't try refresh
+    final authHeader =
+        (err.requestOptions.headers['Authorization'] ?? '').toString().trim();
+
+    if (authHeader.isEmpty) {
+      return handler.next(err);
+    }
+
+    try {
+      await _refresh();
+
+      final retryReq = err.requestOptions;
+      retryReq.extra['__retried'] = true;
+
+      final dio = DioClient.ensure();
+      final res = await dio.fetch(retryReq);
+
+      return handler.resolve(res);
+    } catch (e) {
+      final shouldClear = _shouldClearAfterRefreshFailure(e);
+
+      if (shouldClear) {
+        await jwtStore.clear();
+        DioClient.clearToken();
+      }
+
+      return handler.next(err);
+    }
   }
-}
 
-bool _shouldClearAfterRefreshFailure(Object e) {
-  if (e is DioException) {
-    final s = e.response?.statusCode ?? 0;
+  bool _shouldClearAfterRefreshFailure(Object e) {
+    if (e is DioException) {
+      final status = e.response?.statusCode ?? 0;
 
-    // refresh endpoint said token is invalid / unauthorized
-    if (s == 401) return true;
+      // Refresh token truly rejected by backend
+      if (status == 401 || status == 403) {
+        return true;
+      }
+
+      // timeout / no internet / 500 / backend down:
+      // do NOT wipe saved session
+      return false;
+    }
+
+    final msg = e.toString().toUpperCase();
+
+    return msg.contains('NO_REFRESH') ||
+        msg.contains('BAD_REFRESH') ||
+        msg.contains('BAD_REFRESH_RESPONSE') ||
+        msg.contains('MISSING_TOKENS') ||
+        msg.contains('INVALID_REFRESH') ||
+        msg.contains('REFRESH TOKEN');
   }
-
-  final msg = e.toString().toUpperCase();
-
-  return msg.contains('NO_REFRESH') ||
-      msg.contains('BAD_REFRESH') ||
-      msg.contains('BAD_REFRESH_RESPONSE');
-}
 }

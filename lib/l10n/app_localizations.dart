@@ -6438,6 +6438,210 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Upload now'**
   String get owner_publish_assets_upload_now;
+
+  /// No description provided for @owner_proj_wholesale_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Wholesale'**
+  String get owner_proj_wholesale_title;
+
+  /// No description provided for @owner_proj_wholesale_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Create and manage a wholesale platform for products, bulk orders, and retailer operations.'**
+  String get owner_proj_wholesale_desc;
+
+  /// No description provided for @owner_proj_municipality_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Municipality'**
+  String get owner_proj_municipality_title;
+
+  /// No description provided for @owner_proj_municipality_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Create and manage a municipality app for complaints, requests, announcements, and public services.'**
+  String get owner_proj_municipality_desc;
+
+  /// No description provided for @owner_proj_details_headline_wholesale.
+  ///
+  /// In en, this message translates to:
+  /// **'Run bulk orders and retailer operations with confidence.'**
+  String get owner_proj_details_headline_wholesale;
+
+  /// No description provided for @owner_proj_details_subhead_wholesale.
+  ///
+  /// In en, this message translates to:
+  /// **'Designed for distributors, resellers, and businesses handling large-volume orders.'**
+  String get owner_proj_details_subhead_wholesale;
+
+  /// No description provided for @owner_proj_details_wholesale_h1.
+  ///
+  /// In en, this message translates to:
+  /// **'Bulk pricing and quantity tiers'**
+  String get owner_proj_details_wholesale_h1;
+
+  /// No description provided for @owner_proj_details_wholesale_h2.
+  ///
+  /// In en, this message translates to:
+  /// **'Retailer account management'**
+  String get owner_proj_details_wholesale_h2;
+
+  /// No description provided for @owner_proj_details_wholesale_h3.
+  ///
+  /// In en, this message translates to:
+  /// **'Quote and invoice workflows'**
+  String get owner_proj_details_wholesale_h3;
+
+  /// No description provided for @owner_proj_details_wholesale_h4.
+  ///
+  /// In en, this message translates to:
+  /// **'Stock visibility across warehouses'**
+  String get owner_proj_details_wholesale_h4;
+
+  /// No description provided for @owner_proj_details_wholesale_s1_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Retailer dashboard'**
+  String get owner_proj_details_wholesale_s1_title;
+
+  /// No description provided for @owner_proj_details_wholesale_s1_sub.
+  ///
+  /// In en, this message translates to:
+  /// **'Track orders, balances, and account activity in one place.'**
+  String get owner_proj_details_wholesale_s1_sub;
+
+  /// No description provided for @owner_proj_details_wholesale_s2_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Bulk order flow'**
+  String get owner_proj_details_wholesale_s2_title;
+
+  /// No description provided for @owner_proj_details_wholesale_s2_sub.
+  ///
+  /// In en, this message translates to:
+  /// **'Large basket ordering with fast review and confirmation.'**
+  String get owner_proj_details_wholesale_s2_sub;
+
+  /// No description provided for @owner_proj_details_wholesale_m1.
+  ///
+  /// In en, this message translates to:
+  /// **'Tiered pricing and minimum order quantities'**
+  String get owner_proj_details_wholesale_m1;
+
+  /// No description provided for @owner_proj_details_wholesale_m2.
+  ///
+  /// In en, this message translates to:
+  /// **'Quote approvals and invoice generation'**
+  String get owner_proj_details_wholesale_m2;
+
+  /// No description provided for @owner_proj_details_wholesale_m3.
+  ///
+  /// In en, this message translates to:
+  /// **'Warehouse stock and fulfillment tools'**
+  String get owner_proj_details_wholesale_m3;
+
+  /// No description provided for @owner_proj_details_wholesale_i1.
+  ///
+  /// In en, this message translates to:
+  /// **'Wholesale buyers move faster when reorder flows are simplified.'**
+  String get owner_proj_details_wholesale_i1;
+
+  /// No description provided for @owner_proj_details_wholesale_i2.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear stock and pricing reduce friction in large-volume sales.'**
+  String get owner_proj_details_wholesale_i2;
+
+  /// No description provided for @owner_proj_details_headline_municipality.
+  ///
+  /// In en, this message translates to:
+  /// **'Deliver public services through one trusted mobile experience.'**
+  String get owner_proj_details_headline_municipality;
+
+  /// No description provided for @owner_proj_details_subhead_municipality.
+  ///
+  /// In en, this message translates to:
+  /// **'Built for municipalities handling complaints, requests, announcements, and resident communication.'**
+  String get owner_proj_details_subhead_municipality;
+
+  /// No description provided for @owner_proj_details_municipality_h1.
+  ///
+  /// In en, this message translates to:
+  /// **'Complaint and issue reporting'**
+  String get owner_proj_details_municipality_h1;
+
+  /// No description provided for @owner_proj_details_municipality_h2.
+  ///
+  /// In en, this message translates to:
+  /// **'Appointments and service requests'**
+  String get owner_proj_details_municipality_h2;
+
+  /// No description provided for @owner_proj_details_municipality_h3.
+  ///
+  /// In en, this message translates to:
+  /// **'City announcements and alerts'**
+  String get owner_proj_details_municipality_h3;
+
+  /// No description provided for @owner_proj_details_municipality_h4.
+  ///
+  /// In en, this message translates to:
+  /// **'Resident engagement in one place'**
+  String get owner_proj_details_municipality_h4;
+
+  /// No description provided for @owner_proj_details_municipality_s1_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Citizen request center'**
+  String get owner_proj_details_municipality_s1_title;
+
+  /// No description provided for @owner_proj_details_municipality_s1_sub.
+  ///
+  /// In en, this message translates to:
+  /// **'Residents submit issues and follow request status clearly.'**
+  String get owner_proj_details_municipality_s1_sub;
+
+  /// No description provided for @owner_proj_details_municipality_s2_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Announcements hub'**
+  String get owner_proj_details_municipality_s2_title;
+
+  /// No description provided for @owner_proj_details_municipality_s2_sub.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish updates, notices, and emergency alerts instantly.'**
+  String get owner_proj_details_municipality_s2_sub;
+
+  /// No description provided for @owner_proj_details_municipality_m1.
+  ///
+  /// In en, this message translates to:
+  /// **'Complaint tickets with status tracking'**
+  String get owner_proj_details_municipality_m1;
+
+  /// No description provided for @owner_proj_details_municipality_m2.
+  ///
+  /// In en, this message translates to:
+  /// **'Public notices, alerts, and event communication'**
+  String get owner_proj_details_municipality_m2;
+
+  /// No description provided for @owner_proj_details_municipality_m3.
+  ///
+  /// In en, this message translates to:
+  /// **'Service booking and request routing'**
+  String get owner_proj_details_municipality_m3;
+
+  /// No description provided for @owner_proj_details_municipality_i1.
+  ///
+  /// In en, this message translates to:
+  /// **'Residents trust systems that make follow-up visible and simple.'**
+  String get owner_proj_details_municipality_i1;
+
+  /// No description provided for @owner_proj_details_municipality_i2.
+  ///
+  /// In en, this message translates to:
+  /// **'Fast digital communication improves response quality across services.'**
+  String get owner_proj_details_municipality_i2;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

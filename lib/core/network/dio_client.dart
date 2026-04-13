@@ -1,6 +1,3 @@
-import 'package:build4all_manager/core/network/auth_interceptor.dart';
-import 'package:build4all_manager/features/auth/data/datasources/jwt_local_datasource.dart';
-import 'package:build4all_manager/features/auth/data/services/auth_api.dart';
 import 'package:dio/dio.dart';
 import 'package:build4all_manager/core/network/api_config.dart';
 import 'package:build4all_manager/core/network/globals.dart' as g;
@@ -17,25 +14,21 @@ class DioClient {
     // baseUrl: http://host:8080/api
     g.appServerRoot = cfg.baseUrl;
 
-    // ✅ init server status controller (for the popup auto-retry)
+    // init server status controller (for popup auto-retry)
     ServerStatusController.init(baseUrl: cfg.baseUrl);
-
 
     final client = ApiClient(cfg);
     g.appDio = client.dio;
 
-    // ✅ Add global interceptor once
+    // add global interceptor once
     final dio = ensure();
     final alreadyAdded =
         dio.interceptors.any((i) => i is GlobalErrorInterceptor);
+
     if (!alreadyAdded) {
       dio.interceptors.add(GlobalErrorInterceptor());
     }
-
-   
   }
-
-  
 
   static Dio ensure() {
     final dio = g.appDio;
@@ -46,8 +39,9 @@ class DioClient {
   }
 
   static void setToken(String token) {
-    ensure().options.headers['Authorization'] = 'Bearer ${token.trim()}';
-    g.authToken = token.trim();
+    final cleaned = token.trim();
+    ensure().options.headers['Authorization'] = 'Bearer $cleaned';
+    g.authToken = cleaned;
   }
 
   static void clearToken() {

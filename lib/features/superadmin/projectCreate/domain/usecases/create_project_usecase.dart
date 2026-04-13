@@ -11,7 +11,7 @@ class CreateProjectUseCase {
     required String projectName,
     String? description,
     bool? active,
-    required ProjectType projectType,
+    required String projectType,
   }) {
     return repo.createProject(
       token: token,

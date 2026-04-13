@@ -3225,11 +3225,113 @@ class AppLocalizationsAr extends AppLocalizations {
   String get owner_nav_notifications => 'الإشعارات';
 
   @override
-  String get owner_publish_price_free => 'Free';
+  String get owner_publish_price_free => 'مجاني';
 
   @override
-  String get owner_publish_price_paid => 'Paid';
+  String get owner_publish_price_paid => 'مدفوع';
 
   @override
-  String get owner_publish_assets_upload_now => 'Upload now';
+  String get owner_publish_assets_upload_now => 'رفع الأصول الآن';
+
+  @override
+  String get owner_proj_wholesale_title => 'الجملة';
+
+  @override
+  String get owner_proj_wholesale_desc => 'أنشئ وأدر منصة جملة للمنتجات والطلبات الكبيرة وإدارة التجار.';
+
+  @override
+  String get owner_proj_municipality_title => 'البلدية';
+
+  @override
+  String get owner_proj_municipality_desc => 'أنشئ وأدر تطبيق بلدية للشكاوى والطلبات والإعلانات والخدمات العامة.';
+
+  @override
+  String get owner_proj_details_headline_wholesale => 'أدر الطلبات الكبيرة وعمليات تجار الجملة بثقة.';
+
+  @override
+  String get owner_proj_details_subhead_wholesale => 'مصمم للموزعين والبائعين والشركات التي تتعامل مع الطلبات كبيرة الحجم.';
+
+  @override
+  String get owner_proj_details_wholesale_h1 => 'أسعار جملة وشرائح كميات';
+
+  @override
+  String get owner_proj_details_wholesale_h2 => 'إدارة حسابات التجار';
+
+  @override
+  String get owner_proj_details_wholesale_h3 => 'طلبات عروض الأسعار والفواتير';
+
+  @override
+  String get owner_proj_details_wholesale_h4 => 'عرض المخزون عبر المستودعات';
+
+  @override
+  String get owner_proj_details_wholesale_s1_title => 'لوحة التاجر';
+
+  @override
+  String get owner_proj_details_wholesale_s1_sub => 'متابعة الطلبات والأرصدة ونشاط الحساب في مكان واحد.';
+
+  @override
+  String get owner_proj_details_wholesale_s2_title => 'تدفق طلبات الجملة';
+
+  @override
+  String get owner_proj_details_wholesale_s2_sub => 'طلب كميات كبيرة مع مراجعة وتأكيد سريع.';
+
+  @override
+  String get owner_proj_details_wholesale_m1 => 'تسعير شرائحي وحد أدنى للطلب';
+
+  @override
+  String get owner_proj_details_wholesale_m2 => 'اعتماد عروض الأسعار وإنشاء الفواتير';
+
+  @override
+  String get owner_proj_details_wholesale_m3 => 'أدوات المخزون والتنفيذ في المستودعات';
+
+  @override
+  String get owner_proj_details_wholesale_i1 => 'مشترو الجملة ينجزون أسرع عندما تكون إعادة الطلبات أبسط.';
+
+  @override
+  String get owner_proj_details_wholesale_i2 => 'وضوح الأسعار والمخزون يقلل الاحتكاك في مبيعات الكميات الكبيرة.';
+
+  @override
+  String get owner_proj_details_headline_municipality => 'قدّم الخدمات العامة عبر تجربة موثوقة واحدة على الهاتف.';
+
+  @override
+  String get owner_proj_details_subhead_municipality => 'مخصص للبلديات لإدارة الشكاوى والطلبات والإعلانات والتواصل مع السكان.';
+
+  @override
+  String get owner_proj_details_municipality_h1 => 'الإبلاغ عن الشكاوى والمشكلات';
+
+  @override
+  String get owner_proj_details_municipality_h2 => 'المواعيد وطلبات الخدمات';
+
+  @override
+  String get owner_proj_details_municipality_h3 => 'إعلانات وتنبيهات المدينة';
+
+  @override
+  String get owner_proj_details_municipality_h4 => 'تفاعل السكان في مكان واحد';
+
+  @override
+  String get owner_proj_details_municipality_s1_title => 'مركز طلبات المواطنين';
+
+  @override
+  String get owner_proj_details_municipality_s1_sub => 'يمكن للسكان إرسال الطلبات ومتابعة حالتها بوضوح.';
+
+  @override
+  String get owner_proj_details_municipality_s2_title => 'مركز الإعلانات';
+
+  @override
+  String get owner_proj_details_municipality_s2_sub => 'انشر التحديثات والإشعارات والتنبيهات الطارئة فورًا.';
+
+  @override
+  String get owner_proj_details_municipality_m1 => 'تذاكر شكاوى مع تتبع الحالة';
+
+  @override
+  String get owner_proj_details_municipality_m2 => 'إشعارات عامة وتنبيهات وتواصل حول الفعاليات';
+
+  @override
+  String get owner_proj_details_municipality_m3 => 'حجز الخدمات وتوجيه الطلبات';
+
+  @override
+  String get owner_proj_details_municipality_i1 => 'يثق السكان أكثر بالأنظمة التي تجعل المتابعة واضحة وبسيطة.';
+
+  @override
+  String get owner_proj_details_municipality_i2 => 'التواصل الرقمي السريع يحسن جودة الاستجابة عبر الخدمات.';
 }

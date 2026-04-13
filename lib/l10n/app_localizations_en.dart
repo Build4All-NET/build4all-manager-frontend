@@ -3232,4 +3232,106 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get owner_publish_assets_upload_now => 'Upload now';
+
+  @override
+  String get owner_proj_wholesale_title => 'Wholesale';
+
+  @override
+  String get owner_proj_wholesale_desc => 'Create and manage a wholesale platform for products, bulk orders, and retailer operations.';
+
+  @override
+  String get owner_proj_municipality_title => 'Municipality';
+
+  @override
+  String get owner_proj_municipality_desc => 'Create and manage a municipality app for complaints, requests, announcements, and public services.';
+
+  @override
+  String get owner_proj_details_headline_wholesale => 'Run bulk orders and retailer operations with confidence.';
+
+  @override
+  String get owner_proj_details_subhead_wholesale => 'Designed for distributors, resellers, and businesses handling large-volume orders.';
+
+  @override
+  String get owner_proj_details_wholesale_h1 => 'Bulk pricing and quantity tiers';
+
+  @override
+  String get owner_proj_details_wholesale_h2 => 'Retailer account management';
+
+  @override
+  String get owner_proj_details_wholesale_h3 => 'Quote and invoice workflows';
+
+  @override
+  String get owner_proj_details_wholesale_h4 => 'Stock visibility across warehouses';
+
+  @override
+  String get owner_proj_details_wholesale_s1_title => 'Retailer dashboard';
+
+  @override
+  String get owner_proj_details_wholesale_s1_sub => 'Track orders, balances, and account activity in one place.';
+
+  @override
+  String get owner_proj_details_wholesale_s2_title => 'Bulk order flow';
+
+  @override
+  String get owner_proj_details_wholesale_s2_sub => 'Large basket ordering with fast review and confirmation.';
+
+  @override
+  String get owner_proj_details_wholesale_m1 => 'Tiered pricing and minimum order quantities';
+
+  @override
+  String get owner_proj_details_wholesale_m2 => 'Quote approvals and invoice generation';
+
+  @override
+  String get owner_proj_details_wholesale_m3 => 'Warehouse stock and fulfillment tools';
+
+  @override
+  String get owner_proj_details_wholesale_i1 => 'Wholesale buyers move faster when reorder flows are simplified.';
+
+  @override
+  String get owner_proj_details_wholesale_i2 => 'Clear stock and pricing reduce friction in large-volume sales.';
+
+  @override
+  String get owner_proj_details_headline_municipality => 'Deliver public services through one trusted mobile experience.';
+
+  @override
+  String get owner_proj_details_subhead_municipality => 'Built for municipalities handling complaints, requests, announcements, and resident communication.';
+
+  @override
+  String get owner_proj_details_municipality_h1 => 'Complaint and issue reporting';
+
+  @override
+  String get owner_proj_details_municipality_h2 => 'Appointments and service requests';
+
+  @override
+  String get owner_proj_details_municipality_h3 => 'City announcements and alerts';
+
+  @override
+  String get owner_proj_details_municipality_h4 => 'Resident engagement in one place';
+
+  @override
+  String get owner_proj_details_municipality_s1_title => 'Citizen request center';
+
+  @override
+  String get owner_proj_details_municipality_s1_sub => 'Residents submit issues and follow request status clearly.';
+
+  @override
+  String get owner_proj_details_municipality_s2_title => 'Announcements hub';
+
+  @override
+  String get owner_proj_details_municipality_s2_sub => 'Publish updates, notices, and emergency alerts instantly.';
+
+  @override
+  String get owner_proj_details_municipality_m1 => 'Complaint tickets with status tracking';
+
+  @override
+  String get owner_proj_details_municipality_m2 => 'Public notices, alerts, and event communication';
+
+  @override
+  String get owner_proj_details_municipality_m3 => 'Service booking and request routing';
+
+  @override
+  String get owner_proj_details_municipality_i1 => 'Residents trust systems that make follow-up visible and simple.';
+
+  @override
+  String get owner_proj_details_municipality_i2 => 'Fast digital communication improves response quality across services.';
 }

@@ -35,28 +35,49 @@ class OwnerHomeBloc extends Bloc<OwnerHomeEvent, OwnerHomeState> {
         case 'E_COMMERCE':
         case 'SHOP':
           return 'ecommerce';
+
         case 'ACTIVITIES':
         case 'ACTIVITY':
           return 'activities';
+
         case 'GYM':
         case 'FITNESS':
           return 'gym';
+
         case 'SERVICES':
         case 'SERVICE':
           return 'services';
+
+        case 'WHOLESALE':
+        case 'WHOLE_SALE':
+          return 'wholesale';
+
+        case 'MUNICIPALITY':
+        case 'MUNICIPAL':
+          return 'municipality';
       }
     }
 
     final raw = '${p.name} ${p.description}'.toLowerCase();
+
     if (raw.contains('ecom') || raw.contains('shop')) return 'ecommerce';
     if (raw.contains('activ')) return 'activities';
     if (raw.contains('gym') || raw.contains('fitness')) return 'gym';
     if (raw.contains('service')) return 'services';
+    if (raw.contains('wholesale') || raw.contains('whole sale')) {
+      return 'wholesale';
+    }
+    if (raw.contains('municipality') || raw.contains('municipal')) {
+      return 'municipality';
+    }
 
     return null;
   }
 
-  Future<void> _onLoad(OwnerHomeEvent e, Emitter<OwnerHomeState> emit) async {
+  Future<void> _onLoad(
+    OwnerHomeEvent e,
+    Emitter<OwnerHomeState> emit,
+  ) async {
     emit(state.copyWith(
       loading: true,
       error: null,
@@ -85,11 +106,20 @@ class OwnerHomeBloc extends Bloc<OwnerHomeEvent, OwnerHomeState> {
       final activeProjects = projects.where((p) => p.active == true).toList();
 
       final Map<String, int> kindToProjectId = {};
+
+    
       for (final p in activeProjects) {
         final k = _mapProjectToKind(p);
-        if (k == null) continue;
+
+        if (k == null) {
+         
+          continue;
+        }
+
         kindToProjectId.putIfAbsent(k, () => p.id);
       }
+
+     
 
       emit(state.copyWith(
         loading: false,
@@ -101,6 +131,8 @@ class OwnerHomeBloc extends Bloc<OwnerHomeEvent, OwnerHomeState> {
         error: null,
       ));
     } catch (err) {
+    
+
       emit(state.copyWith(
         loading: false,
         error: ApiErrorHandler.message(err),

@@ -12,7 +12,7 @@ class ProjectsApi {
     required String projectName,
     String? description,
     bool? active,
-    String? projectType, // "ECOMMERCE" | "SERVICES" | "ACTIVITIES"
+    String? projectType,
   }) async {
     final url = "$baseUrl/projects";
 
@@ -39,5 +39,28 @@ class ProjectsApi {
     );
 
     return ProjectDto.fromJson(res.data as Map<String, dynamic>);
+  }
+
+  /// Fetch all possible project types from backend.
+  /// Expected response:
+  /// ["ECOMMERCE","GYM","WHOLESALE","MUNICIPALITY","SERVICES","ACTIVITIES"]
+  Future<List<String>> fetchProjectTypes({
+    required String token,
+  }) async {
+    final url = "$baseUrl/projects/types";
+
+    final res = await dio.get(
+      url,
+      options: Options(headers: {
+        "Authorization": "Bearer $token",
+      }),
+    );
+
+    final data = res.data;
+    if (data is List) {
+      return data.map((e) => e.toString().trim()).where((e) => e.isNotEmpty).toList();
+    }
+
+    throw Exception("Unexpected project types response");
   }
 }

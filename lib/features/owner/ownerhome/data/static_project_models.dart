@@ -23,7 +23,9 @@ class ProjectTemplate {
   });
 }
 
-/// Local-only static list (no backend).
+/// Static platform project templates shown in Owner Home.
+/// These are UI templates only. The real backend projectId is resolved dynamically
+/// from the platform projects API and mapped by kind.
 const projectTemplates = <ProjectTemplate>[
   ProjectTemplate(
     id: 2,
@@ -33,6 +35,36 @@ const projectTemplates = <ProjectTemplate>[
     ctaKey: 'owner_proj_open',
     route: '/owner/projects',
     icon: Icons.shopping_bag_rounded,
-    tint: ProjectPalette.gym, // ✅ FORCE ecommerce = gym green everywhere
+    tint: ProjectPalette.gym,
+  ),
+ ProjectTemplate(
+  id: 3,
+  kind: 'gym',
+  titleKey: 'owner_proj_gym_title',
+  descKey: 'owner_proj_gym_desc',
+  ctaKey: 'owner_proj_open',
+  route: '/owner/projects',
+  icon: Icons.fitness_center_rounded,
+  tint: const Color(0xFFF59E0B),
+),
+  ProjectTemplate(
+    id: 4,
+    kind: 'wholesale',
+    titleKey: 'owner_proj_wholesale_title',
+    descKey: 'owner_proj_wholesale_desc',
+    ctaKey: 'owner_proj_open',
+    route: '/owner/projects',
+    icon: Icons.inventory_2_rounded,
+    tint: Color(0xFF2563EB),
+  ),
+  ProjectTemplate(
+    id: 5,
+    kind: 'municipality',
+    titleKey: 'owner_proj_municipality_title',
+    descKey: 'owner_proj_municipality_desc',
+    ctaKey: 'owner_proj_open',
+    route: '/owner/projects',
+    icon: Icons.location_city_rounded,
+    tint: Color(0xFF7C3AED),
   ),
 ];

@@ -482,6 +482,10 @@ String? _prefillName(String id) {
       return 'My Shop';
     case 'gym':
       return 'My Gym App';
+    case 'wholesale':
+      return 'My Wholesale App';
+    case 'municipality':
+      return 'My Municipality App';
     case 'services':
       return 'My Services App';
     default:
@@ -497,6 +501,10 @@ String _projectTitle(ProjectTemplate tpl, AppLocalizations l10n) {
       return l10n.owner_proj_ecom_title;
     case 'owner_proj_gym_title':
       return l10n.owner_proj_gym_title;
+    case 'owner_proj_wholesale_title':
+      return l10n.owner_proj_wholesale_title;
+    case 'owner_proj_municipality_title':
+      return l10n.owner_proj_municipality_title;
     case 'owner_proj_services_title':
       return l10n.owner_proj_services_title;
     default:

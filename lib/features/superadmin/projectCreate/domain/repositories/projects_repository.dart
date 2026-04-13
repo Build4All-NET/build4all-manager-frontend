@@ -6,6 +6,10 @@ abstract class ProjectsRepository {
     required String projectName,
     String? description,
     bool? active,
-    required ProjectType projectType,
+    required String projectType,
+  });
+
+  Future<List<String>> fetchProjectTypes({
+    required String token,
   });
 }

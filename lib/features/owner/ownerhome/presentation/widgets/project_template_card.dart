@@ -22,7 +22,7 @@ class ProjectTemplateCard extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
 
-    // ✅ FORCE ECOMMERCE TO GYM GREEN (even if tpl.tint exists)
+    // Keep ecommerce forced to gym green as requested.
     final tint = (tpl.kind.toLowerCase() == 'ecommerce')
         ? ProjectPalette.gym
         : (tpl.tint ?? _pickTintFor(tpl.kind, cs));
@@ -39,7 +39,6 @@ class ProjectTemplateCard extends StatelessWidget {
       builder: (context, c) {
         final cardW = c.maxWidth;
 
-        // ✅ card-based responsiveness (better than screen width)
         final compact = cardW < 190;
         final comfy = cardW >= 230;
 
@@ -63,7 +62,7 @@ class ProjectTemplateCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(18),
           child: InkWell(
             borderRadius: BorderRadius.circular(18),
-            onTap: onOpen, // always open details
+            onTap: onOpen,
             child: Container(
               padding: EdgeInsets.all(pad),
               decoration: BoxDecoration(
@@ -81,10 +80,8 @@ class ProjectTemplateCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _IconBadge(icon: tpl.icon, tint: tint, dimmed: !isAvailable),
-
                   SizedBox(height: compact ? 8 : 10),
 
-                  // ✅ Title (auto-shrinks)
                   AutoSizeText(
                     _tr(l10n, tpl.titleKey),
                     style: titleStyle,
@@ -96,7 +93,6 @@ class ProjectTemplateCard extends StatelessWidget {
 
                   SizedBox(height: compact ? 6 : 8),
 
-                  // ✅ Description (auto-shrinks across languages)
                   Flexible(
                     child: AutoSizeText(
                       _tr(l10n, tpl.descKey),
@@ -111,7 +107,6 @@ class ProjectTemplateCard extends StatelessWidget {
 
                   SizedBox(height: compact ? 10 : 12),
 
-                  // ✅ CTA button (fixed height, auto-shrinks text)
                   SizedBox(
                     width: double.infinity,
                     height: compact ? 40 : 44,
@@ -149,20 +144,24 @@ class ProjectTemplateCard extends StatelessWidget {
     );
   }
 
-  Color _pickTintFor(String id, ColorScheme cs) {
-    switch (id) {
-      case 'activities':
-        return ProjectPalette.activities;
-      case 'ecommerce':
-        return ProjectPalette.gym; // ✅ ecommerce follows gym green
-      case 'gym':
-        return ProjectPalette.gym;
-      case 'services':
-        return ProjectPalette.services;
-      default:
-        return cs.primary;
-    }
+ Color _pickTintFor(String id, ColorScheme cs) {
+  switch (id.toLowerCase()) {
+    case 'activities':
+      return ProjectPalette.activities;
+    case 'ecommerce':
+      return ProjectPalette.gym;
+    case 'gym':
+      return const Color(0xFFF59E0B);
+    case 'services':
+      return ProjectPalette.services;
+    case 'wholesale':
+      return const Color(0xFF2563EB);
+    case 'municipality':
+      return const Color(0xFF7C3AED);
+    default:
+      return cs.primary;
   }
+}
 
   String _tr(AppLocalizations l10n, String key) {
     switch (key) {
@@ -185,6 +184,16 @@ class ProjectTemplateCard extends StatelessWidget {
         return l10n.owner_proj_services_title;
       case 'owner_proj_services_desc':
         return l10n.owner_proj_services_desc;
+
+      case 'owner_proj_wholesale_title':
+        return l10n.owner_proj_wholesale_title;
+      case 'owner_proj_wholesale_desc':
+        return l10n.owner_proj_wholesale_desc;
+
+      case 'owner_proj_municipality_title':
+        return l10n.owner_proj_municipality_title;
+      case 'owner_proj_municipality_desc':
+        return l10n.owner_proj_municipality_desc;
 
       case 'owner_proj_open':
         return l10n.owner_proj_open;

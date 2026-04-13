@@ -10,12 +10,10 @@ import 'package:build4all_manager/shared/widgets/app_toast.dart';
 import '../../../tutorial/presentation/superadmin/bloc/tutorial_video_bloc.dart';
 import '../../data/repositories/projects_repository_impl.dart';
 import '../../data/services/projects_api.dart';
-import '../../domain/entities/project.dart';
 import '../../domain/usecases/create_project_usecase.dart';
 import '../bloc/create_project_bloc.dart';
 import '../bloc/create_project_event.dart';
 import '../bloc/create_project_state.dart';
-import '../widgets/project_type_chip.dart';
 
 import '../../../tutorial/data/services/tutorial_api.dart';
 import '../../../tutorial/data/repositories/tutorial_repository_impl.dart';
@@ -41,14 +39,60 @@ class CreateProjectScreen extends StatefulWidget {
 class _CreateProjectScreenState extends State<CreateProjectScreen> {
   final _name = TextEditingController();
   final _desc = TextEditingController();
+
   bool _active = true;
-  ProjectType _type = ProjectType.ECOMMERCE;
+
+  // Project types now come from backend, so this is dynamic.
+  List<String> _availableTypes = [];
+  String? _selectedType;
+  bool _loadingTypes = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProjectTypes();
+  }
 
   @override
   void dispose() {
     _name.dispose();
     _desc.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadProjectTypes() async {
+    final token = await widget.tokenProvider();
+
+    if (token == null || token.trim().isEmpty) {
+      if (!mounted) return;
+      setState(() {
+        _availableTypes = [];
+        _selectedType = null;
+        _loadingTypes = false;
+      });
+      return;
+    }
+
+    try {
+      final api = ProjectsApi(dio: widget.dio, baseUrl: widget.baseUrl);
+      final types = await api.fetchProjectTypes(token: token);
+
+      if (!mounted) return;
+      setState(() {
+        _availableTypes = types;
+        _selectedType = types.isNotEmpty ? types.first : null;
+        _loadingTypes = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _availableTypes = [];
+        _selectedType = null;
+        _loadingTypes = false;
+      });
+
+      AppToast.error(context, 'Failed to load project types');
+    }
   }
 
   @override
@@ -161,33 +205,45 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
                     ),
                     const SizedBox(height: 8),
 
-                    Wrap(
-                      spacing: 10,
-                      runSpacing: 10,
-                      children: [
-                        ProjectTypeChip(
-                          type: ProjectType.ECOMMERCE,
-                          selected: _type == ProjectType.ECOMMERCE,
-                          label: l10n.project_type_ecommerce,
-                          onTap: () =>
-                              setState(() => _type = ProjectType.ECOMMERCE),
+                    if (_loadingTypes)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                        child: Center(
+                          child: CircularProgressIndicator(),
                         ),
-                        ProjectTypeChip(
-                          type: ProjectType.SERVICES,
-                          selected: _type == ProjectType.SERVICES,
-                          label: l10n.project_type_services,
-                          onTap: () =>
-                              setState(() => _type = ProjectType.SERVICES),
+                      )
+                    else if (_availableTypes.isEmpty)
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .errorContainer
+                              .withOpacity(.35),
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                        ProjectTypeChip(
-                          type: ProjectType.ACTIVITIES,
-                          selected: _type == ProjectType.ACTIVITIES,
-                          label: l10n.project_type_activities,
-                          onTap: () =>
-                              setState(() => _type = ProjectType.ACTIVITIES),
+                        child: const Text(
+                          'No project types available from backend',
                         ),
-                      ],
-                    ),
+                      )
+                    else
+                      Wrap(
+                        spacing: 10,
+                        runSpacing: 10,
+                        children: _availableTypes.map((type) {
+                          final selected = _selectedType == type;
+
+                          return ChoiceChip(
+                            selected: selected,
+                            onSelected: loading
+                                ? null
+                                : (_) => setState(() => _selectedType = type),
+                            label: Text(type),
+                          );
+                        }).toList(),
+                      ),
+
                     const SizedBox(height: 12),
 
                     SwitchListTile(
@@ -202,7 +258,9 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
                     SizedBox(
                       width: double.infinity,
                       child: FilledButton.icon(
-                        onPressed: loading ? null : () => _submit(context),
+                        onPressed: (loading || _loadingTypes)
+                            ? null
+                            : () => _submit(context),
                         icon: loading
                             ? const SizedBox(
                                 width: 18,
@@ -228,11 +286,15 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
                             context
                                 .read<CreateProjectBloc>()
                                 .add(CreateProjectReset());
+
                             _name.clear();
                             _desc.clear();
+
                             setState(() {
                               _active = true;
-                              _type = ProjectType.ECOMMERCE;
+                              _selectedType = _availableTypes.isNotEmpty
+                                  ? _availableTypes.first
+                                  : null;
                             });
                           },
                           icon: const Icon(Icons.add),
@@ -259,12 +321,17 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
       return;
     }
 
+    if (_selectedType == null || _selectedType!.trim().isEmpty) {
+      AppToast.error(context, 'Please select a project type');
+      return;
+    }
+
     context.read<CreateProjectBloc>().add(
           CreateProjectSubmitted(
             projectName: name,
             description: desc.isEmpty ? null : desc,
             active: _active,
-            projectType: _type,
+            projectType: _selectedType!,
           ),
         );
   }

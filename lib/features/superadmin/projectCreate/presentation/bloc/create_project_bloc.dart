@@ -38,7 +38,6 @@ class CreateProjectBloc extends Bloc<CreateProjectEvent, CreateProjectState> {
 
       emit(CreateProjectSuccess(project));
     } catch (err) {
-      // Dio throws messy errors; keep it human
       emit(CreateProjectFailure(err.toString()));
     }
   }

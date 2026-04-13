@@ -1674,13 +1674,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get owner_publish_err_logo_required => 'Le logo est requis';
 
   @override
-  String get owner_publish_country_us => 'الولايات المتحدة';
+  String get owner_publish_country_us => 'États-Unis';
 
   @override
-  String get owner_publish_country_lb => 'لبنان';
+  String get owner_publish_country_lb => 'Liban';
 
   @override
-  String get owner_publish_country_fr => 'فرنسا';
+  String get owner_publish_country_fr => 'France';
 
   @override
   String get owner_publish_upload_assets => 'Uploader les assets (Icône + Captures)';
@@ -3094,82 +3094,82 @@ class AppLocalizationsFr extends AppLocalizations {
   String get palette_preview_primary_button => 'Bouton principal';
 
   @override
-  String get runtime_menu_type_title => 'نوع القائمة';
+  String get runtime_menu_type_title => 'Type de menu';
 
   @override
-  String get runtime_enabled_features_title => 'الميزات المفعلة';
+  String get runtime_enabled_features_title => 'Fonctionnalités activées';
 
   @override
-  String get runtime_navigation_title => 'التنقل';
+  String get runtime_navigation_title => 'Navigation';
 
   @override
-  String get runtime_navigation_subtitle => 'الرئيسية + السلة + الملف الشخصي مطلوبة. الاستكشاف اختياري.';
+  String get runtime_navigation_subtitle => 'Activer/désactiver pour afficher/masquer. Glisser les éléments activés pour réorganiser.';
 
   @override
-  String get runtime_home_sections_title => 'أقسام الصفحة الرئيسية';
+  String get runtime_home_sections_title => 'Sections d’accueil';
 
   @override
-  String get runtime_home_sections_subtitle => 'الأقسام التي تتطلب ميزات معطلة سيتم إخفاؤها تلقائيًا.';
+  String get runtime_home_sections_subtitle => 'Les sections qui nécessitent des fonctionnalités désactivées seront automatiquement masquées.';
 
   @override
-  String get runtime_menu_bottom => 'سفلية';
+  String get runtime_menu_bottom => 'Sous-menu';
 
   @override
-  String get runtime_menu_hamburger => 'هامبرغر';
+  String get runtime_menu_hamburger => 'Hamburger';
 
   @override
-  String get runtime_required => 'مطلوب';
+  String get runtime_required => 'Requis';
 
   @override
   String runtime_requires_features(Object features) {
-    return 'يتطلب: $features';
+    return 'Nécessite: $features';
   }
 
   @override
   String runtime_max_bottom_tabs(Object count) {
-    return 'الحد الأقصى $count تبويبات في القائمة السفلية';
+    return 'Le maximum $count onglets dans le menu du bas';
   }
 
   @override
-  String get runtime_pick_limit => 'اختر الحد';
+  String get runtime_pick_limit => 'Choisir la limite';
 
   @override
   String runtime_limit_value(Object count) {
-    return 'الحد $count';
+    return 'Limite : $count';
   }
 
   @override
-  String get runtime_section_header => 'الرأس';
+  String get runtime_section_header => 'En-tête';
 
   @override
-  String get runtime_section_search => 'بحث';
+  String get runtime_section_search => 'Recherche';
 
   @override
-  String get runtime_section_banner => 'البانر الرئيسي';
+  String get runtime_section_banner => 'Bannière';
 
   @override
-  String get runtime_section_categories => 'الفئات';
+  String get runtime_section_categories => 'Catégories';
 
   @override
-  String get runtime_section_hero_items => 'العناصر الرئيسية';
+  String get runtime_section_hero_items => 'Éléments principaux';
 
   @override
-  String get runtime_feature_items => 'العناصر';
+  String get runtime_feature_items => 'Éléments';
 
   @override
-  String get runtime_feature_booking => 'الحجوزات';
+  String get runtime_feature_booking => 'Réservations';
 
   @override
-  String get runtime_feature_reviews => 'المراجعات';
+  String get runtime_feature_reviews => 'Avis';
 
   @override
-  String get runtime_feature_orders => 'الطلبات';
+  String get runtime_feature_orders => 'Commandes';
 
   @override
-  String get runtime_feature_coupons => 'الكوبونات';
+  String get runtime_feature_coupons => 'Coupons';
 
   @override
-  String get runtime_feature_notifications => 'الإشعارات';
+  String get runtime_feature_notifications => 'Notifications';
 
   @override
   String get owner_projects_delete_title => 'Supprimer le projet';
@@ -3225,11 +3225,113 @@ class AppLocalizationsFr extends AppLocalizations {
   String get owner_nav_notifications => 'Notifications';
 
   @override
-  String get owner_publish_price_free => 'Free';
+  String get owner_publish_price_free => 'Gratuit';
 
   @override
-  String get owner_publish_price_paid => 'Paid';
+  String get owner_publish_price_paid => 'Payant';
 
   @override
-  String get owner_publish_assets_upload_now => 'Upload now';
+  String get owner_publish_assets_upload_now => 'Téléverser les ressources maintenant';
+
+  @override
+  String get owner_proj_wholesale_title => 'Commerce de gros';
+
+  @override
+  String get owner_proj_wholesale_desc => 'Créer et gérer une plateforme de commerce de gros pour les produits, les commandes en vrac et les opérations de détaillants.';
+
+  @override
+  String get owner_proj_municipality_title => 'Municipalité';
+
+  @override
+  String get owner_proj_municipality_desc => 'Créer et gérer une application municipale pour les plaintes, les demandes, les annonces et les services publics.';
+
+  @override
+  String get owner_proj_details_headline_wholesale => 'Run bulk orders and retailer operations with confidence.';
+
+  @override
+  String get owner_proj_details_subhead_wholesale => 'Designed for distributors, resellers, and businesses handling large-volume orders.';
+
+  @override
+  String get owner_proj_details_wholesale_h1 => 'Bulk pricing and quantity tiers';
+
+  @override
+  String get owner_proj_details_wholesale_h2 => 'Retailer account management';
+
+  @override
+  String get owner_proj_details_wholesale_h3 => 'Quote and invoice workflows';
+
+  @override
+  String get owner_proj_details_wholesale_h4 => 'Stock visibility across warehouses';
+
+  @override
+  String get owner_proj_details_wholesale_s1_title => 'Retailer dashboard';
+
+  @override
+  String get owner_proj_details_wholesale_s1_sub => 'Track orders, balances, and account activity in one place.';
+
+  @override
+  String get owner_proj_details_wholesale_s2_title => 'Bulk order flow';
+
+  @override
+  String get owner_proj_details_wholesale_s2_sub => 'Large basket ordering with fast review and confirmation.';
+
+  @override
+  String get owner_proj_details_wholesale_m1 => 'Tiered pricing and minimum order quantities';
+
+  @override
+  String get owner_proj_details_wholesale_m2 => 'Quote approvals and invoice generation';
+
+  @override
+  String get owner_proj_details_wholesale_m3 => 'Warehouse stock and fulfillment tools';
+
+  @override
+  String get owner_proj_details_wholesale_i1 => 'Wholesale buyers move faster when reorder flows are simplified.';
+
+  @override
+  String get owner_proj_details_wholesale_i2 => 'Clear stock and pricing reduce friction in large-volume sales.';
+
+  @override
+  String get owner_proj_details_headline_municipality => 'Deliver public services through one trusted mobile experience.';
+
+  @override
+  String get owner_proj_details_subhead_municipality => 'Built for municipalities handling complaints, requests, announcements, and resident communication.';
+
+  @override
+  String get owner_proj_details_municipality_h1 => 'Complaint and issue reporting';
+
+  @override
+  String get owner_proj_details_municipality_h2 => 'Appointments and service requests';
+
+  @override
+  String get owner_proj_details_municipality_h3 => 'City announcements and alerts';
+
+  @override
+  String get owner_proj_details_municipality_h4 => 'Resident engagement in one place';
+
+  @override
+  String get owner_proj_details_municipality_s1_title => 'Citizen request center';
+
+  @override
+  String get owner_proj_details_municipality_s1_sub => 'Residents submit issues and follow request status clearly.';
+
+  @override
+  String get owner_proj_details_municipality_s2_title => 'Announcements hub';
+
+  @override
+  String get owner_proj_details_municipality_s2_sub => 'Publish updates, notices, and emergency alerts instantly.';
+
+  @override
+  String get owner_proj_details_municipality_m1 => 'Complaint tickets with status tracking';
+
+  @override
+  String get owner_proj_details_municipality_m2 => 'Public notices, alerts, and event communication';
+
+  @override
+  String get owner_proj_details_municipality_m3 => 'Service booking and request routing';
+
+  @override
+  String get owner_proj_details_municipality_i1 => 'Residents trust systems that make follow-up visible and simple.';
+
+  @override
+  String get owner_proj_details_municipality_i2 => 'Fast digital communication improves response quality across services.';
 }
