@@ -1,23 +1,24 @@
 import 'package:dio/dio.dart';
-import 'package:build4all_manager/core/network/dio_client.dart';
 import 'package:build4all_manager/shared/utils/ApiErrorHandler.dart';
 
+import 'package:build4all_manager/core/auth/session_manager.dart';
 import 'package:build4all_manager/core/exceptions/auth_failure.dart';
-import 'package:http/http.dart';
 
 import '../../domain/entities/app_user.dart';
 import '../../domain/entities/auth_token.dart';
 import '../../domain/repositories/i_auth_repository.dart';
-import '../datasources/jwt_local_datasource.dart';
 import '../models/login_request_dto.dart';
 import '../models/login_response_dto.dart';
 import '../services/auth_api.dart';
 
 class AuthRepositoryImpl implements IAuthRepository {
   final AuthApi api;
-  final JwtLocalDataSource jwtStore;
+  final SessionManager sessionManager;
 
-  AuthRepositoryImpl({required this.api, required this.jwtStore});
+  AuthRepositoryImpl({
+    required this.api,
+    required this.sessionManager,
+  });
 
   @override
   Future<(AuthToken, AppUser)> login({
@@ -31,7 +32,7 @@ class AuthRepositoryImpl implements IAuthRepository {
 
       final dto = LoginResponseDto.fromJson(res.data as Map<String, dynamic>);
 
-      final role = (dto.role).toString().toUpperCase();
+      final role = dto.role.toString().toUpperCase();
 
       final userOrAdmin = dto.userOrAdmin;
       final user = AppUser(
@@ -43,79 +44,74 @@ class AuthRepositoryImpl implements IAuthRepository {
         role: role,
       );
 
-      await jwtStore.save(
-  token: dto.token,
-  role: role,
-  refreshToken: dto.refreshToken, // ✅ NEW
-);
-      DioClient.setToken(dto.token);
+      await sessionManager.saveSession(
+        token: dto.token,
+        role: role,
+        refreshToken: dto.refreshToken,
+      );
 
       return (AuthToken(dto.token), user);
-    }
+    } on DioException catch (e) {
+      final status = e.response?.statusCode;
 
-    // ✅ IMPORTANT: parse {code, error} coming from backend
-    on DioException catch (e) {
-  final status = e.response?.statusCode;
+      final isServerDown =
+          e.type == DioExceptionType.connectionError ||
+          e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout ||
+          e.type == DioExceptionType.sendTimeout ||
+          (status != null && status >= 500);
 
-  final isServerDown =
-      e.type == DioExceptionType.connectionError ||
-      e.type == DioExceptionType.connectionTimeout ||
-      e.type == DioExceptionType.receiveTimeout ||
-      e.type == DioExceptionType.sendTimeout ||
-      (status != null && status >= 500);
+      if (isServerDown) {
+        throw const AuthFailure(
+          code: 'SERVER_DOWN',
+          message: 'Server unavailable. Please try again shortly.',
+        );
+      }
 
-  if (isServerDown) {
-    throw const AuthFailure(
-      code: 'SERVER_DOWN',
-      message: 'Server unavailable. Please try again shortly.',
-    );
-  }
+      final data = e.response?.data;
 
-  final data = e.response?.data;
+      if (data is Map) {
+        final code = (data['code'] ?? 'AUTH_ERROR').toString();
+        final msg =
+            (data['error'] ?? data['message'] ?? ApiErrorHandler.message(e))
+                .toString();
 
-  if (data is Map) {
-    final code = (data['code'] ?? 'AUTH_ERROR').toString();
-    final msg =
-        (data['error'] ?? data['message'] ?? ApiErrorHandler.message(e))
-            .toString();
+        throw AuthFailure(code: code, message: msg);
+      }
 
-    throw AuthFailure(code: code, message: msg);
-  }
-
-  throw AuthFailure(
-    code: 'NETWORK_ERROR',
-    message: ApiErrorHandler.message(e),
-  );
-}
-    // ✅ fallback
-    catch (e) {
-      throw AuthFailure(code: 'AUTH_ERROR', message: ApiErrorHandler.message(e));
+      throw AuthFailure(
+        code: 'NETWORK_ERROR',
+        message: ApiErrorHandler.message(e),
+      );
+    } catch (e) {
+      throw AuthFailure(
+        code: 'AUTH_ERROR',
+        message: ApiErrorHandler.message(e),
+      );
     }
   }
 
- @override
-Future<void> logout() async {
-  try {
-    final refresh = await jwtStore.readRefreshToken() ?? '';
-    if (refresh.isNotEmpty) {
-      await api.logout(refreshToken: refresh); // ✅ kills session
-    }
-  } catch (_) {}
+  @override
+  Future<void> logout() async {
+    try {
+      final (_, _, refresh) = await sessionManager.readSession();
+      if (refresh.isNotEmpty) {
+        await api.logout(refreshToken: refresh);
+      }
+    } catch (_) {}
 
-  await jwtStore.clear();
-  DioClient.clearToken();
-}
+    await sessionManager.clearSession();
+  }
 
   @override
   Future<bool> isLoggedIn() async {
-    final (t, _) = await jwtStore.read();
-    return t.isNotEmpty;
+    return sessionManager.hasSession();
   }
 
   @override
   Future<String> getStoredRole() async {
-    final (_, r) = await jwtStore.read();
-    return r.trim();
+    final (_, role, _) = await sessionManager.readSession();
+    return role.trim();
   }
 
   @override
@@ -123,8 +119,6 @@ Future<void> logout() async {
     final role = (await getStoredRole()).toUpperCase();
     return role == 'SUPER_ADMIN';
   }
-
-  // -------- OWNER REGISTER OTP FLOW --------
 
   @override
   Future<void> ownerSendOtp({
@@ -140,9 +134,15 @@ Future<void> logout() async {
         final msg = (data['error'] ?? ApiErrorHandler.message(e)).toString();
         throw AuthFailure(code: code, message: msg);
       }
-      throw AuthFailure(code: 'NETWORK_ERROR', message: ApiErrorHandler.message(e));
+      throw AuthFailure(
+        code: 'NETWORK_ERROR',
+        message: ApiErrorHandler.message(e),
+      );
     } catch (e) {
-      throw AuthFailure(code: 'OTP_ERROR', message: ApiErrorHandler.message(e));
+      throw AuthFailure(
+        code: 'OTP_ERROR',
+        message: ApiErrorHandler.message(e),
+      );
     }
   }
 
@@ -167,9 +167,15 @@ Future<void> logout() async {
         final msg = (data['error'] ?? ApiErrorHandler.message(e)).toString();
         throw AuthFailure(code: c, message: msg);
       }
-      throw AuthFailure(code: 'NETWORK_ERROR', message: ApiErrorHandler.message(e));
+      throw AuthFailure(
+        code: 'NETWORK_ERROR',
+        message: ApiErrorHandler.message(e),
+      );
     } catch (e) {
-      throw AuthFailure(code: 'OTP_ERROR', message: ApiErrorHandler.message(e));
+      throw AuthFailure(
+        code: 'OTP_ERROR',
+        message: ApiErrorHandler.message(e),
+      );
     }
   }
 
@@ -204,12 +210,11 @@ Future<void> logout() async {
 
       final refreshToken = (res.data['refreshToken'] ?? '').toString();
 
-await jwtStore.save(
-  token: token,
-  role: 'OWNER',
-  refreshToken: refreshToken, // ✅ NEW
-);
-      DioClient.setToken(token);
+      await sessionManager.saveSession(
+        token: token,
+        role: 'OWNER',
+        refreshToken: refreshToken,
+      );
 
       return (AuthToken(token), user);
     } on DioException catch (e) {
@@ -219,9 +224,15 @@ await jwtStore.save(
         final msg = (data['error'] ?? ApiErrorHandler.message(e)).toString();
         throw AuthFailure(code: c, message: msg);
       }
-      throw AuthFailure(code: 'NETWORK_ERROR', message: ApiErrorHandler.message(e));
+      throw AuthFailure(
+        code: 'NETWORK_ERROR',
+        message: ApiErrorHandler.message(e),
+      );
     } catch (e) {
-      throw AuthFailure(code: 'PROFILE_ERROR', message: ApiErrorHandler.message(e));
+      throw AuthFailure(
+        code: 'PROFILE_ERROR',
+        message: ApiErrorHandler.message(e),
+      );
     }
   }
 }

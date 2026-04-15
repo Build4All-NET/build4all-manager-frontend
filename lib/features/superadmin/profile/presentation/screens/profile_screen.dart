@@ -1,6 +1,10 @@
+import 'package:build4all_manager/core/auth/session_manager.dart';
 import 'package:build4all_manager/core/localization/locale_cubit.dart';
 import 'package:build4all_manager/core/network/dio_client.dart';
 import 'package:build4all_manager/features/auth/data/datasources/jwt_local_datasource.dart';
+import 'package:build4all_manager/features/auth/data/repositories/auth_repository_impl.dart';
+import 'package:build4all_manager/features/auth/data/services/auth_api.dart';
+import 'package:build4all_manager/features/auth/domain/repositories/i_auth_repository.dart';
 import 'package:build4all_manager/l10n/app_localizations.dart';
 import 'package:build4all_manager/shared/widgets/app_toast.dart';
 import 'package:dio/dio.dart';
@@ -104,7 +108,8 @@ class _ProfileView extends StatelessWidget {
                 ),
             child: CustomScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
-              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              keyboardDismissBehavior:
+                  ScrollViewKeyboardDismissBehavior.onDrag,
               slivers: [
                 SliverAppBar(
                   pinned: false,
@@ -113,15 +118,11 @@ class _ProfileView extends StatelessWidget {
                   scrolledUnderElevation: 1,
                   backgroundColor: cs.primary,
                   foregroundColor: cs.onPrimary,
-                  
-                 
                   flexibleSpace: FlexibleSpaceBar(
                     collapseMode: CollapseMode.parallax,
                     background: _ProfileHero(me: me),
                   ),
                 ),
-
-                // ✅ subtle progress bar without breaking layout
                 SliverToBoxAdapter(
                   child: AnimatedSwitcher(
                     duration: const Duration(milliseconds: 160),
@@ -130,13 +131,11 @@ class _ProfileView extends StatelessWidget {
                         : const SizedBox(height: 2),
                   ),
                 ),
-
                 SliverPadding(
                   padding: EdgeInsets.fromLTRB(16, 16, 16, bottomPad),
                   sliver: SliverList(
                     delegate: SliverChildListDelegate(
                       [
-                        // ===== Language =====
                         _SectionTitle(
                           icon: Icons.language_rounded,
                           title: l10n.common_language,
@@ -144,8 +143,6 @@ class _ProfileView extends StatelessWidget {
                         const SizedBox(height: 10),
                         _LanguageTile(l10n: l10n),
                         const SizedBox(height: 16),
-
-                        // ===== Profile Details =====
                         _SectionTitle(
                           icon: Icons.badge_rounded,
                           title: l10n.profile_details,
@@ -155,7 +152,8 @@ class _ProfileView extends StatelessWidget {
                           elevation: 0,
                           clipBehavior: Clip.antiAlias,
                           child: Padding(
-                            padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+                            padding:
+                                const EdgeInsets.fromLTRB(16, 16, 16, 12),
                             child: ProfileForm(
                               me: me,
                               busy: state.savingProfile,
@@ -166,8 +164,6 @@ class _ProfileView extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 16),
-
-                        // ===== Notifications =====
                         _SectionTitle(
                           icon: Icons.notifications_active_rounded,
                           title: l10n.profile_update_notifications,
@@ -182,15 +178,11 @@ class _ProfileView extends StatelessWidget {
                               .add(SubmitNotifications(items, fb)),
                         ),
                         const SizedBox(height: 16),
-
-                        // ===== Security =====
                         _SectionTitle(
                           icon: Icons.lock_rounded,
                           title: l10n.common_security,
                         ),
                         const SizedBox(height: 10),
-
-                        // ✅ No long trailing button (prevents cut). Clean icon action.
                         Card(
                           elevation: 0,
                           clipBehavior: Clip.antiAlias,
@@ -232,13 +224,12 @@ class _ProfileView extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 16),
-
-                        // ===== Logout =====
                         Card(
                           elevation: 0,
                           clipBehavior: Clip.antiAlias,
                           child: Padding(
-                            padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+                            padding:
+                                const EdgeInsets.fromLTRB(16, 14, 16, 14),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -252,7 +243,8 @@ class _ProfileView extends StatelessWidget {
                                 const SizedBox(height: 6),
                                 Text(
                                   l10n.common_sign_out_hint,
-                                  style: TextStyle(color: cs.onSurfaceVariant),
+                                  style:
+                                      TextStyle(color: cs.onSurfaceVariant),
                                 ),
                                 const SizedBox(height: 12),
                                 SizedBox(
@@ -298,11 +290,18 @@ class _ProfileView extends StatelessWidget {
 
     if (ok != true) return;
 
-    final store = JwtLocalDataSource();
-    await store.clear();
+    final authApi = AuthApi(DioClient.ensure());
+    final sessionManager = SessionManager(
+      store: JwtLocalDataSource(),
+      authApi: authApi,
+    );
 
-    final dio = DioClient.ensure();
-    dio.options.headers.remove('Authorization');
+    final IAuthRepository repo = AuthRepositoryImpl(
+      api: authApi,
+      sessionManager: sessionManager,
+    );
+
+    await repo.logout();
 
     if (!context.mounted) return;
 
@@ -354,18 +353,21 @@ class _ProfileHero extends StatelessWidget {
                       ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment:
+                        CrossAxisAlignment.start,
                     children: [
                       Text(
                         '${me.firstName} ${me.lastName}',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         softWrap: false,
-                        style:
-                            Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  color: cs.onPrimary,
-                                  fontWeight: FontWeight.w900,
-                                ),
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(
+                              color: cs.onPrimary,
+                              fontWeight: FontWeight.w900,
+                            ),
                       ),
                       const SizedBox(height: 2),
                       Text(
@@ -393,8 +395,7 @@ class _ProfileHero extends StatelessWidget {
   }
 
   static String _initials(String f, String l) =>
-      '${(f.isNotEmpty ? f[0] : 'A')}${(l.isNotEmpty ? l[0] : 'U')}'
-          .toUpperCase();
+      '${(f.isNotEmpty ? f[0] : 'A')}${(l.isNotEmpty ? l[0] : 'U')}'.toUpperCase();
 }
 
 class _SectionTitle extends StatelessWidget {
@@ -558,7 +559,8 @@ class _LogoutConfirmSheet extends StatelessWidget {
                       const SizedBox(height: 2),
                       Text(
                         l10n.common_sign_out_confirm,
-                        style: TextStyle(color: cs.onSurfaceVariant),
+                        style:
+                            TextStyle(color: cs.onSurfaceVariant),
                       ),
                     ],
                   ),

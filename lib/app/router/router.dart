@@ -1,5 +1,6 @@
 import 'package:build4all_manager/app/nav_key.dart';
 import 'package:build4all_manager/app/router/super_admin_entry_loader.dart';
+import 'package:build4all_manager/core/auth/session_manager.dart';
 import 'package:build4all_manager/features/notifications_admin/presentation/screens/admin_notifications_screen.dart';
 
 import 'package:build4all_manager/features/owner/ownerhome/data/static_project_models.dart';
@@ -12,27 +13,22 @@ import 'package:go_router/go_router.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-// splash / homes
 import 'package:build4all_manager/app/splash_gate.dart';
 import 'package:build4all_manager/features/auth/presentation/screens/app_login_screen.dart';
 
-// owner shell + screens
 import 'package:build4all_manager/features/owner/ownernav/presentation/screens/owner_nav_shell.dart';
 import 'package:build4all_manager/features/owner/ownernav/presentation/controllers/owner_nav_cubit.dart';
 import 'package:build4all_manager/features/owner/ownerhome/presentation/screens/owner_home_screen.dart';
 import 'package:build4all_manager/features/owner/ownerprojects/presentation/screens/owner_projects_screen.dart';
 import 'package:build4all_manager/features/owner/ownerprofile/presentation/screens/owner_profile_screen.dart';
 
-// l10n
 import 'package:build4all_manager/l10n/app_localizations.dart';
 
-// auth repo + jwt store
 import 'package:build4all_manager/features/auth/domain/repositories/i_auth_repository.dart';
 import 'package:build4all_manager/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:build4all_manager/features/auth/data/services/auth_api.dart';
 import 'package:build4all_manager/features/auth/data/datasources/jwt_local_datasource.dart';
 
-// owner register flow
 import 'package:build4all_manager/features/auth/domain/usecases/OwnerCompleteProfile.dart';
 import 'package:build4all_manager/features/auth/domain/usecases/OwnerSendOtp.dart';
 import 'package:build4all_manager/features/auth/domain/usecases/OwnerVerifyOtp.dart';
@@ -41,15 +37,9 @@ import 'package:build4all_manager/features/auth/presentation/screens/register/ow
 import 'package:build4all_manager/features/auth/presentation/screens/register/owner_register_otp_screen.dart';
 import 'package:build4all_manager/features/auth/presentation/screens/register/owner_register_profile_screen.dart';
 
-// shared Dio
 import 'package:build4all_manager/core/network/dio_client.dart';
-
-// JWT helpers
 import 'package:build4all_manager/core/auth/jwt_claims.dart';
 
-/// ===============================================================
-/// Owner session scope (ownerId/dio available everywhere under /owner)
-/// ===============================================================
 class OwnerSessionScope extends InheritedWidget {
   final int ownerId;
   final String? ownerName;
@@ -89,12 +79,18 @@ String? _asNonEmptyStr(dynamic v) {
   return s.isEmpty ? null : s;
 }
 
-/// ===============================================================
-/// Owner Register Bloc wrapper
-/// ===============================================================
 Widget _withOwnerRegBloc(Widget child) {
-  final IAuthRepository repo =
-      AuthRepositoryImpl(api: AuthApi(DioClient.ensure()), jwtStore: JwtLocalDataSource());
+  final authApi = AuthApi(DioClient.ensure());
+  final sessionManager = SessionManager(
+    store: JwtLocalDataSource(),
+    authApi: authApi,
+  );
+
+  final IAuthRepository repo = AuthRepositoryImpl(
+    api: authApi,
+    sessionManager: sessionManager,
+  );
+
   return BlocProvider(
     create: (_) => OwnerRegisterBloc(
       OwnerSendOtpUseCase(repo),
@@ -105,9 +101,6 @@ Widget _withOwnerRegBloc(Widget child) {
   );
 }
 
-/// ===============================================================
-/// Public paths (no token)
-/// ===============================================================
 const _publicPaths = <String>{
   '/',
   '/login',
@@ -134,16 +127,11 @@ final router = GoRouter(
       path: '/manager',
       builder: (_, __) => const SuperAdminEntryLoader(),
     ),
-
-    // keep /owner stable
     GoRoute(path: '/owner', redirect: (_, __) => '/owner/home'),
-
-    // ✅ OUTER OWNER SESSION SHELL (no nav)
     ShellRoute(
       navigatorKey: _ownerSessionShellKey,
       builder: (context, state, child) => _OwnerSessionLoader(child: child),
       routes: [
-        // ✅ INNER NAV SHELL (nav ONLY for these 3)
         ShellRoute(
           navigatorKey: _ownerNavShellKey,
           builder: (context, state, child) => _OwnerNavWrapper(child: child),
@@ -159,12 +147,12 @@ final router = GoRouter(
                 );
               },
             ),
-              GoRoute(
-  path: '/owner/notifications',
-  builder: (context, state) {
-    return const AdminNotificationsScreen();
-  },
-),
+            GoRoute(
+              path: '/owner/notifications',
+              builder: (context, state) {
+                return const AdminNotificationsScreen();
+              },
+            ),
             GoRoute(
               path: '/owner/projects',
               builder: (context, state) {
@@ -181,8 +169,6 @@ final router = GoRouter(
             ),
           ],
         ),
-
-        // ✅ NO NAV routes (still under session scope)
         GoRoute(
           path: '/owner/project/:id',
           builder: (context, state) {
@@ -197,7 +183,11 @@ final router = GoRouter(
               orElse: () => projectTemplates.first,
             );
 
-            return OwnerProjectDetailsScreen(tpl: tpl, ownerId: s.ownerId, dio:s.dio);
+            return OwnerProjectDetailsScreen(
+              tpl: tpl,
+              ownerId: s.ownerId,
+              dio: s.dio,
+            );
           },
         ),
         GoRoute(
@@ -207,7 +197,6 @@ final router = GoRouter(
             return OwnerRequestsListScreen(ownerId: s.ownerId, dio: s.dio);
           },
         ),
-      
         GoRoute(
           path: '/owner/requests',
           builder: (context, state) {
@@ -225,8 +214,6 @@ final router = GoRouter(
         ),
       ],
     ),
-
-    // ✅ owner register is OUTSIDE shell (public)
     GoRoute(
       path: '/owner/register',
       builder: (_, __) => _withOwnerRegBloc(const OwnerRegisterEmailScreen()),
@@ -257,9 +244,6 @@ final router = GoRouter(
   redirect: _authRedirect,
 );
 
-/// ===============================================================
-/// Auth Redirect
-/// ===============================================================
 Future<String?> _authRedirect(BuildContext context, GoRouterState state) async {
   final store = JwtLocalDataSource();
   final (token, roleRaw) = await store.read();
@@ -286,9 +270,6 @@ Future<String?> _authRedirect(BuildContext context, GoRouterState state) async {
   return null;
 }
 
-/// ===============================================================
-/// JWT helpers
-/// ===============================================================
 String? _extractDisplayName(Map<String, dynamic>? claims) {
   if (claims == null) return null;
 
@@ -352,9 +333,6 @@ Future<(int?, String?)> _loadOwnerProfileFromJwt() async {
   }
 }
 
-/// ===============================================================
-/// OUTER shell loader: provides OwnerSessionScope for ALL /owner routes
-/// ===============================================================
 class _OwnerSessionLoader extends StatelessWidget {
   final Widget child;
   const _OwnerSessionLoader({required this.child});
@@ -381,8 +359,6 @@ class _OwnerSessionLoader extends StatelessWidget {
         }
 
         final Dio dio = DioClient.ensure();
-
-        // TODO: plug real backend menu type when you fetch it
         final backendMenuType = 'bottom';
 
         return OwnerSessionScope(
@@ -397,9 +373,6 @@ class _OwnerSessionLoader extends StatelessWidget {
   }
 }
 
-/// ===============================================================
-/// INNER nav wrapper: ONLY wraps home/projects/profile with OwnerNavShell
-/// ===============================================================
 class _OwnerNavWrapper extends StatefulWidget {
   final Widget child;
   const _OwnerNavWrapper({required this.child});
@@ -423,43 +396,44 @@ class _OwnerNavWrapperState extends State<_OwnerNavWrapper> {
     super.dispose();
   }
 
- int _indexForLoc(String loc) {
-  if (loc.startsWith('/owner/projects')) return 1;
-  if (loc.startsWith('/owner/notifications')) return 2;
-  if (loc.startsWith('/owner/profile')) return 3;
-  return 0;
-}
+  int _indexForLoc(String loc) {
+    if (loc.startsWith('/owner/projects')) return 1;
+    if (loc.startsWith('/owner/notifications')) return 2;
+    if (loc.startsWith('/owner/profile')) return 3;
+    return 0;
+  }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final session = OwnerSessionScope.of(context);
-final destinations = <OwnerDestination>[
-  OwnerDestination(
-    icon: Icons.home_outlined,
-    selectedIcon: Icons.home_rounded,
-    label: l10n.owner_nav_home,
-    route: '/owner/home',
-  ),
-  OwnerDestination(
-    icon: Icons.apps_outlined,
-    selectedIcon: Icons.apps_rounded,
-    label: l10n.owner_nav_projects,
-    route: '/owner/projects',
-  ),
-  OwnerDestination(
-    icon: Icons.notifications_none_outlined,
-    selectedIcon: Icons.notifications,
-    label: l10n.owner_nav_notifications,
-    route: '/owner/notifications',
-  ),
-  OwnerDestination(
-    icon: Icons.person_outline,
-    selectedIcon: Icons.person,
-    label: l10n.owner_nav_profile,
-    route: '/owner/profile',
-  ),
-];
+
+    final destinations = <OwnerDestination>[
+      OwnerDestination(
+        icon: Icons.home_outlined,
+        selectedIcon: Icons.home_rounded,
+        label: l10n.owner_nav_home,
+        route: '/owner/home',
+      ),
+      OwnerDestination(
+        icon: Icons.apps_outlined,
+        selectedIcon: Icons.apps_rounded,
+        label: l10n.owner_nav_projects,
+        route: '/owner/projects',
+      ),
+      OwnerDestination(
+        icon: Icons.notifications_none_outlined,
+        selectedIcon: Icons.notifications,
+        label: l10n.owner_nav_notifications,
+        route: '/owner/notifications',
+      ),
+      OwnerDestination(
+        icon: Icons.person_outline,
+        selectedIcon: Icons.person,
+        label: l10n.owner_nav_profile,
+        route: '/owner/profile',
+      ),
+    ];
 
     final loc = GoRouterState.of(context).uri.toString();
     final idx = _indexForLoc(loc);

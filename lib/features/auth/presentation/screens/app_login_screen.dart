@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ui';
 
+import 'package:build4all_manager/core/auth/session_manager.dart';
 import 'package:build4all_manager/core/network/dio_client.dart';
 import 'package:build4all_manager/core/notifications/firebase_push_service.dart';
 import 'package:build4all_manager/features/auth/data/datasources/jwt_local_datasource.dart';
@@ -59,7 +60,6 @@ _LoginErrorType? _resolveLoginErrorType(String? rawError) {
     return false;
   }
 
-  // password wrong
   if (hasAny([
     'incorrect password',
     'wrong password',
@@ -71,7 +71,6 @@ _LoginErrorType? _resolveLoginErrorType(String? rawError) {
     return _LoginErrorType.incorrectPassword;
   }
 
-  // email / username / owner identifier wrong
   if (hasAny([
     'incorrect email',
     'wrong email',
@@ -89,7 +88,6 @@ _LoginErrorType? _resolveLoginErrorType(String? rawError) {
     return _LoginErrorType.incorrectEmailOrUsername;
   }
 
-  // generic backend auth errors
   if (hasAny([
     'bad credentials',
     'invalid credentials',
@@ -104,7 +102,6 @@ _LoginErrorType? _resolveLoginErrorType(String? rawError) {
     return _LoginErrorType.incorrectCredentials;
   }
 
-  // fallback heuristics
   if (msg.contains('password') &&
       (msg.contains('wrong') ||
           msg.contains('incorrect') ||
@@ -154,9 +151,15 @@ class AppLoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final authApi = AuthApi(DioClient.ensure());
+    final sessionManager = SessionManager(
+      store: JwtLocalDataSource(),
+      authApi: authApi,
+    );
+
     final IAuthRepository repo = AuthRepositoryImpl(
-      api: AuthApi(DioClient.ensure()),
-      jwtStore: JwtLocalDataSource(),
+      api: authApi,
+      sessionManager: sessionManager,
     );
 
     final cs = Theme.of(context).colorScheme;
@@ -173,8 +176,8 @@ class AppLoginScreen extends StatelessWidget {
         listener: (context, state) {
           final role = (state.role ?? '').toUpperCase();
           final friendlyError = state.errorCode == 'SERVER_DOWN'
-    ? 'Server unavailable. Please try again shortly.'
-    : _mapLoginError(context, state.error);
+              ? 'Server unavailable. Please try again shortly.'
+              : _mapLoginError(context, state.error);
 
           if (friendlyError != null && friendlyError.isNotEmpty) {
             AppToast.error(context, friendlyError);

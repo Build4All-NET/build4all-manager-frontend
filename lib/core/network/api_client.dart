@@ -1,10 +1,10 @@
+import 'package:build4all_manager/core/auth/session_manager.dart';
 import 'package:build4all_manager/core/network/api_config.dart';
+import 'package:build4all_manager/core/network/auth_interceptor.dart';
+import 'package:build4all_manager/features/auth/data/datasources/jwt_local_datasource.dart';
 import 'package:build4all_manager/features/auth/data/services/auth_api.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-
-import 'package:build4all_manager/core/network/auth_interceptor.dart';
-import 'package:build4all_manager/features/auth/data/datasources/jwt_local_datasource.dart';
 
 class ApiClient {
   final Dio dio;
@@ -22,15 +22,19 @@ class ApiClient {
             },
           ),
         ) {
-    // Auto attach token + handle 401 → logout
+    final jwtStore = JwtLocalDataSource();
+    final authApi = AuthApi(dio);
+    final sessionManager = SessionManager(
+      store: jwtStore,
+      authApi: authApi,
+    );
+
     dio.interceptors.add(
       AuthInterceptor(
-        jwtStore: JwtLocalDataSource(),
-        api: AuthApi(dio),
+        sessionManager: sessionManager,
       ),
     );
 
-    // Lightweight logs in debug only
     if (kDebugMode) {
       dio.interceptors.add(
         LogInterceptor(

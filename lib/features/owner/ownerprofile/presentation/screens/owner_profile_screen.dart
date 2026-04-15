@@ -1,8 +1,11 @@
-// lib/features/owner/ownerprofile/presentation/screens/owner_profile_screen.dart
-
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:build4all_manager/core/auth/session_manager.dart';
 import 'package:build4all_manager/core/localization/locale_cubit.dart';
+import 'package:build4all_manager/core/network/dio_client.dart';
 import 'package:build4all_manager/features/auth/data/datasources/jwt_local_datasource.dart';
+import 'package:build4all_manager/features/auth/data/repositories/auth_repository_impl.dart';
+import 'package:build4all_manager/features/auth/data/services/auth_api.dart';
+import 'package:build4all_manager/features/auth/domain/repositories/i_auth_repository.dart';
 import 'package:build4all_manager/features/owner/ownerprofile/data/repositories/owner_profile_repository_impl.dart';
 import 'package:build4all_manager/features/owner/ownerprofile/data/services/owner_profile_api.dart';
 import 'package:build4all_manager/features/owner/ownerprofile/domain/usecases/get_owner_profile_usecase.dart';
@@ -21,14 +24,14 @@ import 'package:go_router/go_router.dart';
 import 'owner_edit_profile_screen.dart';
 
 class OwnerProfileScreen extends StatelessWidget {
-  final int? ownerId; // if provided -> view someone else; else /me
+  final int? ownerId;
   final Dio dio;
 
   const OwnerProfileScreen({super.key, required this.dio, this.ownerId});
 
   int? _normalizeOwnerId(int? id) {
     if (id == null) return null;
-    if (id <= 0) return null; // treat 0/-1 as "me"
+    if (id <= 0) return null;
     return id;
   }
 
@@ -49,7 +52,7 @@ class OwnerProfileScreen extends StatelessWidget {
 
 class _OwnerProfileView extends StatelessWidget {
   final Dio dio;
-  final int? ownerId; // already normalized
+  final int? ownerId;
 
   const _OwnerProfileView({required this.dio, this.ownerId});
 
@@ -135,8 +138,18 @@ class _OwnerProfileView extends StatelessWidget {
 
     if (confirm != true) return;
 
-    final store = JwtLocalDataSource();
-    await store.clear();
+    final authApi = AuthApi(DioClient.ensure());
+    final sessionManager = SessionManager(
+      store: JwtLocalDataSource(),
+      authApi: authApi,
+    );
+
+    final IAuthRepository repo = AuthRepositoryImpl(
+      api: authApi,
+      sessionManager: sessionManager,
+    );
+
+    await repo.logout();
 
     if (!context.mounted) return;
 
@@ -152,8 +165,9 @@ class _OwnerProfileView extends StatelessWidget {
     );
 
     if (ok == true && context.mounted) {
-      // refresh same mode (me vs by-id)
-      context.read<OwnerProfileBloc>().add(OwnerProfileStarted(adminId: ownerId));
+      context.read<OwnerProfileBloc>().add(
+            OwnerProfileStarted(adminId: ownerId),
+          );
     }
   }
 
@@ -164,8 +178,6 @@ class _OwnerProfileView extends StatelessWidget {
     return BlocBuilder<OwnerProfileBloc, OwnerProfileState>(
       builder: (context, s) {
         final p = s.profile;
-
-        // can edit ONLY when it's /me
         final bool canEdit = ownerId == null && p != null && !s.loading;
 
         final appBar = AppBar(
@@ -247,11 +259,13 @@ class _OwnerProfileView extends StatelessWidget {
                 return SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
                   child: ConstrainedBox(
-                    constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                    constraints:
+                        BoxConstraints(minHeight: constraints.maxHeight),
                     child: Align(
                       alignment: Alignment.topCenter,
                       child: Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 20, 16, 24),
+                        padding:
+                            const EdgeInsets.fromLTRB(16, 20, 16, 24),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -290,14 +304,9 @@ class _OwnerProfileView extends StatelessWidget {
   }
 }
 
-/* =========================================================
- * ✅ PRIVATE WIDGETS (must be in SAME FILE to use "_" names)
- * ========================================================= */
-
 class _PreferencesCard extends StatelessWidget {
   final AppLocalizations l10n;
   final VoidCallback onLogout;
-
   final bool canEdit;
   final VoidCallback onEdit;
 
@@ -329,25 +338,25 @@ class _PreferencesCard extends StatelessWidget {
                     minFontSize: 14,
                     stepGranularity: 0.5,
                     overflow: TextOverflow.ellipsis,
-                    style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+                    style:
+                        tt.titleMedium?.copyWith(fontWeight: FontWeight.w900),
                   ),
                 ),
               ],
             ),
           ),
-
           Divider(height: 1, color: cs.outlineVariant.withOpacity(.7)),
-
-          // Edit profile
           Opacity(
             opacity: canEdit ? 1 : 0.45,
             child: ListTile(
               onTap: canEdit ? onEdit : null,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 16),
               leading: CircleAvatar(
                 radius: 18,
                 backgroundColor: cs.primary.withOpacity(.12),
-                child: Icon(Icons.edit_rounded, color: cs.primary, size: 18),
+                child: Icon(Icons.edit_rounded,
+                    color: cs.primary, size: 18),
               ),
               title: AutoSizeText(
                 l10n.owner_profile_edit_title ?? 'Edit profile',
@@ -355,34 +364,37 @@ class _PreferencesCard extends StatelessWidget {
                 minFontSize: 12,
                 stepGranularity: 0.5,
                 overflow: TextOverflow.ellipsis,
-                style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w900),
+                style:
+                    tt.titleSmall?.copyWith(fontWeight: FontWeight.w900),
               ),
               subtitle: AutoSizeText(
-                canEdit ? (l10n.owner_profile_edit_basic ?? 'Update your account info') : '',
+                canEdit
+                    ? (l10n.owner_profile_edit_basic ??
+                        'Update your account info')
+                    : '',
                 maxLines: 2,
                 minFontSize: 11,
                 stepGranularity: 0.5,
                 overflow: TextOverflow.ellipsis,
-                style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
+                style: tt.bodyMedium
+                    ?.copyWith(color: cs.onSurfaceVariant),
               ),
-              trailing: Icon(Icons.chevron_right_rounded, color: cs.onSurfaceVariant),
+              trailing: Icon(Icons.chevron_right_rounded,
+                  color: cs.onSurfaceVariant),
             ),
           ),
-
           Divider(height: 1, color: cs.outlineVariant.withOpacity(.7)),
-
           _LanguageRow(l10n: l10n),
-
           Divider(height: 1, color: cs.outlineVariant.withOpacity(.7)),
-
-          // Logout
           ListTile(
             onTap: onLogout,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16),
             leading: CircleAvatar(
               radius: 18,
               backgroundColor: cs.error.withOpacity(.12),
-              child: Icon(Icons.logout_rounded, color: cs.error, size: 18),
+              child:
+                  Icon(Icons.logout_rounded, color: cs.error, size: 18),
             ),
             title: AutoSizeText(
               l10n.logout ?? 'Logout',
@@ -400,9 +412,9 @@ class _PreferencesCard extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
             ),
-            trailing: Icon(Icons.chevron_right_rounded, color: cs.onSurfaceVariant),
+            trailing: Icon(Icons.chevron_right_rounded,
+                color: cs.onSurfaceVariant),
           ),
-
           const SizedBox(height: 6),
         ],
       ),
@@ -440,7 +452,8 @@ class _LanguageRow extends StatelessWidget {
           CircleAvatar(
             radius: 18,
             backgroundColor: cs.primary.withOpacity(.12),
-            child: Icon(Icons.language_rounded, size: 18, color: cs.primary),
+            child: Icon(Icons.language_rounded,
+                size: 18, color: cs.primary),
           ),
           const SizedBox(width: 12),
           Expanded(
