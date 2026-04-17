@@ -5,7 +5,6 @@ import 'package:build4all_manager/core/network/connecting/connection_banner.dart
 import 'package:build4all_manager/core/network/connecting/connection_cubit.dart';
 import 'package:build4all_manager/core/network/connecting/server_down_overlay.dart';
 import 'package:build4all_manager/core/network/dio_client.dart';
-import 'package:build4all_manager/core/notifications/firebase_push_service.dart';
 import 'package:build4all_manager/core/notifications/local_notification_service.dart';
 import 'package:build4all_manager/features/auth/data/datasources/jwt_local_datasource.dart';
 import 'package:build4all_manager/l10n/app_localizations.dart';
@@ -48,6 +47,17 @@ Future<void> main() async {
     debugPrint('DioClient.init failed => $e');
   }
 
+  // VERY IMPORTANT:
+  // Run boot guard BEFORE restoring token, so it cannot clear session later
+  // after the app has already started making requests.
+  try {
+    await AppBootGuard.run(
+      currentApiBaseUrl: DioClient.ensure().options.baseUrl,
+    );
+  } catch (e) {
+    debugPrint('AppBootGuard.run failed => $e');
+  }
+
   try {
     await _initFirebase();
   } catch (e) {
@@ -86,11 +96,17 @@ Future<void> main() async {
   try {
     final jwt = JwtLocalDataSource();
     final (token, _) = await jwt.read();
-    if (token.isNotEmpty) {
-      DioClient.setToken(token);
+
+    if (token.trim().isNotEmpty) {
+      DioClient.setToken(token.trim());
+    } else {
+      DioClient.clearToken();
     }
   } catch (e) {
     debugPrint('Restore token failed => $e');
+    try {
+      DioClient.clearToken();
+    } catch (_) {}
   }
 
   runApp(const Build4AllManagerApp());
@@ -129,7 +145,6 @@ class Build4AllManagerApp extends StatelessWidget {
                   return Stack(
                     children: [
                       child ?? const SizedBox.shrink(),
-                      const _BootGuardRunner(),
                       const Align(
                         alignment: Alignment.topCenter,
                         child: ConnectionBanner(),
@@ -161,47 +176,5 @@ class Build4AllManagerApp extends StatelessWidget {
         },
       ),
     );
-  }
-}
-
-class _BootGuardRunner extends StatefulWidget {
-  const _BootGuardRunner();
-
-  @override
-  State<_BootGuardRunner> createState() => _BootGuardRunnerState();
-}
-
-class _BootGuardRunnerState extends State<_BootGuardRunner> {
-  bool _started = false;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-
-    if (_started) return;
-    _started = true;
-
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      try {
-        await AppBootGuard.run(
-          currentApiBaseUrl: DioClient.ensure().options.baseUrl,
-        ).timeout(const Duration(seconds: 5));
-      } catch (e) {
-        debugPrint('AppBootGuard failed or timed out => $e');
-      }
-
-      try {
-        await FirebasePushService().initForAdmin().timeout(
-          const Duration(seconds: 8),
-        );
-      } catch (e) {
-        debugPrint('FirebasePushService init failed or timed out => $e');
-      }
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return const SizedBox.shrink();
   }
 }

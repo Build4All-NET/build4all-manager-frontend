@@ -34,6 +34,7 @@ class _SplashGateState extends State<SplashGate> {
     final role = roleRaw.trim().toUpperCase();
 
     if (role.isEmpty) {
+      DioClient.clearToken();
       context.go('/login');
       return;
     }
@@ -43,6 +44,8 @@ class _SplashGateState extends State<SplashGate> {
     if (access.isEmpty || _isJwtExpired(access)) {
       if (refresh.isEmpty) {
         await store.clear();
+        DioClient.clearToken();
+
         if (!mounted) return;
         context.go('/login');
         return;
@@ -79,6 +82,7 @@ class _SplashGateState extends State<SplashGate> {
 
         if (shouldClear) {
           await store.clear();
+          DioClient.clearToken();
         }
 
         if (!mounted) return;
@@ -107,12 +111,10 @@ class _SplashGateState extends State<SplashGate> {
     if (e is DioException) {
       final status = e.response?.statusCode;
 
-      // Only clear session if refresh token is really rejected/unauthorized
       if (status == 401 || status == 403) {
         return true;
       }
 
-      // Network/server/timeout problems should NOT wipe saved session
       return false;
     }
 
