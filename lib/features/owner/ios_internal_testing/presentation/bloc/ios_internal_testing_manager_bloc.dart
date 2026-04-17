@@ -65,6 +65,7 @@ class IosInternalTestingManagerBloc extends Bloc<
   ) async {
     emit(state.copyWith(
       submitting: true,
+      submittingEmail: event.appleEmail.trim().toLowerCase(),
       clearError: true,
       clearMessage: true,
     ));
@@ -81,13 +82,17 @@ class IosInternalTestingManagerBloc extends Bloc<
 
       emit(state.copyWith(
         submitting: false,
+        clearSubmittingEmail: true,
         summary: summary,
-        message: request.bestMessage.isNotEmpty ? request.bestMessage : request.status,
+        message: request.bestMessage.isNotEmpty
+            ? request.bestMessage
+            : request.status,
         clearError: true,
       ));
     } catch (e) {
       emit(state.copyWith(
         submitting: false,
+        clearSubmittingEmail: true,
         error: ApiErrorHandler.message(e),
       ));
     }

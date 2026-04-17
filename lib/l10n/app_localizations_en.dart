@@ -3334,4 +3334,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get owner_proj_details_municipality_i2 => 'Fast digital communication improves response quality across services.';
+
+  @override
+  String get common_tryAgain => 'Try again';
+
+  @override
+  String get common_processing => 'Processing...';
 }

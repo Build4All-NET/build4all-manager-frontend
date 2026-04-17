@@ -1313,5 +1313,7 @@
   "owner_proj_details_municipality_m2": "إشعارات عامة وتنبيهات وتواصل حول الفعاليات",
   "owner_proj_details_municipality_m3": "حجز الخدمات وتوجيه الطلبات",
   "owner_proj_details_municipality_i1": "يثق السكان أكثر بالأنظمة التي تجعل المتابعة واضحة وبسيطة.",
-  "owner_proj_details_municipality_i2": "التواصل الرقمي السريع يحسن جودة الاستجابة عبر الخدمات."
+  "owner_proj_details_municipality_i2": "التواصل الرقمي السريع يحسن جودة الاستجابة عبر الخدمات.",
+   "common_tryAgain": "حاول مرة أخرى",
+  "common_processing": "جارٍ المعالجة..."
 }

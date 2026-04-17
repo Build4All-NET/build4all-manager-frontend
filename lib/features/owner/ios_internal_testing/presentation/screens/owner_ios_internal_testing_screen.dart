@@ -85,6 +85,17 @@ class _OwnerIosInternalTestingScreenState
     );
   }
 
+  void _retryRequest(IosInternalTestingRequest request) {
+    _bloc.add(
+      IosInternalTestingManagerSubmitted(
+        linkId: widget.project.linkId,
+        appleEmail: request.appleEmail.trim(),
+        firstName: request.firstName.trim(),
+        lastName: request.lastName.trim(),
+      ),
+    );
+  }
+
   String _statusHelperText(
     AppLocalizations l10n,
     IosInternalTestingRequest request,
@@ -151,6 +162,72 @@ class _OwnerIosInternalTestingScreenState
     final msg = (rawMessage ?? '').trim();
     if (msg.isNotEmpty) return msg;
     return l10n.iosInternalTestingSubmittedMessage;
+  }
+
+  String? _actionLabelForRequest(
+    AppLocalizations l10n,
+    IosInternalTestingRequest request,
+  ) {
+    final status = request.status.trim().toUpperCase();
+
+    switch (status) {
+      case 'READY':
+        return null;
+
+      case 'REQUESTED':
+      case 'PROCESSING':
+      case 'ADDING_TO_INTERNAL_TESTING':
+        return l10n.common_processing;
+
+      case 'WAITING_OWNER_ACCEPTANCE':
+        return l10n.common_tryAgain;
+
+      case 'WAITING_APPLE_USER_SYNC':
+        return l10n.common_tryAgain;
+
+      case 'FAILED':
+        return l10n.common_tryAgain;
+
+      case 'MANUAL_REVIEW_REQUIRED':
+        return l10n.common_tryAgain;
+
+      case 'INVITED_TO_APPLE_TEAM':
+        return l10n.common_tryAgain;
+
+      default:
+        return l10n.common_tryAgain;
+    }
+  }
+
+  bool _actionEnabledForRequest(IosInternalTestingRequest request) {
+    final status = request.status.trim().toUpperCase();
+
+    switch (status) {
+      case 'READY':
+      case 'REQUESTED':
+      case 'PROCESSING':
+      case 'ADDING_TO_INTERNAL_TESTING':
+        return false;
+
+      case 'WAITING_OWNER_ACCEPTANCE':
+      case 'WAITING_APPLE_USER_SYNC':
+      case 'FAILED':
+      case 'MANUAL_REVIEW_REQUIRED':
+      case 'INVITED_TO_APPLE_TEAM':
+        return true;
+
+      default:
+        return true;
+    }
+  }
+
+  bool _actionLoadingForRequest(
+    IosInternalTestingManagerState state,
+    IosInternalTestingRequest request,
+  ) {
+    return state.submitting &&
+        state.submittingEmail?.trim().toLowerCase() ==
+            request.appleEmail.trim().toLowerCase();
   }
 
   @override
@@ -446,7 +523,11 @@ class _OwnerIosInternalTestingScreenState
                             child: FilledButton.icon(
                               onPressed:
                                   state.submitting || state.isFull ? null : _submit,
-                              icon: state.submitting
+                              icon: state.submitting &&
+                                      (state.submittingEmail ?? '').isNotEmpty &&
+                                      state.requests.every((e) =>
+                                          e.appleEmail.trim().toLowerCase() !=
+                                          state.submittingEmail!.trim().toLowerCase())
                                   ? const SizedBox(
                                       width: 16,
                                       height: 16,
@@ -492,13 +573,23 @@ class _OwnerIosInternalTestingScreenState
                     )
                   else
                     ...state.requests.map(
-                      (request) => Padding(
-                        padding: const EdgeInsets.only(bottom: 10),
-                        child: _TesterCard(
-                          request: request,
-                          helperText: _statusHelperText(l10n, request),
-                        ),
-                      ),
+                      (request) {
+                        final label = _actionLabelForRequest(l10n, request);
+                        final enabled = _actionEnabledForRequest(request);
+
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 10),
+                          child: _TesterCard(
+                            request: request,
+                            helperText: _statusHelperText(l10n, request),
+                            actionLabel: label,
+                            actionEnabled: enabled,
+                            actionLoading: _actionLoadingForRequest(state, request),
+                            onActionPressed:
+                                enabled ? () => _retryRequest(request) : null,
+                          ),
+                        );
+                      },
                     ),
                 ],
               ),
@@ -513,10 +604,18 @@ class _OwnerIosInternalTestingScreenState
 class _TesterCard extends StatelessWidget {
   final IosInternalTestingRequest request;
   final String helperText;
+  final VoidCallback? onActionPressed;
+  final String? actionLabel;
+  final bool actionEnabled;
+  final bool actionLoading;
 
   const _TesterCard({
     required this.request,
     required this.helperText,
+    this.onActionPressed,
+    this.actionLabel,
+    this.actionEnabled = false,
+    this.actionLoading = false,
   });
 
   @override
@@ -561,7 +660,7 @@ class _TesterCard extends StatelessWidget {
               ),
             ],
           ),
-          if (fullName.trim().isNotEmpty) ...[
+          if (fullName.isNotEmpty) ...[
             const SizedBox(height: 8),
             Text(
               fullName,
@@ -580,6 +679,25 @@ class _TesterCard extends StatelessWidget {
                     ? cs.error
                     : cs.onSurface.withOpacity(.72),
                 height: 1.35,
+              ),
+            ),
+          ],
+          if (actionLabel != null) ...[
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.tonalIcon(
+                onPressed: (actionEnabled && !actionLoading)
+                    ? onActionPressed
+                    : null,
+                icon: actionLoading
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.refresh_rounded),
+                label: Text(actionLabel!),
               ),
             ),
           ],

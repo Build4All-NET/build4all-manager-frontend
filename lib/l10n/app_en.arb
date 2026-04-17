@@ -1374,7 +1374,11 @@
   "owner_proj_details_municipality_m2": "Public notices, alerts, and event communication",
   "owner_proj_details_municipality_m3": "Service booking and request routing",
   "owner_proj_details_municipality_i1": "Residents trust systems that make follow-up visible and simple.",
-  "owner_proj_details_municipality_i2": "Fast digital communication improves response quality across services."
+  "owner_proj_details_municipality_i2": "Fast digital communication improves response quality across services.",
+  
+  "common_tryAgain": "Try again",
+  "common_processing": "Processing..."
+
 
 
 

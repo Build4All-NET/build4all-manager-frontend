@@ -6,6 +6,7 @@ import '../../domain/entities/ios_internal_testing_request.dart';
 class IosInternalTestingManagerState extends Equatable {
   final bool loading;
   final bool submitting;
+  final String? submittingEmail;
   final IosInternalTestingAppSummary? summary;
   final String? error;
   final String? message;
@@ -13,6 +14,7 @@ class IosInternalTestingManagerState extends Equatable {
   const IosInternalTestingManagerState({
     this.loading = false,
     this.submitting = false,
+    this.submittingEmail,
     this.summary,
     this.error,
     this.message,
@@ -33,6 +35,8 @@ class IosInternalTestingManagerState extends Equatable {
   IosInternalTestingManagerState copyWith({
     bool? loading,
     bool? submitting,
+    String? submittingEmail,
+    bool clearSubmittingEmail = false,
     IosInternalTestingAppSummary? summary,
     bool keepSummary = true,
     String? error,
@@ -43,6 +47,9 @@ class IosInternalTestingManagerState extends Equatable {
     return IosInternalTestingManagerState(
       loading: loading ?? this.loading,
       submitting: submitting ?? this.submitting,
+      submittingEmail: clearSubmittingEmail
+          ? null
+          : (submittingEmail ?? this.submittingEmail),
       summary: keepSummary ? (summary ?? this.summary) : summary,
       error: clearError ? null : (error ?? this.error),
       message: clearMessage ? null : (message ?? this.message),
@@ -53,10 +60,16 @@ class IosInternalTestingManagerState extends Equatable {
   List<Object?> get props => [
         loading,
         submitting,
+        submittingEmail,
         summary?.usedSlots,
         summary?.maxSlots,
         summary?.requests.length,
-        requests.map((e) => '${e.id}-${e.status}-${e.updatedAt}').join('|'),
+        requests
+            .map(
+              (e) =>
+                  '${e.id}-${e.appleEmail}-${e.status}-${e.updatedAt}-${e.displayMessage}-${e.lastError}',
+            )
+            .join('|'),
         error,
         message,
       ];

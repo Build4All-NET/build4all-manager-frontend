@@ -3246,92 +3246,98 @@ class AppLocalizationsFr extends AppLocalizations {
   String get owner_proj_municipality_desc => 'Créer et gérer une application municipale pour les plaintes, les demandes, les annonces et les services publics.';
 
   @override
-  String get owner_proj_details_headline_wholesale => 'Run bulk orders and retailer operations with confidence.';
+  String get owner_proj_details_headline_wholesale => 'Gérez les commandes en gros et les opérations des revendeurs en toute confiance.';
 
   @override
-  String get owner_proj_details_subhead_wholesale => 'Designed for distributors, resellers, and businesses handling large-volume orders.';
+  String get owner_proj_details_subhead_wholesale => 'Conçu pour les distributeurs, revendeurs et entreprises qui traitent des commandes à grand volume.';
 
   @override
-  String get owner_proj_details_wholesale_h1 => 'Bulk pricing and quantity tiers';
+  String get owner_proj_details_wholesale_h1 => 'Tarification en gros et paliers de quantité';
 
   @override
-  String get owner_proj_details_wholesale_h2 => 'Retailer account management';
+  String get owner_proj_details_wholesale_h2 => 'Gestion des comptes revendeurs';
 
   @override
-  String get owner_proj_details_wholesale_h3 => 'Quote and invoice workflows';
+  String get owner_proj_details_wholesale_h3 => 'Flux de devis et de facturation';
 
   @override
-  String get owner_proj_details_wholesale_h4 => 'Stock visibility across warehouses';
+  String get owner_proj_details_wholesale_h4 => 'Visibilité du stock entre les entrepôts';
 
   @override
-  String get owner_proj_details_wholesale_s1_title => 'Retailer dashboard';
+  String get owner_proj_details_wholesale_s1_title => 'Tableau de bord revendeur';
 
   @override
-  String get owner_proj_details_wholesale_s1_sub => 'Track orders, balances, and account activity in one place.';
+  String get owner_proj_details_wholesale_s1_sub => 'Suivez les commandes, les soldes et l’activité du compte depuis un seul endroit.';
 
   @override
-  String get owner_proj_details_wholesale_s2_title => 'Bulk order flow';
+  String get owner_proj_details_wholesale_s2_title => 'Flux de commande en gros';
 
   @override
-  String get owner_proj_details_wholesale_s2_sub => 'Large basket ordering with fast review and confirmation.';
+  String get owner_proj_details_wholesale_s2_sub => 'Commande de grands volumes avec révision et confirmation rapides.';
 
   @override
-  String get owner_proj_details_wholesale_m1 => 'Tiered pricing and minimum order quantities';
+  String get owner_proj_details_wholesale_m1 => 'Tarification par paliers et quantités minimales de commande';
 
   @override
-  String get owner_proj_details_wholesale_m2 => 'Quote approvals and invoice generation';
+  String get owner_proj_details_wholesale_m2 => 'Validation des devis et génération des factures';
 
   @override
-  String get owner_proj_details_wholesale_m3 => 'Warehouse stock and fulfillment tools';
+  String get owner_proj_details_wholesale_m3 => 'Outils de stock et d’exécution en entrepôt';
 
   @override
-  String get owner_proj_details_wholesale_i1 => 'Wholesale buyers move faster when reorder flows are simplified.';
+  String get owner_proj_details_wholesale_i1 => 'Les acheteurs en gros avancent plus vite lorsque les réapprovisionnements sont simplifiés.';
 
   @override
-  String get owner_proj_details_wholesale_i2 => 'Clear stock and pricing reduce friction in large-volume sales.';
+  String get owner_proj_details_wholesale_i2 => 'Une visibilité claire sur les stocks et les prix réduit les frictions dans les ventes à grand volume.';
 
   @override
-  String get owner_proj_details_headline_municipality => 'Deliver public services through one trusted mobile experience.';
+  String get owner_proj_details_headline_municipality => 'Offrez les services publics à travers une expérience mobile unique et fiable.';
 
   @override
-  String get owner_proj_details_subhead_municipality => 'Built for municipalities handling complaints, requests, announcements, and resident communication.';
+  String get owner_proj_details_subhead_municipality => 'Pensé pour les municipalités qui gèrent les réclamations, les demandes, les annonces et la communication avec les citoyens.';
 
   @override
-  String get owner_proj_details_municipality_h1 => 'Complaint and issue reporting';
+  String get owner_proj_details_municipality_h1 => 'Signalement des réclamations et incidents';
 
   @override
-  String get owner_proj_details_municipality_h2 => 'Appointments and service requests';
+  String get owner_proj_details_municipality_h2 => 'Rendez-vous et demandes de services';
 
   @override
-  String get owner_proj_details_municipality_h3 => 'City announcements and alerts';
+  String get owner_proj_details_municipality_h3 => 'Annonces et alertes de la ville';
 
   @override
-  String get owner_proj_details_municipality_h4 => 'Resident engagement in one place';
+  String get owner_proj_details_municipality_h4 => 'Engagement des citoyens dans une seule application';
 
   @override
-  String get owner_proj_details_municipality_s1_title => 'Citizen request center';
+  String get owner_proj_details_municipality_s1_title => 'Centre des demandes citoyennes';
 
   @override
-  String get owner_proj_details_municipality_s1_sub => 'Residents submit issues and follow request status clearly.';
+  String get owner_proj_details_municipality_s1_sub => 'Les habitants soumettent leurs demandes et suivent clairement leur statut.';
 
   @override
-  String get owner_proj_details_municipality_s2_title => 'Announcements hub';
+  String get owner_proj_details_municipality_s2_title => 'Centre des annonces';
 
   @override
-  String get owner_proj_details_municipality_s2_sub => 'Publish updates, notices, and emergency alerts instantly.';
+  String get owner_proj_details_municipality_s2_sub => 'Publiez instantanément des mises à jour, avis et alertes d’urgence.';
 
   @override
-  String get owner_proj_details_municipality_m1 => 'Complaint tickets with status tracking';
+  String get owner_proj_details_municipality_m1 => 'Tickets de réclamation avec suivi de statut';
 
   @override
-  String get owner_proj_details_municipality_m2 => 'Public notices, alerts, and event communication';
+  String get owner_proj_details_municipality_m2 => 'Avis publics, alertes et communication sur les événements';
 
   @override
-  String get owner_proj_details_municipality_m3 => 'Service booking and request routing';
+  String get owner_proj_details_municipality_m3 => 'Réservation de services et routage des demandes';
 
   @override
-  String get owner_proj_details_municipality_i1 => 'Residents trust systems that make follow-up visible and simple.';
+  String get owner_proj_details_municipality_i1 => 'Les citoyens font davantage confiance aux systèmes qui rendent le suivi clair et simple.';
 
   @override
-  String get owner_proj_details_municipality_i2 => 'Fast digital communication improves response quality across services.';
+  String get owner_proj_details_municipality_i2 => 'Une communication numérique rapide améliore la qualité de réponse dans l’ensemble des services.';
+
+  @override
+  String get common_tryAgain => 'Réessayer';
+
+  @override
+  String get common_processing => 'Traitement...';
 }

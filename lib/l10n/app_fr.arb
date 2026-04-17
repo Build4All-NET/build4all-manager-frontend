@@ -1467,6 +1467,10 @@
   "owner_proj_details_municipality_m2": "Avis publics, alertes et communication sur les événements",
   "owner_proj_details_municipality_m3": "Réservation de services et routage des demandes",
   "owner_proj_details_municipality_i1": "Les citoyens font davantage confiance aux systèmes qui rendent le suivi clair et simple.",
-  "owner_proj_details_municipality_i2": "Une communication numérique rapide améliore la qualité de réponse dans l’ensemble des services."
+  "owner_proj_details_municipality_i2": "Une communication numérique rapide améliore la qualité de réponse dans l’ensemble des services.",
+  
+  "common_tryAgain": "Réessayer",
+  "common_processing": "Traitement..."
+
 
 }

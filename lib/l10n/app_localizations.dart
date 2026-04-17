@@ -6642,6 +6642,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Fast digital communication improves response quality across services.'**
   String get owner_proj_details_municipality_i2;
+
+  /// No description provided for @common_tryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get common_tryAgain;
+
+  /// No description provided for @common_processing.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing...'**
+  String get common_processing;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
