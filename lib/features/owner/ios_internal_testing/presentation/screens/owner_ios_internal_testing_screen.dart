@@ -89,6 +89,9 @@ class _OwnerIosInternalTestingScreenState
     AppLocalizations l10n,
     IosInternalTestingRequest request,
   ) {
+    final best = request.bestMessage.trim();
+    if (best.isNotEmpty) return best;
+
     final status = request.status.trim().toUpperCase();
 
     switch (status) {
@@ -144,19 +147,10 @@ class _OwnerIosInternalTestingScreenState
     return null;
   }
 
-  String _toastMessage(AppLocalizations l10n, String? rawStatus) {
-    final normalized = (rawStatus ?? '').trim().toUpperCase();
-
-    switch (normalized) {
-      case 'READY':
-        return l10n.iosInternalTestingReadyMessage;
-      case 'WAITING_OWNER_ACCEPTANCE':
-        return l10n.iosInternalTestingWaitingMessage;
-      case 'FAILED':
-        return l10n.iosInternalTestingFailedMessage;
-      default:
-        return l10n.iosInternalTestingSubmittedMessage;
-    }
+  String _toastMessage(AppLocalizations l10n, String? rawMessage) {
+    final msg = (rawMessage ?? '').trim();
+    if (msg.isNotEmpty) return msg;
+    return l10n.iosInternalTestingSubmittedMessage;
   }
 
   @override
@@ -545,7 +539,6 @@ class _TesterCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // email + status
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -568,7 +561,6 @@ class _TesterCard extends StatelessWidget {
               ),
             ],
           ),
-
           if (fullName.trim().isNotEmpty) ...[
             const SizedBox(height: 8),
             Text(
@@ -579,7 +571,6 @@ class _TesterCard extends StatelessWidget {
               ),
             ),
           ],
-
           if (helperText.trim().isNotEmpty) ...[
             const SizedBox(height: 8),
             Text(
@@ -596,5 +587,4 @@ class _TesterCard extends StatelessWidget {
       ),
     );
   }
-
 }

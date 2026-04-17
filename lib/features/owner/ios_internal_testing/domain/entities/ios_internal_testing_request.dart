@@ -15,6 +15,7 @@ class IosInternalTestingRequest {
   final String? appleUserId;
   final String? appleInvitationId;
   final String? lastError;
+  final String? displayMessage;
 
   final DateTime? requestedAt;
   final DateTime? processedAt;
@@ -37,6 +38,7 @@ class IosInternalTestingRequest {
     this.appleUserId,
     this.appleInvitationId,
     this.lastError,
+    this.displayMessage,
     this.requestedAt,
     this.processedAt,
     this.acceptedAt,
@@ -57,4 +59,14 @@ class IosInternalTestingRequest {
       status.toUpperCase() == 'REQUESTED';
 
   bool get hasError => (lastError ?? '').trim().isNotEmpty;
+
+  String get bestMessage {
+    final dm = (displayMessage ?? '').trim();
+    if (dm.isNotEmpty) return dm;
+
+    final err = (lastError ?? '').trim();
+    if (err.isNotEmpty) return err;
+
+    return '';
+  }
 }

@@ -82,7 +82,7 @@ class IosInternalTestingManagerBloc extends Bloc<
       emit(state.copyWith(
         submitting: false,
         summary: summary,
-        message: request.status,
+        message: request.bestMessage.isNotEmpty ? request.bestMessage : request.status,
         clearError: true,
       ));
     } catch (e) {

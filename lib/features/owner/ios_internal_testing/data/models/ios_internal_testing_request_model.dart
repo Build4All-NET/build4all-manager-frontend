@@ -17,6 +17,7 @@ class IosInternalTestingRequestModel {
   final String? appleUserId;
   final String? appleInvitationId;
   final String? lastError;
+  final String? displayMessage;
 
   final DateTime? requestedAt;
   final DateTime? processedAt;
@@ -39,6 +40,7 @@ class IosInternalTestingRequestModel {
     this.appleUserId,
     this.appleInvitationId,
     this.lastError,
+    this.displayMessage,
     this.requestedAt,
     this.processedAt,
     this.acceptedAt,
@@ -89,6 +91,7 @@ class IosInternalTestingRequestModel {
       appleUserId: _asNullableString(json['appleUserId']),
       appleInvitationId: _asNullableString(json['appleInvitationId']),
       lastError: _asNullableString(json['lastError']),
+      displayMessage: _asNullableString(json['displayMessage']),
       requestedAt: _asDateTime(json['requestedAt']),
       processedAt: _asDateTime(json['processedAt']),
       acceptedAt: _asDateTime(json['acceptedAt']),
@@ -113,6 +116,7 @@ class IosInternalTestingRequestModel {
       appleUserId: appleUserId,
       appleInvitationId: appleInvitationId,
       lastError: lastError,
+      displayMessage: displayMessage,
       requestedAt: requestedAt,
       processedAt: processedAt,
       acceptedAt: acceptedAt,
