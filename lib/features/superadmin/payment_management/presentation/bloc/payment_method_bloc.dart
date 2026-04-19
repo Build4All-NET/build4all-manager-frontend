@@ -50,11 +50,7 @@ class PaymentMethodBloc
   ) async {
     emit(state.copyWith(saving: true, error: null, success: null));
     try {
-      await createPaymentMethod(
-        name: event.name,
-        type: event.type,
-        provider: event.provider,
-      );
+      await createPaymentMethod(event.method);
       final items = await getPaymentMethods();
       emit(state.copyWith(
         saving: false,
@@ -75,12 +71,7 @@ class PaymentMethodBloc
   ) async {
     emit(state.copyWith(saving: true, error: null, success: null));
     try {
-      await updatePaymentMethod(
-        id: event.id,
-        name: event.name,
-        type: event.type,
-        provider: event.provider,
-      );
+      await updatePaymentMethod(event.method);
       final items = await getPaymentMethods();
       emit(state.copyWith(
         saving: false,
@@ -102,15 +93,14 @@ class PaymentMethodBloc
     final toggling = {...state.togglingIds, event.id};
     emit(state.copyWith(togglingIds: toggling, error: null, success: null));
     try {
-      await togglePaymentMethod(id: event.id, enabled: event.enabled);
+      await togglePaymentMethod(id: event.id, isEnabled: event.isEnabled);
       final items = await getPaymentMethods();
       final done = {...state.togglingIds}..remove(event.id);
       emit(state.copyWith(
         togglingIds: done,
         items: items,
-        success: event.enabled
-            ? 'Payment method enabled.'
-            : 'Payment method disabled.',
+        success:
+            event.isEnabled ? 'Payment method enabled.' : 'Payment method disabled.',
       ));
     } catch (err) {
       final done = {...state.togglingIds}..remove(event.id);

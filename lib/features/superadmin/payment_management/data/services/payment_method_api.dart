@@ -25,7 +25,7 @@ class PaymentMethodApi {
       if (e is String && e.trim().isNotEmpty) return e;
     }
     if (data is String && data.trim().isNotEmpty) return data;
-    return 'HTTP \${res.statusCode ?? \'???\'';}'
+    return "HTTP ${res.statusCode ?? '???'}";
   }
 
   bool _isOk(Response res) {
@@ -71,10 +71,10 @@ class PaymentMethodApi {
     if (!_isOk(res)) _throw(res);
   }
 
-  Future<void> toggle(int id, bool enabled) async {
+  Future<void> toggle(int id, bool isEnabled) async {
     final res = await _dio.patch(
       '$_base/superadmin/payment-methods/$id/status',
-      data: {'enabled': enabled},
+      data: {'isEnabled': isEnabled},
       options: Options(
         headers: const {'Content-Type': 'application/json'},
         responseType: ResponseType.plain,

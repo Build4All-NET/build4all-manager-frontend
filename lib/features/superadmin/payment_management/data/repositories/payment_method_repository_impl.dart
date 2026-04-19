@@ -11,40 +11,16 @@ class PaymentMethodRepositoryImpl implements IPaymentMethodRepository {
   Future<List<PaymentMethod>> getAll() => _api.getAll();
 
   @override
-  Future<void> create({
-    required String name,
-    required String type,
-    required String provider,
-  }) =>
-      _api.create(
-        PaymentMethodModel(
-          id: 0,
-          name: name,
-          type: type,
-          provider: provider,
-          enabled: true,
-        ).toCreateBody(),
+  Future<void> create(PaymentMethod method) =>
+      _api.create(PaymentMethodModel.fromEntity(method).toCreateBody());
+
+  @override
+  Future<void> update(PaymentMethod method) => _api.update(
+        method.id,
+        PaymentMethodModel.fromEntity(method).toUpdateBody(),
       );
 
   @override
-  Future<void> update({
-    required int id,
-    required String name,
-    required String type,
-    required String provider,
-  }) =>
-      _api.update(
-        id,
-        PaymentMethodModel(
-          id: id,
-          name: name,
-          type: type,
-          provider: provider,
-          enabled: true,
-        ).toUpdateBody(),
-      );
-
-  @override
-  Future<void> toggle({required int id, required bool enabled}) =>
-      _api.toggle(id, enabled);
+  Future<void> toggle({required int id, required bool isEnabled}) =>
+      _api.toggle(id, isEnabled);
 }
