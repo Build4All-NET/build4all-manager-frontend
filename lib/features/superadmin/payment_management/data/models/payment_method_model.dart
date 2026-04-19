@@ -46,6 +46,7 @@ class PaymentMethodModel extends PaymentMethod {
         createdAt: m.createdAt,
       );
 
+  // Includes paymentType — used only on POST (create).
   Map<String, dynamic> toCreateBody() => {
         'paymentDisplayName': paymentDisplayName,
         'paymentType': paymentType.code,
@@ -55,5 +56,12 @@ class PaymentMethodModel extends PaymentMethod {
         if (config != null) 'config': config!.toJson(),
       };
 
-  Map<String, dynamic> toUpdateBody() => toCreateBody();
+  // Excludes paymentType — immutable after creation.
+  Map<String, dynamic> toUpdateBody() => {
+        'paymentDisplayName': paymentDisplayName,
+        'providerCode': providerCode,
+        'description': description,
+        'isEnabled': isEnabled,
+        if (config != null) 'config': config!.toJson(),
+      };
 }

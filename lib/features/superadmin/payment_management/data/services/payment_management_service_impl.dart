@@ -35,27 +35,35 @@ class PaymentManagementServiceImpl implements IPaymentManagementService {
     return code >= 200 && code < 300;
   }
 
+  Options get _mutationOptions => Options(
+        headers: const {'Content-Type': 'application/json'},
+        responseType: ResponseType.plain,
+      );
+
+  List<T> _parseList<T>(
+    dynamic raw,
+    T Function(Map<String, dynamic>) fromJson,
+  ) {
+    final list = raw is List
+        ? raw
+        : (raw is Map ? (raw['data'] ?? raw['content'] ?? []) : []);
+    return (list as List)
+        .map((e) => fromJson(Map<String, dynamic>.from(e as Map)))
+        .toList();
+  }
+
   // ── Payment Methods ──────────────────────────────────────────────────────
 
   @override
   Future<List<PaymentMethodResponseDto>> getPaymentMethods() async {
     final res = await _dio.get('$_base/superadmin/payment-methods');
     if (!_isOk(res)) _throw(res);
-    final raw = res.data;
-    final list = raw is List
-        ? raw
-        : (raw is Map ? (raw['data'] ?? raw['content'] ?? []) : []);
-    return (list as List)
-        .map((e) => PaymentMethodResponseDto.fromJson(
-              Map<String, dynamic>.from(e as Map),
-            ))
-        .toList();
+    return _parseList(res.data, PaymentMethodResponseDto.fromJson);
   }
 
   @override
   Future<PaymentMethodResponseDto> getPaymentMethodById(int id) async {
-    final res =
-        await _dio.get('$_base/superadmin/payment-methods/$id');
+    final res = await _dio.get('$_base/superadmin/payment-methods/$id');
     if (!_isOk(res)) _throw(res);
     return PaymentMethodResponseDto.fromJson(
       Map<String, dynamic>.from(res.data as Map),
@@ -67,24 +75,17 @@ class PaymentManagementServiceImpl implements IPaymentManagementService {
     final res = await _dio.post(
       '$_base/superadmin/payment-methods',
       data: dto.toJson(),
-      options: Options(
-        headers: const {'Content-Type': 'application/json'},
-        responseType: ResponseType.plain,
-      ),
+      options: _mutationOptions,
     );
     if (!_isOk(res)) _throw(res);
   }
 
   @override
-  Future<void> updatePaymentMethod(
-      int id, UpdatePaymentMethodDto dto) async {
+  Future<void> updatePaymentMethod(int id, UpdatePaymentMethodDto dto) async {
     final res = await _dio.put(
       '$_base/superadmin/payment-methods/$id',
       data: dto.toJson(),
-      options: Options(
-        headers: const {'Content-Type': 'application/json'},
-        responseType: ResponseType.plain,
-      ),
+      options: _mutationOptions,
     );
     if (!_isOk(res)) _throw(res);
   }
@@ -94,10 +95,7 @@ class PaymentManagementServiceImpl implements IPaymentManagementService {
     final res = await _dio.patch(
       '$_base/superadmin/payment-methods/$id/status',
       data: TogglePaymentMethodDto(isEnabled: isEnabled).toJson(),
-      options: Options(
-        headers: const {'Content-Type': 'application/json'},
-        responseType: ResponseType.plain,
-      ),
+      options: _mutationOptions,
     );
     if (!_isOk(res)) _throw(res);
   }
@@ -108,15 +106,7 @@ class PaymentManagementServiceImpl implements IPaymentManagementService {
   Future<List<PaymentTypeResponseDto>> getPaymentTypes() async {
     final res = await _dio.get('$_base/superadmin/payment-types');
     if (!_isOk(res)) _throw(res);
-    final raw = res.data;
-    final list = raw is List
-        ? raw
-        : (raw is Map ? (raw['data'] ?? raw['content'] ?? []) : []);
-    return (list as List)
-        .map((e) => PaymentTypeResponseDto.fromJson(
-              Map<String, dynamic>.from(e as Map),
-            ))
-        .toList();
+    return _parseList(res.data, PaymentTypeResponseDto.fromJson);
   }
 
   @override
@@ -124,10 +114,7 @@ class PaymentManagementServiceImpl implements IPaymentManagementService {
     final res = await _dio.post(
       '$_base/superadmin/payment-types',
       data: dto.toJson(),
-      options: Options(
-        headers: const {'Content-Type': 'application/json'},
-        responseType: ResponseType.plain,
-      ),
+      options: _mutationOptions,
     );
     if (!_isOk(res)) _throw(res);
   }
@@ -137,10 +124,17 @@ class PaymentManagementServiceImpl implements IPaymentManagementService {
     final res = await _dio.put(
       '$_base/superadmin/payment-types/$id',
       data: dto.toJson(),
-      options: Options(
-        headers: const {'Content-Type': 'application/json'},
-        responseType: ResponseType.plain,
-      ),
+      options: _mutationOptions,
+    );
+    if (!_isOk(res)) _throw(res);
+  }
+
+  @override
+  Future<void> togglePaymentType(int id, bool isActive) async {
+    final res = await _dio.patch(
+      '$_base/superadmin/payment-types/$id/status',
+      data: TogglePaymentTypeDto(isActive: isActive).toJson(),
+      options: _mutationOptions,
     );
     if (!_isOk(res)) _throw(res);
   }

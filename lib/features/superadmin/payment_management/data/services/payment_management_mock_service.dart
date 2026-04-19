@@ -29,7 +29,7 @@ class PaymentManagementMockService implements IPaymentManagementService {
       isEnabled: true,
       config: {
         'clientId': 'AaBbCcDdEe1234567890',
-        'secret': '••••••••••••••••',
+        'secret': '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022',
         'sandbox': false,
       },
       createdAt: '2024-01-12T09:30:00.000Z',
@@ -43,7 +43,7 @@ class PaymentManagementMockService implements IPaymentManagementService {
       isEnabled: true,
       config: {
         'publishableKey': 'pk_live_xxxxxxxxxxxxxxxxxxxx',
-        'secretKey': '••••••••••••••••',
+        'secretKey': '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022',
       },
       createdAt: '2024-01-15T11:00:00.000Z',
     ),
@@ -159,8 +159,7 @@ class PaymentManagementMockService implements IPaymentManagementService {
   }
 
   @override
-  Future<void> updatePaymentMethod(
-      int id, UpdatePaymentMethodDto dto) async {
+  Future<void> updatePaymentMethod(int id, UpdatePaymentMethodDto dto) async {
     await Future.delayed(_delay);
     final idx = _methods.indexWhere((m) => m.id == id);
     if (idx == -1) throw Exception('Payment method $id not found.');
@@ -232,6 +231,22 @@ class PaymentManagementMockService implements IPaymentManagementService {
       code: existing.code,
       description: dto.description,
       isActive: dto.isActive,
+      createdAt: existing.createdAt,
+    );
+  }
+
+  @override
+  Future<void> togglePaymentType(int id, bool isActive) async {
+    await Future.delayed(_delay);
+    final idx = _types.indexWhere((t) => t.id == id);
+    if (idx == -1) throw Exception('Payment type $id not found.');
+    final existing = _types[idx];
+    _types[idx] = PaymentTypeResponseDto(
+      id: existing.id,
+      typeName: existing.typeName,
+      code: existing.code,
+      description: existing.description,
+      isActive: isActive,
       createdAt: existing.createdAt,
     );
   }

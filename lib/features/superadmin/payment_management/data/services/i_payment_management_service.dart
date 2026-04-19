@@ -13,4 +13,5 @@ abstract class IPaymentManagementService {
   Future<List<PaymentTypeResponseDto>> getPaymentTypes();
   Future<void> createPaymentType(CreatePaymentTypeDto dto);
   Future<void> updatePaymentType(int id, UpdatePaymentTypeDto dto);
+  Future<void> togglePaymentType(int id, bool isActive);
 }

@@ -32,6 +32,7 @@ class ManagedPaymentTypeModel extends ManagedPaymentType {
         createdAt: e.createdAt,
       );
 
+  // Includes code — used only on POST (create).
   Map<String, dynamic> toCreateBody() => {
         'typeName': typeName,
         'code': code.toUpperCase(),
@@ -39,5 +40,10 @@ class ManagedPaymentTypeModel extends ManagedPaymentType {
         'isActive': isActive,
       };
 
-  Map<String, dynamic> toUpdateBody() => toCreateBody();
+  // Excludes code — immutable after creation.
+  Map<String, dynamic> toUpdateBody() => {
+        'typeName': typeName,
+        'description': description,
+        'isActive': isActive,
+      };
 }

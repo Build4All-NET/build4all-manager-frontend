@@ -14,6 +14,7 @@ import '../bloc/payment_type_bloc.dart';
 import '../bloc/payment_type_event.dart';
 import '../bloc/payment_type_state.dart';
 import '../widgets/payment_type_card.dart';
+import '../widgets/pm_list_widgets.dart';
 import 'payment_type_form_screen.dart';
 
 class PaymentTypesScreen extends StatelessWidget {
@@ -54,12 +55,17 @@ class _PaymentTypesView extends StatelessWidget {
               if (state.loading && state.items.isNotEmpty)
                 const Padding(
                   padding: EdgeInsets.only(right: 16),
-                  child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
+                  child: SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
                 ),
               IconButton(
                 icon: const Icon(Icons.refresh_rounded),
                 tooltip: 'Refresh',
-                onPressed: () => context.read<PaymentTypeBloc>().add(RefreshPaymentTypes()),
+                onPressed: () =>
+                    context.read<PaymentTypeBloc>().add(RefreshPaymentTypes()),
               ),
             ],
           ),
@@ -69,7 +75,8 @@ class _PaymentTypesView extends StatelessWidget {
             label: const Text('Add Type'),
           ),
           body: RefreshIndicator.adaptive(
-            onRefresh: () async => context.read<PaymentTypeBloc>().add(RefreshPaymentTypes()),
+            onRefresh: () async =>
+                context.read<PaymentTypeBloc>().add(RefreshPaymentTypes()),
             child: _buildBody(context, state),
           ),
         );
@@ -78,14 +85,21 @@ class _PaymentTypesView extends StatelessWidget {
   }
 
   Widget _buildBody(BuildContext context, PaymentTypeState state) {
-    if (state.loading && state.items.isEmpty) return const _LoadingView();
+    if (state.loading && state.items.isEmpty) return const PmLoadingView();
     if (state.error != null && state.items.isEmpty) {
-      return _ErrorView(
+      return PmErrorView(
         message: state.error!,
-        onRetry: () => context.read<PaymentTypeBloc>().add(LoadPaymentTypes()),
+        onRetry: () =>
+            context.read<PaymentTypeBloc>().add(LoadPaymentTypes()),
       );
     }
-    if (state.items.isEmpty) return const _EmptyView();
+    if (state.items.isEmpty) {
+      return const PmEmptyView(
+        icon: Icons.category_rounded,
+        title: 'No payment types yet',
+        subtitle: 'Tap + to create your first payment type.',
+      );
+    }
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
       itemCount: state.items.length,
@@ -95,109 +109,23 @@ class _PaymentTypesView extends StatelessWidget {
         return PaymentTypeCard(
           type: item,
           isToggling: state.togglingIds.contains(item.id),
-          onToggle: (val) => context.read<PaymentTypeBloc>().add(TogglePaymentTypeActive(id: item.id, isActive: val)),
+          onToggle: (val) => context.read<PaymentTypeBloc>().add(
+                TogglePaymentTypeActive(id: item.id, isActive: val),
+              ),
           onEdit: () => _openForm(context, item),
         );
       },
     );
   }
 
-  Future<void> _openForm(BuildContext context, ManagedPaymentType? existing) async {
+  Future<void> _openForm(
+      BuildContext context, ManagedPaymentType? existing) async {
     final bloc = context.read<PaymentTypeBloc>();
     final result = await Navigator.of(context).push<bool>(
-      MaterialPageRoute(builder: (_) => PaymentTypeFormScreen(existing: existing)),
+      MaterialPageRoute(
+        builder: (_) => PaymentTypeFormScreen(existing: existing),
+      ),
     );
     if (result == true && context.mounted) bloc.add(RefreshPaymentTypes());
-  }
-}
-
-class _LoadingView extends StatelessWidget {
-  const _LoadingView();
-  @override
-  Widget build(BuildContext context) {
-    return ListView.separated(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-      itemCount: 6,
-      separatorBuilder: (_, __) => const SizedBox(height: 10),
-      itemBuilder: (_, __) => const _SkeletonCard(),
-    );
-  }
-}
-
-class _SkeletonCard extends StatelessWidget {
-  const _SkeletonCard();
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Card(
-      elevation: 0,
-      clipBehavior: Clip.antiAlias,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(height: 16, width: 160, decoration: BoxDecoration(color: cs.surfaceContainerHighest, borderRadius: BorderRadius.circular(6))),
-            const SizedBox(height: 8),
-            Container(height: 12, width: 80, decoration: BoxDecoration(color: cs.surfaceContainerHighest, borderRadius: BorderRadius.circular(6))),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ErrorView extends StatelessWidget {
-  final String message;
-  final VoidCallback onRetry;
-  const _ErrorView({required this.message, required this.onRetry});
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.error_outline_rounded, color: cs.error, size: 48),
-            const SizedBox(height: 12),
-            Text(message, textAlign: TextAlign.center, style: TextStyle(color: cs.onSurfaceVariant)),
-            const SizedBox(height: 16),
-            FilledButton.icon(onPressed: onRetry, icon: const Icon(Icons.refresh_rounded), label: const Text('Retry')),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _EmptyView extends StatelessWidget {
-  const _EmptyView();
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return CustomScrollView(
-      physics: const AlwaysScrollableScrollPhysics(),
-      slivers: [
-        SliverFillRemaining(
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.category_rounded, size: 64, color: cs.onSurfaceVariant.withOpacity(.4)),
-                  const SizedBox(height: 16),
-                  Text('No payment types yet', style: Theme.of(context).textTheme.titleMedium),
-                  const SizedBox(height: 6),
-                  Text('Tap + to create your first payment type.', textAlign: TextAlign.center, style: TextStyle(color: cs.onSurfaceVariant)),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
   }
 }
