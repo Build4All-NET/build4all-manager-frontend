@@ -8,6 +8,13 @@ import 'package:build4all_manager/features/owner/ownerhome/presentation/screens/
 import 'package:build4all_manager/features/owner/ownerhome/presentation/screens/owner_requests_list_screen.dart';
 import 'package:build4all_manager/features/owner/ownerrequests/presentation/screens/owner_requests_screen.dart';
 
+import 'package:build4all_manager/features/superadmin/payment_management/domain/entities/managed_payment_type.dart';
+import 'package:build4all_manager/features/superadmin/payment_management/domain/entities/payment_method.dart';
+import 'package:build4all_manager/features/superadmin/payment_management/presentation/screens/payment_method_form_screen.dart';
+import 'package:build4all_manager/features/superadmin/payment_management/presentation/screens/payment_methods_screen.dart';
+import 'package:build4all_manager/features/superadmin/payment_management/presentation/screens/payment_type_form_screen.dart';
+import 'package:build4all_manager/features/superadmin/payment_management/presentation/screens/payment_types_screen.dart';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:dio/dio.dart';
@@ -123,10 +130,50 @@ final router = GoRouter(
     GoRoute(path: '/', builder: (_, __) => const SplashGate()),
     GoRoute(path: '/login', builder: (_, __) => const AppLoginScreen()),
     GoRoute(path: '/loginScreen', builder: (_, __) => const AppLoginScreen()),
+
+    // ── Super Admin root ─────────────────────────────────────────────────────
     GoRoute(
       path: '/manager',
       builder: (_, __) => const SuperAdminEntryLoader(),
     ),
+
+    // ── Payment Management deep-link routes (SUPER_ADMIN only) ───────────────
+    // All paths under /manager/* are guarded by _authRedirect:
+    //   role != SUPER_ADMIN → redirect to /owner/home
+    // These routes let notifications, emails, or external links open a
+    // specific payment screen directly without going through the Profile tab.
+    GoRoute(
+      path: '/manager/payment/methods',
+      builder: (_, __) => const PaymentMethodsScreen(),
+    ),
+    GoRoute(
+      path: '/manager/payment/methods/new',
+      builder: (_, __) => const PaymentMethodFormScreen(),
+    ),
+    GoRoute(
+      path: '/manager/payment/methods/edit',
+      // Pass the PaymentMethod entity via GoRouter.go/push(extra: method)
+      builder: (_, state) => PaymentMethodFormScreen(
+        existing: state.extra as PaymentMethod?,
+      ),
+    ),
+    GoRoute(
+      path: '/manager/payment/types',
+      builder: (_, __) => const PaymentTypesScreen(),
+    ),
+    GoRoute(
+      path: '/manager/payment/types/new',
+      builder: (_, __) => const PaymentTypeFormScreen(),
+    ),
+    GoRoute(
+      path: '/manager/payment/types/edit',
+      // Pass the ManagedPaymentType entity via GoRouter.go/push(extra: type)
+      builder: (_, state) => PaymentTypeFormScreen(
+        existing: state.extra as ManagedPaymentType?,
+      ),
+    ),
+
+    // ── Owner routes ─────────────────────────────────────────────────────────
     GoRoute(path: '/owner', redirect: (_, __) => '/owner/home'),
     ShellRoute(
       navigatorKey: _ownerSessionShellKey,
@@ -134,7 +181,8 @@ final router = GoRouter(
       routes: [
         ShellRoute(
           navigatorKey: _ownerNavShellKey,
-          builder: (context, state, child) => _OwnerNavWrapper(child: child),
+          builder: (context, state, child) =>
+              _OwnerNavWrapper(child: child),
           routes: [
             GoRoute(
               path: '/owner/home',
@@ -174,8 +222,8 @@ final router = GoRouter(
           builder: (context, state) {
             final s = OwnerSessionScope.of(context);
 
-            final idStr =
-                state.pathParameters['id'] ?? '${projectTemplates.first.id}';
+            final idStr = state.pathParameters['id'] ??
+                '${projectTemplates.first.id}';
             final id = int.tryParse(idStr) ?? projectTemplates.first.id;
 
             final tpl = projectTemplates.firstWhere(
@@ -194,14 +242,16 @@ final router = GoRouter(
           path: '/owner/requests/list',
           builder: (context, state) {
             final s = OwnerSessionScope.of(context);
-            return OwnerRequestsListScreen(ownerId: s.ownerId, dio: s.dio);
+            return OwnerRequestsListScreen(
+                ownerId: s.ownerId, dio: s.dio);
           },
         ),
         GoRoute(
           path: '/owner/requests',
           builder: (context, state) {
             final s = OwnerSessionScope.of(context);
-            final extra = (state.extra is Map) ? state.extra as Map : const {};
+            final extra =
+                (state.extra is Map) ? state.extra as Map : const {};
 
             return OwnerRequestScreen(
               baseUrl: s.dio.options.baseUrl,
@@ -216,7 +266,8 @@ final router = GoRouter(
     ),
     GoRoute(
       path: '/owner/register',
-      builder: (_, __) => _withOwnerRegBloc(const OwnerRegisterEmailScreen()),
+      builder: (_, __) =>
+          _withOwnerRegBloc(const OwnerRegisterEmailScreen()),
       routes: [
         GoRoute(
           path: 'otp',
@@ -244,7 +295,8 @@ final router = GoRouter(
   redirect: _authRedirect,
 );
 
-Future<String?> _authRedirect(BuildContext context, GoRouterState state) async {
+Future<String?> _authRedirect(
+    BuildContext context, GoRouterState state) async {
   final store = JwtLocalDataSource();
   final (token, roleRaw) = await store.read();
 
@@ -258,11 +310,13 @@ Future<String?> _authRedirect(BuildContext context, GoRouterState state) async {
 
   final goingToAuth =
       loc.startsWith('/login') || loc.startsWith('/owner/register');
-  if (goingToAuth) return role == 'SUPER_ADMIN' ? '/manager' : '/owner/home';
+  if (goingToAuth)
+    return role == 'SUPER_ADMIN' ? '/manager' : '/owner/home';
 
   if (role == 'SUPER_ADMIN' && loc.startsWith('/owner')) {
     return '/manager';
   }
+  // Covers /manager and all /manager/payment/* routes
   if (role != 'SUPER_ADMIN' && loc.startsWith('/manager')) {
     return '/owner/home';
   }
@@ -306,7 +360,8 @@ String? _extractDisplayName(Map<String, dynamic>? claims) {
 
   if (raw == null) return null;
 
-  final isEmail = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(raw);
+  final isEmail =
+      RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(raw);
   if (isEmail) return null;
 
   return raw;
@@ -355,7 +410,8 @@ class _OwnerSessionLoader extends StatelessWidget {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (context.mounted) context.go('/login');
           });
-          return Scaffold(body: Center(child: Text(l10n.owner_nav_home)));
+          return Scaffold(
+              body: Center(child: Text(l10n.owner_nav_home)));
         }
 
         final Dio dio = DioClient.ensure();

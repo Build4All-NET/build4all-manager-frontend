@@ -12,6 +12,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../payment_management/presentation/screens/payment_methods_screen.dart';
+import '../../../payment_management/presentation/screens/payment_types_screen.dart';
 import '../../data/repositories/admin_repository_impl.dart';
 import '../../data/services/admin_api.dart';
 import '../../domain/entities/admin_profile.dart';
@@ -224,6 +226,61 @@ class _ProfileView extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 16),
+                        _SectionTitle(
+                          icon: Icons.payments_rounded,
+                          title: 'Payment Management',
+                        ),
+                        const SizedBox(height: 10),
+                        Card(
+                          elevation: 0,
+                          clipBehavior: Clip.antiAlias,
+                          child: Column(
+                            children: [
+                              ListTile(
+                                contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 6),
+                                leading: const Icon(Icons.credit_card_rounded),
+                                title: const Text('Payment Methods'),
+                                subtitle: const Text(
+                                    'Manage available payment methods'),
+                                trailing: const Icon(
+                                    Icons.chevron_right_rounded),
+                                onTap: () => Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        const PaymentMethodsScreen(),
+                                  ),
+                                ),
+                              ),
+                              Divider(
+                                height: 1,
+                                indent: 16,
+                                endIndent: 16,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .outlineVariant,
+                              ),
+                              ListTile(
+                                contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 6),
+                                leading:
+                                    const Icon(Icons.category_rounded),
+                                title: const Text('Payment Types'),
+                                subtitle: const Text(
+                                    'Manage custom payment type registry'),
+                                trailing: const Icon(
+                                    Icons.chevron_right_rounded),
+                                onTap: () => Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        const PaymentTypesScreen(),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
                         Card(
                           elevation: 0,
                           clipBehavior: Clip.antiAlias,
@@ -353,8 +410,7 @@ class _ProfileHero extends StatelessWidget {
                       ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment:
-                        CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         '${me.firstName} ${me.lastName}',
@@ -395,7 +451,8 @@ class _ProfileHero extends StatelessWidget {
   }
 
   static String _initials(String f, String l) =>
-      '${(f.isNotEmpty ? f[0] : 'A')}${(l.isNotEmpty ? l[0] : 'U')}'.toUpperCase();
+      '${(f.isNotEmpty ? f[0] : 'A')}${(l.isNotEmpty ? l[0] : 'U')}'
+          .toUpperCase();
 }
 
 class _SectionTitle extends StatelessWidget {
@@ -526,7 +583,8 @@ class _LogoutConfirmSheet extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+          borderRadius:
+              const BorderRadius.vertical(top: Radius.circular(16)),
           boxShadow: kElevationToShadow[3],
         ),
         child: Column(
@@ -559,8 +617,7 @@ class _LogoutConfirmSheet extends StatelessWidget {
                       const SizedBox(height: 2),
                       Text(
                         l10n.common_sign_out_confirm,
-                        style:
-                            TextStyle(color: cs.onSurfaceVariant),
+                        style: TextStyle(color: cs.onSurfaceVariant),
                       ),
                     ],
                   ),
