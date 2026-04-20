@@ -53,7 +53,6 @@ class PaymentMethodApi {
       data: body,
       options: Options(
         headers: const {'Content-Type': 'application/json'},
-        responseType: ResponseType.plain,
       ),
     );
     if (!_isOk(res)) _throw(res);
@@ -65,7 +64,6 @@ class PaymentMethodApi {
       data: body,
       options: Options(
         headers: const {'Content-Type': 'application/json'},
-        responseType: ResponseType.plain,
       ),
     );
     if (!_isOk(res)) _throw(res);
@@ -77,7 +75,6 @@ class PaymentMethodApi {
       data: {'isEnabled': isEnabled},
       options: Options(
         headers: const {'Content-Type': 'application/json'},
-        responseType: ResponseType.plain,
       ),
     );
     if (!_isOk(res)) _throw(res);
