@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../payment_management/presentation/screens/license_plan_pricings_screen.dart';
 import '../../../payment_management/presentation/screens/payment_methods_screen.dart';
 import '../../../payment_management/presentation/screens/payment_types_screen.dart';
 import '../../data/repositories/admin_repository_impl.dart';
@@ -274,6 +275,31 @@ class _ProfileView extends StatelessWidget {
                                   MaterialPageRoute(
                                     builder: (_) =>
                                         const PaymentTypesScreen(),
+                                  ),
+                                ),
+                              ),
+                              Divider(
+                                height: 1,
+                                indent: 16,
+                                endIndent: 16,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .outlineVariant,
+                              ),
+                              ListTile(
+                                contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 6),
+                                leading:
+                                    const Icon(Icons.sell_rounded),
+                                title: const Text('Plan Pricing'),
+                                subtitle: const Text(
+                                    'Manage license plan prices and discounts'),
+                                trailing: const Icon(
+                                    Icons.chevron_right_rounded),
+                                onTap: () => Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        const LicensePlanPricingsScreen(),
                                   ),
                                 ),
                               ),
