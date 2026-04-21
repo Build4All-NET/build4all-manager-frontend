@@ -229,7 +229,7 @@ class _ProfileView extends StatelessWidget {
                         const SizedBox(height: 16),
                         _SectionTitle(
                           icon: Icons.payments_rounded,
-                          title: 'Payment Management',
+                          title: 'Subscription Billing',
                         ),
                         const SizedBox(height: 10),
                         Card(
@@ -241,9 +241,9 @@ class _ProfileView extends StatelessWidget {
                                 contentPadding: const EdgeInsets.symmetric(
                                     horizontal: 16, vertical: 6),
                                 leading: const Icon(Icons.credit_card_rounded),
-                                title: const Text('Payment Methods'),
+                                title: const Text('Billing Methods'),
                                 subtitle: const Text(
-                                    'Manage available payment methods'),
+                                    'Stripe / bank accounts used to bill owners'),
                                 trailing: const Icon(
                                     Icons.chevron_right_rounded),
                                 onTap: () => Navigator.of(context).push(
@@ -266,9 +266,9 @@ class _ProfileView extends StatelessWidget {
                                     horizontal: 16, vertical: 6),
                                 leading:
                                     const Icon(Icons.category_rounded),
-                                title: const Text('Payment Types'),
+                                title: const Text('Billing Types'),
                                 subtitle: const Text(
-                                    'Manage custom payment type registry'),
+                                    'Categories of billing methods (Card, Bank…)'),
                                 trailing: const Icon(
                                     Icons.chevron_right_rounded),
                                 onTap: () => Navigator.of(context).push(

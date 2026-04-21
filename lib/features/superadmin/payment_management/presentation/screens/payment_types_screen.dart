@@ -49,7 +49,7 @@ class _PaymentTypesView extends StatelessWidget {
       builder: (context, state) {
         return Scaffold(
           appBar: AppBar(
-            title: const Text('Payment Types'),
+            title: const Text('Subscription Billing – Types'),
             centerTitle: false,
             actions: [
               if (state.loading && state.items.isNotEmpty)

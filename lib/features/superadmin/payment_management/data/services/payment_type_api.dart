@@ -34,7 +34,7 @@ class PaymentTypeApi {
   }
 
   Future<List<ManagedPaymentTypeModel>> getAll() async {
-    final res = await _dio.get('$_base/superadmin/payment-types');
+    final res = await _dio.get('$_base/superadmin/subscription-billing/types');
     if (!_isOk(res)) _throw(res);
     final raw = res.data;
     final list = raw is List
@@ -49,7 +49,7 @@ class PaymentTypeApi {
 
   Future<void> create(Map<String, dynamic> body) async {
     final res = await _dio.post(
-      '$_base/superadmin/payment-types',
+      '$_base/superadmin/subscription-billing/types',
       data: body,
       options: Options(
         headers: const {'Content-Type': 'application/json'},
@@ -60,7 +60,7 @@ class PaymentTypeApi {
 
   Future<void> update(int id, Map<String, dynamic> body) async {
     final res = await _dio.put(
-      '$_base/superadmin/payment-types/$id',
+      '$_base/superadmin/subscription-billing/types/$id',
       data: body,
       options: Options(
         headers: const {'Content-Type': 'application/json'},
@@ -71,7 +71,7 @@ class PaymentTypeApi {
 
   Future<void> toggle(int id, bool isActive) async {
     final res = await _dio.patch(
-      '$_base/superadmin/payment-types/$id/status',
+      '$_base/superadmin/subscription-billing/types/$id/status',
       data: {'isActive': isActive},
       options: Options(
         headers: const {'Content-Type': 'application/json'},
