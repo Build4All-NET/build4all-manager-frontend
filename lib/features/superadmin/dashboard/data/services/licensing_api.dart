@@ -20,6 +20,12 @@ class LicensingApi {
         data: {'note': note},
       );
 
+  /// POST /api/licensing/upgrade-requests/{id}/mark-paid
+  /// Cash/manual flow: confirms cash was collected at the counter and
+  /// activates the subscription for the billing cycle the owner picked.
+  Future<Response> markUpgradeRequestPaid(int requestId) =>
+      dio.post('/licensing/upgrade-requests/$requestId/mark-paid');
+
 
       Future<List<SuperAdminAppLicenseRow>> listAppsLicenses() async {
   final res = await dio.get('/licensing/apps');
