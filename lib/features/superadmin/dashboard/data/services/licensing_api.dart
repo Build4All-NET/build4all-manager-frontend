@@ -26,6 +26,21 @@ class LicensingApi {
   Future<Response> markUpgradeRequestPaid(int requestId) =>
       dio.post('/licensing/upgrade-requests/$requestId/mark-paid');
 
+  /// POST /api/licensing/upgrade-requests/{id}/mark-unpaid
+  /// Reverses a cash Mark-Paid: cancels the activated subscription,
+  /// flips the payment to FAILED and moves the request back to PENDING.
+  /// Only valid for cash/manual rows.
+  Future<Response> markUpgradeRequestUnpaid(int requestId) =>
+      dio.post('/licensing/upgrade-requests/$requestId/mark-unpaid');
+
+  /// GET /api/licensing/upgrade-requests/recently-approved?days=N
+  /// Recently approved cash upgrades so the UI can offer an Undo.
+  Future<Response> recentlyApprovedUpgradeRequests({int days = 7}) =>
+      dio.get(
+        '/licensing/upgrade-requests/recently-approved',
+        queryParameters: {'days': days},
+      );
+
 
       Future<List<SuperAdminAppLicenseRow>> listAppsLicenses() async {
   final res = await dio.get('/licensing/apps');
