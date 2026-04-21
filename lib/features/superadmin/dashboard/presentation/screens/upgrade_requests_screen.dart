@@ -79,12 +79,12 @@ class _SuperAdminUpgradeRequestsScreenState
     }
   }
 
-  Future<void> _approve(UpgradeRequestRow r) async {
+  Future<void> _markPaid(UpgradeRequestRow r) async {
     final l10n = AppLocalizations.of(context)!;
 
     setState(() => _busyIds.add(r.id));
     try {
-      await _api.approveUpgradeRequest(r.id);
+      await _api.markUpgradeRequestPaid(r.id);
       if (!mounted) return;
       setState(() => _items.removeWhere((x) => x.id == r.id));
       _toast(l10n.upgrade_requests_approve_success);
@@ -248,7 +248,7 @@ class _SuperAdminUpgradeRequestsScreenState
                             child: _ProUpgradeRequestCard(
                               row: r,
                               busy: busy,
-                              onApprove: busy ? null : () => _approve(r),
+                              onMarkPaid: busy ? null : () => _markPaid(r),
                               onReject: busy ? null : () => _reject(r),
                             ),
                           );
@@ -395,13 +395,13 @@ class _UpgradeHeroPanel extends StatelessWidget {
 class _ProUpgradeRequestCard extends StatelessWidget {
   final UpgradeRequestRow row;
   final bool busy;
-  final VoidCallback? onApprove;
+  final VoidCallback? onMarkPaid;
   final VoidCallback? onReject;
 
   const _ProUpgradeRequestCard({
     required this.row,
     required this.busy,
-    required this.onApprove,
+    required this.onMarkPaid,
     required this.onReject,
   });
 
@@ -541,6 +541,14 @@ class _ProUpgradeRequestCard extends StatelessWidget {
                   cs.primary,
                   icon: Icons.workspace_premium_outlined,
                 ),
+                if (row.billingCycle.isNotEmpty)
+                  softChip(
+                    row.billingCycle,
+                    Colors.indigo,
+                    icon: row.billingCycle.toUpperCase() == 'YEARLY'
+                        ? Icons.calendar_today_rounded
+                        : Icons.calendar_view_month_rounded,
+                  ),
               ],
             ),
             const SizedBox(height: 6),
@@ -652,7 +660,7 @@ class _ProUpgradeRequestCard extends StatelessWidget {
                 const SizedBox(width: 10),
                 Expanded(
                   child: FilledButton.icon(
-                    onPressed: onApprove,
+                    onPressed: onMarkPaid,
                     style: FilledButton.styleFrom(
                       minimumSize: const Size.fromHeight(48),
                       shape: RoundedRectangleBorder(
@@ -668,8 +676,8 @@ class _ProUpgradeRequestCard extends StatelessWidget {
                               color: Colors.white,
                             ),
                           )
-                        : const Icon(Icons.check_rounded),
-                    label: Text(l10n.common_approve),
+                        : const Icon(Icons.payments_rounded),
+                    label: const Text('Mark Paid'),
                   ),
                 ),
               ],
@@ -860,6 +868,7 @@ class UpgradeRequestRow {
   final String appName;
   final String slug;
   final String requestedPlanCode;
+  final String billingCycle; // MONTHLY | YEARLY | "" (legacy rows)
   final int? usersAllowedOverride;
   final DateTime? requestedAt;
 
@@ -869,6 +878,7 @@ class UpgradeRequestRow {
     required this.appName,
     required this.slug,
     required this.requestedPlanCode,
+    required this.billingCycle,
     required this.usersAllowedOverride,
     required this.requestedAt,
   });
@@ -891,6 +901,7 @@ class UpgradeRequestRow {
       appName: (j['appName'] ?? '').toString(),
       slug: (j['slug'] ?? '').toString(),
       requestedPlanCode: (j['requestedPlanCode'] ?? '').toString(),
+      billingCycle: (j['billingCycle'] ?? '').toString(),
       usersAllowedOverride: j['usersAllowedOverride'] == null
           ? null
           : int.tryParse(j['usersAllowedOverride'].toString()),
