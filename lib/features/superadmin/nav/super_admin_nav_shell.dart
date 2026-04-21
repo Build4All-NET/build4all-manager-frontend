@@ -278,14 +278,15 @@ class _SuperAdminNavShellState extends State<SuperAdminNavShell>
       case SuperMenuType.bottom:
       default:
         return Scaffold(
-          appBar: _buildAppBar(context),
-          body: _buildBodyStack(pages),
-          bottomNavigationBar: _ProBottomBar(
-            index: _index,
-            onTap: _goTo,
-            destinations: pages,
-          ),
-        );
+  resizeToAvoidBottomInset: true,
+  appBar: _buildAppBar(context),
+  body: _buildBodyStack(pages),
+  bottomNavigationBar: _ProBottomBar(
+    index: _index,
+    onTap: _goTo,
+    destinations: pages,
+  ),
+);
     }
   }
 
@@ -369,7 +370,8 @@ class _ProBottomBar extends StatelessWidget {
         textScaler: const TextScaler.linear(1.0),
       ),
       child: SafeArea(
-        top: false,
+  top: false,
+  maintainBottomViewPadding: true,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(8, 6, 8, 8),
           child: Container(

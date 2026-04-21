@@ -1,4 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:build4all_manager/shared/utils/ApiErrorHandler.dart';
+
 import '../../domain/usecases/create_project_usecase.dart';
 import 'create_project_event.dart';
 import 'create_project_state.dart';
@@ -22,7 +24,7 @@ class CreateProjectBloc extends Bloc<CreateProjectEvent, CreateProjectState> {
     emit(const CreateProjectLoading());
 
     final token = await tokenProvider();
-    if (token == null || token.isEmpty) {
+    if (token == null || token.trim().isEmpty) {
       emit(const CreateProjectFailure("Unauthorized"));
       return;
     }
@@ -30,15 +32,17 @@ class CreateProjectBloc extends Bloc<CreateProjectEvent, CreateProjectState> {
     try {
       final project = await usecase(
         token: token,
-        projectName: e.projectName,
-        description: e.description,
+        projectName: e.projectName.trim(),
+        description: e.description?.trim().isEmpty == true
+            ? null
+            : e.description?.trim(),
         active: e.active,
-        projectType: e.projectType,
+        projectType: e.projectType.trim(),
       );
 
       emit(CreateProjectSuccess(project));
     } catch (err) {
-      emit(CreateProjectFailure(err.toString()));
+      emit(CreateProjectFailure(ApiErrorHandler.message(err)));
     }
   }
 }
