@@ -20,6 +20,9 @@ class LicensingApi {
         data: {'note': note},
       );
 
+Future<Response> cancelLicense(int aupId) {
+  return dio.post('/licensing/apps/$aupId/cancel-license');
+}
 
       Future<List<SuperAdminAppLicenseRow>> listAppsLicenses() async {
   final res = await dio.get('/licensing/apps');

@@ -1,6 +1,7 @@
 import 'package:build4all_manager/core/network/dio_client.dart';
 import 'package:build4all_manager/l10n/app_localizations.dart';
 import 'package:build4all_manager/shared/utils/ApiErrorHandler.dart';
+import 'package:build4all_manager/shared/widgets/app_toast.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
@@ -26,6 +27,8 @@ class _AppsLicensesScreenState extends State<AppsLicensesScreen> {
   _LicenseFilter _filter = _LicenseFilter.all;
 
   final Set<int> _expandedIds = <int>{};
+
+  int? _cancelingAupId;
 
   @override
   void initState() {
@@ -56,6 +59,63 @@ class _AppsLicensesScreenState extends State<AppsLicensesScreen> {
       });
     }
   }
+
+  Future<void> _cancelLicense(SuperAdminAppLicenseRow item) async {
+  final confirmed = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Cancel License'),
+      content: Text(
+        'Are you sure you want to cancel the license for ${item.appName}?',
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: const Text('No'),
+        ),
+        FilledButton.icon(
+          onPressed: () => Navigator.of(context).pop(true),
+          icon: const Icon(Icons.cancel_outlined),
+          label: const Text('Yes, Cancel'),
+        ),
+      ],
+    ),
+  );
+
+  if (confirmed != true) return;
+
+  setState(() {
+    _cancelingAupId = item.aupId;
+  });
+
+  try {
+    final res = await _api.cancelLicense(item.aupId);
+
+    if (!mounted) return;
+
+    String message = 'Done successfully';
+    final data = res.data;
+
+    if (data is Map<String, dynamic>) {
+      final backendMessage = data['message']?.toString();
+      if (backendMessage != null && backendMessage.trim().isNotEmpty) {
+        message = backendMessage;
+      }
+    }
+
+    AppToast.success(context, message);
+
+    await _load();
+  } catch (e) {
+    if (!mounted) return;
+    AppToast.error(context, ApiErrorHandler.message(e));
+  } finally {
+    if (!mounted) return;
+    setState(() {
+      _cancelingAupId = null;
+    });
+  }
+}
 
   bool _matchesSearch(SuperAdminAppLicenseRow item) {
     final q = _query.trim().toLowerCase();
@@ -157,7 +217,7 @@ class _AppsLicensesScreenState extends State<AppsLicensesScreen> {
   }
 
   String _filterLabel(_LicenseFilter filter, AppLocalizations l10n) {
-    switch (filter) {
+    switch (_filter) {
       case _LicenseFilter.all:
         return l10n.app_licenses_filter_all;
       case _LicenseFilter.pending:
@@ -568,6 +628,10 @@ class _AppsLicensesScreenState extends State<AppsLicensesScreen> {
     final planColor = _statusColor(context, item.planCode);
     final subColor = _statusColor(context, item.subscriptionStatus);
 
+    final isActiveSubscription =
+        (item.subscriptionStatus ?? '').toUpperCase() == 'ACTIVE';
+    final isCanceling = _cancelingAupId == item.aupId;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
@@ -739,6 +803,31 @@ class _AppsLicensesScreenState extends State<AppsLicensesScreen> {
                         '${l10n.app_licenses_filter_blocked}: ${item.blockingReason ?? l10n.unknownLabel}',
                   ),
                 ],
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: [
+                    OutlinedButton.icon(
+                      onPressed: (isActiveSubscription && !isCanceling)
+                          ? () => _cancelLicense(item)
+                          : null,
+                      icon: isCanceling
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.cancel_outlined),
+                      label: Text(
+                        isCanceling ? 'Canceling...' : 'Cancel License',
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: cs.error,
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
