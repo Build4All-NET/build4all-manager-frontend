@@ -15,6 +15,8 @@ class SuperAdminUpgradeRequestsScreen extends StatefulWidget {
       _SuperAdminUpgradeRequestsScreenState();
 }
 
+enum _UpgradeView { pending, recentlyPaid }
+
 class _SuperAdminUpgradeRequestsScreenState
     extends State<SuperAdminUpgradeRequestsScreen> {
   late final Dio _dio;
@@ -23,6 +25,7 @@ class _SuperAdminUpgradeRequestsScreenState
   bool _loading = true;
   String? _error;
 
+  _UpgradeView _view = _UpgradeView.pending;
   List<UpgradeRequestRow> _items = const [];
   final Set<int> _busyIds = {};
   String _query = '';
@@ -54,7 +57,9 @@ class _SuperAdminUpgradeRequestsScreenState
     });
 
     try {
-      final res = await _api.pendingUpgradeRequests();
+      final res = _view == _UpgradeView.pending
+          ? await _api.pendingUpgradeRequests()
+          : await _api.recentlyApprovedUpgradeRequests();
       final list = (res.data as List).cast<Map<String, dynamic>>();
       final items = list.map(UpgradeRequestRow.fromJson).toList();
 
@@ -79,12 +84,35 @@ class _SuperAdminUpgradeRequestsScreenState
     }
   }
 
-  Future<void> _approve(UpgradeRequestRow r) async {
+  void _switchView(_UpgradeView next) {
+    if (next == _view) return;
+    setState(() {
+      _view = next;
+      _items = const [];
+    });
+    _load();
+  }
+
+  Future<void> _markUnpaid(UpgradeRequestRow r) async {
+    setState(() => _busyIds.add(r.id));
+    try {
+      await _api.markUpgradeRequestUnpaid(r.id);
+      if (!mounted) return;
+      setState(() => _items.removeWhere((x) => x.id == r.id));
+      _toast('Reversed — request is back in the pending queue');
+    } catch (e) {
+      _toast(ApiErrorHandler.message(e), error: true);
+    } finally {
+      if (mounted) setState(() => _busyIds.remove(r.id));
+    }
+  }
+
+  Future<void> _markPaid(UpgradeRequestRow r) async {
     final l10n = AppLocalizations.of(context)!;
 
     setState(() => _busyIds.add(r.id));
     try {
-      await _api.approveUpgradeRequest(r.id);
+      await _api.markUpgradeRequestPaid(r.id);
       if (!mounted) return;
       setState(() => _items.removeWhere((x) => x.id == r.id));
       _toast(l10n.upgrade_requests_approve_success);
@@ -229,15 +257,24 @@ class _SuperAdminUpgradeRequestsScreenState
                         filtered: items.length,
                         onSearch: (v) => setState(() => _query = v),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 12),
+                      _ViewSwitcher(
+                        current: _view,
+                        onChange: _switchView,
+                      ),
+                      const SizedBox(height: 12),
                       if (items.isEmpty)
                         _EmptyStateCard(
                           icon: Icons.inbox_rounded,
                           title: _query.trim().isEmpty
-                              ? l10n.upgrade_requests_empty
+                              ? (_view == _UpgradeView.pending
+                                  ? l10n.upgrade_requests_empty
+                                  : 'No recent cash approvals')
                               : l10n.upgrade_requests_empty_search_title,
                           subtitle: _query.trim().isEmpty
-                              ? l10n.upgrade_requests_empty_sub
+                              ? (_view == _UpgradeView.pending
+                                  ? l10n.upgrade_requests_empty_sub
+                                  : "Approvals from the last 7 days show up here so you can undo them.")
                               : l10n.upgrade_requests_empty_search_subtitle,
                         )
                       else
@@ -248,8 +285,11 @@ class _SuperAdminUpgradeRequestsScreenState
                             child: _ProUpgradeRequestCard(
                               row: r,
                               busy: busy,
-                              onApprove: busy ? null : () => _approve(r),
+                              pending: _view == _UpgradeView.pending,
+                              onMarkPaid: busy ? null : () => _markPaid(r),
                               onReject: busy ? null : () => _reject(r),
+                              onMarkUnpaid:
+                                  busy ? null : () => _markUnpaid(r),
                             ),
                           );
                         }),
@@ -395,14 +435,18 @@ class _UpgradeHeroPanel extends StatelessWidget {
 class _ProUpgradeRequestCard extends StatelessWidget {
   final UpgradeRequestRow row;
   final bool busy;
-  final VoidCallback? onApprove;
+  final bool pending;
+  final VoidCallback? onMarkPaid;
   final VoidCallback? onReject;
+  final VoidCallback? onMarkUnpaid;
 
   const _ProUpgradeRequestCard({
     required this.row,
     required this.busy,
-    required this.onApprove,
+    required this.pending,
+    required this.onMarkPaid,
     required this.onReject,
+    required this.onMarkUnpaid,
   });
 
   @override
@@ -541,6 +585,14 @@ class _ProUpgradeRequestCard extends StatelessWidget {
                   cs.primary,
                   icon: Icons.workspace_premium_outlined,
                 ),
+                if (row.billingCycle.isNotEmpty)
+                  softChip(
+                    row.billingCycle,
+                    Colors.indigo,
+                    icon: row.billingCycle.toUpperCase() == 'YEARLY'
+                        ? Icons.calendar_today_rounded
+                        : Icons.calendar_view_month_rounded,
+                  ),
               ],
             ),
             const SizedBox(height: 6),
@@ -628,52 +680,79 @@ class _ProUpgradeRequestCard extends StatelessWidget {
               ),
             ],
             const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: onReject,
-                    style: OutlinedButton.styleFrom(
-                      minimumSize: const Size.fromHeight(48),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
+            if (pending)
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: onReject,
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size.fromHeight(48),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
                       ),
+                      icon: busy
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.close_rounded),
+                      label: Text(l10n.common_reject),
                     ),
-                    icon: busy
-                        ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.close_rounded),
-                    label: Text(l10n.common_reject),
                   ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: FilledButton.icon(
-                    onPressed: onApprove,
-                    style: FilledButton.styleFrom(
-                      minimumSize: const Size.fromHeight(48),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: FilledButton.icon(
+                      onPressed: onMarkPaid,
+                      style: FilledButton.styleFrom(
+                        minimumSize: const Size.fromHeight(48),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
                       ),
+                      icon: busy
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Icon(Icons.payments_rounded),
+                      label: const Text('Mark Paid'),
                     ),
-                    icon: busy
-                        ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
-                          )
-                        : const Icon(Icons.check_rounded),
-                    label: Text(l10n.common_approve),
                   ),
+                ],
+              )
+            else
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: onMarkUnpaid,
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size.fromHeight(48),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    foregroundColor: cs.error,
+                    side: BorderSide(color: cs.error.withOpacity(.4)),
+                  ),
+                  icon: busy
+                      ? SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: cs.error,
+                          ),
+                        )
+                      : const Icon(Icons.undo_rounded),
+                  label: const Text('Mark Unpaid'),
                 ),
-              ],
-            ),
+              ),
           ],
         ),
       ),
@@ -852,6 +931,83 @@ class _TinyStatChip extends StatelessWidget {
   }
 }
 
+class _ViewSwitcher extends StatelessWidget {
+  final _UpgradeView current;
+  final ValueChanged<_UpgradeView> onChange;
+
+  const _ViewSwitcher({required this.current, required this.onChange});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    Widget seg({
+      required IconData icon,
+      required String label,
+      required _UpgradeView value,
+    }) {
+      final selected = current == value;
+      return Expanded(
+        child: InkWell(
+          onTap: () => onChange(value),
+          borderRadius: BorderRadius.circular(12),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 120),
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            decoration: BoxDecoration(
+              color: selected
+                  ? cs.primary.withOpacity(.12)
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  icon,
+                  size: 18,
+                  color: selected ? cs.primary : cs.onSurfaceVariant,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: selected ? cs.primary : cs.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerHighest.withOpacity(.6),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: cs.outlineVariant.withOpacity(.4)),
+      ),
+      child: Row(
+        children: [
+          seg(
+            icon: Icons.schedule_rounded,
+            label: 'Pending',
+            value: _UpgradeView.pending,
+          ),
+          seg(
+            icon: Icons.undo_rounded,
+            label: 'Recently Paid',
+            value: _UpgradeView.recentlyPaid,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 /* ========================= Model ========================= */
 
 class UpgradeRequestRow {
@@ -860,6 +1016,7 @@ class UpgradeRequestRow {
   final String appName;
   final String slug;
   final String requestedPlanCode;
+  final String billingCycle; // MONTHLY | YEARLY | "" (legacy rows)
   final int? usersAllowedOverride;
   final DateTime? requestedAt;
 
@@ -869,6 +1026,7 @@ class UpgradeRequestRow {
     required this.appName,
     required this.slug,
     required this.requestedPlanCode,
+    required this.billingCycle,
     required this.usersAllowedOverride,
     required this.requestedAt,
   });
@@ -891,6 +1049,7 @@ class UpgradeRequestRow {
       appName: (j['appName'] ?? '').toString(),
       slug: (j['slug'] ?? '').toString(),
       requestedPlanCode: (j['requestedPlanCode'] ?? '').toString(),
+      billingCycle: (j['billingCycle'] ?? '').toString(),
       usersAllowedOverride: j['usersAllowedOverride'] == null
           ? null
           : int.tryParse(j['usersAllowedOverride'].toString()),
