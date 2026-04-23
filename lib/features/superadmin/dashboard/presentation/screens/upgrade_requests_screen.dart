@@ -255,6 +255,7 @@ class _SuperAdminUpgradeRequestsScreenState
                       _UpgradeHeroPanel(
                         total: _items.length,
                         filtered: items.length,
+                        view: _view,
                         onSearch: (v) => setState(() => _query = v),
                       ),
                       const SizedBox(height: 12),
@@ -312,11 +313,13 @@ class _SuperAdminUpgradeRequestsScreenState
 class _UpgradeHeroPanel extends StatelessWidget {
   final int total;
   final int filtered;
+  final _UpgradeView view;
   final ValueChanged<String> onSearch;
 
   const _UpgradeHeroPanel({
     required this.total,
     required this.filtered,
+    required this.view,
     required this.onSearch,
   });
 
@@ -324,6 +327,12 @@ class _UpgradeHeroPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context)!;
+
+    final isPending = view == _UpgradeView.pending;
+    final statusLabel = isPending ? l10n.upgrade_requests_stat_pending : 'Paid';
+    final statusIcon =
+        isPending ? Icons.schedule_rounded : Icons.payments_rounded;
+    final statusColor = isPending ? Colors.orange : Colors.green;
 
     return Container(
       padding: const EdgeInsets.all(18),
@@ -407,10 +416,10 @@ class _UpgradeHeroPanel extends StatelessWidget {
                 color: cs.secondary,
               ),
               _TinyStatChip(
-                icon: Icons.schedule_rounded,
-                label: l10n.upgrade_requests_stat_pending,
+                icon: statusIcon,
+                label: statusLabel,
                 value: '$total',
-                color: Colors.orange,
+                color: statusColor,
               ),
             ],
           ),
@@ -546,11 +555,17 @@ class _ProUpgradeRequestCard extends StatelessWidget {
       );
     }
 
+    final statusText =
+        pending ? l10n.upgrade_requests_status_pending : 'Paid';
+    final statusColor = pending ? Colors.orange : Colors.green;
+    final statusIcon =
+        pending ? Icons.schedule_rounded : Icons.payments_rounded;
+
     return Container(
       decoration: BoxDecoration(
         color: cs.surface,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.orange.withOpacity(.26)),
+        border: Border.all(color: statusColor.withOpacity(.26)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(.045),
@@ -576,9 +591,9 @@ class _ProUpgradeRequestCard extends StatelessWidget {
                       ),
                 ),
                 softChip(
-                  l10n.upgrade_requests_status_pending,
-                  Colors.orange,
-                  icon: Icons.schedule_rounded,
+                  statusText,
+                  statusColor,
+                  icon: statusIcon,
                 ),
                 softChip(
                   row.requestedPlanCode.isEmpty ? '—' : row.requestedPlanCode,
