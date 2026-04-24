@@ -1,9 +1,10 @@
-{  "serverURI": "http://3.96.140.126:8080",
+{
+    "serverURI": "https://unlivable-unison-password.ngrok-free.dev/api",
 
-  "role": "both",
-  "locationIq": {
-    "autocomplete": "https://api.locationiq.com/v1/autocomplete?key=pk.14ea0e02d4685f88a3ec5ea23dd898b9",
-    "search": "https://api.locationiq.com/v1/search?key=pk.14ea0e02d4685f88a3ec5ea23dd898b9",
-    "reverse": "https://us1.locationiq.com/v1/reverse?key=pk.14ea0e02d4685f88a3ec5ea23dd898b9"
-  }
+    "role": "both",
+    "locationIq": {
+        "autocomplete": "https://api.locationiq.com/v1/autocomplete?key=pk.14ea0e02d4685f88a3ec5ea23dd898b9",
+        "search": "https://api.locationiq.com/v1/search?key=pk.14ea0e02d4685f88a3ec5ea23dd898b9",
+        "reverse": "https://us1.locationiq.com/v1/reverse?key=pk.14ea0e02d4685f88a3ec5ea23dd898b9"
+    }
 }
