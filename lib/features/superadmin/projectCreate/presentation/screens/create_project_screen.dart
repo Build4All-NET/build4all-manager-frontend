@@ -40,8 +40,7 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
   final _name = TextEditingController();
   final _desc = TextEditingController();
 
-  bool _active = true;
-
+  bool _active = false;
   // Project types now come from backend, so this is dynamic.
   List<String> _availableTypes = [];
   String? _selectedType;
@@ -291,7 +290,7 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
                             _desc.clear();
 
                             setState(() {
-                              _active = true;
+                              _active = false;
                               _selectedType = _availableTypes.isNotEmpty
                                   ? _availableTypes.first
                                   : null;

@@ -22,4 +22,16 @@ class ProjectApi {
   ///   in OrderController (base path: /api/orders).
   Future<Response> ownerAppOrders(int ownerProjectId) =>
       dio.get('/orders/superadmin/applications/$ownerProjectId/orders');
+
+      Future<Response> enableProject(int projectId) {
+  return dio.put('/projects/$projectId/enable');
+}
+
+Future<Response> disableProject(int projectId) {
+  return dio.put('/projects/$projectId/disable');
+}
+
+Future<Response> archiveProject(int projectId) {
+  return dio.put('/projects/$projectId/archive');
+}
 }

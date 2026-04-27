@@ -21,7 +21,7 @@ class ProjectsApi {
     id: 0,
     projectName: projectName,
     description: description,
-    active: active ?? true,
+    active: active ?? false,
     projectType: projectType ?? "ECOMMERCE",
   ).toCreateJson(
     projectName: projectName,
@@ -75,4 +75,13 @@ class ProjectsApi {
 
     throw Exception("Unexpected project types response");
   }
+
+  Future<Response> enableProject(int projectId) =>
+    dio.put('/projects/$projectId/enable');
+
+Future<Response> disableProject(int projectId) =>
+    dio.put('/projects/$projectId/disable');
+
+Future<Response> archiveProject(int projectId) =>
+    dio.put('/projects/$projectId/archive');
 }
