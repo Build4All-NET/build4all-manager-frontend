@@ -32,7 +32,7 @@ migrate_working_dir/
 .pub/
 /build/
 /coverage/
-/lib/config/hostIp.json
+
 
 # Symbolication related
 app.*.symbols
