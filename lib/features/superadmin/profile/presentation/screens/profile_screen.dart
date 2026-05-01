@@ -358,6 +358,7 @@ class _ProfileView extends StatelessWidget {
       },
     );
   }
+  
 
   Future<void> _confirmLogout(
       BuildContext context, AppLocalizations l10n) async {
