@@ -1,0 +1,41 @@
+name: Sprint release to production
+
+on:
+  workflow_dispatch:        # triggered manually by the team
+    inputs:
+      sprint_name:
+        description: 'Sprint name (e.g. sprint-24)'
+        required: true
+
+jobs:
+  open-prod-pr:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout UAT main
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Push to prod repo and open PR
+        env:
+          GH_TOKEN: ${{ secrets.PROD_DEPLOY_TOKEN }}
+          SPRINT: ${{ github.event.inputs.sprint_name }}
+        run: |
+          # Configure git
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+          # Add prod repo as remote
+          git remote add prod https://x-access-token:${GH_TOKEN}@github.com/Build4All-NET/build4all-manager-frontend-prod.git
+
+          # Push UAT main to a sprint branch on prod
+          git push prod main:refs/heads/${SPRINT} --force
+
+          # Open the PR on the prod repo using GitHub CLI
+          gh pr create \
+            --repo Build4All-NET/build4all-manager-frontend-prod \
+            --head ${SPRINT} \
+            --base main \
+            --title "Release: ${SPRINT}" \
+            --body "Merging UAT main into production for ${SPRINT}. Please review and approve."
