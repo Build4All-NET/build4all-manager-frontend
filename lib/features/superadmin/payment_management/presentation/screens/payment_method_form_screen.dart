@@ -84,7 +84,13 @@ class _FormViewState extends State<_FormView> {
     _providerCtrl = TextEditingController(text: e?.providerCode ?? '');
     _descriptionCtrl = TextEditingController(text: e?.description ?? '');
     _selectedType = e?.paymentType ?? PaymentType.cash;
-    _selectedTypeCode = _selectedType.code;
+    // Prefer the raw backend type code (e.g. user-defined "MPGS") over
+    // the enum's code (which would be "CUSTOM" for anything outside the
+    // built-in set). For new methods, _loadTypes() reconciles this to
+    // the first available type once the list comes back.
+    _selectedTypeCode = (e?.paymentTypeCode != null && e!.paymentTypeCode!.isNotEmpty)
+        ? e.paymentTypeCode!
+        : _selectedType.code;
     _isEnabled = e?.isEnabled ?? true;
     _instructionsCtrl = TextEditingController();
     _paypalClientIdCtrl = TextEditingController();
@@ -106,6 +112,17 @@ class _FormViewState extends State<_FormView> {
         setState(() {
           _availableTypes = types.where((t) => t.isActive).toList();
           _loadingTypes = false;
+
+          // Reconcile the form's selected code with what's actually
+          // available. Without this, the dropdown silently displays the
+          // first available type while the parent state still holds the
+          // initial default ("CASH"), and submit posts the stale code.
+          if (_availableTypes.isNotEmpty &&
+              !_isEditMode &&
+              !_availableTypes.any((t) => t.code == _selectedTypeCode)) {
+            _selectedTypeCode = _availableTypes.first.code;
+            _selectedType = PaymentType.fromCode(_selectedTypeCode);
+          }
         });
       }
     } catch (_) {
@@ -188,6 +205,9 @@ class _FormViewState extends State<_FormView> {
       id: widget.existing?.id ?? 0,
       paymentDisplayName: _displayNameCtrl.text.trim(),
       paymentType: _selectedType,
+      paymentTypeCode: _selectedTypeCode.trim().isEmpty
+          ? null
+          : _selectedTypeCode.trim().toUpperCase(),
       providerCode: _providerCtrl.text.trim(),
       description: _descriptionCtrl.text.trim(),
       isEnabled: _isEnabled,

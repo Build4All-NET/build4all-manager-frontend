@@ -12,6 +12,7 @@ class PaymentMethodModel extends PaymentMethod {
     required super.isEnabled,
     super.config,
     super.createdAt,
+    super.paymentTypeCode,
   });
 
   factory PaymentMethodModel.fromJson(Map<String, dynamic> j) {
@@ -24,6 +25,7 @@ class PaymentMethodModel extends PaymentMethod {
       paymentDisplayName:
           (j['paymentDisplayName'] ?? j['name'] ?? '').toString(),
       paymentType: PaymentType.fromCode(typeCode),
+      paymentTypeCode: typeCode,
       providerCode: (j['providerCode'] ?? j['provider'] ?? '').toString(),
       description: (j['description'] ?? '').toString(),
       isEnabled: (j['isEnabled'] ?? j['enabled'] ?? true) as bool,
@@ -39,6 +41,7 @@ class PaymentMethodModel extends PaymentMethod {
         id: m.id,
         paymentDisplayName: m.paymentDisplayName,
         paymentType: m.paymentType,
+        paymentTypeCode: m.paymentTypeCode,
         providerCode: m.providerCode,
         description: m.description,
         isEnabled: m.isEnabled,
@@ -46,10 +49,12 @@ class PaymentMethodModel extends PaymentMethod {
         createdAt: m.createdAt,
       );
 
-  // Includes paymentType — used only on POST (create).
+  // Includes paymentType — used only on POST (create). Uses the
+  // raw type code when set so user-defined types (e.g. MPGS) survive
+  // the round-trip without being downgraded to CUSTOM by the enum.
   Map<String, dynamic> toCreateBody() => {
         'paymentDisplayName': paymentDisplayName,
-        'paymentType': paymentType.code,
+        'paymentType': effectiveTypeCode,
         'providerCode': providerCode,
         'description': description,
         'isEnabled': isEnabled,
