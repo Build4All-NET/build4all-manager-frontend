@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "135386207874",
+    "project_id": "build4all-manager-e0e31",
+    "storage_bucket": "build4all-manager-e0e31.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:135386207874:android:568afb1f616c341781069b",
+        "android_client_info": {
+          "package_name": "com.build4all.build4allmanager"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBZ6Qb-HHZn2EHrfEqWI9D_In4TSd7ivyk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
