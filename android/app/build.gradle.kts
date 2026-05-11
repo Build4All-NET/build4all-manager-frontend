@@ -33,8 +33,10 @@ android {
 
     defaultConfig {
         applicationId = "com.build4alluat.build4allmanager"
-      minSdk = (flutter.minSdkVersion as Number).toInt()
+     // minSdk = (flutter.minSdkVersion as Number).toInt()
         //minSdkVersion flutter.minSdkVersion
+        
+        minSdk = 23
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
