@@ -20,13 +20,22 @@ jobs:
       - name: Push to prod repo and open PR
         env:
           GH_TOKEN: ${{ secrets.PROD_DEPLOY_TOKEN }}
-          SPRINT: ${{ github.event.inputs.sprint_name }}
+          SPRINT_RAW: ${{ github.event.inputs.sprint_name }}
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
 
+          # Sanitize the sprint name: trim, lowercase, replace whitespace with '-',
+          # then reject anything outside [a-z0-9._/-] so it is safe as a git ref / branch name.
+          SPRINT="$(echo "$SPRINT_RAW" | tr '[:upper:]' '[:lower:]' | sed -E 's/^[[:space:]]+|[[:space:]]+$//g; s/[[:space:]]+/-/g')"
+          if [[ -z "$SPRINT" || ! "$SPRINT" =~ ^[a-z0-9._/-]+$ ]]; then
+            echo "Invalid sprint name: '$SPRINT_RAW' (sanitized: '$SPRINT'). Allowed: letters, digits, '.', '_', '/', '-'."
+            exit 1
+          fi
+          echo "Using sprint branch name: $SPRINT"
+
           # Add prod repo as a remote and fetch its main (tolerate empty prod on first run)
-          git remote add prod https://x-access-token:${GH_TOKEN}@github.com/Build4All-NET/build4all-manager-frontend-prod.git
+          git remote add prod "https://x-access-token:${GH_TOKEN}@github.com/Build4All-NET/build4all-manager-frontend-prod.git"
           git fetch prod main || echo "prod/main not found - first run"
 
           # Files that must keep their PROD version (never overwritten by UAT)
@@ -55,12 +64,12 @@ jobs:
           fi
 
           # Push to a sprint branch on the prod repo
-          git push prod HEAD:refs/heads/${SPRINT} --force
+          git push prod "HEAD:refs/heads/${SPRINT}" --force
 
           # Open the PR on the prod repo
           gh pr create \
             --repo Build4All-NET/build4all-manager-frontend-prod \
-            --head ${SPRINT} \
+            --head "${SPRINT}" \
             --base main \
             --title "Release: ${SPRINT}" \
             --body "Merging UAT main into production for ${SPRINT}. Protected files (firebase configs, bundle ids, hostIp) are kept from prod. Please review and approve."
