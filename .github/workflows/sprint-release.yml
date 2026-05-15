@@ -16,6 +16,11 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          # Don't write a persistent http.extraheader for github.com — otherwise
+          # the GITHUB_TOKEN auth from this checkout would override the
+          # PROD_DEPLOY_TOKEN credentials embedded in the prod remote URL,
+          # causing the push to prod to be rejected as github-actions[bot].
+          persist-credentials: false
 
       - name: Push to prod repo and open PR
         env:
