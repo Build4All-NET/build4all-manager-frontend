@@ -18,17 +18,55 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
+      - name: Verify PROD_DEPLOY_TOKEN
+        env:
+          GH_TOKEN: ${{ secrets.PROD_DEPLOY_TOKEN }}
+        run: |
+          if [ -z "${GH_TOKEN}" ]; then
+            echo "::error::PROD_DEPLOY_TOKEN secret is empty or not set on this repo."
+            exit 1
+          fi
+          echo "Token length: ${#GH_TOKEN}"
+
+          who=$(curl -sS -H "Authorization: Bearer ${GH_TOKEN}" \
+                https://api.github.com/user | jq -r '.login // empty')
+          if [ -z "${who}" ]; then
+            echo "::error::Token authentication failed (no user returned)."
+            exit 1
+          fi
+          echo "Authenticated as: ${who}"
+
+          perms=$(curl -sS -H "Authorization: Bearer ${GH_TOKEN}" \
+                  https://api.github.com/repos/Build4All-NET/build4all-manager-frontend-prod)
+          push=$(echo "${perms}" | jq -r '.permissions.push // false')
+          if [ "${push}" != "true" ]; then
+            echo "::error::Token has no push access to build4all-manager-frontend-prod."
+            echo "${perms}" | jq '{name, permissions, message}'
+            exit 1
+          fi
+          echo "Token has push access to build4all-manager-frontend-prod."
+
       - name: Push to prod repo and open PR
         env:
           GH_TOKEN: ${{ secrets.PROD_DEPLOY_TOKEN }}
           SPRINT: ${{ github.event.inputs.sprint_name }}
         run: |
+          set -euo pipefail
+
+          # Wipe any inherited auth state from previous steps / runner setup
+          git config --local --unset-all http.https://github.com/.extraheader || true
+          git config --local --unset-all credential.helper || true
+          git config --global --unset-all credential.helper || true
+
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
 
-          # Add prod repo as a remote and fetch its main (tolerate empty prod on first run)
-          git remote add prod https://x-access-token:${GH_TOKEN}@github.com/Build4All-NET/build4all-manager-frontend-prod.git
-          git fetch prod main || echo "prod/main not found - first run"
+          PROD_URL="https://github.com/Build4All-NET/build4all-manager-frontend-prod.git"
+          AUTH_HEADER="AUTHORIZATION: Bearer ${GH_TOKEN}"
+
+          # Fetch prod main with explicit auth header (tolerate empty prod on first run)
+          git -c http.extraheader="${AUTH_HEADER}" fetch "${PROD_URL}" main:refs/remotes/prod/main \
+            || echo "prod/main not found - first run"
 
           # Files that must keep their PROD version (never overwritten by UAT)
           PROTECTED_FILES=(
@@ -55,10 +93,12 @@ jobs:
             git commit -m "chore: preserve prod-specific files for ${SPRINT}"
           fi
 
-          # Push to a sprint branch on the prod repo
-          git push prod HEAD:refs/heads/${SPRINT} --force
+          # Push directly to the prod URL with the auth header injected on the command line.
+          # This bypasses any remote-URL credentials and any leftover extraheader.
+          git -c http.extraheader="${AUTH_HEADER}" push "${PROD_URL}" \
+              HEAD:refs/heads/${SPRINT} --force
 
-          # Open the PR on the prod repo
+          # Open the PR on the prod repo (gh uses GH_TOKEN automatically)
           gh pr create \
             --repo Build4All-NET/build4all-manager-frontend-prod \
             --head ${SPRINT} \
