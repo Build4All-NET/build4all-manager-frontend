@@ -1,4 +1,5 @@
 import 'package:build4all_manager/features/notifications_admin/presentation/screens/admin_notifications_screen.dart';
+import 'package:build4all_manager/features/superadmin/ios_internal_testing/presentation/screens/super_admin_ios_internal_testing_screen.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:build4all_manager/l10n/app_localizations.dart';
@@ -62,6 +63,12 @@ class SuperAdminEntry extends StatelessWidget {
         selectedIcon: Icons.publish_rounded,
         label: l10n.owner_nav_requests,
         page: PublishRequestsScreen(dio: dio),
+      ),
+      SuperAdminDestination(
+        icon: Icons.science_outlined,
+        selectedIcon: Icons.science_rounded,
+        label: l10n.super_nav_ios_internal_testing,
+        page: SuperAdminIosInternalTestingScreen(dio: dio),
       ),
       SuperAdminDestination(
         icon: Icons.notifications_none_outlined,
