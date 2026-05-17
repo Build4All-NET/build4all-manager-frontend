@@ -62,7 +62,10 @@ jobs:
           git config user.email "github-actions@github.com"
 
           PROD_URL="https://github.com/Build4All-NET/build4all-manager-frontend-prod.git"
-          AUTH_HEADER="AUTHORIZATION: Bearer ${GH_TOKEN}"
+
+          # GitHub's git endpoint requires Basic auth (Bearer is REST-API only).
+          BASIC=$(printf 'x-access-token:%s' "${GH_TOKEN}" | base64 -w0)
+          AUTH_HEADER="AUTHORIZATION: basic ${BASIC}"
 
           # Fetch prod main with explicit auth header (tolerate empty prod on first run)
           git -c http.extraheader="${AUTH_HEADER}" fetch "${PROD_URL}" main:refs/remotes/prod/main \
