@@ -11,9 +11,10 @@ import 'package:build4all_manager/features/owner/ios_internal_testing/presentati
 import 'package:build4all_manager/l10n/app_localizations.dart';
 import 'package:build4all_manager/shared/widgets/app_toast.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-// ── Local filter enum ─────────────────────────────────────────────────────────
+// ── Status filter ────────────────────────────────────────────────────────────
 
 enum _StatusFilter { all, pending, invited, accepted, failed, cancelled }
 
@@ -58,7 +59,7 @@ extension _StatusFilterExt on _StatusFilter {
   }
 }
 
-// ── Screen ────────────────────────────────────────────────────────────────────
+// ── Main screen ──────────────────────────────────────────────────────────────
 
 class OwnerIosInternalTestingScreen extends StatefulWidget {
   final OwnerProject project;
@@ -192,30 +193,18 @@ class _OwnerIosInternalTestingScreenState
     );
   }
 
-  String _helperText(
-    AppLocalizations l10n,
-    IosInternalTestingRequest r,
-  ) {
-    final best = r.bestMessage.trim();
-    if (best.isNotEmpty) return best;
-    final status = r.status.trim().toUpperCase();
-    switch (status) {
-      case 'READY':
-        return l10n.iosInternalTestingReadyHint;
-      case 'WAITING_OWNER_ACCEPTANCE':
-        return l10n.iosInternalTestingWaitingHint;
-      case 'FAILED':
-        final err = (r.lastError ?? '').trim();
-        return err.isNotEmpty ? err : l10n.iosInternalTestingFailedHint;
-      case 'PROCESSING':
-        return l10n.iosInternalTestingStatusProcessing;
-      case 'REQUESTED':
-        return l10n.iosInternalTestingStatusRequested;
-      case 'INVITED_TO_APPLE_TEAM':
-        return l10n.iosInternalTestingStatusInvitationSent;
-      default:
-        return '';
-    }
+  void _openDetail(BuildContext ctx, IosInternalTestingRequest request) {
+    Navigator.of(ctx).push(
+      MaterialPageRoute<void>(
+        builder: (_) => BlocProvider.value(
+          value: _bloc,
+          child: _TesterDetailPage(
+            request: request,
+            onRetry: () => _retryRequest(request),
+          ),
+        ),
+      ),
+    );
   }
 
   String? _validateEmail(BuildContext ctx, String? v) {
@@ -246,20 +235,6 @@ class _OwnerIosInternalTestingScreenState
     return null;
   }
 
-  bool _canRetry(IosInternalTestingRequest r) {
-    final s = r.status.trim().toUpperCase();
-    switch (s) {
-      case 'READY':
-      case 'REQUESTED':
-      case 'PROCESSING':
-      case 'ADDING_TO_INTERNAL_TESTING':
-      case 'CANCELLED':
-        return false;
-      default:
-        return true;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -288,8 +263,8 @@ class _OwnerIosInternalTestingScreenState
           }
         },
         builder: (ctx, state) {
+          final isInitialLoad = state.loading && !state.hasRequests;
           final visibleTesters = _filtered(state.requests);
-          final isInitialLoading = state.loading && !state.hasRequests;
 
           return Scaffold(
             backgroundColor: cs.surface,
@@ -328,13 +303,13 @@ class _OwnerIosInternalTestingScreenState
                     bundleId: (widget.project.iosBundleId ?? '').trim(),
                     usedSlots: state.usedSlots,
                     maxSlots: state.maxSlots,
-                    loading: isInitialLoading,
+                    loading: isInitialLoad,
                     isFull: state.isFull,
                     onAddTester: () => _openAddTesterSheet(ctx, state.isFull),
                     l10n: l10n,
                   ),
                   const SizedBox(height: 16),
-                  if (state.hasRequests || (state.loading && state.hasRequests))
+                  if (state.hasRequests) ...[
                     _FilterBar(
                       searchCtrl: _searchCtrl,
                       selected: _statusFilter,
@@ -343,9 +318,9 @@ class _OwnerIosInternalTestingScreenState
                       onReset: _resetFilters,
                       l10n: l10n,
                     ),
-                  if (state.hasRequests || (state.loading && state.hasRequests))
                     const SizedBox(height: 12),
-                  if (isInitialLoading)
+                  ],
+                  if (isInitialLoad)
                     const _SkeletonList()
                   else if (!state.hasRequests)
                     _EmptyState(
@@ -359,22 +334,10 @@ class _OwnerIosInternalTestingScreenState
                       children: visibleTesters
                           .map(
                             (r) => Padding(
-                              padding: const EdgeInsets.only(bottom: 10),
-                              child: _TesterCard(
+                              padding: const EdgeInsets.only(bottom: 8),
+                              child: _CompactTesterCard(
                                 request: r,
-                                helperText: _helperText(l10n, r),
-                                canRetry: _canRetry(r),
-                                isRetrying: state.submitting &&
-                                    (state.submittingEmail
-                                                ?.trim()
-                                                .toLowerCase() ==
-                                            r.appleEmail
-                                                .trim()
-                                                .toLowerCase()),
-                                onRetry: _canRetry(r)
-                                    ? () => _retryRequest(r)
-                                    : null,
-                                l10n: l10n,
+                                onTap: () => _openDetail(ctx, r),
                               ),
                             ),
                           )
@@ -390,7 +353,7 @@ class _OwnerIosInternalTestingScreenState
   }
 }
 
-// ── Page Header ───────────────────────────────────────────────────────────────
+// ── Page header ──────────────────────────────────────────────────────────────
 
 class _PageHeader extends StatelessWidget {
   final String appName;
@@ -437,8 +400,8 @@ class _PageHeader extends StatelessWidget {
                   children: [
                     Text(
                       l10n.iosInternalTestingPageTitle,
-                      style: tt.titleLarge
-                          ?.copyWith(fontWeight: FontWeight.w900),
+                      style:
+                          tt.titleLarge?.copyWith(fontWeight: FontWeight.w900),
                     ),
                     const SizedBox(height: 4),
                     Text(
@@ -475,7 +438,7 @@ class _PageHeader extends StatelessWidget {
             runSpacing: 8,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              _MetaBadge(
+              _MetaChip(
                 icon: Icons.apps_rounded,
                 label: appName,
                 cs: cs,
@@ -483,7 +446,7 @@ class _PageHeader extends StatelessWidget {
                 bold: true,
               ),
               if (bundleId.isNotEmpty)
-                _MetaBadge(
+                _MetaChip(
                   icon: Icons.tag_rounded,
                   label: bundleId,
                   cs: cs,
@@ -500,41 +463,39 @@ class _PageHeader extends StatelessWidget {
               ),
             ],
           ),
-          if (isFull) ..._capacityWarning(cs, tt),
+          if (isFull) ...[
+            const SizedBox(height: 14),
+            Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: cs.error.withOpacity(.08),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: cs.error.withOpacity(.18)),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.warning_amber_rounded,
+                      size: 18, color: cs.error),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      l10n.iosInternalTestingCapacityReachedMessage,
+                      style: tt.bodySmall
+                          ?.copyWith(color: cs.error, height: 1.4),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ],
       ),
     );
   }
-
-  List<Widget> _capacityWarning(ColorScheme cs, TextTheme tt) {
-    return [
-      const SizedBox(height: 14),
-      Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        decoration: BoxDecoration(
-          color: cs.error.withOpacity(.08),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: cs.error.withOpacity(.18)),
-        ),
-        child: Row(
-          children: [
-            Icon(Icons.warning_amber_rounded, size: 18, color: cs.error),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                l10n.iosInternalTestingCapacityReachedMessage,
-                style: tt.bodySmall
-                    ?.copyWith(color: cs.error, height: 1.4),
-              ),
-            ),
-          ],
-        ),
-      ),
-    ];
-  }
 }
 
-class _MetaBadge extends StatelessWidget {
+class _MetaChip extends StatelessWidget {
   final IconData icon;
   final String label;
   final ColorScheme cs;
@@ -542,7 +503,7 @@ class _MetaBadge extends StatelessWidget {
   final bool bold;
   final bool mono;
 
-  const _MetaBadge({
+  const _MetaChip({
     required this.icon,
     required this.label,
     required this.cs,
@@ -627,7 +588,7 @@ class _SlotBadge extends StatelessWidget {
   }
 }
 
-// ── Filter Bar ────────────────────────────────────────────────────────────────
+// ── Filter bar ───────────────────────────────────────────────────────────────
 
 class _FilterBar extends StatelessWidget {
   final TextEditingController searchCtrl;
@@ -722,8 +683,8 @@ class _FilterBar extends StatelessWidget {
                     icon: const Icon(Icons.filter_alt_off_rounded, size: 15),
                     label: Text(l10n.common_clear),
                     style: TextButton.styleFrom(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 6),
                       visualDensity: VisualDensity.compact,
                     ),
                   ),
@@ -736,45 +697,27 @@ class _FilterBar extends StatelessWidget {
   }
 }
 
-// ── Tester Card ───────────────────────────────────────────────────────────────
+// ── Compact list card ────────────────────────────────────────────────────────
 
-class _TesterCard extends StatelessWidget {
+class _CompactTesterCard extends StatelessWidget {
   final IosInternalTestingRequest request;
-  final String helperText;
-  final bool canRetry;
-  final bool isRetrying;
-  final VoidCallback? onRetry;
-  final AppLocalizations l10n;
+  final VoidCallback onTap;
 
-  const _TesterCard({
+  const _CompactTesterCard({
     required this.request,
-    required this.helperText,
-    required this.canRetry,
-    required this.isRetrying,
-    this.onRetry,
-    required this.l10n,
+    required this.onTap,
   });
 
   String _initials() {
-    final first = request.firstName.trim();
-    final last = request.lastName.trim();
-    if (first.isEmpty && last.isEmpty) {
+    final f = request.firstName.trim();
+    final l = request.lastName.trim();
+    if (f.isEmpty && l.isEmpty) {
       return request.appleEmail.isNotEmpty
           ? request.appleEmail[0].toUpperCase()
           : '?';
     }
-    final f = first.isNotEmpty ? first[0].toUpperCase() : '';
-    final l = last.isNotEmpty ? last[0].toUpperCase() : '';
-    return '$f$l';
-  }
-
-  String _formatDate(DateTime? dt) {
-    if (dt == null) return '';
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-    ];
-    return '${months[dt.month - 1]} ${dt.day}, ${dt.year}';
+    return '${f.isNotEmpty ? f[0].toUpperCase() : ''}'
+        '${l.isNotEmpty ? l[0].toUpperCase() : ''}';
   }
 
   @override
@@ -782,113 +725,497 @@ class _TesterCard extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
     final fullName = '${request.firstName} ${request.lastName}'.trim();
-    final date = _formatDate(request.createdAt ?? request.updatedAt);
+
+    return Material(
+      color: cs.surface,
+      borderRadius: BorderRadius.circular(14),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: cs.outlineVariant.withOpacity(.60)),
+          ),
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: 20,
+                backgroundColor: cs.primary.withOpacity(.12),
+                child: Text(
+                  _initials(),
+                  style: tt.labelLarge?.copyWith(
+                    color: cs.primary,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (fullName.isNotEmpty)
+                      Text(
+                        fullName,
+                        style: tt.bodyMedium
+                            ?.copyWith(fontWeight: FontWeight.w700),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    Text(
+                      request.appleEmail,
+                      style: tt.bodySmall?.copyWith(
+                        color: cs.onSurface.withOpacity(
+                          fullName.isNotEmpty ? .60 : .88,
+                        ),
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 10),
+              IosInternalTestingStatusChip(
+                status: request.status,
+                compact: true,
+              ),
+              const SizedBox(width: 6),
+              Icon(
+                Icons.chevron_right_rounded,
+                size: 20,
+                color: cs.onSurface.withOpacity(.30),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Tester detail page ───────────────────────────────────────────────────────
+
+class _TesterDetailPage extends StatelessWidget {
+  final IosInternalTestingRequest request;
+  final VoidCallback onRetry;
+
+  const _TesterDetailPage({
+    required this.request,
+    required this.onRetry,
+  });
+
+  bool get _canRetry {
+    final s = request.status.trim().toUpperCase();
+    switch (s) {
+      case 'READY':
+      case 'REQUESTED':
+      case 'PROCESSING':
+      case 'ADDING_TO_INTERNAL_TESTING':
+      case 'CANCELLED':
+        return false;
+      default:
+        return true;
+    }
+  }
+
+  String _helperText(AppLocalizations l10n) {
+    final best = request.bestMessage.trim();
+    if (best.isNotEmpty) return best;
+    final status = request.status.trim().toUpperCase();
+    switch (status) {
+      case 'READY':
+        return l10n.iosInternalTestingReadyHint;
+      case 'WAITING_OWNER_ACCEPTANCE':
+        return l10n.iosInternalTestingWaitingHint;
+      case 'FAILED':
+        final err = (request.lastError ?? '').trim();
+        return err.isNotEmpty ? err : l10n.iosInternalTestingFailedHint;
+      case 'PROCESSING':
+        return l10n.iosInternalTestingStatusProcessing;
+      case 'REQUESTED':
+        return l10n.iosInternalTestingStatusRequested;
+      case 'INVITED_TO_APPLE_TEAM':
+        return l10n.iosInternalTestingStatusInvitationSent;
+      default:
+        return '';
+    }
+  }
+
+  String _formatDate(DateTime? dt) {
+    if (dt == null) return '—';
+    const m = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
+    final h = dt.hour.toString().padLeft(2, '0');
+    final min = dt.minute.toString().padLeft(2, '0');
+    return '${m[dt.month - 1]} ${dt.day}, ${dt.year} · $h:$min';
+  }
+
+  String _initials() {
+    final f = request.firstName.trim();
+    final l = request.lastName.trim();
+    if (f.isEmpty && l.isEmpty) {
+      return request.appleEmail.isNotEmpty
+          ? request.appleEmail[0].toUpperCase()
+          : '?';
+    }
+    return '${f.isNotEmpty ? f[0].toUpperCase() : ''}'
+        '${l.isNotEmpty ? l[0].toUpperCase() : ''}';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    final fullName = '${request.firstName} ${request.lastName}'.trim();
+    final helperText = _helperText(l10n);
+
+    return BlocBuilder<IosInternalTestingManagerBloc,
+        IosInternalTestingManagerState>(
+      builder: (context, state) {
+        final isRetrying = state.submitting &&
+            (state.submittingEmail?.trim().toLowerCase() ==
+                request.appleEmail.trim().toLowerCase());
+
+        return Scaffold(
+          backgroundColor: cs.surface,
+          appBar: AppBar(
+            title: Text(
+              fullName.isNotEmpty ? fullName : request.appleEmail,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          body: ListView(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 40),
+            children: [
+              // ── Identity card ──────────────────────────────────────────────
+              _DetailSection(
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 28,
+                      backgroundColor: cs.primary.withOpacity(.12),
+                      child: Text(
+                        _initials(),
+                        style: tt.titleMedium?.copyWith(
+                          color: cs.primary,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (fullName.isNotEmpty)
+                            Text(
+                              fullName,
+                              style: tt.titleMedium
+                                  ?.copyWith(fontWeight: FontWeight.w800),
+                            ),
+                          const SizedBox(height: 2),
+                          GestureDetector(
+                            onLongPress: () {
+                              Clipboard.setData(
+                                ClipboardData(text: request.appleEmail),
+                              );
+                              AppToast.success(
+                                context,
+                                'Email copied',
+                              );
+                            },
+                            child: Text(
+                              request.appleEmail,
+                              style: tt.bodyMedium?.copyWith(
+                                color: cs.onSurface.withOpacity(.68),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          IosInternalTestingStatusChip(
+                            status: request.status,
+                            compact: false,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              // ── Status message ─────────────────────────────────────────────
+              if (helperText.isNotEmpty) ...[
+                _DetailSection(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(
+                        request.isFailed
+                            ? Icons.error_outline_rounded
+                            : Icons.info_outline_rounded,
+                        size: 18,
+                        color:
+                            request.isFailed ? cs.error : cs.primary,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          helperText,
+                          style: tt.bodyMedium?.copyWith(
+                            color: request.isFailed
+                                ? cs.error
+                                : cs.onSurface.withOpacity(.78),
+                            height: 1.45,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+              ],
+
+              // ── App / build snapshot ───────────────────────────────────────
+              _DetailSection(
+                title: 'App Info',
+                child: Column(
+                  children: [
+                    _DetailRow(
+                      icon: Icons.apps_rounded,
+                      label: 'App name',
+                      value: request.appNameSnapshot,
+                      cs: cs,
+                      tt: tt,
+                    ),
+                    _DetailRow(
+                      icon: Icons.tag_rounded,
+                      label: 'Bundle ID',
+                      value: request.bundleIdSnapshot,
+                      cs: cs,
+                      tt: tt,
+                      mono: true,
+                      copyable: true,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              // ── Dates ──────────────────────────────────────────────────────
+              _DetailSection(
+                title: 'Timeline',
+                child: Column(
+                  children: [
+                    _DetailRow(
+                      icon: Icons.add_circle_outline_rounded,
+                      label: 'Requested',
+                      value: _formatDate(request.requestedAt ?? request.createdAt),
+                      cs: cs,
+                      tt: tt,
+                    ),
+                    if (request.processedAt != null)
+                      _DetailRow(
+                        icon: Icons.check_circle_outline_rounded,
+                        label: 'Processed',
+                        value: _formatDate(request.processedAt),
+                        cs: cs,
+                        tt: tt,
+                      ),
+                    if (request.acceptedAt != null)
+                      _DetailRow(
+                        icon: Icons.verified_outlined,
+                        label: 'Accepted',
+                        value: _formatDate(request.acceptedAt),
+                        cs: cs,
+                        tt: tt,
+                      ),
+                    if (request.readyAt != null)
+                      _DetailRow(
+                        icon: Icons.rocket_launch_outlined,
+                        label: 'Ready',
+                        value: _formatDate(request.readyAt),
+                        cs: cs,
+                        tt: tt,
+                      ),
+                    if (request.updatedAt != null)
+                      _DetailRow(
+                        icon: Icons.update_rounded,
+                        label: 'Last updated',
+                        value: _formatDate(request.updatedAt),
+                        cs: cs,
+                        tt: tt,
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              // ── Technical IDs (collapsed by default) ───────────────────────
+              if ((request.appleUserId ?? '').isNotEmpty ||
+                  (request.appleInvitationId ?? '').isNotEmpty)
+                _ExpandableSection(
+                  title: 'Technical details',
+                  cs: cs,
+                  tt: tt,
+                  children: [
+                    if ((request.appleUserId ?? '').isNotEmpty)
+                      _DetailRow(
+                        icon: Icons.fingerprint_rounded,
+                        label: 'Apple User ID',
+                        value: request.appleUserId!,
+                        cs: cs,
+                        tt: tt,
+                        mono: true,
+                        copyable: true,
+                      ),
+                    if ((request.appleInvitationId ?? '').isNotEmpty)
+                      _DetailRow(
+                        icon: Icons.mail_outline_rounded,
+                        label: 'Invitation ID',
+                        value: request.appleInvitationId!,
+                        cs: cs,
+                        tt: tt,
+                        mono: true,
+                        copyable: true,
+                      ),
+                  ],
+                ),
+              if ((request.appleUserId ?? '').isNotEmpty ||
+                  (request.appleInvitationId ?? '').isNotEmpty)
+                const SizedBox(height: 12),
+
+              // ── Action ─────────────────────────────────────────────────────
+              if (_canRetry)
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    onPressed: isRetrying ? null : onRetry,
+                    icon: isRetrying
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Icon(Icons.refresh_rounded),
+                    label: Text(l10n.common_tryAgain),
+                  ),
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+// ── Detail section wrapper ───────────────────────────────────────────────────
+
+class _DetailSection extends StatelessWidget {
+  final String? title;
+  final Widget child;
+
+  const _DetailSection({this.title, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
 
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: cs.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: cs.outlineVariant.withOpacity(.60)),
       ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (title != null) ...[
+            Text(
+              title!,
+              style: tt.labelMedium?.copyWith(
+                color: cs.onSurface.withOpacity(.50),
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.4,
+              ),
+            ),
+            const SizedBox(height: 12),
+            const Divider(height: 1),
+            const SizedBox(height: 12),
+          ],
+          child,
+        ],
+      ),
+    );
+  }
+}
+
+class _DetailRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+  final ColorScheme cs;
+  final TextTheme tt;
+  final bool mono;
+  final bool copyable;
+
+  const _DetailRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.cs,
+    required this.tt,
+    this.mono = false,
+    this.copyable = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CircleAvatar(
-            radius: 22,
-            backgroundColor: cs.primary.withOpacity(.12),
-            child: Text(
-              _initials(),
-              style: tt.titleSmall?.copyWith(
-                color: cs.primary,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
+          Icon(icon, size: 16, color: cs.onSurface.withOpacity(.40)),
+          const SizedBox(width: 10),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (fullName.isNotEmpty) ..[
-                  Text(
-                    fullName,
-                    style: tt.titleSmall
-                        ?.copyWith(fontWeight: FontWeight.w800),
-                  ),
-                  const SizedBox(height: 2),
-                ],
-                SelectableText(
-                  request.appleEmail,
+                Text(
+                  label,
                   style: tt.bodySmall?.copyWith(
-                    color: cs.onSurface.withOpacity(.68),
-                    letterSpacing: 0.1,
+                    color: cs.onSurface.withOpacity(.48),
+                    fontSize: 11,
                   ),
                 ),
-                if (helperText.isNotEmpty) ..[
-                  const SizedBox(height: 6),
-                  Text(
-                    helperText,
-                    style: tt.bodySmall?.copyWith(
-                      color: request.isFailed
-                          ? cs.error
-                          : cs.onSurface.withOpacity(.58),
-                      height: 1.35,
+                const SizedBox(height: 1),
+                GestureDetector(
+                  onLongPress: copyable
+                      ? () {
+                          Clipboard.setData(ClipboardData(text: value));
+                          AppToast.success(context, 'Copied');
+                        }
+                      : null,
+                  child: Text(
+                    value,
+                    style: tt.bodyMedium?.copyWith(
+                      fontFamily: mono ? 'monospace' : null,
+                      color: cs.onSurface.withOpacity(.84),
                     ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
                   ),
-                ],
+                ),
               ],
             ),
-          ),
-          const SizedBox(width: 10),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              IosInternalTestingStatusChip(
-                status: request.status,
-                compact: true,
-              ),
-              if (date.isNotEmpty) ..[
-                const SizedBox(height: 5),
-                Text(
-                  date,
-                  style: tt.bodySmall?.copyWith(
-                    color: cs.onSurface.withOpacity(.40),
-                    fontSize: 10.5,
-                  ),
-                ),
-              ],
-              if (canRetry) ..[
-                const SizedBox(height: 8),
-                SizedBox(
-                  height: 30,
-                  child: OutlinedButton.icon(
-                    onPressed: isRetrying ? null : onRetry,
-                    icon: isRetrying
-                        ? SizedBox(
-                            width: 12,
-                            height: 12,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 1.5,
-                              color: cs.primary,
-                            ),
-                          )
-                        : const Icon(Icons.refresh_rounded, size: 14),
-                    label: Text(
-                      l10n.common_tryAgain,
-                      style: const TextStyle(fontSize: 12),
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 10),
-                      visualDensity: VisualDensity.compact,
-                    ),
-                  ),
-                ),
-              ],
-            ],
           ),
         ],
       ),
@@ -896,16 +1223,96 @@ class _TesterCard extends StatelessWidget {
   }
 }
 
-// ── Empty States ──────────────────────────────────────────────────────────────
+class _ExpandableSection extends StatefulWidget {
+  final String title;
+  final ColorScheme cs;
+  final TextTheme tt;
+  final List<Widget> children;
+
+  const _ExpandableSection({
+    required this.title,
+    required this.cs,
+    required this.tt,
+    required this.children,
+  });
+
+  @override
+  State<_ExpandableSection> createState() => _ExpandableSectionState();
+}
+
+class _ExpandableSectionState extends State<_ExpandableSection> {
+  bool _expanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = widget.cs;
+    final tt = widget.tt;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: cs.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: cs.outlineVariant.withOpacity(.60)),
+      ),
+      child: Column(
+        children: [
+          InkWell(
+            onTap: () => setState(() => _expanded = !_expanded),
+            borderRadius: _expanded
+                ? const BorderRadius.vertical(top: Radius.circular(16))
+                : BorderRadius.circular(16),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.code_rounded,
+                    size: 16,
+                    color: cs.onSurface.withOpacity(.45),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      widget.title,
+                      style: tt.labelMedium?.copyWith(
+                        color: cs.onSurface.withOpacity(.55),
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.4,
+                      ),
+                    ),
+                  ),
+                  Icon(
+                    _expanded
+                        ? Icons.keyboard_arrow_up_rounded
+                        : Icons.keyboard_arrow_down_rounded,
+                    size: 20,
+                    color: cs.onSurface.withOpacity(.40),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (_expanded) ...[
+            Divider(
+                height: 1, color: cs.outlineVariant.withOpacity(.40)),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+              child: Column(children: widget.children),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+// ── Empty states ─────────────────────────────────────────────────────────────
 
 class _EmptyState extends StatelessWidget {
   final VoidCallback onAddTester;
   final AppLocalizations l10n;
 
-  const _EmptyState({
-    required this.onAddTester,
-    required this.l10n,
-  });
+  const _EmptyState({required this.onAddTester, required this.l10n});
 
   @override
   Widget build(BuildContext context) {
@@ -964,10 +1371,7 @@ class _FilteredEmpty extends StatelessWidget {
   final VoidCallback onReset;
   final AppLocalizations l10n;
 
-  const _FilteredEmpty({
-    required this.onReset,
-    required this.l10n,
-  });
+  const _FilteredEmpty({required this.onReset, required this.l10n});
 
   @override
   Widget build(BuildContext context) {
@@ -1009,7 +1413,7 @@ class _FilteredEmpty extends StatelessWidget {
   }
 }
 
-// ── Skeleton Loader ───────────────────────────────────────────────────────────
+// ── Skeleton loader ───────────────────────────────────────────────────────────
 
 class _SkeletonList extends StatelessWidget {
   const _SkeletonList();
@@ -1018,9 +1422,9 @@ class _SkeletonList extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: List.generate(
-        3,
+        4,
         (_) => const Padding(
-          padding: EdgeInsets.only(bottom: 10),
+          padding: EdgeInsets.only(bottom: 8),
           child: _SkeletonCard(),
         ),
       ),
@@ -1065,38 +1469,33 @@ class _SkeletonCardState extends State<_SkeletonCard>
         final base = cs.surfaceContainerHighest
             .withOpacity(0.45 + 0.20 * _anim.value);
         return Container(
-          padding: const EdgeInsets.all(14),
+          padding:
+              const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: BoxDecoration(
             color: cs.surface,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(14),
             border: Border.all(color: cs.outlineVariant.withOpacity(.40)),
           ),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CircleAvatar(radius: 22, backgroundColor: base),
+              CircleAvatar(radius: 20, backgroundColor: base),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _Bone(width: 110, height: 14, base: base),
-                    const SizedBox(height: 7),
-                    _Bone(width: 175, height: 11, base: base),
-                    const SizedBox(height: 7),
-                    _Bone(width: 220, height: 10, base: base.withOpacity(base.opacity * 0.7)),
+                    _Bone(width: 100, height: 13, base: base),
+                    const SizedBox(height: 6),
+                    _Bone(
+                      width: 160,
+                      height: 11,
+                      base: base.withOpacity(base.opacity * 0.75),
+                    ),
                   ],
                 ),
               ),
               const SizedBox(width: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  _Bone(width: 72, height: 24, base: base, radius: 999),
-                  const SizedBox(height: 6),
-                  _Bone(width: 56, height: 10, base: base.withOpacity(base.opacity * 0.6)),
-                ],
-              ),
+              _Bone(width: 64, height: 22, base: base, radius: 999),
             ],
           ),
         );
@@ -1131,7 +1530,7 @@ class _Bone extends StatelessWidget {
   }
 }
 
-// ── Add Tester Bottom Sheet ───────────────────────────────────────────────────
+// ── Add Tester bottom sheet ───────────────────────────────────────────────────
 
 class _AddTesterSheet extends StatefulWidget {
   final GlobalKey<FormState> formKey;
@@ -1298,7 +1697,8 @@ class _AddTesterSheetState extends State<_AddTesterSheet> {
                                 decoration: InputDecoration(
                                   labelText:
                                       l10n.iosInternalTestingLastNameLabel,
-                                  hintText: l10n.iosInternalTestingLastNameHint,
+                                  hintText:
+                                      l10n.iosInternalTestingLastNameHint,
                                   prefixIcon:
                                       const Icon(Icons.badge_outlined),
                                 ),
@@ -1313,7 +1713,8 @@ class _AddTesterSheetState extends State<_AddTesterSheet> {
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: cs.surfaceContainerHighest.withOpacity(.45),
+                            color:
+                                cs.surfaceContainerHighest.withOpacity(.45),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
                               color: cs.outlineVariant.withOpacity(.28),
@@ -1344,8 +1745,9 @@ class _AddTesterSheetState extends State<_AddTesterSheet> {
                         SizedBox(
                           width: double.infinity,
                           child: FilledButton.icon(
-                            onPressed:
-                                (submitting || widget.isFull) ? null : widget.onSubmit,
+                            onPressed: (submitting || widget.isFull)
+                                ? null
+                                : widget.onSubmit,
                             icon: submitting
                                 ? const SizedBox(
                                     width: 16,
@@ -1356,7 +1758,8 @@ class _AddTesterSheetState extends State<_AddTesterSheet> {
                                     ),
                                   )
                                 : const Icon(Icons.person_add_alt_rounded),
-                            label: Text(l10n.iosInternalTestingAddTesterButton),
+                            label:
+                                Text(l10n.iosInternalTestingAddTesterButton),
                           ),
                         ),
                       ],
