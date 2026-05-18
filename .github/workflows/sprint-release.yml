@@ -73,20 +73,38 @@ jobs:
 
           # Files that must keep their PROD version (never overwritten by UAT)
           PROTECTED_FILES=(
+            # Android package / Firebase
+            "android/app/build.gradle.kts"
             "android/app/google-services.json"
+            "android/app/google-servicesold.json"
+            "android/app/src/main/AndroidManifest.xml"
+          
+            # Android Kotlin package entry point
+            "android/app/src/main/kotlin/com/example/build4allmanager/MainActivity.kt"
+            "android/app/src/main/kotlin/com/build4all/build4allmanager/MainActivity.kt"
+            "android/app/src/main/kotlin/com/build4alluat/build4allmanager/MainActivity.kt"
+          
+            # iOS bundle / Firebase
             "ios/Runner/GoogleService-Info.plist"
-            "android/app/build.gradle"
+            "ios/Runner/GoogleService-Infoold.plist"
             "ios/Runner/Info.plist"
             "ios/Runner.xcodeproj/project.pbxproj"
+            "ios/Runner/Runner.entitlements"
+          
+            # App environment / host
             "lib/config/hostIp.json"
+          
+            # Production workflows
+            ".github/workflows/android-playstore-build4allmanager.yml"
+            ".github/workflows/ios_testflight.yml"
           )
-
+          
           for f in "${PROTECTED_FILES[@]}"; do
             if git cat-file -e prod/main:"$f" 2>/dev/null; then
               git checkout prod/main -- "$f"
-              echo "Kept prod version of: $f"
+              echo "Kept PROD version of: $f"
             else
-              echo "Skipping (not in prod yet): $f"
+              echo "File does not exist in PROD, skipping: $f"
             fi
           done
 
