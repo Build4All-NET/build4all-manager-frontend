@@ -8,6 +8,7 @@ class SuperAdminIosInternalTestingRequestModel extends Equatable {
 
   final String appNameSnapshot;
   final String bundleIdSnapshot;
+  final String? logoUrl;
 
   final String appleEmail;
   final String firstName;
@@ -32,6 +33,7 @@ class SuperAdminIosInternalTestingRequestModel extends Equatable {
     required this.projectId,
     required this.appNameSnapshot,
     required this.bundleIdSnapshot,
+    this.logoUrl,
     required this.appleEmail,
     required this.firstName,
     required this.lastName,
@@ -74,6 +76,21 @@ class SuperAdminIosInternalTestingRequestModel extends Equatable {
     return DateTime.tryParse(s);
   }
 
+  static String? _resolveLogoUrl(Map<String, dynamic> json) {
+    for (final key in [
+      'logoUrl',
+      'appLogoUrl',
+      'iconUrl',
+      'appIconUrl',
+      'logoSnapshot',
+      'appIcon',
+    ]) {
+      final v = _asNullableString(json[key]);
+      if (v != null) return v;
+    }
+    return null;
+  }
+
   factory SuperAdminIosInternalTestingRequestModel.fromJson(
     Map<String, dynamic> json,
   ) {
@@ -84,6 +101,7 @@ class SuperAdminIosInternalTestingRequestModel extends Equatable {
       projectId: _asInt(json['projectId']),
       appNameSnapshot: _asString(json['appNameSnapshot']),
       bundleIdSnapshot: _asString(json['bundleIdSnapshot']),
+      logoUrl: _resolveLogoUrl(json),
       appleEmail: _asString(json['appleEmail']),
       firstName: _asString(json['firstName']),
       lastName: _asString(json['lastName']),
@@ -103,12 +121,9 @@ class SuperAdminIosInternalTestingRequestModel extends Equatable {
   String get fullName => '$firstName $lastName'.trim();
 
   bool get isReady => status.trim().toUpperCase() == 'READY';
-
   bool get isFailed => status.trim().toUpperCase() == 'FAILED';
-
   bool get isWaiting =>
       status.trim().toUpperCase() == 'WAITING_OWNER_ACCEPTANCE';
-
   bool get isAdding =>
       status.trim().toUpperCase() == 'ADDING_TO_INTERNAL_TESTING';
 
@@ -128,6 +143,7 @@ class SuperAdminIosInternalTestingRequestModel extends Equatable {
         projectId,
         appNameSnapshot,
         bundleIdSnapshot,
+        logoUrl,
         appleEmail,
         firstName,
         lastName,
