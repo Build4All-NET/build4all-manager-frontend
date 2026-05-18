@@ -294,7 +294,7 @@ class _OwnerIosInternalTestingScreenState
                 await Future.delayed(const Duration(milliseconds: 250));
               },
               child: ListView(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 40),
+                padding: const EdgeInsets.fromLTRB(14, 4, 14, 28),
                 children: [
                   _PageHeader(
                     appName: widget.project.appName.isNotEmpty
@@ -308,7 +308,7 @@ class _OwnerIosInternalTestingScreenState
                     onAddTester: () => _openAddTesterSheet(ctx, state.isFull),
                     l10n: l10n,
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 10),
                   if (state.hasRequests) ...[
                     _FilterBar(
                       searchCtrl: _searchCtrl,
@@ -318,7 +318,7 @@ class _OwnerIosInternalTestingScreenState
                       onReset: _resetFilters,
                       l10n: l10n,
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 8),
                   ],
                   if (isInitialLoad)
                     const _SkeletonList()
@@ -382,10 +382,10 @@ class _PageHeader extends StatelessWidget {
     final tt = Theme.of(context).textTheme;
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
       decoration: BoxDecoration(
         color: cs.surface,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(color: cs.outlineVariant.withOpacity(.65)),
       ),
       child: Column(
@@ -401,41 +401,43 @@ class _PageHeader extends StatelessWidget {
                     Text(
                       l10n.iosInternalTestingPageTitle,
                       style:
-                          tt.titleLarge?.copyWith(fontWeight: FontWeight.w900),
+                          tt.titleMedium?.copyWith(fontWeight: FontWeight.w900, height: 1.05),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       l10n.iosInternalTestingSectionSubtitle,
-                      style: tt.bodyMedium?.copyWith(
+                      style: tt.bodySmall?.copyWith(
                         color: cs.onSurface.withOpacity(.62),
-                        height: 1.45,
+                        height: 1.25,
                       ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 8),
               FilledButton.icon(
                 onPressed: isFull ? null : onAddTester,
                 icon: const Icon(Icons.person_add_alt_1_rounded, size: 18),
                 label: Text(l10n.iosInternalTestingAddTesterButton),
                 style: FilledButton.styleFrom(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   textStyle: const TextStyle(
                     fontWeight: FontWeight.w700,
-                    fontSize: 13,
+                    fontSize: 12,
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 10),
           const Divider(height: 1),
-          const SizedBox(height: 14),
+          const SizedBox(height: 9),
           Wrap(
-            spacing: 14,
-            runSpacing: 8,
+            spacing: 10,
+            runSpacing: 6,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               _MetaChip(
@@ -464,10 +466,10 @@ class _PageHeader extends StatelessWidget {
             ],
           ),
           if (isFull) ...[
-            const SizedBox(height: 14),
+            const SizedBox(height: 10),
             Container(
               padding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
               decoration: BoxDecoration(
                 color: cs.error.withOpacity(.08),
                 borderRadius: BorderRadius.circular(12),
@@ -517,8 +519,8 @@ class _MetaChip extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 14, color: cs.onSurface.withOpacity(.45)),
-        const SizedBox(width: 5),
+        Icon(icon, size: 13, color: cs.onSurface.withOpacity(.45)),
+        const SizedBox(width: 4),
         Text(
           label,
           style: tt.bodySmall?.copyWith(
@@ -554,7 +556,7 @@ class _SlotBadge extends StatelessWidget {
     final full = max > 0 && used >= max;
     final color = full ? cs.error : cs.primary;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: color.withOpacity(.10),
         borderRadius: BorderRadius.circular(999),
@@ -573,8 +575,8 @@ class _SlotBadge extends StatelessWidget {
               ),
             )
           else
-            Icon(Icons.group_rounded, size: 14, color: color),
-          const SizedBox(width: 6),
+            Icon(Icons.group_rounded, size: 13, color: color),
+          const SizedBox(width: 5),
           Text(
             '$used / $max ${l10n.iosInternalTestingSlotsUsedLabel}',
             style: tt.labelSmall?.copyWith(
@@ -613,31 +615,76 @@ class _FilterBar extends StatelessWidget {
     final tt = Theme.of(context).textTheme;
 
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.fromLTRB(10, 9, 10, 9),
       decoration: BoxDecoration(
         color: cs.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: cs.outlineVariant.withOpacity(.55)),
+        borderRadius: BorderRadius.circular(13),
+        border: Border.all(color: cs.outlineVariant.withOpacity(.45)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           TextField(
             controller: searchCtrl,
+            style: tt.bodySmall?.copyWith(fontSize: 13),
             decoration: InputDecoration(
               hintText: l10n.common_search_hint,
-              prefixIcon: const Icon(Icons.search_rounded, size: 20),
-              suffixIcon: searchCtrl.text.isNotEmpty
-                  ? IconButton(
-                      icon: const Icon(Icons.clear_rounded, size: 18),
-                      onPressed: searchCtrl.clear,
-                    )
-                  : null,
+              hintStyle: TextStyle(
+                color: cs.onSurface.withOpacity(.38),
+                fontSize: 13,
+              ),
+              prefixIcon: Icon(
+                Icons.search_rounded,
+                size: 18,
+                color: cs.onSurface.withOpacity(.38),
+              ),
+              prefixIconConstraints: const BoxConstraints(
+                minWidth: 36,
+                minHeight: 36,
+              ),
+              suffixIconConstraints: const BoxConstraints(
+                minWidth: 34,
+                minHeight: 34,
+              ),
+              suffixIcon: ValueListenableBuilder<TextEditingValue>(
+                valueListenable: searchCtrl,
+                builder: (_, v, __) => v.text.isNotEmpty
+                    ? IconButton(
+                        icon: Icon(
+                          Icons.clear_rounded,
+                          size: 16,
+                          color: cs.onSurface.withOpacity(.50),
+                        ),
+                        onPressed: searchCtrl.clear,
+                        visualDensity: VisualDensity.compact,
+                        padding: EdgeInsets.zero,
+                      )
+                    : const SizedBox.shrink(),
+              ),
               isDense: true,
-              contentPadding: const EdgeInsets.symmetric(vertical: 10),
+              contentPadding: const EdgeInsets.symmetric(vertical: 7),
+              filled: true,
+              fillColor: cs.surface,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(
+                  color: cs.outlineVariant.withOpacity(.40),
+                ),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(
+                  color: cs.outlineVariant.withOpacity(.35),
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(color: cs.primary, width: 1.2),
+              ),
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 7),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
@@ -650,26 +697,27 @@ class _FilterBar extends StatelessWidget {
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 150),
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
+                          horizontal: 10,
+                          vertical: 5,
                         ),
                         decoration: BoxDecoration(
                           color: f == selected
                               ? cs.primary
-                              : cs.surfaceContainerHighest.withOpacity(.55),
+                              : cs.surfaceContainerHighest.withOpacity(.45),
                           borderRadius: BorderRadius.circular(999),
                           border: Border.all(
                             color: f == selected
                                 ? cs.primary
-                                : cs.outlineVariant.withOpacity(.40),
+                                : cs.outlineVariant.withOpacity(.35),
                           ),
                         ),
                         child: Text(
                           f.label(l10n),
                           style: tt.labelSmall?.copyWith(
+                            fontSize: 10.5,
                             color: f == selected
                                 ? cs.onPrimary
-                                : cs.onSurface.withOpacity(.72),
+                                : cs.onSurface.withOpacity(.70),
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -680,12 +728,18 @@ class _FilterBar extends StatelessWidget {
                 if (hasActive)
                   TextButton.icon(
                     onPressed: onReset,
-                    icon: const Icon(Icons.filter_alt_off_rounded, size: 15),
+                    icon: const Icon(Icons.filter_alt_off_rounded, size: 14),
                     label: Text(l10n.common_clear),
                     style: TextButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 6),
+                        horizontal: 8,
+                        vertical: 5,
+                      ),
                       visualDensity: VisualDensity.compact,
+                      textStyle: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
               ],
@@ -733,15 +787,15 @@ class _CompactTesterCard extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(14),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: cs.outlineVariant.withOpacity(.60)),
+            borderRadius: BorderRadius.circular(13),
+            border: Border.all(color: cs.outlineVariant.withOpacity(.55)),
           ),
           child: Row(
             children: [
               CircleAvatar(
-                radius: 20,
+                radius: 18,
                 backgroundColor: cs.primary.withOpacity(.12),
                 child: Text(
                   _initials(),
@@ -751,7 +805,7 @@ class _CompactTesterCard extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 10),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -775,7 +829,7 @@ class _CompactTesterCard extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 8),
               IosInternalTestingStatusChip(
                 status: request.status,
                 compact: true,
@@ -889,7 +943,7 @@ class _TesterDetailPage extends StatelessWidget {
             ),
           ),
           body: ListView(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 40),
+            padding: const EdgeInsets.fromLTRB(14, 8, 14, 28),
             children: [
               // ── Identity card ──────────────────────────────────────────────
               _DetailSection(
@@ -1130,7 +1184,7 @@ class _DetailSection extends StatelessWidget {
     final tt = Theme.of(context).textTheme;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: cs.surface,
         borderRadius: BorderRadius.circular(16),
@@ -1323,7 +1377,7 @@ class _EmptyState extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 52, horizontal: 24),
       decoration: BoxDecoration(
         color: cs.surface,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(color: cs.outlineVariant.withOpacity(.55)),
       ),
       child: Column(
@@ -1382,7 +1436,7 @@ class _FilteredEmpty extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 44, horizontal: 24),
       decoration: BoxDecoration(
         color: cs.surface,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(color: cs.outlineVariant.withOpacity(.55)),
       ),
       child: Column(
@@ -1478,8 +1532,8 @@ class _SkeletonCardState extends State<_SkeletonCard>
           ),
           child: Row(
             children: [
-              CircleAvatar(radius: 20, backgroundColor: base),
-              const SizedBox(width: 12),
+              CircleAvatar(radius: 18, backgroundColor: base),
+              const SizedBox(width: 10),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

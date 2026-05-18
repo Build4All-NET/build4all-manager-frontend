@@ -170,12 +170,11 @@ class _ViewState extends State<_View> {
                       .add(const SuperAdminIosInternalTestingRefreshed()),
                   child: ListView(
                     padding:
-                        const EdgeInsets.fromLTRB(16, 14, 16, 40),
+                        const EdgeInsets.fromLTRB(14, 6, 14, 28),
                     physics: const AlwaysScrollableScrollPhysics(),
                     children: [
-                      _StatsRow(
-                          state: state, loading: isInitialLoad),
-                      const SizedBox(height: 12),
+                      _StatsRow(state: state, loading: isInitialLoad),
+                      const SizedBox(height: 8),
                       _FilterBar(
                         searchCtrl: _searchCtrl,
                         selectedStatus: state.selectedStatus,
@@ -188,7 +187,7 @@ class _ViewState extends State<_View> {
                         l10n: l10n,
                       ),
                       if (!isInitialLoad) ...[  
-                        const SizedBox(height: 10),
+                        const SizedBox(height: 8),
                         _SyncAllPanel(
                           acting: state.acting,
                           onSyncAll: () => bloc.add(
@@ -197,7 +196,7 @@ class _ViewState extends State<_View> {
                           l10n: l10n,
                         ),
                       ],
-                      const SizedBox(height: 14),
+                      const SizedBox(height: 10),
                       if (isInitialLoad)
                         const _SkeletonList()
                       else if (state.requests.isEmpty)
@@ -325,36 +324,63 @@ class _StatsRow extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context)!;
 
-    return Row(
-      children: [
-        _StatPill(
-          icon: Icons.layers_rounded,
-          label: l10n.super_ios_internal_testing_total,
-          value: loading ? '—' : '${state.totalCount}',
-          color: cs.primary,
-        ),
-        const SizedBox(width: 8),
-        _StatPill(
-          icon: Icons.error_outline_rounded,
-          label: l10n.super_ios_internal_testing_failed,
-          value: loading ? '—' : '${state.failedCount}',
-          color: state.failedCount > 0 ? cs.error : cs.outline,
-        ),
-        const SizedBox(width: 8),
-        _StatPill(
-          icon: Icons.verified_rounded,
-          label: l10n.super_ios_internal_testing_ready,
-          value: loading ? '—' : '${state.readyCount}',
-          color: cs.tertiary,
-        ),
-        const SizedBox(width: 8),
-        _StatPill(
-          icon: Icons.hourglass_top_rounded,
-          label: 'Processing',
-          value: loading ? '—' : '${state.processingCount}',
-          color: cs.secondary,
-        ),
-      ],
+    final pills = [
+      _StatPill(
+        icon: Icons.layers_rounded,
+        label: l10n.super_ios_internal_testing_total,
+        value: loading ? '—' : '${state.totalCount}',
+        color: cs.primary,
+      ),
+      _StatPill(
+        icon: Icons.error_outline_rounded,
+        label: l10n.super_ios_internal_testing_failed,
+        value: loading ? '—' : '${state.failedCount}',
+        color: state.failedCount > 0 ? cs.error : cs.outline,
+      ),
+      _StatPill(
+        icon: Icons.verified_rounded,
+        label: l10n.super_ios_internal_testing_ready,
+        value: loading ? '—' : '${state.readyCount}',
+        color: cs.tertiary,
+      ),
+      _StatPill(
+        icon: Icons.hourglass_top_rounded,
+        label: 'Processing',
+        value: loading ? '—' : '${state.processingCount}',
+        color: cs.secondary,
+      ),
+    ];
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isTiny = constraints.maxWidth < 370;
+        if (isTiny) {
+          return Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: pills
+                .map(
+                  (pill) => SizedBox(
+                    width: (constraints.maxWidth - 6) / 2,
+                    child: pill,
+                  ),
+                )
+                .toList(),
+          );
+        }
+
+        return Row(
+          children: [
+            Expanded(child: pills[0]),
+            const SizedBox(width: 6),
+            Expanded(child: pills[1]),
+            const SizedBox(width: 6),
+            Expanded(child: pills[2]),
+            const SizedBox(width: 6),
+            Expanded(child: pills[3]),
+          ],
+        );
+      },
     );
   }
 }
@@ -376,37 +402,47 @@ class _StatPill extends StatelessWidget {
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
 
-    return Expanded(
-      child: Container(
-        padding:
-            const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-        decoration: BoxDecoration(
-          color: color.withOpacity(.08),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: color.withOpacity(.18)),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(icon, size: 15, color: color),
-            const SizedBox(height: 5),
-            Text(
-              value,
-              style: tt.titleMedium?.copyWith(
-                color: color,
-                fontWeight: FontWeight.w900,
-                height: 1.1,
-              ),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
+      decoration: BoxDecoration(
+        color: color.withOpacity(.07),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: color.withOpacity(.14)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: color),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  value,
+                  style: tt.labelLarge?.copyWith(
+                    color: color,
+                    fontWeight: FontWeight.w900,
+                    height: 1,
+                  ),
+                  maxLines: 1,
+                ),
+                const SizedBox(height: 1),
+                Text(
+                  label,
+                  style: tt.labelSmall?.copyWith(
+                    color: color.withOpacity(.68),
+                    fontSize: 9.5,
+                    height: 1,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ),
-            Text(
-              label,
-              style: tt.bodySmall
-                  ?.copyWith(color: color.withOpacity(.68), fontSize: 10),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -465,58 +501,76 @@ class _FilterBar extends StatelessWidget {
     final tt = Theme.of(context).textTheme;
 
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.fromLTRB(10, 9, 10, 9),
       decoration: BoxDecoration(
         color: cs.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: cs.outlineVariant.withOpacity(.5)),
+        borderRadius: BorderRadius.circular(13),
+        border: Border.all(color: cs.outlineVariant.withOpacity(.45)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           TextField(
             controller: searchCtrl,
+            style: tt.bodySmall?.copyWith(fontSize: 13),
             decoration: InputDecoration(
               hintText: l10n.super_ios_internal_testing_search_hint,
               hintStyle: TextStyle(
-                  color: cs.onSurface.withOpacity(.4), fontSize: 14),
-              prefixIcon: Icon(Icons.search_rounded,
-                  size: 20, color: cs.onSurface.withOpacity(.4)),
+                color: cs.onSurface.withOpacity(.38),
+                fontSize: 13,
+              ),
+              prefixIcon: Icon(
+                Icons.search_rounded,
+                size: 18,
+                color: cs.onSurface.withOpacity(.38),
+              ),
+              prefixIconConstraints: const BoxConstraints(
+                minWidth: 36,
+                minHeight: 36,
+              ),
+              suffixIconConstraints: const BoxConstraints(
+                minWidth: 34,
+                minHeight: 34,
+              ),
               suffixIcon: ValueListenableBuilder<TextEditingValue>(
                 valueListenable: searchCtrl,
                 builder: (_, v, __) => v.text.isNotEmpty
                     ? IconButton(
-                        icon: Icon(Icons.clear_rounded,
-                            size: 18,
-                            color: cs.onSurface.withOpacity(.5)),
+                        icon: Icon(
+                          Icons.clear_rounded,
+                          size: 16,
+                          color: cs.onSurface.withOpacity(.50),
+                        ),
                         onPressed: searchCtrl.clear,
                         visualDensity: VisualDensity.compact,
+                        padding: EdgeInsets.zero,
                       )
                     : const SizedBox.shrink(),
               ),
               isDense: true,
-              contentPadding:
-                  const EdgeInsets.symmetric(vertical: 10),
+              contentPadding: const EdgeInsets.symmetric(vertical: 7),
               filled: true,
               fillColor: cs.surface,
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(10),
                 borderSide: BorderSide(
-                    color: cs.outlineVariant.withOpacity(.5)),
+                  color: cs.outlineVariant.withOpacity(.40),
+                ),
               ),
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(10),
                 borderSide: BorderSide(
-                    color: cs.outlineVariant.withOpacity(.4)),
+                  color: cs.outlineVariant.withOpacity(.35),
+                ),
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide:
-                    BorderSide(color: cs.primary, width: 1.5),
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(color: cs.primary, width: 1.2),
               ),
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 5),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
@@ -530,19 +584,22 @@ class _FilterBar extends StatelessWidget {
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 150),
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 6),
+                          horizontal: 10,
+                          vertical: 5,
+                        ),
                         decoration: BoxDecoration(
                           color: active ? cs.primary : cs.surface,
                           borderRadius: BorderRadius.circular(999),
                           border: Border.all(
                             color: active
                                 ? cs.primary
-                                : cs.outlineVariant.withOpacity(.5),
+                                : cs.outlineVariant.withOpacity(.42),
                           ),
                         ),
                         child: Text(
                           _label(s),
                           style: tt.labelSmall?.copyWith(
+                            fontSize: 10.5,
                             color: active
                                 ? cs.onPrimary
                                 : cs.onSurface.withOpacity(.68),
@@ -556,15 +613,18 @@ class _FilterBar extends StatelessWidget {
                 if (hasActive)
                   TextButton.icon(
                     onPressed: onReset,
-                    icon: const Icon(Icons.filter_alt_off_rounded,
-                        size: 14),
+                    icon: const Icon(Icons.filter_alt_off_rounded, size: 14),
                     label: Text(l10n.common_clear),
                     style: TextButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 6),
+                        horizontal: 8,
+                        vertical: 5,
+                      ),
                       visualDensity: VisualDensity.compact,
                       textStyle: const TextStyle(
-                          fontSize: 12, fontWeight: FontWeight.w600),
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
               ],
@@ -596,24 +656,24 @@ class _SyncAllPanel extends StatelessWidget {
 
     return Container(
       padding:
-          const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
       decoration: BoxDecoration(
         color: cs.secondaryContainer.withOpacity(.22),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(color: cs.secondary.withOpacity(.18)),
       ),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(7),
+            padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
               color: cs.secondary.withOpacity(.12),
-              borderRadius: BorderRadius.circular(9),
+              borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(Icons.sync_alt_rounded,
-                size: 17, color: cs.secondary),
+                size: 16, color: cs.secondary),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 8),
           Expanded(
             child: Text(
               l10n.super_ios_internal_testing_sync_all_visible_pending,
@@ -625,7 +685,7 @@ class _SyncAllPanel extends StatelessWidget {
               maxLines: 2,
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 8),
           FilledButton.tonalIcon(
             onPressed: acting ? null : onSyncAll,
             icon: acting
@@ -641,7 +701,7 @@ class _SyncAllPanel extends StatelessWidget {
             label: Text(l10n.super_ios_internal_testing_sync),
             style: FilledButton.styleFrom(
               padding: const EdgeInsets.symmetric(
-                  horizontal: 14, vertical: 10),
+                  horizontal: 10, vertical: 8),
               textStyle: const TextStyle(
                   fontSize: 12, fontWeight: FontWeight.w700),
               visualDensity: VisualDensity.compact,
@@ -683,15 +743,14 @@ class _RequestCard extends StatelessWidget {
 
     return Material(
       color: cs.surface,
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(12),
         child: Container(
-          padding: const EdgeInsets.symmetric(
-              horizontal: 14, vertical: 13),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: request.isFailed
                   ? cs.error.withOpacity(.28)
@@ -704,11 +763,11 @@ class _RequestCard extends StatelessWidget {
               // App avatar
               _AppAvatar(
                 appName: appName,
-                logoUrl: request.logoUrl,
-                size: 46,
-                radius: 12,
+                
+                size: 40,
+                radius: 10,
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 10),
               // Content: fills remaining width, no overflow risk
               Expanded(
                 child: Column(
@@ -762,7 +821,7 @@ class _RequestCard extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 7),
+                    const SizedBox(height: 5),
                     // Status chip + date in the content column
                     // so the right side never competes for space
                     Row(
@@ -792,7 +851,7 @@ class _RequestCard extends StatelessWidget {
               ),
               // Chevron – only thing on the right, aligned to top
               Padding(
-                padding: const EdgeInsets.only(top: 12, left: 4),
+                padding: const EdgeInsets.only(top: 10, left: 4),
                 child: Icon(
                   Icons.chevron_right_rounded,
                   size: 20,
@@ -858,7 +917,7 @@ class _DetailPage extends StatelessWidget {
             scrolledUnderElevation: 1,
           ),
           body: ListView(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 40),
+            padding: const EdgeInsets.fromLTRB(14, 8, 14, 28),
             children: [
               // Identity card
               _Card(
@@ -867,7 +926,7 @@ class _DetailPage extends StatelessWidget {
                   children: [
                     _AppAvatar(
                       appName: appName,
-                      logoUrl: request.logoUrl,
+                    
                       size: 56,
                       radius: 14,
                     ),
@@ -953,7 +1012,7 @@ class _DetailPage extends StatelessWidget {
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
                       color: cs.error.withOpacity(.07),
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                           color: cs.error.withOpacity(.18)),
                     ),
@@ -1115,7 +1174,7 @@ class _Card extends StatelessWidget {
     final tt = Theme.of(context).textTheme;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: cs.surface,
         borderRadius: BorderRadius.circular(16),
@@ -1445,11 +1504,10 @@ class _SkeletonCardState extends State<_SkeletonCard>
             .withOpacity(0.45 + 0.20 * _anim.value);
 
         return Container(
-          padding: const EdgeInsets.symmetric(
-              horizontal: 14, vertical: 13),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           decoration: BoxDecoration(
             color: cs.surface,
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(12),
             border: Border.all(
                 color: cs.outlineVariant.withOpacity(.35)),
           ),
