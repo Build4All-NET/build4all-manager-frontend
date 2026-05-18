@@ -74,32 +74,30 @@ jobs:
           # Files that must keep their PROD version (never overwritten by UAT)
           # Files that must keep their PROD version
           # These files should NOT be updated from UAT into PROD PR.
+                    # Files that must NOT be updated from UAT into PROD PR.
+          # If they exist in PROD, keep PROD version.
+          # If they exist only in UAT, remove them from the release branch.
           PROTECTED_FILES=(
-            # Release workflow itself
             ".github/workflows/sprint-release.yml"
 
-            # Android package / Firebase / app identity
             "android/app/build.gradle.kts"
             "android/app/google-services.json"
             "android/app/google-servicesold.json"
             "android/app/src/main/AndroidManifest.xml"
 
-            # Android Kotlin package entry point
+            "android/app/src/main/kotlin/com/example/build4all_manager/MainActivity.kt"
             "android/app/src/main/kotlin/com/example/build4allmanager/MainActivity.kt"
             "android/app/src/main/kotlin/com/build4all/build4allmanager/MainActivity.kt"
             "android/app/src/main/kotlin/com/build4alluat/build4allmanager/MainActivity.kt"
 
-            # iOS bundle / Firebase / app identity
             "ios/Runner/GoogleService-Info.plist"
             "ios/Runner/GoogleService-Infoold.plist"
             "ios/Runner/Info.plist"
             "ios/Runner.xcodeproj/project.pbxproj"
             "ios/Runner/Runner.entitlements"
 
-            # App environment / host
             "lib/config/hostIp.json"
 
-            # Production build/test workflows
             ".github/workflows/android-playstore-build4allmanager.yml"
             ".github/workflows/ios_testflight.yml"
           )
@@ -109,7 +107,12 @@ jobs:
               git checkout prod/main -- "$f"
               echo "Kept PROD version of: $f"
             else
-              echo "File does not exist in PROD, skipping: $f"
+              if [ -e "$f" ]; then
+                git rm -f "$f"
+                echo "Removed UAT-only protected file from release branch: $f"
+              else
+                echo "Protected file not found anywhere, skipping: $f"
+              fi
             fi
           done
 
