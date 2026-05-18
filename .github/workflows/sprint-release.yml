@@ -72,33 +72,38 @@ jobs:
             || echo "prod/main not found - first run"
 
           # Files that must keep their PROD version (never overwritten by UAT)
+          # Files that must keep their PROD version
+          # These files should NOT be updated from UAT into PROD PR.
           PROTECTED_FILES=(
-            # Android package / Firebase
+            # Release workflow itself
+            ".github/workflows/sprint-release.yml"
+
+            # Android package / Firebase / app identity
             "android/app/build.gradle.kts"
             "android/app/google-services.json"
             "android/app/google-servicesold.json"
             "android/app/src/main/AndroidManifest.xml"
-          
+
             # Android Kotlin package entry point
             "android/app/src/main/kotlin/com/example/build4allmanager/MainActivity.kt"
             "android/app/src/main/kotlin/com/build4all/build4allmanager/MainActivity.kt"
             "android/app/src/main/kotlin/com/build4alluat/build4allmanager/MainActivity.kt"
-          
-            # iOS bundle / Firebase
+
+            # iOS bundle / Firebase / app identity
             "ios/Runner/GoogleService-Info.plist"
             "ios/Runner/GoogleService-Infoold.plist"
             "ios/Runner/Info.plist"
             "ios/Runner.xcodeproj/project.pbxproj"
             "ios/Runner/Runner.entitlements"
-          
+
             # App environment / host
             "lib/config/hostIp.json"
-          
-            # Production workflows
+
+            # Production build/test workflows
             ".github/workflows/android-playstore-build4allmanager.yml"
             ".github/workflows/ios_testflight.yml"
           )
-          
+
           for f in "${PROTECTED_FILES[@]}"; do
             if git cat-file -e prod/main:"$f" 2>/dev/null; then
               git checkout prod/main -- "$f"
