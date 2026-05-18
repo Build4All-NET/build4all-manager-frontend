@@ -71,10 +71,7 @@ jobs:
           git -c http.extraheader="${AUTH_HEADER}" fetch "${PROD_URL}" main:refs/remotes/prod/main \
             || echo "prod/main not found - first run"
 
-          # Files that must keep their PROD version (never overwritten by UAT)
-          # Files that must keep their PROD version
-          # These files should NOT be updated from UAT into PROD PR.
-                    # Files that must NOT be updated from UAT into PROD PR.
+          # Files that must NOT be updated from UAT into PROD PR.
           # If they exist in PROD, keep PROD version.
           # If they exist only in UAT, remove them from the release branch.
           PROTECTED_FILES=(
