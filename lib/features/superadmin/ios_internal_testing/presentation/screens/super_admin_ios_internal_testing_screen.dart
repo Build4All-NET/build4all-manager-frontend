@@ -13,7 +13,7 @@ import '../bloc/super_admin_ios_internal_testing_bloc.dart';
 import '../bloc/super_admin_ios_internal_testing_event.dart';
 import '../bloc/super_admin_ios_internal_testing_state.dart';
 
-// ─── Entry ────────────────────────────────────────────────────────────────────
+// ── Entry ───────────────────────────────────────────────────────────────────
 
 class SuperAdminIosInternalTestingScreen extends StatelessWidget {
   final Dio dio;
@@ -31,7 +31,7 @@ class SuperAdminIosInternalTestingScreen extends StatelessWidget {
   }
 }
 
-// ─── Main view ────────────────────────────────────────────────────────────────
+// ── Main view ─────────────────────────────────────────────────────────────
 
 class _View extends StatefulWidget {
   const _View();
@@ -151,44 +151,13 @@ class _ViewState extends State<_View> {
             title: Text(l10n.super_nav_ios_internal_testing),
             scrolledUnderElevation: 1,
             actions: [
-              if (!isInitialLoad) ...
-                [
-                  FilledButton.tonalIcon(
-                    onPressed: state.acting
-                        ? null
-                        : () => bloc.add(
-                              const SuperAdminIosInternalTestingSyncAllPressed(),
-                            ),
-                    icon: state.acting
-                        ? SizedBox(
-                            width: 14,
-                            height: 14,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 1.5,
-                              color: cs.onSecondaryContainer,
-                            ),
-                          )
-                        : const Icon(Icons.sync_rounded, size: 16),
-                    label: Text(
-                      l10n.super_ios_internal_testing_sync_all_visible_pending,
-                    ),
-                    style: FilledButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 8),
-                      textStyle: const TextStyle(
-                          fontSize: 12, fontWeight: FontWeight.w700),
-                      visualDensity: VisualDensity.compact,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  IconButton(
-                    onPressed: () =>
-                        bloc.add(const SuperAdminIosInternalTestingRefreshed()),
-                    icon: const Icon(Icons.refresh_rounded),
-                    tooltip: l10n.super_ios_internal_testing_refresh,
-                  ),
-                  const SizedBox(width: 4),
-                ],
+              IconButton(
+                onPressed: () => bloc
+                    .add(const SuperAdminIosInternalTestingRefreshed()),
+                icon: const Icon(Icons.refresh_rounded),
+                tooltip: l10n.super_ios_internal_testing_refresh,
+              ),
+              const SizedBox(width: 4),
             ],
           ),
           body: SafeArea(
@@ -197,24 +166,37 @@ class _ViewState extends State<_View> {
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 1240),
                 child: RefreshIndicator.adaptive(
-                  onRefresh: () async =>
-                      bloc.add(const SuperAdminIosInternalTestingRefreshed()),
+                  onRefresh: () async => bloc
+                      .add(const SuperAdminIosInternalTestingRefreshed()),
                   child: ListView(
-                    padding: const EdgeInsets.fromLTRB(16, 14, 16, 40),
+                    padding:
+                        const EdgeInsets.fromLTRB(16, 14, 16, 40),
                     physics: const AlwaysScrollableScrollPhysics(),
                     children: [
-                      _StatsRow(state: state, loading: isInitialLoad),
+                      _StatsRow(
+                          state: state, loading: isInitialLoad),
                       const SizedBox(height: 12),
                       _FilterBar(
                         searchCtrl: _searchCtrl,
                         selectedStatus: state.selectedStatus,
                         statuses: _statuses,
                         hasActive: _hasActive(state),
-                        onStatusChanged: (s) => bloc
-                            .add(SuperAdminIosInternalTestingStatusChanged(s)),
+                        onStatusChanged: (s) => bloc.add(
+                            SuperAdminIosInternalTestingStatusChanged(
+                                s)),
                         onReset: _reset,
                         l10n: l10n,
                       ),
+                      if (!isInitialLoad) ...[  
+                        const SizedBox(height: 10),
+                        _SyncAllPanel(
+                          acting: state.acting,
+                          onSyncAll: () => bloc.add(
+                            const SuperAdminIosInternalTestingSyncAllPressed(),
+                          ),
+                          l10n: l10n,
+                        ),
+                      ],
                       const SizedBox(height: 14),
                       if (isInitialLoad)
                         const _SkeletonList()
@@ -226,10 +208,12 @@ class _ViewState extends State<_View> {
                         Column(
                           children: items
                               .map((r) => Padding(
-                                    padding: const EdgeInsets.only(bottom: 8),
+                                    padding: const EdgeInsets.only(
+                                        bottom: 8),
                                     child: _RequestCard(
                                       request: r,
-                                      onTap: () => _openDetail(ctx, r, bloc),
+                                      onTap: () =>
+                                          _openDetail(ctx, r, bloc),
                                     ),
                                   ))
                               .toList(),
@@ -246,7 +230,89 @@ class _ViewState extends State<_View> {
   }
 }
 
-// ─── Stats row ────────────────────────────────────────────────────────────────
+// ── App avatar (logo + initial fallback) ──────────────────────────────
+
+class _AppAvatar extends StatelessWidget {
+  final String appName;
+  final String? logoUrl;
+  final double size;
+  final double radius;
+
+  const _AppAvatar({
+    required this.appName,
+    this.logoUrl,
+    this.size = 46,
+    this.radius = 12,
+  });
+
+  String get _initial {
+    final n = appName.trim();
+    return n.isNotEmpty ? n[0].toUpperCase() : '?';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    if (logoUrl != null && logoUrl!.isNotEmpty) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(radius),
+        child: Image.network(
+          logoUrl!,
+          width: size,
+          height: size,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => _initialBox(cs),
+          loadingBuilder: (_, child, progress) {
+            if (progress == null) return child;
+            return _loadingBox(cs);
+          },
+        ),
+      );
+    }
+    return _initialBox(cs);
+  }
+
+  Widget _initialBox(ColorScheme cs) => Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          color: cs.primaryContainer,
+          borderRadius: BorderRadius.circular(radius),
+        ),
+        child: Center(
+          child: Text(
+            _initial,
+            style: TextStyle(
+              color: cs.onPrimaryContainer,
+              fontWeight: FontWeight.w800,
+              fontSize: size * 0.37,
+            ),
+          ),
+        ),
+      );
+
+  Widget _loadingBox(ColorScheme cs) => Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          color: cs.primaryContainer.withOpacity(.5),
+          borderRadius: BorderRadius.circular(radius),
+        ),
+        child: Center(
+          child: SizedBox(
+            width: size * 0.38,
+            height: size * 0.38,
+            child: CircularProgressIndicator(
+              strokeWidth: 1.5,
+              color: cs.primary.withOpacity(.4),
+            ),
+          ),
+        ),
+      );
+}
+
+// ── Stats row ─────────────────────────────────────────────────────────────
 
 class _StatsRow extends StatelessWidget {
   final SuperAdminIosInternalTestingState state;
@@ -312,7 +378,8 @@ class _StatPill extends StatelessWidget {
 
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+        padding:
+            const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
         decoration: BoxDecoration(
           color: color.withOpacity(.08),
           borderRadius: BorderRadius.circular(12),
@@ -333,10 +400,8 @@ class _StatPill extends StatelessWidget {
             ),
             Text(
               label,
-              style: tt.bodySmall?.copyWith(
-                color: color.withOpacity(.68),
-                fontSize: 10,
-              ),
+              style: tt.bodySmall
+                  ?.copyWith(color: color.withOpacity(.68), fontSize: 10),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -347,7 +412,7 @@ class _StatPill extends StatelessWidget {
   }
 }
 
-// ─── Filter bar ───────────────────────────────────────────────────────────────
+// ── Filter bar ─────────────────────────────────────────────────────────────
 
 class _FilterBar extends StatelessWidget {
   final TextEditingController searchCtrl;
@@ -379,7 +444,8 @@ class _FilterBar extends StatelessWidget {
       case 'INVITED_TO_APPLE_TEAM':
         return l10n.super_ios_internal_testing_status_invitation_sent;
       case 'WAITING_OWNER_ACCEPTANCE':
-        return l10n.super_ios_internal_testing_status_waiting_acceptance;
+        return l10n
+            .super_ios_internal_testing_status_waiting_acceptance;
       case 'ADDING_TO_INTERNAL_TESTING':
         return l10n.super_ios_internal_testing_status_adding;
       case 'FAILED':
@@ -429,22 +495,24 @@ class _FilterBar extends StatelessWidget {
                     : const SizedBox.shrink(),
               ),
               isDense: true,
-              contentPadding: const EdgeInsets.symmetric(vertical: 10),
+              contentPadding:
+                  const EdgeInsets.symmetric(vertical: 10),
               filled: true,
               fillColor: cs.surface,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide:
-                    BorderSide(color: cs.outlineVariant.withOpacity(.5)),
+                borderSide: BorderSide(
+                    color: cs.outlineVariant.withOpacity(.5)),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide:
-                    BorderSide(color: cs.outlineVariant.withOpacity(.4)),
+                borderSide: BorderSide(
+                    color: cs.outlineVariant.withOpacity(.4)),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: cs.primary, width: 1.5),
+                borderSide:
+                    BorderSide(color: cs.primary, width: 1.5),
               ),
             ),
           ),
@@ -488,7 +556,8 @@ class _FilterBar extends StatelessWidget {
                 if (hasActive)
                   TextButton.icon(
                     onPressed: onReset,
-                    icon: const Icon(Icons.filter_alt_off_rounded, size: 14),
+                    icon: const Icon(Icons.filter_alt_off_rounded,
+                        size: 14),
                     label: Text(l10n.common_clear),
                     style: TextButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
@@ -507,18 +576,90 @@ class _FilterBar extends StatelessWidget {
   }
 }
 
-// ─── Request card ─────────────────────────────────────────────────────────────
+// ── Sync-all panel ───────────────────────────────────────────────────────
+
+class _SyncAllPanel extends StatelessWidget {
+  final bool acting;
+  final VoidCallback onSyncAll;
+  final AppLocalizations l10n;
+
+  const _SyncAllPanel({
+    required this.acting,
+    required this.onSyncAll,
+    required this.l10n,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
+    return Container(
+      padding:
+          const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: cs.secondaryContainer.withOpacity(.22),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: cs.secondary.withOpacity(.18)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(7),
+            decoration: BoxDecoration(
+              color: cs.secondary.withOpacity(.12),
+              borderRadius: BorderRadius.circular(9),
+            ),
+            child: Icon(Icons.sync_alt_rounded,
+                size: 17, color: cs.secondary),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              l10n.super_ios_internal_testing_sync_all_visible_pending,
+              style: tt.bodySmall?.copyWith(
+                color: cs.onSurface.withOpacity(.68),
+                fontWeight: FontWeight.w500,
+                height: 1.4,
+              ),
+              maxLines: 2,
+            ),
+          ),
+          const SizedBox(width: 12),
+          FilledButton.tonalIcon(
+            onPressed: acting ? null : onSyncAll,
+            icon: acting
+                ? SizedBox(
+                    width: 14,
+                    height: 14,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 1.5,
+                      color: cs.onSecondaryContainer,
+                    ),
+                  )
+                : const Icon(Icons.sync_rounded, size: 15),
+            label: Text(l10n.super_ios_internal_testing_sync),
+            style: FilledButton.styleFrom(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 14, vertical: 10),
+              textStyle: const TextStyle(
+                  fontSize: 12, fontWeight: FontWeight.w700),
+              visualDensity: VisualDensity.compact,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Request card ──────────────────────────────────────────────────────────
 
 class _RequestCard extends StatelessWidget {
   final SuperAdminIosInternalTestingRequestModel request;
   final VoidCallback onTap;
 
   const _RequestCard({required this.request, required this.onTap});
-
-  String get _initial {
-    final n = request.appNameSnapshot.trim();
-    return n.isNotEmpty ? n[0].toUpperCase() : '?';
-  }
 
   String _date() {
     final dt = request.updatedAt ?? request.createdAt;
@@ -547,8 +688,8 @@ class _RequestCard extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(14),
         child: Container(
-          padding:
-              const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+          padding: const EdgeInsets.symmetric(
+              horizontal: 14, vertical: 13),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
@@ -558,39 +699,33 @@ class _RequestCard extends StatelessWidget {
             ),
           ),
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 46,
-                height: 46,
-                decoration: BoxDecoration(
-                  color: cs.primaryContainer,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Center(
-                  child: Text(
-                    _initial,
-                    style: tt.titleMedium?.copyWith(
-                      color: cs.onPrimaryContainer,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
+              // App avatar
+              _AppAvatar(
+                appName: appName,
+                logoUrl: request.logoUrl,
+                size: 46,
+                radius: 12,
               ),
               const SizedBox(width: 12),
+              // Content: fills remaining width, no overflow risk
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // App name – allow 2 lines
                     Text(
                       appName,
                       style: tt.bodyMedium
                           ?.copyWith(fontWeight: FontWeight.w700),
-                      maxLines: 1,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
+                    // Bundle ID
                     if (request.bundleIdSnapshot.trim().isNotEmpty) ...
                       [
-                        const SizedBox(height: 1),
+                        const SizedBox(height: 2),
                         Text(
                           request.bundleIdSnapshot,
                           style: tt.bodySmall?.copyWith(
@@ -602,44 +737,67 @@ class _RequestCard extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ],
-                    const SizedBox(height: 3),
+                    const SizedBox(height: 4),
+                    // Tester name (separate line)
+                    if (fullName.isNotEmpty) ...
+                      [
+                        Text(
+                          fullName,
+                          style: tt.bodySmall?.copyWith(
+                            color: cs.onSurface.withOpacity(.70),
+                            fontWeight: FontWeight.w500,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 2),
+                      ],
+                    // Apple email (separate line)
                     Text(
-                      fullName.isNotEmpty
-                          ? '$fullName · ${request.appleEmail}'
-                          : request.appleEmail,
+                      request.appleEmail,
                       style: tt.bodySmall?.copyWith(
-                        color: cs.onSurface.withOpacity(.58),
+                        color: cs.onSurface.withOpacity(.50),
+                        fontSize: 11,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
+                    const SizedBox(height: 7),
+                    // Status chip + date in the content column
+                    // so the right side never competes for space
+                    Row(
+                      children: [
+                        IosInternalTestingStatusChip(
+                            status: request.status, compact: true),
+                        if (date.isNotEmpty) ...
+                          [
+                            const SizedBox(width: 8),
+                            Flexible(
+                              child: Text(
+                                date,
+                                style: tt.bodySmall?.copyWith(
+                                  color:
+                                      cs.onSurface.withOpacity(.35),
+                                  fontSize: 10,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                      ],
+                    ),
                   ],
                 ),
               ),
-              const SizedBox(width: 10),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  IosInternalTestingStatusChip(
-                      status: request.status, compact: true),
-                  if (date.isNotEmpty) ...
-                    [
-                      const SizedBox(height: 4),
-                      Text(
-                        date,
-                        style: tt.bodySmall?.copyWith(
-                          color: cs.onSurface.withOpacity(.35),
-                          fontSize: 10,
-                        ),
-                      ),
-                    ],
-                ],
-              ),
-              const SizedBox(width: 4),
-              Icon(
-                Icons.chevron_right_rounded,
-                size: 20,
-                color: cs.onSurface.withOpacity(.25),
+              // Chevron – only thing on the right, aligned to top
+              Padding(
+                padding: const EdgeInsets.only(top: 12, left: 4),
+                child: Icon(
+                  Icons.chevron_right_rounded,
+                  size: 20,
+                  color: cs.onSurface.withOpacity(.25),
+                ),
               ),
             ],
           ),
@@ -649,7 +807,7 @@ class _RequestCard extends StatelessWidget {
   }
 }
 
-// ─── Detail page ──────────────────────────────────────────────────────────────
+// ── Detail page ───────────────────────────────────────────────────────────
 
 class _DetailPage extends StatelessWidget {
   final SuperAdminIosInternalTestingRequestModel request;
@@ -665,11 +823,6 @@ class _DetailPage extends StatelessWidget {
     final h = dt.hour.toString().padLeft(2, '0');
     final min = dt.minute.toString().padLeft(2, '0');
     return '${m[dt.month - 1]} ${dt.day}, ${dt.year} · $h:$min';
-  }
-
-  String get _initial {
-    final n = request.appNameSnapshot.trim();
-    return n.isNotEmpty ? n[0].toUpperCase() : '?';
   }
 
   @override
@@ -707,26 +860,16 @@ class _DetailPage extends StatelessWidget {
           body: ListView(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 40),
             children: [
-              // Identity
+              // Identity card
               _Card(
                 child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      width: 52,
-                      height: 52,
-                      decoration: BoxDecoration(
-                        color: cs.primaryContainer,
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: Center(
-                        child: Text(
-                          _initial,
-                          style: tt.titleLarge?.copyWith(
-                            color: cs.onPrimaryContainer,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      ),
+                    _AppAvatar(
+                      appName: appName,
+                      logoUrl: request.logoUrl,
+                      size: 56,
+                      radius: 14,
                     ),
                     const SizedBox(width: 14),
                     Expanded(
@@ -735,18 +878,28 @@ class _DetailPage extends StatelessWidget {
                         children: [
                           Text(
                             appName,
-                            style: tt.titleMedium
-                                ?.copyWith(fontWeight: FontWeight.w800),
+                            style: tt.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w800),
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          if (request.bundleIdSnapshot.trim().isNotEmpty)
-                            Text(
-                              request.bundleIdSnapshot,
-                              style: tt.bodySmall?.copyWith(
-                                color: cs.onSurface.withOpacity(.5),
-                                fontFamily: 'monospace',
+                          if (request.bundleIdSnapshot
+                              .trim()
+                              .isNotEmpty) ...
+                            [
+                              const SizedBox(height: 3),
+                              Text(
+                                request.bundleIdSnapshot,
+                                style: tt.bodySmall?.copyWith(
+                                  color:
+                                      cs.onSurface.withOpacity(.5),
+                                  fontFamily: 'monospace',
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
                               ),
-                            ),
-                          const SizedBox(height: 6),
+                            ],
+                          const SizedBox(height: 8),
                           IosInternalTestingStatusChip(
                             status: request.status,
                             compact: false,
@@ -778,12 +931,14 @@ class _DetailPage extends StatelessWidget {
                     ),
                     _InfoRow(
                       icon: Icons.link_rounded,
-                      label: l10n.super_ios_internal_testing_aup_label,
+                      label:
+                          l10n.super_ios_internal_testing_aup_label,
                       value: 'AUP ${request.ownerProjectLinkId}',
                     ),
                     _InfoRow(
                       icon: Icons.tag_rounded,
-                      label: l10n.super_ios_internal_testing_request_label,
+                      label: l10n
+                          .super_ios_internal_testing_request_label,
                       value: '#${request.id}',
                     ),
                   ],
@@ -799,8 +954,8 @@ class _DetailPage extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: cs.error.withOpacity(.07),
                       borderRadius: BorderRadius.circular(14),
-                      border:
-                          Border.all(color: cs.error.withOpacity(.18)),
+                      border: Border.all(
+                          color: cs.error.withOpacity(.18)),
                     ),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -829,8 +984,8 @@ class _DetailPage extends StatelessWidget {
                     _InfoRow(
                       icon: Icons.add_circle_outline_rounded,
                       label: 'Requested',
-                      value:
-                          _dt(request.requestedAt ?? request.createdAt),
+                      value: _dt(
+                          request.requestedAt ?? request.createdAt),
                     ),
                     if (request.processedAt != null)
                       _InfoRow(
@@ -931,8 +1086,8 @@ class _DetailPage extends StatelessWidget {
                                   ),
                                 )
                               : const Icon(Icons.sync_rounded),
-                          label:
-                              Text(l10n.super_ios_internal_testing_sync),
+                          label: Text(
+                              l10n.super_ios_internal_testing_sync),
                         ),
                       ],
                   ],
@@ -946,7 +1101,7 @@ class _DetailPage extends StatelessWidget {
   }
 }
 
-// ─── Shared card ──────────────────────────────────────────────────────────────
+// ── Shared card ────────────────────────────────────────────────────────────
 
 class _Card extends StatelessWidget {
   final String? title;
@@ -992,7 +1147,7 @@ class _Card extends StatelessWidget {
   }
 }
 
-// ─── Info row ─────────────────────────────────────────────────────────────────
+// ── Info row ───────────────────────────────────────────────────────────────
 
 class _InfoRow extends StatelessWidget {
   final IconData icon;
@@ -1019,7 +1174,11 @@ class _InfoRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 16, color: cs.onSurface.withOpacity(.35)),
+          Padding(
+            padding: const EdgeInsets.only(top: 2),
+            child: Icon(icon,
+                size: 15, color: cs.onSurface.withOpacity(.35)),
+          ),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
@@ -1032,11 +1191,12 @@ class _InfoRow extends StatelessWidget {
                     fontSize: 11,
                   ),
                 ),
-                const SizedBox(height: 1),
+                const SizedBox(height: 2),
                 GestureDetector(
                   onLongPress: copyable
                       ? () {
-                          Clipboard.setData(ClipboardData(text: value));
+                          Clipboard.setData(
+                              ClipboardData(text: value));
                           AppToast.success(context, 'Copied');
                         }
                       : null,
@@ -1046,6 +1206,7 @@ class _InfoRow extends StatelessWidget {
                       fontFamily: mono ? 'monospace' : null,
                       color: cs.onSurface.withOpacity(.82),
                     ),
+                    softWrap: true,
                   ),
                 ),
               ],
@@ -1057,7 +1218,7 @@ class _InfoRow extends StatelessWidget {
   }
 }
 
-// ─── Expandable card ──────────────────────────────────────────────────────────
+// ── Expandable card ───────────────────────────────────────────────────────
 
 class _ExpandableCard extends StatefulWidget {
   final String title;
@@ -1088,7 +1249,8 @@ class _ExpandableCardState extends State<_ExpandableCard> {
           InkWell(
             onTap: () => setState(() => _expanded = !_expanded),
             borderRadius: _expanded
-                ? const BorderRadius.vertical(top: Radius.circular(16))
+                ? const BorderRadius.vertical(
+                    top: Radius.circular(16))
                 : BorderRadius.circular(16),
             child: Padding(
               padding: const EdgeInsets.symmetric(
@@ -1126,7 +1288,8 @@ class _ExpandableCardState extends State<_ExpandableCard> {
                   height: 1,
                   color: cs.outlineVariant.withOpacity(.35)),
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                padding:
+                    const EdgeInsets.fromLTRB(16, 12, 16, 4),
                 child: Column(children: widget.children),
               ),
             ],
@@ -1136,7 +1299,7 @@ class _ExpandableCardState extends State<_ExpandableCard> {
   }
 }
 
-// ─── Empty states ─────────────────────────────────────────────────────────────
+// ── Empty states ──────────────────────────────────────────────────────────
 
 class _EmptyState extends StatelessWidget {
   final AppLocalizations l10n;
@@ -1149,7 +1312,8 @@ class _EmptyState extends StatelessWidget {
     final tt = Theme.of(context).textTheme;
 
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 60, horizontal: 24),
+      padding:
+          const EdgeInsets.symmetric(vertical: 60, horizontal: 24),
       decoration: BoxDecoration(
         color: cs.surface,
         borderRadius: BorderRadius.circular(18),
@@ -1191,7 +1355,8 @@ class _FilteredEmpty extends StatelessWidget {
     final tt = Theme.of(context).textTheme;
 
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
+      padding:
+          const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
       decoration: BoxDecoration(
         color: cs.surface,
         borderRadius: BorderRadius.circular(18),
@@ -1213,8 +1378,7 @@ class _FilteredEmpty extends StatelessWidget {
           const SizedBox(height: 14),
           TextButton.icon(
             onPressed: onReset,
-            icon:
-                const Icon(Icons.filter_alt_off_rounded, size: 15),
+            icon: const Icon(Icons.filter_alt_off_rounded, size: 15),
             label: Text(l10n.common_clear),
           ),
         ],
@@ -1223,7 +1387,7 @@ class _FilteredEmpty extends StatelessWidget {
   }
 }
 
-// ─── Skeleton loader ──────────────────────────────────────────────────────────
+// ── Skeleton loader ──────────────────────────────────────────────────────
 
 class _SkeletonList extends StatelessWidget {
   const _SkeletonList();
@@ -1281,8 +1445,8 @@ class _SkeletonCardState extends State<_SkeletonCard>
             .withOpacity(0.45 + 0.20 * _anim.value);
 
         return Container(
-          padding:
-              const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+          padding: const EdgeInsets.symmetric(
+              horizontal: 14, vertical: 13),
           decoration: BoxDecoration(
             color: cs.surface,
             borderRadius: BorderRadius.circular(14),
@@ -1290,6 +1454,7 @@ class _SkeletonCardState extends State<_SkeletonCard>
                 color: cs.outlineVariant.withOpacity(.35)),
           ),
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
                 width: 46,
@@ -1304,22 +1469,24 @@ class _SkeletonCardState extends State<_SkeletonCard>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _Bone(width: 120, height: 13, base: base),
+                    _Bone(width: 130, height: 13, base: base),
                     const SizedBox(height: 5),
                     _Bone(
-                        width: 160,
+                        width: 170,
                         height: 11,
-                        base: base.withOpacity(base.opacity * 0.75)),
+                        base:
+                            base.withOpacity(base.opacity * 0.75)),
                     const SizedBox(height: 5),
                     _Bone(
                         width: 200,
                         height: 10,
-                        base: base.withOpacity(base.opacity * 0.60)),
+                        base:
+                            base.withOpacity(base.opacity * 0.60)),
+                    const SizedBox(height: 8),
+                    _Bone(width: 80, height: 22, base: base, radius: 999),
                   ],
                 ),
               ),
-              const SizedBox(width: 12),
-              _Bone(width: 68, height: 24, base: base, radius: 999),
             ],
           ),
         );
