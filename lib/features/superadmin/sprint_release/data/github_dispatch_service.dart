@@ -1,17 +1,49 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
+enum WorkflowJob {
+  sprintRelease,
+  androidBuild,
+  iosBuild,
+}
+
+extension WorkflowJobX on WorkflowJob {
+  String get fileName {
+    switch (this) {
+      case WorkflowJob.sprintRelease:
+        return 'sprint-release.yml';
+      case WorkflowJob.androidBuild:
+        return 'android-playstore-build4allmanager.yml';
+      case WorkflowJob.iosBuild:
+        return 'ios_testflight.yml';
+    }
+  }
+
+  String get label {
+    switch (this) {
+      case WorkflowJob.sprintRelease:
+        return 'Sprint Release';
+      case WorkflowJob.androidBuild:
+        return 'Android - Play Store';
+      case WorkflowJob.iosBuild:
+        return 'iOS - TestFlight';
+    }
+  }
+}
+
 class GitHubDispatchService {
   static const _owner = 'Build4All-NET';
   static const _repo = 'build4all-manager-frontend';
   static const _apiBase = 'https://api.github.com';
 
-  Future<void> triggerSprintRelease({
+  Future<void> triggerWorkflow({
     required String pat,
-    required String sprintName,
+    required WorkflowJob job,
+    required Map<String, String> inputs,
+    String ref = 'main',
   }) async {
     final url = Uri.parse(
-      '$_apiBase/repos/$_owner/$_repo/actions/workflows/sprint-release.yml/dispatches',
+      '$_apiBase/repos/$_owner/$_repo/actions/workflows/${job.fileName}/dispatches',
     );
 
     final response = await http.post(
@@ -23,22 +55,21 @@ class GitHubDispatchService {
         'Content-Type': 'application/json',
       },
       body: jsonEncode({
-        'ref': 'main',
-        'inputs': {'sprint_name': sprintName},
+        'ref': ref,
+        if (inputs.isNotEmpty) 'inputs': inputs,
       }),
     );
 
     if (response.statusCode == 401) {
-      throw Exception('Invalid token — check your GitHub PAT.');
+      throw Exception('Invalid token - check your GitHub PAT.');
     }
     if (response.statusCode == 404) {
-      throw Exception('Repo or workflow not found. Make sure the repo is accessible by this token.');
+      throw Exception('Workflow not found or repo is inaccessible.');
     }
     if (response.statusCode != 204) {
       String detail = '';
       try {
-        final body = jsonDecode(response.body);
-        detail = body['message'] ?? response.body;
+        detail = (jsonDecode(response.body) as Map)['message'] ?? response.body;
       } catch (_) {
         detail = response.body;
       }

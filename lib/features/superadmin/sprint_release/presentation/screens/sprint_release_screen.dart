@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../cubit/sprint_release_cubit.dart';
 import '../cubit/sprint_release_state.dart';
+import '../../data/github_dispatch_service.dart';
 
 class SprintReleaseScreen extends StatefulWidget {
   const SprintReleaseScreen({super.key});
@@ -11,9 +12,15 @@ class SprintReleaseScreen extends StatefulWidget {
 }
 
 class _SprintReleaseScreenState extends State<SprintReleaseScreen> {
-  final _sprintCtrl = TextEditingController();
   final _patCtrl = TextEditingController();
   bool _patObscured = true;
+  WorkflowJob _selectedJob = WorkflowJob.sprintRelease;
+
+  final _sprintCtrl = TextEditingController();
+  String _androidTrack = 'internal';
+  String _androidStatus = 'draft';
+  final _androidChangelogCtrl = TextEditingController(text: 'CI build');
+  final _iosChangelogCtrl = TextEditingController(text: 'CI build');
 
   @override
   void initState() {
@@ -25,15 +32,46 @@ class _SprintReleaseScreenState extends State<SprintReleaseScreen> {
 
   @override
   void dispose() {
-    _sprintCtrl.dispose();
     _patCtrl.dispose();
+    _sprintCtrl.dispose();
+    _androidChangelogCtrl.dispose();
+    _iosChangelogCtrl.dispose();
     super.dispose();
   }
 
+  Map<String, String> _buildInputs() {
+    switch (_selectedJob) {
+      case WorkflowJob.sprintRelease:
+        return {'sprint_name': _sprintCtrl.text.trim()};
+      case WorkflowJob.androidBuild:
+        return {
+          'track': _androidTrack,
+          'release_status': _androidStatus,
+          'changelog': _androidChangelogCtrl.text.trim(),
+        };
+      case WorkflowJob.iosBuild:
+        return {'changelog': _iosChangelogCtrl.text.trim()};
+    }
+  }
+
+  bool _inputsValid() {
+    if (_selectedJob == WorkflowJob.sprintRelease) {
+      return _sprintCtrl.text.trim().isNotEmpty;
+    }
+    return true;
+  }
+
   void _trigger() {
+    if (!_inputsValid()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Fill in all required fields.')),
+      );
+      return;
+    }
     context.read<SprintReleaseCubit>().trigger(
           pat: _patCtrl.text,
-          sprintName: _sprintCtrl.text,
+          job: _selectedJob,
+          inputs: _buildInputs(),
         );
   }
 
@@ -44,13 +82,10 @@ class _SprintReleaseScreenState extends State<SprintReleaseScreen> {
     return BlocListener<SprintReleaseCubit, SprintReleaseState>(
       listener: (context, state) {
         if (state is SprintReleaseSuccess) {
-          _sprintCtrl.clear();
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               backgroundColor: Colors.green.shade700,
-              content: Text(
-                '"${state.sprintName}" release triggered successfully.',
-              ),
+              content: Text('${state.job.label} triggered on GitHub.'),
             ),
           );
           context.read<SprintReleaseCubit>().reset();
@@ -72,7 +107,7 @@ class _SprintReleaseScreenState extends State<SprintReleaseScreen> {
           children: [
             _SectionCard(
               title: 'GitHub PAT',
-              subtitle: 'Saved locally. Required to trigger workflows on the private repo.',
+              subtitle: 'Saved locally. Needs Actions: Write on this repo.',
               child: TextField(
                 controller: _patCtrl,
                 obscureText: _patObscured,
@@ -81,9 +116,9 @@ class _SprintReleaseScreenState extends State<SprintReleaseScreen> {
                   hintText: 'ghp_xxxxxxxxxxxxxxxxxxxx',
                   border: const OutlineInputBorder(),
                   suffixIcon: IconButton(
-                    icon: Icon(
-                      _patObscured ? Icons.visibility_off : Icons.visibility,
-                    ),
+                    icon: Icon(_patObscured
+                        ? Icons.visibility_off
+                        : Icons.visibility),
                     onPressed: () =>
                         setState(() => _patObscured = !_patObscured),
                   ),
@@ -92,76 +127,130 @@ class _SprintReleaseScreenState extends State<SprintReleaseScreen> {
             ),
             const SizedBox(height: 16),
             _SectionCard(
-              title: 'Sprint Release',
-              subtitle: 'Triggers the sprint-release workflow and opens a PR on the prod repo.',
+              title: 'Workflow',
+              subtitle: 'Select which workflow to run.',
               child: Column(
                 children: [
-                  TextField(
-                    controller: _sprintCtrl,
-                    decoration: const InputDecoration(
-                      labelText: 'Sprint name',
-                      hintText: 'sprint-25',
-                      border: OutlineInputBorder(),
+                  for (final job in WorkflowJob.values)
+                    RadioListTile<WorkflowJob>(
+                      value: job,
+                      groupValue: _selectedJob,
+                      title: Text(job.label),
+                      contentPadding: EdgeInsets.zero,
+                      onChanged: (v) {
+                        if (v != null) setState(() => _selectedJob = v);
+                      },
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  BlocBuilder<SprintReleaseCubit, SprintReleaseState>(
-                    builder: (context, state) {
-                      final loading = state is SprintReleaseLoading;
-                      return SizedBox(
-                        width: double.infinity,
-                        child: FilledButton.icon(
-                          onPressed: loading ? null : _trigger,
-                          icon: loading
-                              ? const SizedBox(
-                                  width: 18,
-                                  height: 18,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: Colors.white,
-                                  ),
-                                )
-                              : const Icon(Icons.rocket_launch_rounded),
-                          label: Text(
-                            loading ? 'Triggering...' : 'Trigger Sprint Release',
-                          ),
-                        ),
-                      );
-                    },
-                  ),
                 ],
               ),
             ),
-            const SizedBox(height: 24),
-            Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: cs.surfaceContainerHighest.withOpacity(.4),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: cs.outlineVariant.withOpacity(.4),
-                ),
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(Icons.info_outline, size: 18, color: cs.primary),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      'The PAT needs Actions: Read & Write + Contents: Read on the build4all-manager-frontend repo.',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: cs.onSurfaceVariant,
-                          ),
-                    ),
+            const SizedBox(height: 16),
+            _buildInputsCard(),
+            const SizedBox(height: 16),
+            BlocBuilder<SprintReleaseCubit, SprintReleaseState>(
+              builder: (context, state) {
+                final loading = state is SprintReleaseLoading;
+                return SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    onPressed: loading ? null : _trigger,
+                    icon: loading
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Icon(Icons.rocket_launch_rounded),
+                    label: Text(
+                        loading ? 'Triggering...' : 'Run ${_selectedJob.label}'),
                   ),
-                ],
-              ),
+                );
+              },
             ),
           ],
         ),
       ),
     );
+  }
+
+  Widget _buildInputsCard() {
+    switch (_selectedJob) {
+      case WorkflowJob.sprintRelease:
+        return _SectionCard(
+          title: 'Inputs',
+          subtitle: 'Opens a PR from UAT to Prod.',
+          child: TextField(
+            controller: _sprintCtrl,
+            decoration: const InputDecoration(
+              labelText: 'Sprint name *',
+              hintText: 'sprint-25',
+              border: OutlineInputBorder(),
+            ),
+          ),
+        );
+      case WorkflowJob.androidBuild:
+        return _SectionCard(
+          title: 'Inputs',
+          subtitle: 'Builds AAB and uploads to Google Play.',
+          child: Column(
+            children: [
+              DropdownButtonFormField<String>(
+                value: _androidTrack,
+                decoration: const InputDecoration(
+                    labelText: 'Track', border: OutlineInputBorder()),
+                items: const [
+                  DropdownMenuItem(value: 'internal', child: Text('Internal')),
+                  DropdownMenuItem(value: 'alpha', child: Text('Alpha')),
+                  DropdownMenuItem(value: 'beta', child: Text('Beta')),
+                  DropdownMenuItem(
+                      value: 'production', child: Text('Production')),
+                ],
+                onChanged: (v) =>
+                    setState(() => _androidTrack = v ?? 'internal'),
+              ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<String>(
+                value: _androidStatus,
+                decoration: const InputDecoration(
+                    labelText: 'Release status',
+                    border: OutlineInputBorder()),
+                items: const [
+                  DropdownMenuItem(value: 'draft', child: Text('Draft')),
+                  DropdownMenuItem(
+                      value: 'inProgress', child: Text('In Progress')),
+                  DropdownMenuItem(
+                      value: 'completed', child: Text('Completed')),
+                ],
+                onChanged: (v) =>
+                    setState(() => _androidStatus = v ?? 'draft'),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _androidChangelogCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Changelog',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            ],
+          ),
+        );
+      case WorkflowJob.iosBuild:
+        return _SectionCard(
+          title: 'Inputs',
+          subtitle: 'Builds IPA and uploads to TestFlight.',
+          child: TextField(
+            controller: _iosChangelogCtrl,
+            decoration: const InputDecoration(
+              labelText: 'Changelog',
+              border: OutlineInputBorder(),
+            ),
+          ),
+        );
+    }
   }
 }
 
@@ -196,20 +285,17 @@ class _SectionCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: Theme.of(context)
-                .textTheme
-                .titleMedium
-                ?.copyWith(fontWeight: FontWeight.w700),
-          ),
+          Text(title,
+              style: Theme.of(context)
+                  .textTheme
+                  .titleMedium
+                  ?.copyWith(fontWeight: FontWeight.w700)),
           const SizedBox(height: 4),
-          Text(
-            subtitle,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: cs.onSurfaceVariant,
-                ),
-          ),
+          Text(subtitle,
+              style: Theme.of(context)
+                  .textTheme
+                  .bodySmall
+                  ?.copyWith(color: cs.onSurfaceVariant)),
           const SizedBox(height: 14),
           child,
         ],

@@ -23,25 +23,23 @@ class SprintReleaseCubit extends Cubit<SprintReleaseState> {
 
   Future<void> trigger({
     required String pat,
-    required String sprintName,
+    required WorkflowJob job,
+    required Map<String, String> inputs,
   }) async {
     if (pat.trim().isEmpty) {
       emit(SprintReleaseError('Enter your GitHub PAT first.'));
       return;
     }
-    if (sprintName.trim().isEmpty) {
-      emit(SprintReleaseError('Enter a sprint name.'));
-      return;
-    }
 
     emit(SprintReleaseLoading());
     try {
-      await _service.triggerSprintRelease(
+      await _service.triggerWorkflow(
         pat: pat.trim(),
-        sprintName: sprintName.trim(),
+        job: job,
+        inputs: inputs,
       );
       await _savePat(pat.trim());
-      emit(SprintReleaseSuccess(sprintName.trim()));
+      emit(SprintReleaseSuccess(job));
     } catch (e) {
       emit(SprintReleaseError(e.toString().replaceFirst('Exception: ', '')));
     }
