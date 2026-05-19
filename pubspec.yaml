@@ -18,6 +18,7 @@ dependencies:
   flutter_gen: ^5.10.0
   http: ^1.2.2
   shared_preferences: ^2.3.2
+  flutter_secure_storage: ^9.0.0
   country_picker: ^2.0.25
   phone_numbers_parser: ^8.0.0
   email_validator: ^2.1.0
@@ -61,9 +62,7 @@ dependencies:
   video_player: ^2.8.6
   chewie: ^1.8.1
   flutter_local_notifications: ^17.2.1+2
-  
-  
- 
+
 
   # Core
   collection: ^1.18.0
@@ -79,7 +78,6 @@ dev_dependencies:
   flutter_lints: ^5.0.0
   flutter_launcher_icons: ^0.13.1
 
-  
 
 flutter:
   uses-material-design: true
@@ -95,6 +93,3 @@ flutter_icons:
   image_path: "assets/icon/app_icon.png"
   adaptive_icon_background: "#FFFFFF"
   adaptive_icon_foreground: "assets/icon/app_icon.png"
-
-
-

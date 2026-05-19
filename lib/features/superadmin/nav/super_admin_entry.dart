@@ -1,4 +1,5 @@
 import 'package:build4all_manager/features/notifications_admin/presentation/screens/admin_notifications_screen.dart';
+import 'package:build4all_manager/features/superadmin/sprint_release/presentation/screens/sprint_release_screen.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:build4all_manager/l10n/app_localizations.dart';
@@ -62,6 +63,12 @@ class SuperAdminEntry extends StatelessWidget {
         selectedIcon: Icons.publish_rounded,
         label: l10n.owner_nav_requests,
         page: PublishRequestsScreen(dio: dio),
+      ),
+      SuperAdminDestination(
+        icon: Icons.rocket_launch_outlined,
+        selectedIcon: Icons.rocket_launch_rounded,
+        label: 'Releases',
+        page: const SprintReleaseScreen(),
       ),
       SuperAdminDestination(
         icon: Icons.notifications_none_outlined,
