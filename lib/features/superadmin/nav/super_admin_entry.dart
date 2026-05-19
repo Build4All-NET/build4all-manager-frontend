@@ -69,7 +69,7 @@ class SuperAdminEntry extends StatelessWidget {
       SuperAdminDestination(
         icon: Icons.rocket_launch_outlined,
         selectedIcon: Icons.rocket_launch_rounded,
-        label: 'Sprint Release',
+        label: 'Workflows',
         page: BlocProvider(
           create: (_) => SprintReleaseCubit(),
           child: const SprintReleaseScreen(),
