@@ -2,6 +2,7 @@ import 'package:build4all_manager/shared/utils/ApiErrorHandler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../domain/usecases/create_license_plan_pricing.dart';
+import '../../domain/usecases/delete_license_plan_pricing.dart';
 import '../../domain/usecases/get_license_plan_pricings.dart';
 import '../../domain/usecases/toggle_license_plan_pricing.dart';
 import '../../domain/usecases/update_license_plan_pricing.dart';
@@ -14,18 +15,21 @@ class LicensePlanPricingBloc
   final CreateLicensePlanPricing createOne;
   final UpdateLicensePlanPricing updateOne;
   final ToggleLicensePlanPricing toggleOne;
+  final DeleteLicensePlanPricing deleteOne;
 
   LicensePlanPricingBloc({
     required this.getAll,
     required this.createOne,
     required this.updateOne,
     required this.toggleOne,
+    required this.deleteOne,
   }) : super(const LicensePlanPricingState()) {
     on<LoadLicensePlanPricings>(_load);
     on<RefreshLicensePlanPricings>(_load);
     on<AddLicensePlanPricing>(_add);
     on<EditLicensePlanPricing>(_edit);
     on<ToggleLicensePlanPricingActive>(_toggle);
+    on<DeleteLicensePlanPricing>(_delete);
   }
 
   Future<void> _load(
@@ -98,6 +102,28 @@ class LicensePlanPricingBloc
       final done = {...state.togglingIds}..remove(event.id);
       emit(state.copyWith(
           togglingIds: done, error: ApiErrorHandler.message(err)));
+    }
+  }
+
+  Future<void> _delete(
+    DeleteLicensePlanPricing event,
+    Emitter<LicensePlanPricingState> emit,
+  ) async {
+    final deleting = {...state.deletingIds, event.id};
+    emit(state.copyWith(deletingIds: deleting, error: null, success: null));
+    try {
+      await deleteOne(event.id);
+      final items = state.items.where((p) => p.id != event.id).toList();
+      final done = {...state.deletingIds}..remove(event.id);
+      emit(state.copyWith(
+        deletingIds: done,
+        items: items,
+        success: 'Pricing row deleted successfully.',
+      ));
+    } catch (err) {
+      final done = {...state.deletingIds}..remove(event.id);
+      emit(state.copyWith(
+          deletingIds: done, error: ApiErrorHandler.message(err)));
     }
   }
 }

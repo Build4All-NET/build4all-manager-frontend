@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
 import '../../domain/entities/billing_cycle.dart';
 import '../../domain/entities/license_plan_pricing.dart';
+import '../bloc/license_plan_pricing_bloc.dart';
+import '../bloc/license_plan_pricing_event.dart';
 
 class LicensePlanPricingCard extends StatelessWidget {
   final LicensePlanPricing pricing;
   final bool isToggling;
+  final bool isDeleting;
   final ValueChanged<bool> onToggle;
   final VoidCallback onEdit;
 
@@ -14,9 +18,43 @@ class LicensePlanPricingCard extends StatelessWidget {
     super.key,
     required this.pricing,
     required this.isToggling,
+    this.isDeleting = false,
     required this.onToggle,
     required this.onEdit,
   });
+
+  Future<void> _confirmDelete(BuildContext context) async {
+    final cs = Theme.of(context).colorScheme;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete Pricing Row'),
+        content: Text(
+          'Are you sure you want to delete the pricing for '
+          '"${pricing.planCode}"? This action cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: cs.error,
+              foregroundColor: cs.onError,
+            ),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && context.mounted) {
+      context
+          .read<LicensePlanPricingBloc>()
+          .add(DeleteLicensePlanPricing(pricing.id));
+    }
+  }
 
   String _fmtAmount(double n) {
     if (n == n.roundToDouble()) return n.toStringAsFixed(0);
@@ -155,8 +193,29 @@ class LicensePlanPricingCard extends StatelessWidget {
                   icon: const Icon(Icons.edit_outlined, size: 20),
                   tooltip: 'Edit',
                   visualDensity: VisualDensity.compact,
-                  onPressed: onEdit,
+                  onPressed: (isDeleting) ? null : onEdit,
                 ),
+                isDeleting
+                    ? const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 10),
+                        child: SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      )
+                    : Builder(
+                        builder: (ctx) => IconButton(
+                          icon: Icon(
+                            Icons.delete_outline_rounded,
+                            size: 20,
+                            color: Theme.of(ctx).colorScheme.error,
+                          ),
+                          tooltip: 'Delete',
+                          visualDensity: VisualDensity.compact,
+                          onPressed: () => _confirmDelete(ctx),
+                        ),
+                      ),
               ],
             ),
           ],

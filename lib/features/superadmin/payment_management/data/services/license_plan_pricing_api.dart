@@ -75,6 +75,12 @@ class LicensePlanPricingApi {
     if (!_isOk(res)) _throw(res);
   }
 
+  Future<void> delete(int id) async {
+    final res =
+        await _dio.delete('$_base/superadmin/license-plan-pricing/$id');
+    if (!_isOk(res)) _throw(res);
+  }
+
   Future<List<PricingCurrencyModel>> listCurrencies() async {
     final res = await _dio.get('$_base/currencies');
     if (!_isOk(res)) _throw(res);

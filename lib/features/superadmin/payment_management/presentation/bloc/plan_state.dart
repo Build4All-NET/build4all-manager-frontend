@@ -1,48 +1,44 @@
 import 'package:equatable/equatable.dart';
 
-import '../../domain/entities/license_plan_pricing.dart';
+import '../../domain/entities/plan.dart';
 
 const _omit = Object();
 
-class LicensePlanPricingState extends Equatable {
+class PlanState extends Equatable {
   final bool loading;
   final bool saving;
-  final List<LicensePlanPricing> items;
+  final List<Plan> items;
   final String? error;
   final String? success;
-  final Set<int> togglingIds;
-  final Set<int> deletingIds;
+  final Set<String> deletingCodes;
 
-  const LicensePlanPricingState({
+  const PlanState({
     this.loading = false,
     this.saving = false,
     this.items = const [],
     this.error,
     this.success,
-    this.togglingIds = const {},
-    this.deletingIds = const {},
+    this.deletingCodes = const {},
   });
 
-  LicensePlanPricingState copyWith({
+  PlanState copyWith({
     bool? loading,
     bool? saving,
-    List<LicensePlanPricing>? items,
+    List<Plan>? items,
     Object? error = _omit,
     Object? success = _omit,
-    Set<int>? togglingIds,
-    Set<int>? deletingIds,
+    Set<String>? deletingCodes,
   }) =>
-      LicensePlanPricingState(
+      PlanState(
         loading: loading ?? this.loading,
         saving: saving ?? this.saving,
         items: items ?? this.items,
         error: identical(error, _omit) ? this.error : error as String?,
         success: identical(success, _omit) ? this.success : success as String?,
-        togglingIds: togglingIds ?? this.togglingIds,
-        deletingIds: deletingIds ?? this.deletingIds,
+        deletingCodes: deletingCodes ?? this.deletingCodes,
       );
 
   @override
   List<Object?> get props =>
-      [loading, saving, items, error, success, togglingIds, deletingIds];
+      [loading, saving, items, error, success, deletingCodes];
 }

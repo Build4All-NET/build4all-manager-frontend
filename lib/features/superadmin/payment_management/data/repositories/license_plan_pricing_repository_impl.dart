@@ -28,5 +28,8 @@ class LicensePlanPricingRepositoryImpl
       _api.toggle(id, isActive);
 
   @override
+  Future<void> delete(int id) => _api.delete(id);
+
+  @override
   Future<List<PricingCurrency>> listCurrencies() => _api.listCurrencies();
 }

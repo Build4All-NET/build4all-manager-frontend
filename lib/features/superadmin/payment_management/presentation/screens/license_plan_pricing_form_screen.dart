@@ -11,6 +11,7 @@ import '../../domain/entities/billing_cycle.dart';
 import '../../domain/entities/license_plan_pricing.dart';
 import '../../domain/entities/pricing_currency.dart';
 import '../../domain/usecases/create_license_plan_pricing.dart';
+import '../../domain/usecases/delete_license_plan_pricing.dart';
 import '../../domain/usecases/get_license_plan_pricings.dart';
 import '../../domain/usecases/get_pricing_currencies.dart';
 import '../../domain/usecases/toggle_license_plan_pricing.dart';
@@ -33,6 +34,7 @@ class LicensePlanPricingFormScreen extends StatelessWidget {
         createOne: CreateLicensePlanPricing(repo),
         updateOne: UpdateLicensePlanPricing(repo),
         toggleOne: ToggleLicensePlanPricing(repo),
+        deleteOne: DeleteLicensePlanPricing(repo),
       ),
       child: _FormView(existing: existing),
     );

@@ -15,6 +15,7 @@ import 'package:go_router/go_router.dart';
 import '../../../payment_management/presentation/screens/license_plan_pricings_screen.dart';
 import '../../../payment_management/presentation/screens/payment_methods_screen.dart';
 import '../../../payment_management/presentation/screens/payment_types_screen.dart';
+import '../../../payment_management/presentation/screens/plans_screen.dart';
 import '../../data/repositories/admin_repository_impl.dart';
 import '../../data/services/admin_api.dart';
 import '../../domain/entities/admin_profile.dart';
@@ -275,6 +276,30 @@ class _ProfileView extends StatelessWidget {
                                   MaterialPageRoute(
                                     builder: (_) =>
                                         const PaymentTypesScreen(),
+                                  ),
+                                ),
+                              ),
+                              Divider(
+                                height: 1,
+                                indent: 16,
+                                endIndent: 16,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .outlineVariant,
+                              ),
+                              ListTile(
+                                contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 6),
+                                leading:
+                                    const Icon(Icons.layers_rounded),
+                                title: const Text('Plans'),
+                                subtitle: const Text(
+                                    'Add and manage subscription plans'),
+                                trailing: const Icon(
+                                    Icons.chevron_right_rounded),
+                                onTap: () => Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) => const PlansScreen(),
                                   ),
                                 ),
                               ),

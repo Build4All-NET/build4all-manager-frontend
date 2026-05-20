@@ -6,6 +6,7 @@ abstract class ILicensePlanPricingRepository {
   Future<void> create(LicensePlanPricing pricing);
   Future<void> update(LicensePlanPricing pricing);
   Future<void> toggle({required int id, required bool isActive});
+  Future<void> delete(int id);
 
   /// Populates the currency dropdown in the pricing form.
   Future<List<PricingCurrency>> listCurrencies();

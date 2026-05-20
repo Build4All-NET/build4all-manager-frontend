@@ -7,6 +7,7 @@ import '../../data/repositories/license_plan_pricing_repository_impl.dart';
 import '../../data/services/license_plan_pricing_api.dart';
 import '../../domain/entities/license_plan_pricing.dart';
 import '../../domain/usecases/create_license_plan_pricing.dart';
+import '../../domain/usecases/delete_license_plan_pricing.dart';
 import '../../domain/usecases/get_license_plan_pricings.dart';
 import '../../domain/usecases/toggle_license_plan_pricing.dart';
 import '../../domain/usecases/update_license_plan_pricing.dart';
@@ -30,6 +31,7 @@ class LicensePlanPricingsScreen extends StatelessWidget {
         createOne: CreateLicensePlanPricing(repo),
         updateOne: UpdateLicensePlanPricing(repo),
         toggleOne: ToggleLicensePlanPricing(repo),
+        deleteOne: DeleteLicensePlanPricing(repo),
       )..add(LoadLicensePlanPricings()),
       child: const _LicensePlanPricingsView(),
     );
@@ -113,6 +115,7 @@ class _LicensePlanPricingsView extends StatelessWidget {
         return LicensePlanPricingCard(
           pricing: item,
           isToggling: state.togglingIds.contains(item.id),
+          isDeleting: state.deletingIds.contains(item.id),
           onToggle: (val) => context.read<LicensePlanPricingBloc>().add(
                 ToggleLicensePlanPricingActive(id: item.id, isActive: val),
               ),
