@@ -1,5 +1,6 @@
 // ===== Flutter 3.35.x =====
 import 'package:flutter/material.dart'; // core UI
+import 'package:flutter/services.dart'; // TextInputFormatter
 
 // semantic sizes for the input (small / medium / large)
 enum AppInputSize { sm, md, lg } // three sizes
@@ -63,6 +64,8 @@ class AppTextField extends StatelessWidget {
   final bool filled; // filled style
   // text direction (null = inherit)
   final TextDirection? textDirection; // rtl/ltr override
+  // input formatters (e.g. uppercase, digits only)
+  final List<TextInputFormatter>? inputFormatters;
 
   const AppTextField({
     super.key,
@@ -95,6 +98,7 @@ class AppTextField extends StatelessWidget {
     this.borderRadius,
     this.filled = false,
     this.textDirection,
+    this.inputFormatters,
   });
 
   ({
@@ -252,6 +256,7 @@ class AppTextField extends StatelessWidget {
       focusNode: focusNode,
       autofillHints: autofillHints,
       textDirection: textDirection,
+      inputFormatters: inputFormatters,
       style: theme.textTheme.bodyLarge?.copyWith(
         fontSize: m.font,
         color: textColor,
