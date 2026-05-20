@@ -4,6 +4,7 @@ import 'package:build4all_manager/shared/widgets/app_button.dart';
 import 'package:build4all_manager/shared/widgets/app_text_field.dart';
 import 'package:build4all_manager/shared/widgets/app_toast.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../data/repositories/plan_repository_impl.dart';
@@ -16,8 +17,6 @@ import '../../domain/usecases/update_plan.dart';
 import '../bloc/plan_bloc.dart';
 import '../bloc/plan_event.dart';
 import '../bloc/plan_state.dart';
-
-const _kPlanCodes = ['PRO_HOSTEDB', 'SMART', 'FREE'];
 
 class PlanFormScreen extends StatelessWidget {
   final Plan? existing;
@@ -48,10 +47,10 @@ class _FormView extends StatefulWidget {
 
 class _FormViewState extends State<_FormView> {
   final _formKey = GlobalKey<FormState>();
+  late final TextEditingController _codeCtrl;
   late final TextEditingController _displayNameCtrl;
   late final TextEditingController _usersAllowedCtrl;
   late final TextEditingController _billingCycleCtrl;
-  late String? _selectedCode;
   late bool _requiresDedicatedServer;
 
   bool get _isEditMode => widget.existing != null;
@@ -60,19 +59,20 @@ class _FormViewState extends State<_FormView> {
   void initState() {
     super.initState();
     final e = widget.existing;
+    _codeCtrl = TextEditingController(text: e?.code ?? '');
     _displayNameCtrl = TextEditingController(text: e?.displayName ?? '');
     _usersAllowedCtrl = TextEditingController(
       text: e?.usersAllowed?.toString() ?? '',
     );
     _billingCycleCtrl = TextEditingController(
-      text: e?.billingCycleMonths.toString() ?? '1',
+      text: e?.billingCycleMonths.toString() ?? '12',
     );
-    _selectedCode = e?.code ?? _kPlanCodes.first;
     _requiresDedicatedServer = e?.requiresDedicatedServer ?? false;
   }
 
   @override
   void dispose() {
+    _codeCtrl.dispose();
     _displayNameCtrl.dispose();
     _usersAllowedCtrl.dispose();
     _billingCycleCtrl.dispose();
@@ -83,11 +83,12 @@ class _FormViewState extends State<_FormView> {
     if (!_formKey.currentState!.validate()) return;
     final usersText = _usersAllowedCtrl.text.trim();
     final plan = Plan(
-      code: _isEditMode ? widget.existing!.code : (_selectedCode ?? _kPlanCodes.first),
+      code: _isEditMode
+          ? widget.existing!.code
+          : _codeCtrl.text.trim().toUpperCase(),
       displayName: _displayNameCtrl.text.trim(),
       usersAllowed: usersText.isEmpty ? null : int.tryParse(usersText),
-      billingCycleMonths:
-          int.tryParse(_billingCycleCtrl.text.trim()) ?? 1,
+      billingCycleMonths: int.tryParse(_billingCycleCtrl.text.trim()) ?? 12,
       requiresDedicatedServer: _requiresDedicatedServer,
     );
     if (_isEditMode) {
@@ -122,28 +123,26 @@ class _FormViewState extends State<_FormView> {
             child: ListView(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
               children: [
-                // Code selector (dropdown in create, read-only chip in edit)
+                // Code — free text in create, read-only in edit
                 if (!_isEditMode) ...[
-                  DropdownButtonFormField<String>(
-                    value: _selectedCode,
-                    decoration: const InputDecoration(
-                      labelText: 'Plan Code',
-                      prefixIcon: Icon(Icons.code_rounded),
-                      border: OutlineInputBorder(),
-                    ),
-                    items: _kPlanCodes
-                        .map(
-                          (c) => DropdownMenuItem(
-                            value: c,
-                            child: Text(c),
-                          ),
-                        )
-                        .toList(),
-                    onChanged: busy
-                        ? null
-                        : (v) => setState(() => _selectedCode = v),
-                    validator: (v) =>
-                        (v == null || v.isEmpty) ? l10n.err_required : null,
+                  AppTextField(
+                    controller: _codeCtrl,
+                    label: 'Plan Code',
+                    hint: 'e.g. FREE, BASIC, SMART',
+                    helper: 'Uppercase letters and underscores only',
+                    prefix: const Icon(Icons.code_rounded),
+                    enabled: !busy,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'[A-Z0-9_]')),
+                      _UpperCaseFormatter(),
+                    ],
+                    validator: (v) {
+                      if (v == null || v.trim().isEmpty) return l10n.err_required;
+                      if (!RegExp(r'^[A-Z][A-Z0-9_]*$').hasMatch(v.trim())) {
+                        return 'Use uppercase letters, digits and underscores';
+                      }
+                      return null;
+                    },
                   ),
                 ] else ...[
                   InputDecorator(
@@ -164,13 +163,8 @@ class _FormViewState extends State<_FormView> {
                     padding: const EdgeInsets.only(top: 4, left: 4),
                     child: Text(
                       'Code cannot be changed after creation',
-                      style: Theme.of(context)
-                          .textTheme
-                          .labelSmall
-                          ?.copyWith(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onSurfaceVariant,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                     ),
                   ),
@@ -179,7 +173,7 @@ class _FormViewState extends State<_FormView> {
                 AppTextField(
                   controller: _displayNameCtrl,
                   label: 'Display Name',
-                  hint: 'e.g. Basic, Pro, Enterprise',
+                  hint: 'e.g. Free, Basic, Smart',
                   prefix: const Icon(Icons.label_outline),
                   enabled: !busy,
                   validator: (v) =>
@@ -221,8 +215,8 @@ class _FormViewState extends State<_FormView> {
                   elevation: 0,
                   clipBehavior: Clip.antiAlias,
                   child: SwitchListTile.adaptive(
-                    contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 4),
+                    contentPadding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                     title: const Text('Requires Dedicated Server'),
                     subtitle: Text(
                       _requiresDedicatedServer
@@ -236,10 +230,8 @@ class _FormViewState extends State<_FormView> {
                           : Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                     value: _requiresDedicatedServer,
-                    onChanged: busy
-                        ? null
-                        : (v) =>
-                            setState(() => _requiresDedicatedServer = v),
+                    onChanged:
+                        busy ? null : (v) => setState(() => _requiresDedicatedServer = v),
                   ),
                 ),
                 const SizedBox(height: 32),
@@ -261,9 +253,7 @@ class _FormViewState extends State<_FormView> {
                         isBusy: busy,
                         onPressed: busy ? null : _submit,
                         trailing: Icon(
-                          _isEditMode
-                              ? Icons.save_rounded
-                              : Icons.add_rounded,
+                          _isEditMode ? Icons.save_rounded : Icons.add_rounded,
                         ),
                       ),
                     ),
@@ -277,3 +267,14 @@ class _FormViewState extends State<_FormView> {
     );
   }
 }
+
+/// Forces all typed characters to uppercase.
+class _UpperCaseFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) =>
+      newValue.copyWith(text: newValue.text.toUpperCase());
+}
+
