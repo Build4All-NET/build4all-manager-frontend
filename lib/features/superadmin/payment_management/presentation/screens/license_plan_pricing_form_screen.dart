@@ -56,7 +56,7 @@ class _FormViewState extends State<_FormView> {
   final _discountPercentCtrl = TextEditingController();
   final _discountLabelCtrl = TextEditingController();
 
-  String _selectedPlanCode = 'PRO_HOSTEDB';
+  String _selectedPlanCode = 'BASIC';
   PricingBillingCycle _selectedCycle = PricingBillingCycle.monthly;
   bool _isActive = true;
   String _selectedCurrencyCode = 'USD';
@@ -67,11 +67,11 @@ class _FormViewState extends State<_FormView> {
 
   bool get _isEditMode => widget.existing != null;
 
-  static const _availablePlanCodes = ['PRO_HOSTEDB', 'SMART'];
+  static const _availablePlanCodes = ['BASIC', 'SMART'];
 
   static const _planCodeLabels = {
-    'PRO_HOSTEDB': 'Basic — \$75/mo',
-    'SMART':       'Smart — \$85/mo',
+    'BASIC': 'Basic — \$75/mo',
+    'SMART': 'Smart — \$85/mo',
   };
 
   @override
