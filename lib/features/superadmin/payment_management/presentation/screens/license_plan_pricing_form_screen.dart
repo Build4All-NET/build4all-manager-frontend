@@ -65,7 +65,13 @@ class _FormViewState extends State<_FormView> {
 
   bool get _isEditMode => widget.existing != null;
 
-  static const _availablePlanCodes = ['PRO_HOSTEDB', 'DEDICATED'];
+  static const _availablePlanCodes = ['PRO_HOSTEDB', 'SMART', 'DEDICATED'];
+
+  static const _planCodeLabels = {
+    'PRO_HOSTEDB': 'Basic (PRO_HOSTEDB) — \$75/mo',
+    'SMART':       'Smart (SMART) — \$85/mo',
+    'DEDICATED':   'Dedicated (DEDICATED) — Contact Us',
+  };
 
   @override
   void initState() {
@@ -198,8 +204,10 @@ class _FormViewState extends State<_FormView> {
                 DropdownButtonFormField<String>(
                   value: _selectedPlanCode,
                   items: _availablePlanCodes
-                      .map((p) =>
-                          DropdownMenuItem(value: p, child: Text(p)))
+                      .map((p) => DropdownMenuItem(
+                            value: p,
+                            child: Text(_planCodeLabels[p] ?? p),
+                          ))
                       .toList(),
                   onChanged: (_isEditMode || busy)
                       ? null
