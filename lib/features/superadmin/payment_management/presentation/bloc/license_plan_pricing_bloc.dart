@@ -29,7 +29,7 @@ class LicensePlanPricingBloc
     on<AddLicensePlanPricing>(_add);
     on<EditLicensePlanPricing>(_edit);
     on<ToggleLicensePlanPricingActive>(_toggle);
-    on<DeleteLicensePlanPricing>(_delete);
+    on<RemoveLicensePlanPricing>(_delete);
   }
 
   Future<void> _load(
@@ -106,7 +106,7 @@ class LicensePlanPricingBloc
   }
 
   Future<void> _delete(
-    DeleteLicensePlanPricing event,
+    RemoveLicensePlanPricing event,
     Emitter<LicensePlanPricingState> emit,
   ) async {
     final deleting = {...state.deletingIds, event.id};

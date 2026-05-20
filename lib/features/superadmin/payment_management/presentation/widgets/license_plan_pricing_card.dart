@@ -52,7 +52,7 @@ class LicensePlanPricingCard extends StatelessWidget {
     if (confirmed == true && context.mounted) {
       context
           .read<LicensePlanPricingBloc>()
-          .add(DeleteLicensePlanPricing(pricing.id));
+          .add(RemoveLicensePlanPricing(pricing.id));
     }
   }
 

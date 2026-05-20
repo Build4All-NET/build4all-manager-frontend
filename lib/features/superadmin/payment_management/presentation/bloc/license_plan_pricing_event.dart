@@ -41,9 +41,9 @@ class ToggleLicensePlanPricingActive extends LicensePlanPricingEvent {
   List<Object?> get props => [id, isActive];
 }
 
-class DeleteLicensePlanPricing extends LicensePlanPricingEvent {
+class RemoveLicensePlanPricing extends LicensePlanPricingEvent {
   final int id;
-  const DeleteLicensePlanPricing(this.id);
+  const RemoveLicensePlanPricing(this.id);
 
   @override
   List<Object?> get props => [id];
