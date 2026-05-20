@@ -1377,7 +1377,22 @@
   "owner_proj_details_municipality_i2": "Fast digital communication improves response quality across services.",
   
   "common_tryAgain": "Try again",
-  "common_processing": "Processing..."
+  "common_processing": "Processing...",
+
+  "lblCountry": "Country",
+  "hintSelectCountry": "Select your country",
+  "errCountryRequired": "Please select your country",
+
+  "super_proj_display_title": "Display title",
+  "super_proj_display_title_hint": "Short title shown on the app card (e.g. E-commerce)",
+  "super_proj_display_description": "Card description",
+  "super_proj_display_description_hint": "Brief description shown under the title",
+  "super_proj_icon_name": "Icon name",
+  "super_proj_icon_name_hint": "Flutter icon key (e.g. shopping_bag_rounded)",
+  "super_proj_card_color": "Card accent color",
+  "super_proj_card_color_hint": "Hex color (e.g. #2563EB)",
+  "super_proj_display_order": "Display order",
+  "super_proj_display_order_hint": "Lower numbers appear first (e.g. 1)"
 
 
 

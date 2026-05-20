@@ -35,6 +35,11 @@ class Project {
   final String? description;
   final bool active;
   final String projectType;
+  final String? displayTitle;
+  final String? displayDescription;
+  final String? iconName;
+  final String? cardColor;
+  final int displayOrder;
 
   const Project({
     required this.id,
@@ -42,5 +47,10 @@ class Project {
     required this.description,
     required this.active,
     required this.projectType,
+    this.displayTitle,
+    this.displayDescription,
+    this.iconName,
+    this.cardColor,
+    this.displayOrder = 0,
   });
 }

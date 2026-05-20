@@ -1315,5 +1315,20 @@
   "owner_proj_details_municipality_i1": "يثق السكان أكثر بالأنظمة التي تجعل المتابعة واضحة وبسيطة.",
   "owner_proj_details_municipality_i2": "التواصل الرقمي السريع يحسن جودة الاستجابة عبر الخدمات.",
    "common_tryAgain": "حاول مرة أخرى",
-  "common_processing": "جارٍ المعالجة..."
+  "common_processing": "جارٍ المعالجة...",
+
+  "lblCountry": "الدولة",
+  "hintSelectCountry": "اختر دولتك",
+  "errCountryRequired": "يرجى اختيار الدولة",
+
+  "super_proj_display_title": "العنوان التعريفي",
+  "super_proj_display_title_hint": "عنوان قصير يظهر على بطاقة التطبيق",
+  "super_proj_display_description": "وصف البطاقة",
+  "super_proj_display_description_hint": "وصف مختصر يظهر أسفل العنوان",
+  "super_proj_icon_name": "اسم الأيقونة",
+  "super_proj_icon_name_hint": "مفتاح أيقونة Flutter (مثال: shopping_bag_rounded)",
+  "super_proj_card_color": "لون بطاقة المشروع",
+  "super_proj_card_color_hint": "لون Hex (مثال: #2563EB)",
+  "super_proj_display_order": "ترتيب العرض",
+  "super_proj_display_order_hint": "الأرقام الأصغر تظهر أولاً (مثال: 1)"
 }

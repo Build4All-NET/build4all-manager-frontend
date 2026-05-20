@@ -30,14 +30,20 @@ class CreateProjectBloc extends Bloc<CreateProjectEvent, CreateProjectState> {
     }
 
     try {
+      String? _clean(String? s) =>
+          (s == null || s.trim().isEmpty) ? null : s.trim();
+
       final project = await usecase(
         token: token,
         projectName: e.projectName.trim(),
-        description: e.description?.trim().isEmpty == true
-            ? null
-            : e.description?.trim(),
+        description: _clean(e.description),
         active: e.active,
         projectType: e.projectType.trim(),
+        displayTitle: _clean(e.displayTitle),
+        displayDescription: _clean(e.displayDescription),
+        iconName: _clean(e.iconName),
+        cardColor: _clean(e.cardColor),
+        displayOrder: e.displayOrder,
       );
 
       emit(CreateProjectSuccess(project));

@@ -39,9 +39,13 @@ class CreateProjectScreen extends StatefulWidget {
 class _CreateProjectScreenState extends State<CreateProjectScreen> {
   final _name = TextEditingController();
   final _desc = TextEditingController();
+  final _displayTitle = TextEditingController();
+  final _displayDesc = TextEditingController();
+  final _iconName = TextEditingController();
+  final _cardColor = TextEditingController();
+  final _displayOrder = TextEditingController();
 
   bool _active = false;
-  // Project types now come from backend, so this is dynamic.
   List<String> _availableTypes = [];
   String? _selectedType;
   bool _loadingTypes = true;
@@ -56,6 +60,11 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
   void dispose() {
     _name.dispose();
     _desc.dispose();
+    _displayTitle.dispose();
+    _displayDesc.dispose();
+    _iconName.dispose();
+    _cardColor.dispose();
+    _displayOrder.dispose();
     super.dispose();
   }
 
@@ -245,6 +254,83 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
 
                     const SizedBox(height: 12),
 
+                    const SizedBox(height: 16),
+                    Divider(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .outlineVariant
+                          .withOpacity(.5),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      l10n.super_proj_display_title,
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleMedium
+                          ?.copyWith(fontWeight: FontWeight.w700),
+                    ),
+                    const SizedBox(height: 12),
+
+                    TextField(
+                      controller: _displayTitle,
+                      decoration: InputDecoration(
+                        labelText: l10n.super_proj_display_title,
+                        hintText: l10n.super_proj_display_title_hint,
+                        border: const OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+
+                    TextField(
+                      controller: _displayDesc,
+                      minLines: 2,
+                      maxLines: 4,
+                      decoration: InputDecoration(
+                        labelText: l10n.super_proj_display_description,
+                        hintText: l10n.super_proj_display_description_hint,
+                        border: const OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _iconName,
+                            decoration: InputDecoration(
+                              labelText: l10n.super_proj_icon_name,
+                              hintText: l10n.super_proj_icon_name_hint,
+                              border: const OutlineInputBorder(),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: TextField(
+                            controller: _cardColor,
+                            decoration: InputDecoration(
+                              labelText: l10n.super_proj_card_color,
+                              hintText: l10n.super_proj_card_color_hint,
+                              border: const OutlineInputBorder(),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+
+                    TextField(
+                      controller: _displayOrder,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: l10n.super_proj_display_order,
+                        hintText: l10n.super_proj_display_order_hint,
+                        border: const OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+
                     SwitchListTile(
                       value: _active,
                       onChanged:
@@ -288,6 +374,11 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
 
                             _name.clear();
                             _desc.clear();
+                            _displayTitle.clear();
+                            _displayDesc.clear();
+                            _iconName.clear();
+                            _cardColor.clear();
+                            _displayOrder.clear();
 
                             setState(() {
                               _active = false;
@@ -325,12 +416,25 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
       return;
     }
 
+    String? _c(TextEditingController ctrl) {
+      final v = ctrl.text.trim();
+      return v.isEmpty ? null : v;
+    }
+
+    final orderRaw = _displayOrder.text.trim();
+    final orderInt = orderRaw.isEmpty ? null : int.tryParse(orderRaw);
+
     context.read<CreateProjectBloc>().add(
           CreateProjectSubmitted(
             projectName: name,
             description: desc.isEmpty ? null : desc,
             active: _active,
             projectType: _selectedType!,
+            displayTitle: _c(_displayTitle),
+            displayDescription: _c(_displayDesc),
+            iconName: _c(_iconName),
+            cardColor: _c(_cardColor),
+            displayOrder: orderInt,
           ),
         );
   }

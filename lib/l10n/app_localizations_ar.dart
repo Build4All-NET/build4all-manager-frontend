@@ -3340,4 +3340,47 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get common_processing => 'جارٍ المعالجة...';
+
+  @override
+  String get lblCountry => 'الدولة';
+
+  @override
+  String get hintSelectCountry => 'اختر دولتك';
+
+  @override
+  String get errCountryRequired => 'يرجى اختيار الدولة';
+
+  @override
+  String get super_proj_display_title => 'العنوان التعريفي';
+
+  @override
+  String get super_proj_display_title_hint =>
+      'عنوان قصير يظهر على بطاقة التطبيق';
+
+  @override
+  String get super_proj_display_description => 'وصف البطاقة';
+
+  @override
+  String get super_proj_display_description_hint =>
+      'وصف مختصر يظهر أسفل العنوان';
+
+  @override
+  String get super_proj_icon_name => 'اسم الأيقونة';
+
+  @override
+  String get super_proj_icon_name_hint =>
+      'مفتاح أيقونة Flutter (مثال: shopping_bag_rounded)';
+
+  @override
+  String get super_proj_card_color => 'لون بطاقة المشروع';
+
+  @override
+  String get super_proj_card_color_hint => 'لون Hex (مثال: #2563EB)';
+
+  @override
+  String get super_proj_display_order => 'ترتيب العرض';
+
+  @override
+  String get super_proj_display_order_hint =>
+      'الأرقام الأصغر تظهر أولاً (مثال: 1)';
 }

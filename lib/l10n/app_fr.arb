@@ -1470,7 +1470,20 @@
   "owner_proj_details_municipality_i2": "Une communication numérique rapide améliore la qualité de réponse dans l’ensemble des services.",
   
   "common_tryAgain": "Réessayer",
-  "common_processing": "Traitement..."
+  "common_processing": "Traitement...",
 
+  "lblCountry": "Pays",
+  "hintSelectCountry": "Sélectionnez votre pays",
+  "errCountryRequired": "Veuillez sélectionner votre pays",
 
+  "super_proj_display_title": "Titre affiché",
+  "super_proj_display_title_hint": "Titre court affiché sur la carte de l'application",
+  "super_proj_display_description": "Description de la carte",
+  "super_proj_display_description_hint": "Description courte affichée sous le titre",
+  "super_proj_icon_name": "Nom de l'icône",
+  "super_proj_icon_name_hint": "Clé d'icône Flutter (ex: shopping_bag_rounded)",
+  "super_proj_card_color": "Couleur accentuée de la carte",
+  "super_proj_card_color_hint": "Couleur Hex (ex: #2563EB)",
+  "super_proj_display_order": "Ordre d'affichage",
+  "super_proj_display_order_hint": "Les numéros inférieurs apparaissent en premier (ex: 1)"
 }

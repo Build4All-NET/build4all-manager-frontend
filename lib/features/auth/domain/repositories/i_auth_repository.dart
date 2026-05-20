@@ -20,12 +20,12 @@ abstract class IAuthRepository {
     required String code,
   });
 
-  // ✅ UPDATED: phoneNumber
   Future<(AuthToken, AppUser)> ownerCompleteProfile({
     required String registrationToken,
     required String username,
     required String firstName,
     required String lastName,
     required String phoneNumber,
+    int? countryId,
   });
 }

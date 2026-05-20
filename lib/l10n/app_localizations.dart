@@ -6654,6 +6654,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Processing...'**
   String get common_processing;
+
+  /// No description provided for @lblCountry.
+  ///
+  /// In en, this message translates to:
+  /// **'Country'**
+  String get lblCountry;
+
+  /// No description provided for @hintSelectCountry.
+  ///
+  /// In en, this message translates to:
+  /// **'Select your country'**
+  String get hintSelectCountry;
+
+  /// No description provided for @errCountryRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select your country'**
+  String get errCountryRequired;
+
+  /// No description provided for @super_proj_display_title.
+  String get super_proj_display_title;
+
+  /// No description provided for @super_proj_display_title_hint.
+  String get super_proj_display_title_hint;
+
+  /// No description provided for @super_proj_display_description.
+  String get super_proj_display_description;
+
+  /// No description provided for @super_proj_display_description_hint.
+  String get super_proj_display_description_hint;
+
+  /// No description provided for @super_proj_icon_name.
+  String get super_proj_icon_name;
+
+  /// No description provided for @super_proj_icon_name_hint.
+  String get super_proj_icon_name_hint;
+
+  /// No description provided for @super_proj_card_color.
+  String get super_proj_card_color;
+
+  /// No description provided for @super_proj_card_color_hint.
+  String get super_proj_card_color_hint;
+
+  /// No description provided for @super_proj_display_order.
+  String get super_proj_display_order;
+
+  /// No description provided for @super_proj_display_order_hint.
+  String get super_proj_display_order_hint;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

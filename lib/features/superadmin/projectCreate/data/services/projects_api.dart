@@ -14,6 +14,11 @@ class ProjectsApi {
   String? description,
   bool? active,
   String? projectType,
+  String? displayTitle,
+  String? displayDescription,
+  String? iconName,
+  String? cardColor,
+  int? displayOrder,
 }) async {
   final url = "$baseUrl/projects";
 
@@ -28,6 +33,11 @@ class ProjectsApi {
     description: description,
     active: active,
     projectType: projectType,
+    displayTitle: displayTitle,
+    displayDescription: displayDescription,
+    iconName: iconName,
+    cardColor: cardColor,
+    displayOrder: displayOrder,
   );
 
   try {

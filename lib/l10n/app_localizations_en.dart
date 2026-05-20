@@ -3340,4 +3340,47 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get common_processing => 'Processing...';
+
+  @override
+  String get lblCountry => 'Country';
+
+  @override
+  String get hintSelectCountry => 'Select your country';
+
+  @override
+  String get errCountryRequired => 'Please select your country';
+
+  @override
+  String get super_proj_display_title => 'Display title';
+
+  @override
+  String get super_proj_display_title_hint =>
+      'Short title shown on the app card (e.g. E-commerce)';
+
+  @override
+  String get super_proj_display_description => 'Card description';
+
+  @override
+  String get super_proj_display_description_hint =>
+      'Brief description shown under the title';
+
+  @override
+  String get super_proj_icon_name => 'Icon name';
+
+  @override
+  String get super_proj_icon_name_hint =>
+      'Flutter icon key (e.g. shopping_bag_rounded)';
+
+  @override
+  String get super_proj_card_color => 'Card accent color';
+
+  @override
+  String get super_proj_card_color_hint => 'Hex color (e.g. #2563EB)';
+
+  @override
+  String get super_proj_display_order => 'Display order';
+
+  @override
+  String get super_proj_display_order_hint =>
+      'Lower numbers appear first (e.g. 1)';
 }

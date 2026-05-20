@@ -3,7 +3,12 @@ class ProjectDto {
   final String projectName;
   final String? description;
   final bool active;
-  final String projectType; // "ECOMMERCE" | "SERVICES" | "ACTIVITIES"
+  final String projectType;
+  final String? displayTitle;
+  final String? displayDescription;
+  final String? iconName;
+  final String? cardColor;
+  final int displayOrder;
 
   ProjectDto({
     required this.id,
@@ -11,6 +16,11 @@ class ProjectDto {
     required this.description,
     required this.active,
     required this.projectType,
+    this.displayTitle,
+    this.displayDescription,
+    this.iconName,
+    this.cardColor,
+    this.displayOrder = 0,
   });
 
   factory ProjectDto.fromJson(Map<String, dynamic> j) {
@@ -22,6 +32,11 @@ class ProjectDto {
       description: j['description']?.toString(),
       active: j['active'] == true,
       projectType: (j['projectType'] ?? 'ECOMMERCE').toString(),
+      displayTitle: j['displayTitle']?.toString(),
+      displayDescription: j['displayDescription']?.toString(),
+      iconName: j['iconName']?.toString(),
+      cardColor: j['cardColor']?.toString(),
+      displayOrder: (j['displayOrder'] as num?)?.toInt() ?? 0,
     );
   }
 
@@ -30,12 +45,22 @@ class ProjectDto {
     String? description,
     bool? active,
     String? projectType,
+    String? displayTitle,
+    String? displayDescription,
+    String? iconName,
+    String? cardColor,
+    int? displayOrder,
   }) {
     return {
-      "projectName": projectName,
-      "description": description,
-      if (active != null) "active": active,
-      if (projectType != null) "projectType": projectType,
+      'projectName': projectName,
+      if (description != null) 'description': description,
+      if (active != null) 'active': active,
+      if (projectType != null) 'projectType': projectType,
+      if (displayTitle != null) 'displayTitle': displayTitle,
+      if (displayDescription != null) 'displayDescription': displayDescription,
+      if (iconName != null) 'iconName': iconName,
+      if (cardColor != null) 'cardColor': cardColor,
+      if (displayOrder != null) 'displayOrder': displayOrder,
     };
   }
 }

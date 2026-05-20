@@ -12,6 +12,11 @@ class CreateProjectUseCase {
     String? description,
     bool? active,
     required String projectType,
+    String? displayTitle,
+    String? displayDescription,
+    String? iconName,
+    String? cardColor,
+    int? displayOrder,
   }) {
     return repo.createProject(
       token: token,
@@ -19,6 +24,11 @@ class CreateProjectUseCase {
       description: description,
       active: active,
       projectType: projectType,
+      displayTitle: displayTitle,
+      displayDescription: displayDescription,
+      iconName: iconName,
+      cardColor: cardColor,
+      displayOrder: displayOrder,
     );
   }
 }
