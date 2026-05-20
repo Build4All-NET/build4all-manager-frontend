@@ -65,12 +65,11 @@ class _FormViewState extends State<_FormView> {
 
   bool get _isEditMode => widget.existing != null;
 
-  static const _availablePlanCodes = ['PRO_HOSTEDB', 'SMART', 'DEDICATED'];
+  static const _availablePlanCodes = ['PRO_HOSTEDB', 'SMART'];
 
   static const _planCodeLabels = {
-    'PRO_HOSTEDB': 'Basic (PRO_HOSTEDB) — \$75/mo',
-    'SMART':       'Smart (SMART) — \$85/mo',
-    'DEDICATED':   'Dedicated (DEDICATED) — Contact Us',
+    'PRO_HOSTEDB': 'Basic — \$75/mo',
+    'SMART':       'Smart — \$85/mo',
   };
 
   @override
