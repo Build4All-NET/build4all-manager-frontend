@@ -34,6 +34,10 @@ class AdminNotificationsApi {
     await dio.put('/notifications/admin/$id/read');
   }
 
+  Future<void> markAllAsRead() async {
+    await dio.put('/notifications/admin/read-all');
+  }
+
   Future<void> deleteNotification(int id) async {
     await dio.delete('/notifications/admin/$id');
   }

@@ -163,10 +163,6 @@ final router = GoRouter(
     ),
 
     // ── Payment Management deep-link routes (SUPER_ADMIN only) ───────────────
-    // All paths under /manager/* are guarded by _authRedirect:
-    //   role != SUPER_ADMIN → redirect to /owner/home
-    // These routes let notifications, emails, or external links open a
-    // specific payment screen directly without going through the Profile tab.
     GoRoute(
       path: '/manager/payment/methods',
       builder: (_, __) => const PaymentMethodsScreen(),
@@ -177,7 +173,6 @@ final router = GoRouter(
     ),
     GoRoute(
       path: '/manager/payment/methods/edit',
-      // Pass the PaymentMethod entity via GoRouter.go/push(extra: method)
       builder: (_, state) => PaymentMethodFormScreen(
         existing: state.extra as PaymentMethod?,
       ),
@@ -192,7 +187,6 @@ final router = GoRouter(
     ),
     GoRoute(
       path: '/manager/payment/types/edit',
-      // Pass the ManagedPaymentType entity via GoRouter.go/push(extra: type)
       builder: (_, state) => PaymentTypeFormScreen(
         existing: state.extra as ManagedPaymentType?,
       ),
@@ -255,7 +249,6 @@ final router = GoRouter(
             final projectType =
                 (extra['projectType'] ?? '').toString().toUpperCase();
 
-            // Resolve template: prefer projectType match, then ID match
             final tpl = projectType.isNotEmpty
                 ? projectTemplates.firstWhere(
                     (t) => t.kind.toUpperCase() == projectType ||
@@ -357,7 +350,6 @@ Future<String?> _authRedirect(
   if (role == 'SUPER_ADMIN' && loc.startsWith('/owner')) {
     return '/manager';
   }
-  // Covers /manager and all /manager/payment/* routes
   if (role != 'SUPER_ADMIN' && loc.startsWith('/manager')) {
     return '/owner/home';
   }
@@ -429,16 +421,34 @@ Future<(int?, String?)> _loadOwnerProfileFromJwt() async {
   }
 }
 
-class _OwnerSessionLoader extends StatelessWidget {
+// _OwnerSessionLoader is StatefulWidget so the future is created once in
+// initState and cached.  When GoRouter rebuilds the shell on tab switches,
+// didUpdateWidget is called but _future never changes, so FutureBuilder
+// immediately returns the already-completed result without flashing a
+// loading screen.
+class _OwnerSessionLoader extends StatefulWidget {
   final Widget child;
   const _OwnerSessionLoader({required this.child});
+
+  @override
+  State<_OwnerSessionLoader> createState() => _OwnerSessionLoaderState();
+}
+
+class _OwnerSessionLoaderState extends State<_OwnerSessionLoader> {
+  late final Future<(int?, String?)> _future;
+
+  @override
+  void initState() {
+    super.initState();
+    _future = _loadOwnerProfileFromJwt();
+  }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
     return FutureBuilder<(int?, String?)>(
-      future: _loadOwnerProfileFromJwt(),
+      future: _future,
       builder: (context, snap) {
         if (snap.connectionState != ConnectionState.done) {
           return const Scaffold(
@@ -456,14 +466,14 @@ class _OwnerSessionLoader extends StatelessWidget {
         }
 
         final Dio dio = DioClient.ensure();
-        final backendMenuType = 'bottom';
+        const backendMenuType = 'bottom';
 
         return OwnerSessionScope(
           ownerId: ownerId,
           ownerName: ownerName,
           dio: dio,
           backendMenuType: backendMenuType,
-          child: child,
+          child: widget.child,
         );
       },
     );
@@ -480,6 +490,9 @@ class _OwnerNavWrapper extends StatefulWidget {
 
 class _OwnerNavWrapperState extends State<_OwnerNavWrapper> {
   late final OwnerNavCubit _nav;
+  // All four tab screens built once and kept alive via IndexedStack.
+  // Using ??= ensures they survive GoRouter rebuilds on every tab switch.
+  List<Widget>? _screens;
 
   @override
   void initState() {
@@ -532,6 +545,18 @@ class _OwnerNavWrapperState extends State<_OwnerNavWrapper> {
       ),
     ];
 
+    // Build the four screens once; ??= keeps them alive on subsequent builds.
+    _screens ??= [
+      OwnerHomeScreen(
+        ownerId: session.ownerId,
+        dio: session.dio,
+        ownerName: session.ownerName,
+      ),
+      OwnerProjectsScreen(ownerId: session.ownerId, dio: session.dio),
+      const AdminNotificationsScreen(),
+      OwnerProfileScreen(dio: session.dio),
+    ];
+
     final loc = GoRouterState.of(context).uri.toString();
     final idx = _indexForLoc(loc);
 
@@ -556,7 +581,7 @@ class _OwnerNavWrapperState extends State<_OwnerNavWrapper> {
           backendMenuType: session.backendMenuType,
           destinations: destinations,
           initialIndex: idx,
-          child: widget.child,
+          screens: _screens!,
         ),
       ),
     );

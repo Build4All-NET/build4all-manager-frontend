@@ -60,19 +60,42 @@ unreadCubit?.setCount(state.unreadCount);
               children: [
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-                  child: Align(
-                    alignment: Alignment.centerRight,
-                    child: OutlinedButton.icon(
-                      onPressed: state.loading
-                          ? null
-                          : () {
-                              context.read<AdminNotificationsBloc>().add(
-                                    const AdminNotificationsRefreshed(),
-                                  );
-                            },
-                      icon: const Icon(Icons.refresh),
-                      label: Text(l10n.common_refresh),
-                    ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      if (state.unreadCount > 0) ...
+                        [
+                          OutlinedButton.icon(
+                            onPressed: (state.loading || state.acting)
+                                ? null
+                                : () {
+                                    context.read<AdminNotificationsBloc>().add(
+                                          const AdminNotificationsMarkAllRead(),
+                                        );
+                                  },
+                            icon: state.acting
+                                ? const SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(strokeWidth: 2),
+                                  )
+                                : const Icon(Icons.done_all),
+                            label: const Text('Mark all read'),
+                          ),
+                          const SizedBox(width: 8),
+                        ],
+                      OutlinedButton.icon(
+                        onPressed: state.loading
+                            ? null
+                            : () {
+                                context.read<AdminNotificationsBloc>().add(
+                                      const AdminNotificationsRefreshed(),
+                                    );
+                              },
+                        icon: const Icon(Icons.refresh),
+                        label: Text(l10n.common_refresh),
+                      ),
+                    ],
                   ),
                 ),
                 Expanded(

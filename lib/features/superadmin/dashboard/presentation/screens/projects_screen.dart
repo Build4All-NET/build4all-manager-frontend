@@ -3,6 +3,7 @@ import 'package:build4all_manager/features/superadmin/dashboard/data/models/proj
 import 'package:build4all_manager/features/superadmin/dashboard/data/services/project_api.dart';
 import 'package:build4all_manager/features/superadmin/dashboard/domain/entities/project_summary.dart';
 import 'package:build4all_manager/features/superadmin/dashboard/presentation/screens/OwnersByProjectScreen.dart';
+import 'package:build4all_manager/features/superadmin/dashboard/presentation/widgets/edit_project_dialog.dart';
 import 'package:build4all_manager/features/superadmin/dashboard/presentation/widgets/pro_project_tile.dart';
 import 'package:build4all_manager/l10n/app_localizations.dart';
 import 'package:build4all_manager/shared/utils/ApiErrorHandler.dart';
@@ -76,6 +77,22 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
       });
 
       AppToast.error(context, msg);
+    }
+  }
+
+  Future<void> _editProject(ProjectSummary project) async {
+    final saved = await showDialog<bool>(
+      context: context,
+      builder: (_) => EditProjectDialog(
+        project: project,
+        onSave: (data) async {
+          await _api.updateProject(project.id, data);
+        },
+      ),
+    );
+    if (saved == true) {
+      await _load();
+      if (mounted) AppToast.success(context, 'Project updated');
     }
   }
 
@@ -188,6 +205,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
               p.name,
               '${p.id}',
               p.description ?? '',
+              p.displayTitle ?? '',
               p.active ? 'active' : 'inactive',
             ],
           ),
@@ -251,6 +269,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                                           ),
                                         );
                                       },
+                                      onEdit: () => _editProject(p),
                                       onEnable: () => _enableProject(p),
                                       onDisable: () => _disableProject(p),
                                       onArchive: () => _archiveProject(p),

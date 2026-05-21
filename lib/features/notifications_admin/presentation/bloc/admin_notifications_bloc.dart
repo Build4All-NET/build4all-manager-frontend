@@ -13,6 +13,7 @@ class AdminNotificationsBloc
     on<AdminNotificationsStarted>(_onLoad);
     on<AdminNotificationsRefreshed>(_onLoad);
     on<AdminNotificationMarkedRead>(_onMarkRead);
+    on<AdminNotificationsMarkAllRead>(_onMarkAllRead);
     on<AdminNotificationDeleted>(_onDelete);
   }
 
@@ -62,6 +63,31 @@ class AdminNotificationsBloc
       ));
     } catch (e) {
       emit(state.copyWith(error: ApiErrorHandler.message(e)));
+    }
+  }
+
+  Future<void> _onMarkAllRead(
+    AdminNotificationsMarkAllRead event,
+    Emitter<AdminNotificationsState> emit,
+  ) async {
+    emit(state.copyWith(acting: true, clearError: true));
+    try {
+      await api.markAllAsRead();
+
+      final updated = state.items
+          .map((n) => (n != null && !n.isRead) ? n.copyWithForRead() : n)
+          .toList();
+
+      emit(state.copyWith(
+        acting: false,
+        items: updated,
+        unreadCount: 0,
+      ));
+    } catch (e) {
+      emit(state.copyWith(
+        acting: false,
+        error: ApiErrorHandler.message(e),
+      ));
     }
   }
 

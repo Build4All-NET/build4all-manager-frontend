@@ -42,17 +42,20 @@ class OwnerNavShell extends StatefulWidget {
   final OwnerMenuType? override;
   final List<OwnerDestination> destinations;
   final int initialIndex;
-  final Widget child;
+  // Screens are built once by the caller and passed here so IndexedStack
+  // keeps them mounted across tab switches.
+  final List<Widget> screens;
 
   const OwnerNavShell({
     super.key,
     required this.destinations,
-    required this.child,
+    required this.screens,
     this.backendMenuType,
     this.override,
     this.initialIndex = 0,
   });
 
+  @override
   State<OwnerNavShell> createState() => _OwnerNavShellState();
 }
 
@@ -60,6 +63,7 @@ class _OwnerNavShellState extends State<OwnerNavShell>
     with TickerProviderStateMixin {
   TabController? _tab;
   final _scaffoldKey = GlobalKey<ScaffoldState>();
+  late final AdminUnreadCountCubit _unreadCubit;
 
   OwnerMenuType get _mode =>
       widget.override ?? _parseOwnerMenu(widget.backendMenuType);
@@ -67,6 +71,9 @@ class _OwnerNavShellState extends State<OwnerNavShell>
   @override
   void initState() {
     super.initState();
+    _unreadCubit = AdminUnreadCountCubit(
+      AdminNotificationsApi(DioClient.ensure()),
+    )..start();
     _syncCubitWithRouteIndex(widget.initialIndex);
     _attachTabIfNeeded(widget.initialIndex);
   }
@@ -135,6 +142,7 @@ class _OwnerNavShellState extends State<OwnerNavShell>
 
   @override
   void dispose() {
+    _unreadCubit.close();
     _tab?.dispose();
     super.dispose();
   }
@@ -145,10 +153,8 @@ class _OwnerNavShellState extends State<OwnerNavShell>
     final width = MediaQuery.of(context).size.width;
     final useRail = width >= 900 && _mode == OwnerMenuType.bottom;
 
-    return BlocProvider(
-      create: (_) => AdminUnreadCountCubit(
-        AdminNotificationsApi(DioClient.ensure()),
-      )..start(),
+    return BlocProvider.value(
+      value: _unreadCubit,
       child: BlocBuilder<OwnerNavCubit, OwnerNavState>(
         builder: (context, navState) {
           final unreadCount =
@@ -161,13 +167,14 @@ class _OwnerNavShellState extends State<OwnerNavShell>
             _tab!.index = index;
           }
 
-          final body = AnimatedSwitcher(
-            duration: const Duration(milliseconds: 220),
-            child: KeyedSubtree(
-              key: ValueKey(GoRouterState.of(context).uri.toString()),
-              child: widget.child,
-            ),
-          );
+          // IndexedStack keeps every tab screen mounted so switching is
+          // instant and all scroll / bloc state is preserved.
+          final stackIndex = widget.screens.isEmpty
+              ? 0
+              : index.clamp(0, widget.screens.length - 1);
+          final body = widget.screens.isEmpty
+              ? const SizedBox.shrink()
+              : IndexedStack(index: stackIndex, children: widget.screens);
 
           if (pages.isEmpty) {
             return Scaffold(
