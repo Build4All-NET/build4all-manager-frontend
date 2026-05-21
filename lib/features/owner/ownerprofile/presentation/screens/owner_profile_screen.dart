@@ -21,6 +21,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:build4all_manager/features/owner/licensing/presentation/widgets/upgrade_request_sheet.dart';
+
 import 'owner_edit_profile_screen.dart';
 
 class OwnerProfileScreen extends StatelessWidget {
@@ -278,6 +280,18 @@ class _OwnerProfileView extends StatelessWidget {
                               width: wide ? maxCardWidth : double.infinity,
                               child: ProfileInfoCard(p: p),
                             ),
+                            const SizedBox(height: 12),
+                            // Upgrade plan button — only for own profile (not when viewing as superadmin)
+                            if (ownerId == null)
+                              SizedBox(
+                                width: wide ? maxCardWidth : double.infinity,
+                                child: FilledButton.icon(
+                                  icon: const Icon(Icons.upgrade_rounded),
+                                  label: const Text('Upgrade Plan'),
+                                  onPressed: () =>
+                                      showUpgradeRequestSheet(context),
+                                ),
+                              ),
                             const SizedBox(height: 12),
                             SizedBox(
                               width: wide ? maxCardWidth : double.infinity,
