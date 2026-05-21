@@ -4,8 +4,12 @@ class ProjectApi {
   final Dio dio;
   ProjectApi(this.dio);
 
-  /// GET /projects → list of projects
+  /// GET /projects → full list for Super Admin management
   Future<Response> list() => dio.get('/projects');
+
+  /// PUT /projects/{projectId} → update template card fields
+  Future<Response> updateProject(int projectId, Map<String, dynamic> data) =>
+      dio.put('/projects/$projectId', data: data);
 
   /// GET /projects/{projectId}/owners → list owners in a project
   Future<Response> ownersByProject(int projectId) =>
@@ -16,22 +20,15 @@ class ProjectApi {
       dio.get('/projects/$projectId/owners/$adminId/apps');
 
   /// GET /orders/superadmin/applications/{ownerProjectId}/orders
-  /// Returns the list of orders for a specific owner app (ownerProjectId),
-  /// using the existing controller:
-  ///   @GetMapping("/superadmin/applications/{ownerProjectId}/orders")
-  ///   in OrderController (base path: /api/orders).
   Future<Response> ownerAppOrders(int ownerProjectId) =>
       dio.get('/orders/superadmin/applications/$ownerProjectId/orders');
 
-      Future<Response> enableProject(int projectId) {
-  return dio.put('/projects/$projectId/enable');
-}
+  Future<Response> enableProject(int projectId) =>
+      dio.put('/projects/$projectId/enable');
 
-Future<Response> disableProject(int projectId) {
-  return dio.put('/projects/$projectId/disable');
-}
+  Future<Response> disableProject(int projectId) =>
+      dio.put('/projects/$projectId/disable');
 
-Future<Response> archiveProject(int projectId) {
-  return dio.put('/projects/$projectId/archive');
-}
+  Future<Response> archiveProject(int projectId) =>
+      dio.put('/projects/$projectId/archive');
 }

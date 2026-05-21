@@ -7,7 +7,7 @@ class OwnerProjectsApi {
   OwnerProjectsApi(this.dio);
 
   Future<List<BackendProjectDto>> fetchProjects() async {
-    final res = await dio.get('/projects');
+    final res = await dio.get('/projects/public');
 
     final data = (res.data as List?) ?? const [];
 

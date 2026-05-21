@@ -5,6 +5,7 @@ import '../../domain/entities/project_summary.dart';
 class ProProjectTile extends StatelessWidget {
   final ProjectSummary project;
   final VoidCallback? onTap;
+  final VoidCallback? onEdit;
   final VoidCallback? onEnable;
   final VoidCallback? onDisable;
   final VoidCallback? onArchive;
@@ -13,6 +14,7 @@ class ProProjectTile extends StatelessWidget {
     super.key,
     required this.project,
     this.onTap,
+    this.onEdit,
     this.onEnable,
     this.onDisable,
     this.onArchive,
@@ -57,7 +59,9 @@ class ProProjectTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      project.name,
+                      project.displayTitle?.isNotEmpty == true
+                          ? project.displayTitle!
+                          : project.name,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -66,9 +70,11 @@ class ProProjectTile extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      (project.description?.trim().isNotEmpty ?? false)
-                          ? project.description!.trim()
-                          : '—',
+                      (project.displayDescription?.trim().isNotEmpty ?? false)
+                          ? project.displayDescription!.trim()
+                          : (project.description?.trim().isNotEmpty ?? false)
+                              ? project.description!.trim()
+                              : '—',
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -81,6 +87,8 @@ class ProProjectTile extends StatelessWidget {
                       runSpacing: 6,
                       children: [
                         _chip(context, statusLabel, statusColor),
+                        if (project.archived)
+                          _chip(context, 'Archived', cs.error),
                         _chip(
                           context,
                           _fmt(project.updatedAt),
@@ -99,6 +107,9 @@ class ProProjectTile extends StatelessWidget {
                 icon: const Icon(Icons.more_vert),
                 onSelected: (action) {
                   switch (action) {
+                    case _ProjectAction.edit:
+                      onEdit?.call();
+                      break;
                     case _ProjectAction.enable:
                       onEnable?.call();
                       break;
@@ -111,6 +122,14 @@ class ProProjectTile extends StatelessWidget {
                   }
                 },
                 itemBuilder: (context) => [
+                  const PopupMenuItem(
+                    value: _ProjectAction.edit,
+                    child: _MenuRow(
+                      icon: Icons.edit_outlined,
+                      label: 'Edit card',
+                    ),
+                  ),
+                  const PopupMenuDivider(),
                   if (!project.active)
                     const PopupMenuItem(
                       value: _ProjectAction.enable,
@@ -169,6 +188,7 @@ class ProProjectTile extends StatelessWidget {
 }
 
 enum _ProjectAction {
+  edit,
   enable,
   disable,
   archive,
