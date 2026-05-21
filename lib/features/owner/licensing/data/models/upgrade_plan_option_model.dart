@@ -29,7 +29,7 @@ class PlanPricingInfo {
   static double? _toDouble(dynamic v) =>
       v == null ? null : double.tryParse(v.toString());
 
-  double? effectiveYearlyPrice => yearlyDiscountedPrice ?? yearlyPrice;
+  double? get effectiveYearlyPrice => yearlyDiscountedPrice ?? yearlyPrice;
 }
 
 class UpgradePlanOptionModel {
