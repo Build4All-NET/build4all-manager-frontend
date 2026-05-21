@@ -15,6 +15,10 @@ class AdminNotificationMarkedRead extends AdminNotificationsEvent {
   const AdminNotificationMarkedRead(this.id);
 }
 
+class AdminNotificationsMarkAllRead extends AdminNotificationsEvent {
+  const AdminNotificationsMarkAllRead();
+}
+
 class AdminNotificationDeleted extends AdminNotificationsEvent {
   final int id;
   const AdminNotificationDeleted(this.id);
