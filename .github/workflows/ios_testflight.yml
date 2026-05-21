@@ -11,14 +11,6 @@ on:
         description: "Changelog / What to Test"
         required: false
         default: "CI build"
-  push:
-    branches: [ "main" ]
-    paths:
-      - "lib/**"
-      - "ios/**"
-      - "pubspec.yaml"
-      - "pubspec.lock"
-      - ".github/workflows/ios-testflight-build4allmanager.yml"
 
 permissions:
   contents: write

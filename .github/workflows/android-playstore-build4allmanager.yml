@@ -16,14 +16,6 @@ on:
         description: "Release notes"
         required: false
         default: "CI build"
-  push:
-    branches: [ "main" ]
-    paths:
-      - "lib/**"
-      - "android/**"
-      - "pubspec.yaml"
-      - "pubspec.lock"
-      - ".github/workflows/android-playstore-build4allmanager.yml"
 
 permissions:
   contents: read
