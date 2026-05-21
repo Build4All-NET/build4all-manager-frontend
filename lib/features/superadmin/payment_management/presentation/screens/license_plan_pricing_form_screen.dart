@@ -5,8 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../data/models/plan_model.dart';
 import '../../data/repositories/license_plan_pricing_repository_impl.dart';
 import '../../data/services/license_plan_pricing_api.dart';
+import '../../data/services/plan_api.dart';
 import '../../domain/entities/billing_cycle.dart';
 import '../../domain/entities/license_plan_pricing.dart';
 import '../../domain/entities/pricing_currency.dart';
@@ -56,7 +58,7 @@ class _FormViewState extends State<_FormView> {
   final _discountPercentCtrl = TextEditingController();
   final _discountLabelCtrl = TextEditingController();
 
-  String _selectedPlanCode = 'PRO_HOSTEDB';
+  String? _selectedPlanCode;
   PricingBillingCycle _selectedCycle = PricingBillingCycle.monthly;
   bool _isActive = true;
   String _selectedCurrencyCode = 'USD';
@@ -65,14 +67,11 @@ class _FormViewState extends State<_FormView> {
   bool _loadingCurrencies = true;
   String? _currenciesError;
 
+  List<PlanModel> _plans = const [];
+  bool _loadingPlans = true;
+  String? _plansError;
+
   bool get _isEditMode => widget.existing != null;
-
-  static const _availablePlanCodes = ['PRO_HOSTEDB', 'SMART'];
-
-  static const _planCodeLabels = {
-    'PRO_HOSTEDB': 'Basic — \$75/mo',
-    'SMART':       'Smart — \$85/mo',
-  };
 
   @override
   void initState() {
@@ -94,6 +93,7 @@ class _FormViewState extends State<_FormView> {
         _discountLabelCtrl.text = e.discountLabel!;
       }
     }
+    _loadPlans();
     _loadCurrencies();
   }
 
@@ -111,6 +111,27 @@ class _FormViewState extends State<_FormView> {
     return n.toStringAsFixed(2);
   }
 
+  Future<void> _loadPlans() async {
+    final planApi = PlanApi(DioClient.ensure());
+    try {
+      final list = await planApi.getAll();
+      if (!mounted) return;
+      setState(() {
+        _plans = list;
+        _loadingPlans = false;
+        if (_selectedPlanCode == null && list.isNotEmpty) {
+          _selectedPlanCode = list.first.code;
+        }
+      });
+    } catch (err) {
+      if (!mounted) return;
+      setState(() {
+        _loadingPlans = false;
+        _plansError = ApiErrorHandler.message(err);
+      });
+    }
+  }
+
   Future<void> _loadCurrencies() async {
     final api = LicensePlanPricingApi(DioClient.ensure());
     final repo = LicensePlanPricingRepositoryImpl(api);
@@ -120,7 +141,6 @@ class _FormViewState extends State<_FormView> {
       setState(() {
         _currencies = list;
         _loadingCurrencies = false;
-        // If the existing currency code isn't in the list, default to first.
         if (list.isNotEmpty &&
             !list.any((c) =>
                 c.code.toUpperCase() == _selectedCurrencyCode.toUpperCase())) {
@@ -138,6 +158,7 @@ class _FormViewState extends State<_FormView> {
 
   void _submit() {
     if (!_formKey.currentState!.validate()) return;
+    if (_selectedPlanCode == null) return;
 
     final price = double.tryParse(_priceCtrl.text.trim());
     if (price == null) return;
@@ -154,7 +175,7 @@ class _FormViewState extends State<_FormView> {
 
     final pricing = LicensePlanPricing(
       id: widget.existing?.id ?? 0,
-      planCode: _selectedPlanCode,
+      planCode: _selectedPlanCode!,
       billingCycle: _selectedCycle,
       price: price,
       discountedPrice: discountedPrice,
@@ -202,23 +223,7 @@ class _FormViewState extends State<_FormView> {
                   title: 'Plan & billing cycle',
                 ),
                 const SizedBox(height: 8),
-                DropdownButtonFormField<String>(
-                  value: _selectedPlanCode,
-                  items: _availablePlanCodes
-                      .map((p) => DropdownMenuItem(
-                            value: p,
-                            child: Text(_planCodeLabels[p] ?? p),
-                          ))
-                      .toList(),
-                  onChanged: (_isEditMode || busy)
-                      ? null
-                      : (v) => setState(
-                          () => _selectedPlanCode = v ?? _selectedPlanCode),
-                  decoration: const InputDecoration(
-                    labelText: 'Plan code',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
+                _buildPlanDropdown(busy),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<PricingBillingCycle>(
                   value: _selectedCycle,
@@ -336,13 +341,14 @@ class _FormViewState extends State<_FormView> {
                 ),
                 const SizedBox(height: 24),
                 FilledButton.icon(
-                  onPressed: (busy || _loadingCurrencies) ? null : _submit,
+                  onPressed: (busy || _loadingCurrencies || _loadingPlans)
+                      ? null
+                      : _submit,
                   icon: busy
                       ? const SizedBox(
                           width: 18,
                           height: 18,
-                          child:
-                              CircularProgressIndicator(strokeWidth: 2),
+                          child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const Icon(Icons.save_rounded),
                   label: Text(_isEditMode ? 'Save changes' : 'Create pricing'),
@@ -352,6 +358,71 @@ class _FormViewState extends State<_FormView> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildPlanDropdown(bool busy) {
+    if (_loadingPlans) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 12),
+        child: Row(
+          children: [
+            SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(strokeWidth: 2)),
+            SizedBox(width: 8),
+            Text('Loading plans…'),
+          ],
+        ),
+      );
+    }
+    if (_plansError != null && _plans.isEmpty) {
+      return InputDecorator(
+        decoration: InputDecoration(
+          labelText: 'Plan code',
+          errorText: _plansError,
+          border: const OutlineInputBorder(),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                _selectedPlanCode ?? '—',
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
+            ),
+            TextButton.icon(
+              onPressed: () {
+                setState(() {
+                  _loadingPlans = true;
+                  _plansError = null;
+                });
+                _loadPlans();
+              },
+              icon: const Icon(Icons.refresh_rounded),
+              label: const Text('Retry'),
+            ),
+          ],
+        ),
+      );
+    }
+    return DropdownButtonFormField<String>(
+      value: _selectedPlanCode,
+      items: _plans
+          .map((p) => DropdownMenuItem(
+                value: p.code,
+                child: Text('${p.displayName} (${p.code})'),
+              ))
+          .toList(),
+      onChanged: (_isEditMode || busy)
+          ? null
+          : (v) => setState(() => _selectedPlanCode = v ?? _selectedPlanCode),
+      decoration: const InputDecoration(
+        labelText: 'Plan code',
+        border: OutlineInputBorder(),
+      ),
+      validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
     );
   }
 
