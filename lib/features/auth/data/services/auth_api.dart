@@ -58,6 +58,7 @@ class AuthApi {
     required String firstName,
     required String lastName,
     required String phoneNumber,
+    int? countryId,
   }) {
     return _dio.post(
       '/auth/owner/complete-profile',
@@ -67,6 +68,7 @@ class AuthApi {
         'firstName': firstName,
         'lastName': lastName,
         'phoneNumber': phoneNumber,
+        if (countryId != null) 'countryId': countryId,
       },
     );
   }

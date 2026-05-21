@@ -11,6 +11,7 @@ class OwnerCompleteProfileUseCase {
     required String firstName,
     required String lastName,
     required String phoneNumber,
+    int? countryId,
   }) =>
       repo.ownerCompleteProfile(
         registrationToken: registrationToken,
@@ -18,5 +19,6 @@ class OwnerCompleteProfileUseCase {
         firstName: firstName,
         lastName: lastName,
         phoneNumber: phoneNumber,
+        countryId: countryId,
       );
 }

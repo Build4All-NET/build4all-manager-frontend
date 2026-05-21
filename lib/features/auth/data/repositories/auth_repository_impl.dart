@@ -186,6 +186,7 @@ class AuthRepositoryImpl implements IAuthRepository {
     required String firstName,
     required String lastName,
     required String phoneNumber,
+    int? countryId,
   }) async {
     try {
       final res = await api.ownerCompleteProfile(
@@ -194,6 +195,7 @@ class AuthRepositoryImpl implements IAuthRepository {
         firstName: firstName,
         lastName: lastName,
         phoneNumber: phoneNumber,
+        countryId: countryId,
       );
 
       final token = (res.data['token'] ?? '').toString();

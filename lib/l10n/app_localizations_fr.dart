@@ -3340,4 +3340,47 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get common_processing => 'Traitement...';
+
+  @override
+  String get lblCountry => 'Pays';
+
+  @override
+  String get hintSelectCountry => 'Sélectionnez votre pays';
+
+  @override
+  String get errCountryRequired => 'Veuillez sélectionner votre pays';
+
+  @override
+  String get super_proj_display_title => 'Titre affiché';
+
+  @override
+  String get super_proj_display_title_hint =>
+      'Titre court affiché sur la carte de l\'application';
+
+  @override
+  String get super_proj_display_description => 'Description de la carte';
+
+  @override
+  String get super_proj_display_description_hint =>
+      'Description courte affichée sous le titre';
+
+  @override
+  String get super_proj_icon_name => 'Nom de l\'icône';
+
+  @override
+  String get super_proj_icon_name_hint =>
+      'Clé d\'icône Flutter (ex: shopping_bag_rounded)';
+
+  @override
+  String get super_proj_card_color => 'Couleur accentuée de la carte';
+
+  @override
+  String get super_proj_card_color_hint => 'Couleur Hex (ex: #2563EB)';
+
+  @override
+  String get super_proj_display_order => 'Ordre d\'affichage';
+
+  @override
+  String get super_proj_display_order_hint =>
+      'Les numéros inférieurs apparaissent en premier (ex: 1)';
 }

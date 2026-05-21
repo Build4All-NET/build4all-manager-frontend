@@ -86,6 +86,31 @@ String? _asNonEmptyStr(dynamic v) {
   return s.isEmpty ? null : s;
 }
 
+String _kindFromType(String type) {
+  switch (type.toUpperCase()) {
+    case 'ECOMMERCE':
+    case 'E_COMMERCE':
+      return 'ecommerce';
+    case 'GYM':
+    case 'FITNESS':
+      return 'gym';
+    case 'WHOLESALE':
+    case 'WHOLE_SALE':
+      return 'wholesale';
+    case 'MUNICIPALITY':
+    case 'MUNICIPAL':
+      return 'municipality';
+    case 'ACTIVITIES':
+    case 'ACTIVITY':
+      return 'activities';
+    case 'SERVICES':
+    case 'SERVICE':
+      return 'services';
+    default:
+      return type.toLowerCase();
+  }
+}
+
 Widget _withOwnerRegBloc(Widget child) {
   final authApi = AuthApi(DioClient.ensure());
   final sessionManager = SessionManager(
@@ -226,10 +251,25 @@ final router = GoRouter(
                 '${projectTemplates.first.id}';
             final id = int.tryParse(idStr) ?? projectTemplates.first.id;
 
-            final tpl = projectTemplates.firstWhere(
-              (t) => t.id == id,
-              orElse: () => projectTemplates.first,
-            );
+            final extra = (state.extra ?? {}) as Map;
+            final projectType =
+                (extra['projectType'] ?? '').toString().toUpperCase();
+
+            // Resolve template: prefer projectType match, then ID match
+            final tpl = projectType.isNotEmpty
+                ? projectTemplates.firstWhere(
+                    (t) => t.kind.toUpperCase() == projectType ||
+                        t.kind.toUpperCase() ==
+                            _kindFromType(projectType).toUpperCase(),
+                    orElse: () => projectTemplates.firstWhere(
+                      (t) => t.id == id,
+                      orElse: () => projectTemplates.first,
+                    ),
+                  )
+                : projectTemplates.firstWhere(
+                    (t) => t.id == id,
+                    orElse: () => projectTemplates.first,
+                  );
 
             return OwnerProjectDetailsScreen(
               tpl: tpl,
@@ -286,6 +326,7 @@ final router = GoRouter(
           builder: (ctx, st) => _withOwnerRegBloc(
             OwnerRegisterProfileScreen(
               registrationToken: (st.extra ?? '') as String,
+              dio: DioClient.ensure(),
             ),
           ),
         ),

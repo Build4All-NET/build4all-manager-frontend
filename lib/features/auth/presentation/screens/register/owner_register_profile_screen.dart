@@ -1,5 +1,8 @@
 
+import 'package:build4all_manager/features/auth/data/models/country_model.dart';
+import 'package:build4all_manager/features/auth/data/services/country_api.dart';
 import 'package:build4all_manager/shared/widgets/app_toast.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -15,10 +18,12 @@ import '../../bloc/register/owner_register_state.dart';
 
 class OwnerRegisterProfileScreen extends StatefulWidget {
   final String registrationToken;
+  final Dio dio;
 
   const OwnerRegisterProfileScreen({
     super.key,
     required this.registrationToken,
+    required this.dio,
   });
 
   @override
@@ -26,13 +31,23 @@ class OwnerRegisterProfileScreen extends StatefulWidget {
       _OwnerRegisterProfileScreenState();
 }
 
-class _OwnerRegisterProfileScreenState extends State<OwnerRegisterProfileScreen> {
+class _OwnerRegisterProfileScreenState
+    extends State<OwnerRegisterProfileScreen> {
   final _form = GlobalKey<FormState>();
   final _username = TextEditingController();
   final _first = TextEditingController();
   final _last = TextEditingController();
 
-  String? _fullPhone; // ✅ +96170123456
+  String? _fullPhone;
+  int? _selectedCountryId;
+  List<CountryModel> _countries = [];
+  bool _loadingCountries = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchCountries();
+  }
 
   @override
   void dispose() {
@@ -40,6 +55,20 @@ class _OwnerRegisterProfileScreenState extends State<OwnerRegisterProfileScreen>
     _first.dispose();
     _last.dispose();
     super.dispose();
+  }
+
+  Future<void> _fetchCountries() async {
+    try {
+      final countries = await CountryApi(widget.dio).getActiveCountries();
+      if (!mounted) return;
+      setState(() {
+        _countries = countries;
+        _loadingCountries = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _loadingCountries = false);
+    }
   }
 
   String? _required(String? v, String msg) =>
@@ -51,7 +80,6 @@ class _OwnerRegisterProfileScreenState extends State<OwnerRegisterProfileScreen>
 
     if (!form.validate()) return;
 
-    // ✅ extra guard
     final phone = (_fullPhone ?? '').trim();
     if (phone.isEmpty) {
       AppToast.info(context, l10n.errPhoneRequired);
@@ -66,7 +94,8 @@ class _OwnerRegisterProfileScreenState extends State<OwnerRegisterProfileScreen>
             _username.text.trim(),
             _first.text.trim(),
             _last.text.trim(),
-            phone, // ✅ send full phone (with country code)
+            phone,
+            countryId: _selectedCountryId,
           ),
         );
   }
@@ -102,6 +131,7 @@ class _OwnerRegisterProfileScreenState extends State<OwnerRegisterProfileScreen>
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final cs = Theme.of(context).colorScheme;
 
     return BlocConsumer<OwnerRegisterBloc, OwnerRegisterState>(
       listenWhen: (p, c) => p.error != c.error || p.completed != c.completed,
@@ -154,12 +184,11 @@ class _OwnerRegisterProfileScreenState extends State<OwnerRegisterProfileScreen>
                       ),
                       const SizedBox(height: 14),
 
-                      // ✅ NEW: phone with country code
+                      // Phone field with country code
                       IntlPhoneField(
                         initialCountryCode: 'LB',
                         decoration: _phoneDecoration(context, l10n),
                         onChanged: (phone) {
-                          // phone.completeNumber => +96170123456
                           _fullPhone = phone.completeNumber;
                         },
                         validator: (phone) {
@@ -172,6 +201,55 @@ class _OwnerRegisterProfileScreenState extends State<OwnerRegisterProfileScreen>
                           return null;
                         },
                       ),
+
+                      const SizedBox(height: 14),
+
+                      // Country dropdown
+                      if (_loadingCountries)
+                        const SizedBox(
+                          height: 56,
+                          child: Center(child: CircularProgressIndicator()),
+                        )
+                      else
+                        DropdownButtonFormField<int>(
+                          value: _selectedCountryId,
+                          decoration: InputDecoration(
+                            labelText: l10n.lblCountry,
+                            hintText: l10n.hintSelectCountry,
+                            prefixIcon: const Icon(Icons.public_outlined),
+                            filled: true,
+                            fillColor: cs.surface,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(
+                                  color: cs.outlineVariant.withOpacity(0.5)),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(
+                                  color: cs.outlineVariant.withOpacity(0.5)),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide:
+                                  BorderSide(color: cs.primary, width: 1.4),
+                            ),
+                          ),
+                          isExpanded: true,
+                          items: _countries
+                              .map(
+                                (c) => DropdownMenuItem(
+                                  value: c.id,
+                                  child: Text(c.name),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (v) =>
+                              setState(() => _selectedCountryId = v),
+                          validator: (_) => _selectedCountryId == null
+                              ? l10n.errCountryRequired
+                              : null,
+                        ),
 
                       const SizedBox(height: 20),
                       AppButton(

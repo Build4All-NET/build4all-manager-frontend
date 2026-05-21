@@ -7,6 +7,11 @@ abstract class ProjectsRepository {
     String? description,
     bool? active,
     required String projectType,
+    String? displayTitle,
+    String? displayDescription,
+    String? iconName,
+    String? cardColor,
+    int? displayOrder,
   });
 
   Future<List<String>> fetchProjectTypes({

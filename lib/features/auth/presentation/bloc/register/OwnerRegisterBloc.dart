@@ -65,6 +65,7 @@ class OwnerRegisterBloc extends Bloc<OwnerRegisterEvent, OwnerRegisterState> {
         firstName: e.firstName,
         lastName: e.lastName,
         phoneNumber: e.phoneNumber,
+        countryId: e.countryId,
       );
       emit(state.copyWith(
         loading: false,

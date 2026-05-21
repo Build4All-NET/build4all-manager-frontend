@@ -22,7 +22,6 @@ import '../bloc/owner_home_bloc.dart';
 import '../bloc/owner_home_event.dart';
 import '../bloc/owner_home_state.dart';
 
-import '../../data/static_project_models.dart';
 import '../widgets/project_template_card.dart';
 
 import 'package:build4all_manager/features/owner/ownerprofile/data/services/owner_profile_api.dart';
@@ -349,6 +348,26 @@ class _HomeBodyState extends State<_HomeBody> {
                       final aspect =
                           cardW < 190 ? 0.86 : (cardW < 230 ? 0.95 : 1.05);
 
+                      final sorted = [...state.platformProjects]
+                        ..sort((a, b) =>
+                            a.displayOrder.compareTo(b.displayOrder));
+
+                      if (sorted.isEmpty && state.loading) {
+                        return SliverGrid(
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: cols,
+                            mainAxisSpacing: spacing,
+                            crossAxisSpacing: spacing,
+                            childAspectRatio: aspect,
+                          ),
+                          delegate: SliverChildBuilderDelegate(
+                            (_, __) => const _SkeletonCard(),
+                            childCount: 4,
+                          ),
+                        );
+                      }
+
                       return SliverGrid(
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: cols,
@@ -358,26 +377,14 @@ class _HomeBodyState extends State<_HomeBody> {
                         ),
                         delegate: SliverChildBuilderDelegate(
                           (context, i) {
-                            final tpl = projectTemplates[i];
-                            final kind = tpl.kind.toLowerCase();
-
-                            final isAvailable =
-                                state.availableKinds.contains(kind);
-                            final int? realProjectId =
-                                state.kindToProjectId[kind];
+                            final proj = sorted[i];
+                            final isAvailable = proj.active;
 
                             return ProjectTemplateCard(
-                              tpl: tpl,
-                              isAvailable: !(state.loading &&
-                                      state.availableKinds.isEmpty &&
-                                      state.kindToProjectId.isEmpty) &&
-                                  isAvailable,
+                              project: proj,
+                              isAvailable: isAvailable,
                               onOpen: () {
-                                final isBoot = state.loading &&
-                                    state.availableKinds.isEmpty &&
-                                    state.kindToProjectId.isEmpty;
-
-                                if (isBoot) {
+                                if (state.loading && sorted.isEmpty) {
                                   AppToast.info(
                                     context,
                                     l10n.owner_home_loading_projects,
@@ -385,25 +392,18 @@ class _HomeBodyState extends State<_HomeBody> {
                                   return;
                                 }
 
-                                if (!isAvailable) {
-                                  AppToast.info(
-                                    context,
-                                    l10n.owner_proj_comingSoon,
-                                  );
-                                  return;
-                                }
-
                                 context.push(
-                                  '/owner/project/${tpl.id}',
+                                  '/owner/project/${proj.id}',
                                   extra: {
                                     'canRequest': isAvailable,
-                                    'projectId': realProjectId,
+                                    'projectId': proj.id,
+                                    'projectType': proj.projectType ?? '',
                                   },
                                 );
                               },
                             );
                           },
-                          childCount: projectTemplates.length,
+                          childCount: sorted.length,
                         ),
                       );
                     },
@@ -532,6 +532,22 @@ class _OwnerProjectsSearchField extends StatelessWidget {
           else
             const SizedBox(width: 12),
         ],
+      ),
+    );
+  }
+}
+
+class _SkeletonCard extends StatelessWidget {
+  const _SkeletonCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerHighest.withOpacity(.40),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: cs.outlineVariant.withOpacity(.35)),
       ),
     );
   }
