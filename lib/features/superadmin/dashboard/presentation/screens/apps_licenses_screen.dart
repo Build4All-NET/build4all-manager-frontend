@@ -152,9 +152,9 @@ class _AppsLicensesScreenState extends State<AppsLicensesScreen> {
       case _LicenseFilter.free:
         return plan == 'FREE';
       case _LicenseFilter.proHosted:
-        return plan == 'BASIC';
+        return plan != 'FREE' && item.requiresDedicatedServer != true;
       case _LicenseFilter.dedicated:
-        return plan == 'DEDICATED' || item.requiresDedicatedServer == true;
+        return item.requiresDedicatedServer == true;
     }
   }
 
@@ -237,9 +237,6 @@ class _AppsLicensesScreenState extends State<AppsLicensesScreen> {
     final raw = (code ?? '').toUpperCase();
 
     if (raw == 'FREE') return l10n.app_licenses_plan_free;
-    if (raw == 'BASIC') return l10n.app_licenses_plan_pro_hosted;
-    if (raw == 'DEDICATED') return l10n.app_licenses_plan_dedicated;
-
     if ((planName ?? '').trim().isNotEmpty) return planName!.trim();
     if ((code ?? '').trim().isNotEmpty) return code!;
     return l10n.unknownLabel;
@@ -283,10 +280,6 @@ class _AppsLicensesScreenState extends State<AppsLicensesScreen> {
         return Colors.orange;
       case 'FREE':
         return cs.primary;
-      case 'BASIC':
-        return Colors.blue;
-      case 'DEDICATED':
-        return Colors.deepPurple;
       case 'EXPIRED':
       case 'REJECTED':
       case 'SUSPENDED':
@@ -477,11 +470,12 @@ class _AppsLicensesScreenState extends State<AppsLicensesScreen> {
     final freeCount =
         _items.where((e) => (e.planCode ?? '').toUpperCase() == 'FREE').length;
     final proCount = _items
-        .where((e) => (e.planCode ?? '').toUpperCase() == 'BASIC')
+        .where((e) =>
+            (e.planCode ?? '').toUpperCase() != 'FREE' &&
+            e.requiresDedicatedServer != true)
         .length;
-    final dedicatedCount = _items
-        .where((e) => (e.planCode ?? '').toUpperCase() == 'DEDICATED')
-        .length;
+    final dedicatedCount =
+        _items.where((e) => e.requiresDedicatedServer == true).length;
 
     return Container(
       padding: const EdgeInsets.all(18),

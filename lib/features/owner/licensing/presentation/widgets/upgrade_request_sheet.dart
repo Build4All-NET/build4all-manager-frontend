@@ -3,11 +3,10 @@ import 'package:build4all_manager/shared/utils/ApiErrorHandler.dart';
 import 'package:build4all_manager/shared/widgets/app_toast.dart';
 import 'package:flutter/material.dart';
 
-import '../../data/models/available_payment_method_model.dart';
 import '../../data/models/upgrade_plan_option_model.dart';
 import '../../data/services/owner_licensing_api.dart';
 
-/// Call this to show the upgrade-request bottom sheet.
+/// Shows the upgrade-request bottom sheet.
 /// Returns true if the request was submitted successfully.
 Future<bool?> showUpgradeRequestSheet(BuildContext context) {
   return showModalBottomSheet<bool>(
@@ -34,28 +33,17 @@ class _UpgradeRequestSheetState extends State<_UpgradeRequestSheet> {
   final _api = OwnerLicensingApi(DioClient.ensure());
 
   List<UpgradePlanOptionModel> _plans = const [];
-  List<AvailablePaymentMethodModel> _methods = const [];
-
   bool _loadingPlans = true;
-  bool _loadingMethods = true;
   String? _plansError;
-  String? _methodsError;
 
   String? _selectedPlanCode;
   String _billingCycle = 'MONTHLY';
-  int? _selectedMethodId;
-
   bool _submitting = false;
 
   @override
   void initState() {
     super.initState();
-    _loadAll();
-  }
-
-  Future<void> _loadAll() async {
     _loadPlans();
-    _loadMethods();
   }
 
   Future<void> _loadPlans() async {
@@ -78,30 +66,6 @@ class _UpgradeRequestSheetState extends State<_UpgradeRequestSheet> {
       setState(() {
         _loadingPlans = false;
         _plansError = ApiErrorHandler.message(e);
-      });
-    }
-  }
-
-  Future<void> _loadMethods() async {
-    setState(() {
-      _loadingMethods = true;
-      _methodsError = null;
-    });
-    try {
-      final methods = await _api.getPaymentMethods();
-      if (!mounted) return;
-      setState(() {
-        _methods = methods;
-        _loadingMethods = false;
-        if (_selectedMethodId == null && methods.isNotEmpty) {
-          _selectedMethodId = methods.first.id;
-        }
-      });
-    } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _loadingMethods = false;
-        _methodsError = ApiErrorHandler.message(e);
       });
     }
   }
@@ -148,13 +112,12 @@ class _UpgradeRequestSheetState extends State<_UpgradeRequestSheet> {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
 
-    final bool loading = _loadingPlans || _loadingMethods;
     final bool canSubmit =
-        !loading && !_submitting && _selectedPlanCode != null;
+        !_loadingPlans && !_submitting && _selectedPlanCode != null;
 
     return DraggableScrollableSheet(
       expand: false,
-      initialChildSize: 0.75,
+      initialChildSize: 0.65,
       minChildSize: 0.4,
       maxChildSize: 0.95,
       builder: (_, controller) => Padding(
@@ -185,8 +148,8 @@ class _UpgradeRequestSheetState extends State<_UpgradeRequestSheet> {
                             ),
                             Text(
                               'Choose a plan to send a request.',
-                              style: tt.bodyMedium?.copyWith(
-                                  color: cs.onSurfaceVariant),
+                              style: tt.bodyMedium
+                                  ?.copyWith(color: cs.onSurfaceVariant),
                             ),
                           ],
                         ),
@@ -198,13 +161,13 @@ class _UpgradeRequestSheetState extends State<_UpgradeRequestSheet> {
                   // Plans section
                   if (_loadingPlans)
                     const Center(
-                        child: Padding(
-                      padding: EdgeInsets.symmetric(vertical: 24),
-                      child: CircularProgressIndicator(),
-                    ))
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 32),
+                        child: CircularProgressIndicator(),
+                      ),
+                    )
                   else if (_plansError != null)
-                    _ErrorRetry(
-                        message: _plansError!, onRetry: _loadPlans)
+                    _ErrorRetry(message: _plansError!, onRetry: _loadPlans)
                   else if (_plans.isEmpty)
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 16),
@@ -227,7 +190,7 @@ class _UpgradeRequestSheetState extends State<_UpgradeRequestSheet> {
 
                   const SizedBox(height: 20),
 
-                  // Billing cycle
+                  // Billing cycle toggle
                   Text(
                     'BILLING CYCLE',
                     style: tt.labelSmall?.copyWith(
@@ -241,47 +204,9 @@ class _UpgradeRequestSheetState extends State<_UpgradeRequestSheet> {
                     selected: _billingCycle,
                     onChanged: (v) => setState(() => _billingCycle = v),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 28),
 
-                  // Payment method section
-                  Text(
-                    'PAYMENT METHOD',
-                    style: tt.labelSmall?.copyWith(
-                      color: cs.onSurfaceVariant,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 1.1,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  if (_loadingMethods)
-                    const Center(
-                        child: Padding(
-                      padding: EdgeInsets.symmetric(vertical: 12),
-                      child: CircularProgressIndicator(),
-                    ))
-                  else if (_methodsError != null)
-                    _ErrorRetry(
-                        message: _methodsError!, onRetry: _loadMethods)
-                  else if (_methods.isEmpty)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      child: Text(
-                        'No payment methods configured.',
-                        style: tt.bodyMedium
-                            ?.copyWith(color: cs.onSurfaceVariant),
-                      ),
-                    )
-                  else
-                    ..._methods.map((m) => _MethodTile(
-                          method: m,
-                          selected: _selectedMethodId == m.id,
-                          onTap: () =>
-                              setState(() => _selectedMethodId = m.id),
-                        )),
-
-                  const SizedBox(height: 24),
-
-                  // Submit button
+                  // Submit
                   SizedBox(
                     width: double.infinity,
                     child: FilledButton(
@@ -316,6 +241,8 @@ class _UpgradeRequestSheetState extends State<_UpgradeRequestSheet> {
   }
 }
 
+// ── Plan tile ─────────────────────────────────────────────────────────────────
+
 class _PlanTile extends StatelessWidget {
   final UpgradePlanOptionModel plan;
   final String price;
@@ -346,9 +273,7 @@ class _PlanTile extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: selected
-                  ? cs.primary
-                  : cs.outlineVariant.withOpacity(.6),
+              color: selected ? cs.primary : cs.outlineVariant.withOpacity(.6),
               width: selected ? 2 : 1,
             ),
             color: selected
@@ -381,14 +306,13 @@ class _PlanTile extends StatelessWidget {
                         plan.description!.isNotEmpty)
                       Text(
                         plan.description!,
-                        style: tt.bodySmall?.copyWith(
-                            color: cs.onSurfaceVariant),
+                        style: tt.bodySmall
+                            ?.copyWith(color: cs.onSurfaceVariant),
                       ),
                     if (!available && plan.unavailableReason != null)
                       Text(
                         plan.unavailableReason!,
-                        style: tt.bodySmall
-                            ?.copyWith(color: cs.error),
+                        style: tt.bodySmall?.copyWith(color: cs.error),
                       ),
                   ],
                 ),
@@ -397,7 +321,9 @@ class _PlanTile extends StatelessWidget {
                 price,
                 style: tt.titleSmall?.copyWith(
                   fontWeight: FontWeight.w800,
-                  color: available ? cs.onSurface : cs.onSurface.withOpacity(.4),
+                  color: available
+                      ? cs.onSurface
+                      : cs.onSurface.withOpacity(.4),
                 ),
               ),
             ],
@@ -408,14 +334,13 @@ class _PlanTile extends StatelessWidget {
   }
 }
 
+// ── Billing cycle toggle ──────────────────────────────────────────────────────
+
 class _BillingCycleToggle extends StatelessWidget {
   final String selected;
   final ValueChanged<String> onChanged;
 
-  const _BillingCycleToggle({
-    required this.selected,
-    required this.onChanged,
-  });
+  const _BillingCycleToggle({required this.selected, required this.onChanged});
 
   @override
   Widget build(BuildContext context) {
@@ -490,75 +415,7 @@ class _Tab extends StatelessWidget {
   }
 }
 
-class _MethodTile extends StatelessWidget {
-  final AvailablePaymentMethodModel method;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _MethodTile({
-    required this.method,
-    required this.selected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: selected
-                  ? cs.primary
-                  : cs.outlineVariant.withOpacity(.6),
-              width: selected ? 2 : 1,
-            ),
-            color: selected
-                ? cs.primaryContainer.withOpacity(.18)
-                : cs.surfaceContainerHighest.withOpacity(.3),
-          ),
-          child: Row(
-            children: [
-              Radio<int>(
-                value: method.id,
-                groupValue: selected ? method.id : null,
-                onChanged: (_) => onTap(),
-                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      method.displayName,
-                      style: tt.titleSmall
-                          ?.copyWith(fontWeight: FontWeight.w700),
-                    ),
-                    Text(
-                      method.typeName,
-                      style: tt.bodySmall
-                          ?.copyWith(color: cs.onSurfaceVariant),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
+// ── Error + retry ─────────────────────────────────────────────────────────────
 
 class _ErrorRetry extends StatelessWidget {
   final String message;

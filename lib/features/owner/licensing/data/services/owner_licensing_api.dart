@@ -1,7 +1,6 @@
 import 'package:build4all_manager/core/network/globals.dart' as g;
 import 'package:dio/dio.dart';
 
-import '../models/available_payment_method_model.dart';
 import '../models/upgrade_plan_option_model.dart';
 
 class OwnerLicensingApi {
@@ -47,12 +46,6 @@ class OwnerLicensingApi {
     final res = await _dio.get('$_base/licensing/apps/me/upgrade-plans');
     if (!_isOk(res)) _throw(res);
     return _parseList(res.data, UpgradePlanOptionModel.fromJson);
-  }
-
-  Future<List<AvailablePaymentMethodModel>> getPaymentMethods() async {
-    final res = await _dio.get('$_base/licensing/apps/me/payment-methods');
-    if (!_isOk(res)) _throw(res);
-    return _parseList(res.data, AvailablePaymentMethodModel.fromJson);
   }
 
   Future<void> sendUpgradeRequest({
