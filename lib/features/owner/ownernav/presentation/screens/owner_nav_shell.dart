@@ -55,7 +55,7 @@ class OwnerNavShell extends StatefulWidget {
     this.initialIndex = 0,
   });
 
-  @override
+
   State<OwnerNavShell> createState() => _OwnerNavShellState();
 }
 
