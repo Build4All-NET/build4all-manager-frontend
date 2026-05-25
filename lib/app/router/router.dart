@@ -7,6 +7,11 @@ import 'package:build4all_manager/features/owner/ownerhome/data/static_project_m
 import 'package:build4all_manager/features/owner/ownerhome/presentation/screens/owner_project_details_screen.dart';
 import 'package:build4all_manager/features/owner/ownerhome/presentation/screens/owner_requests_list_screen.dart';
 import 'package:build4all_manager/features/owner/ownerrequests/presentation/screens/owner_requests_screen.dart';
+import 'package:build4all_manager/features/owner/social/presentation/cubit/social_channels_cubit.dart';
+import 'package:build4all_manager/features/owner/social/presentation/screens/owner_social_channel_detail_screen.dart';
+import 'package:build4all_manager/features/owner/social/presentation/screens/owner_social_channels_screen.dart';
+import 'package:build4all_manager/features/owner/social/presentation/screens/owner_social_oauth_webview_screen.dart';
+import 'package:build4all_manager/features/owner/social/presentation/screens/social_oauth_models.dart';
 
 import 'package:build4all_manager/features/superadmin/payment_management/domain/entities/managed_payment_type.dart';
 import 'package:build4all_manager/features/superadmin/payment_management/domain/entities/payment_method.dart';
@@ -232,6 +237,34 @@ final router = GoRouter(
               builder: (context, state) {
                 final s = OwnerSessionScope.of(context);
                 return OwnerProfileScreen(dio: s.dio);
+              },
+            ),
+            GoRoute(
+              path: '/owner/social/channels',
+              builder: (context, state) => const OwnerSocialChannelsScreen(),
+              routes: [
+                GoRoute(
+                  path: ':id',
+                  builder: (context, state) {
+                    final id = int.parse(state.pathParameters['id']!);
+                    // The detail screen needs the channels cubit owned by the list
+                    // screen above; we instantiate a fresh one here when navigated
+                    // to directly (e.g. deep link), and rely on its load() in
+                    // initState. For taps from the list, extra carries it.
+                    final extra = state.extra;
+                    final cubit = (extra is SocialChannelsCubit)
+                        ? extra
+                        : (SocialChannelsCubit()..load());
+                    return OwnerSocialChannelDetailScreen(cubit: cubit, channelId: id);
+                  },
+                ),
+              ],
+            ),
+            GoRoute(
+              path: '/owner/social/oauth',
+              builder: (context, state) {
+                final args = state.extra as SocialOAuthArgs;
+                return OwnerSocialOAuthWebViewScreen(args: args);
               },
             ),
           ],
@@ -508,8 +541,9 @@ class _OwnerNavWrapperState extends State<_OwnerNavWrapper> {
 
   int _indexForLoc(String loc) {
     if (loc.startsWith('/owner/projects')) return 1;
-    if (loc.startsWith('/owner/notifications')) return 2;
-    if (loc.startsWith('/owner/profile')) return 3;
+    if (loc.startsWith('/owner/social')) return 2;
+    if (loc.startsWith('/owner/notifications')) return 3;
+    if (loc.startsWith('/owner/profile')) return 4;
     return 0;
   }
 
@@ -530,6 +564,12 @@ class _OwnerNavWrapperState extends State<_OwnerNavWrapper> {
         selectedIcon: Icons.apps_rounded,
         label: l10n.owner_nav_projects,
         route: '/owner/projects',
+      ),
+      OwnerDestination(
+        icon: Icons.share_outlined,
+        selectedIcon: Icons.share_rounded,
+        label: l10n.owner_nav_social,
+        route: '/owner/social/channels',
       ),
       OwnerDestination(
         icon: Icons.notifications_none_outlined,

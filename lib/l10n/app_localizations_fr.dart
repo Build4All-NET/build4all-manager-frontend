@@ -3225,6 +3225,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get owner_nav_notifications => 'Notifications';
 
   @override
+  String get owner_nav_social => 'Réseaux sociaux';
+
+  @override
   String get owner_publish_price_free => 'Gratuit';
 
   @override
@@ -3354,22 +3357,19 @@ class AppLocalizationsFr extends AppLocalizations {
   String get super_proj_display_title => 'Titre affiché';
 
   @override
-  String get super_proj_display_title_hint =>
-      'Titre court affiché sur la carte de l\'application';
+  String get super_proj_display_title_hint => 'Titre court affiché sur la carte de l\'application';
 
   @override
   String get super_proj_display_description => 'Description de la carte';
 
   @override
-  String get super_proj_display_description_hint =>
-      'Description courte affichée sous le titre';
+  String get super_proj_display_description_hint => 'Description courte affichée sous le titre';
 
   @override
   String get super_proj_icon_name => 'Nom de l\'icône';
 
   @override
-  String get super_proj_icon_name_hint =>
-      'Clé d\'icône Flutter (ex: shopping_bag_rounded)';
+  String get super_proj_icon_name_hint => 'Clé d\'icône Flutter (ex: shopping_bag_rounded)';
 
   @override
   String get super_proj_card_color => 'Couleur accentuée de la carte';
@@ -3381,6 +3381,5 @@ class AppLocalizationsFr extends AppLocalizations {
   String get super_proj_display_order => 'Ordre d\'affichage';
 
   @override
-  String get super_proj_display_order_hint =>
-      'Les numéros inférieurs apparaissent en premier (ex: 1)';
+  String get super_proj_display_order_hint => 'Les numéros inférieurs apparaissent en premier (ex: 1)';
 }

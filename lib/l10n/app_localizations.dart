@@ -6421,6 +6421,12 @@ abstract class AppLocalizations {
   /// **'Notifications'**
   String get owner_nav_notifications;
 
+  /// No description provided for @owner_nav_social.
+  ///
+  /// In en, this message translates to:
+  /// **'Social media'**
+  String get owner_nav_social;
+
   /// No description provided for @owner_publish_price_free.
   ///
   /// In en, this message translates to:
@@ -6674,33 +6680,63 @@ abstract class AppLocalizations {
   String get errCountryRequired;
 
   /// No description provided for @super_proj_display_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Display title'**
   String get super_proj_display_title;
 
   /// No description provided for @super_proj_display_title_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Short title shown on the app card (e.g. E-commerce)'**
   String get super_proj_display_title_hint;
 
   /// No description provided for @super_proj_display_description.
+  ///
+  /// In en, this message translates to:
+  /// **'Card description'**
   String get super_proj_display_description;
 
   /// No description provided for @super_proj_display_description_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Brief description shown under the title'**
   String get super_proj_display_description_hint;
 
   /// No description provided for @super_proj_icon_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Icon name'**
   String get super_proj_icon_name;
 
   /// No description provided for @super_proj_icon_name_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Flutter icon key (e.g. shopping_bag_rounded)'**
   String get super_proj_icon_name_hint;
 
   /// No description provided for @super_proj_card_color.
+  ///
+  /// In en, this message translates to:
+  /// **'Card accent color'**
   String get super_proj_card_color;
 
   /// No description provided for @super_proj_card_color_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Hex color (e.g. #2563EB)'**
   String get super_proj_card_color_hint;
 
   /// No description provided for @super_proj_display_order.
+  ///
+  /// In en, this message translates to:
+  /// **'Display order'**
   String get super_proj_display_order;
 
   /// No description provided for @super_proj_display_order_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Lower numbers appear first (e.g. 1)'**
   String get super_proj_display_order_hint;
 }
 

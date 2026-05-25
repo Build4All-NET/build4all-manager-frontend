@@ -3225,6 +3225,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get owner_nav_notifications => 'الإشعارات';
 
   @override
+  String get owner_nav_social => 'وسائل التواصل الاجتماعي';
+
+  @override
   String get owner_publish_price_free => 'مجاني';
 
   @override
@@ -3354,22 +3357,19 @@ class AppLocalizationsAr extends AppLocalizations {
   String get super_proj_display_title => 'العنوان التعريفي';
 
   @override
-  String get super_proj_display_title_hint =>
-      'عنوان قصير يظهر على بطاقة التطبيق';
+  String get super_proj_display_title_hint => 'عنوان قصير يظهر على بطاقة التطبيق';
 
   @override
   String get super_proj_display_description => 'وصف البطاقة';
 
   @override
-  String get super_proj_display_description_hint =>
-      'وصف مختصر يظهر أسفل العنوان';
+  String get super_proj_display_description_hint => 'وصف مختصر يظهر أسفل العنوان';
 
   @override
   String get super_proj_icon_name => 'اسم الأيقونة';
 
   @override
-  String get super_proj_icon_name_hint =>
-      'مفتاح أيقونة Flutter (مثال: shopping_bag_rounded)';
+  String get super_proj_icon_name_hint => 'مفتاح أيقونة Flutter (مثال: shopping_bag_rounded)';
 
   @override
   String get super_proj_card_color => 'لون بطاقة المشروع';
@@ -3381,6 +3381,5 @@ class AppLocalizationsAr extends AppLocalizations {
   String get super_proj_display_order => 'ترتيب العرض';
 
   @override
-  String get super_proj_display_order_hint =>
-      'الأرقام الأصغر تظهر أولاً (مثال: 1)';
+  String get super_proj_display_order_hint => 'الأرقام الأصغر تظهر أولاً (مثال: 1)';
 }

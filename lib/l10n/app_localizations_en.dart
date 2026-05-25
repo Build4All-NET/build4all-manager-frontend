@@ -3225,6 +3225,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get owner_nav_notifications => 'Notifications';
 
   @override
+  String get owner_nav_social => 'Social media';
+
+  @override
   String get owner_publish_price_free => 'Free';
 
   @override
@@ -3354,22 +3357,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get super_proj_display_title => 'Display title';
 
   @override
-  String get super_proj_display_title_hint =>
-      'Short title shown on the app card (e.g. E-commerce)';
+  String get super_proj_display_title_hint => 'Short title shown on the app card (e.g. E-commerce)';
 
   @override
   String get super_proj_display_description => 'Card description';
 
   @override
-  String get super_proj_display_description_hint =>
-      'Brief description shown under the title';
+  String get super_proj_display_description_hint => 'Brief description shown under the title';
 
   @override
   String get super_proj_icon_name => 'Icon name';
 
   @override
-  String get super_proj_icon_name_hint =>
-      'Flutter icon key (e.g. shopping_bag_rounded)';
+  String get super_proj_icon_name_hint => 'Flutter icon key (e.g. shopping_bag_rounded)';
 
   @override
   String get super_proj_card_color => 'Card accent color';
@@ -3381,6 +3381,5 @@ class AppLocalizationsEn extends AppLocalizations {
   String get super_proj_display_order => 'Display order';
 
   @override
-  String get super_proj_display_order_hint =>
-      'Lower numbers appear first (e.g. 1)';
+  String get super_proj_display_order_hint => 'Lower numbers appear first (e.g. 1)';
 }
