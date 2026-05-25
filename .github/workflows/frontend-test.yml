@@ -1,0 +1,40 @@
+name: Frontend tests
+
+on:
+  push:
+    branches:
+      - main
+      - 'claude/**'
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: frontend-test-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: flutter test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          # Pinned to the version the dev environment uses today. Update
+          # together with the dev SDK so CI never lags or leads.
+          flutter-version: '3.44.0'
+          channel: stable
+
+      - name: flutter pub get
+        run: flutter pub get
+
+      - name: flutter analyze (social module only)
+        # Repo-wide analyze surfaces pre-existing info-level noise; we
+        # only fail CI when our new module regresses.
+        run: flutter analyze lib/features/owner/social/ test/features/owner/social/
+
+      - name: flutter test (social module)
+        run: flutter test test/features/owner/social/ --reporter=expanded

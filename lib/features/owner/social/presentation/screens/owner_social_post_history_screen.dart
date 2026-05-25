@@ -3,6 +3,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../data/models/social_channel.dart';
 import '../../data/models/social_post.dart';
+import '../../data/services/social_api.dart';
 
 /// Post-history screen for one channel. The dedicated channel-history
 /// endpoint lands in Slice 4; for Slice 3 this screen surfaces an empty
@@ -19,19 +20,19 @@ class OwnerSocialPostHistoryScreen extends StatefulWidget {
 
 class _OwnerSocialPostHistoryScreenState
     extends State<OwnerSocialPostHistoryScreen> {
+  final SocialApi _api = SocialApi();
   late Future<List<SocialPost>> _future;
 
   @override
   void initState() {
     super.initState();
-    _future = _load();
+    _future = _api.listChannelPosts(widget.channel.id);
   }
 
-  /// Channel-wide history endpoint lands in Slice 4. For Slice 3, this screen
-  /// surfaces an empty state pointing the OWNER to the per-item panel — which
-  /// is where the per-channel history actually lives today.
-  Future<List<SocialPost>> _load() async {
-    return const <SocialPost>[];
+  void _refresh() {
+    setState(() {
+      _future = _api.listChannelPosts(widget.channel.id);
+    });
   }
 
   @override
@@ -66,9 +67,7 @@ class _OwnerSocialPostHistoryScreenState
                         color: theme.colorScheme.outline, size: 64),
                     const SizedBox(height: 12),
                     Text(
-                      'Channel-wide history is coming in the next slice.\n'
-                      'For now, open a product to see its individual posts '
-                      'in the Social media panel.',
+                      'No posts yet for this channel.',
                       textAlign: TextAlign.center,
                       style: theme.textTheme.bodyMedium?.copyWith(
                           color: theme.colorScheme.outline),
@@ -79,7 +78,7 @@ class _OwnerSocialPostHistoryScreenState
             );
           }
           return RefreshIndicator(
-            onRefresh: () async => setState(() { _future = _load(); }),
+            onRefresh: () async { _refresh(); await _future; },
             child: ListView.separated(
               itemCount: posts.length,
               separatorBuilder: (_, __) => const Divider(height: 1),

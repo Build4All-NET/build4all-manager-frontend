@@ -106,6 +106,13 @@ class SocialApi {
     return raw.map(SocialItemOverride.fromJson).toList(growable: false);
   }
 
+  /// Channel-wide post history (closeout endpoint). Newest first.
+  Future<List<SocialPost>> listChannelPosts(int channelId) async {
+    final r = await _dio.get('/owner/social/channels/$channelId/posts');
+    final raw = (r.data as List).cast<Map<String, dynamic>>();
+    return raw.map(SocialPost.fromJson).toList(growable: false);
+  }
+
   Future<SocialItemOverride> putOverride(
     int itemId,
     int channelId, {
