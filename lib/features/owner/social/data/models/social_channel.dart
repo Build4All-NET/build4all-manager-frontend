@@ -35,6 +35,10 @@ enum SocialChannelProvider {
       case SocialChannelProvider.whatsappCatalog: return 'WhatsApp Catalog';
     }
   }
+
+  bool get isCatalog =>
+      this == SocialChannelProvider.metaCatalog ||
+      this == SocialChannelProvider.whatsappCatalog;
 }
 
 enum SocialChannelStatus {

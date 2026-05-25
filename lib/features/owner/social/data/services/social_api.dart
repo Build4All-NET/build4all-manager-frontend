@@ -125,6 +125,32 @@ class SocialApi {
   Future<void> deleteOverride(int itemId, int channelId) async {
     await _dio.delete('/owner/items/$itemId/social/overrides/$channelId');
   }
+
+  // -------- Plan B catalog feed --------
+
+  /// Asks the backend to issue a fresh HMAC-signed feed URL Meta can pull on
+  /// a schedule. The returned URL is public — the OWNER copies it into Meta
+  /// Commerce Manager. URL expires server-side; re-issue when it does.
+  Future<PlanBFeedUrl> issueCatalogFeedUrl() async {
+    final r = await _dio.get('/owner/social/feed/url');
+    final j = r.data as Map<String, dynamic>;
+    return PlanBFeedUrl(
+      url: j['url'] as String,
+      expiresAt: DateTime.parse(j['expiresAt'] as String),
+      ttlSeconds: (j['ttlSeconds'] as num).toInt(),
+    );
+  }
+}
+
+class PlanBFeedUrl {
+  final String url;
+  final DateTime expiresAt;
+  final int ttlSeconds;
+  const PlanBFeedUrl({
+    required this.url,
+    required this.expiresAt,
+    required this.ttlSeconds,
+  });
 }
 
 /// Tuple result of [SocialApi.startOAuth].
