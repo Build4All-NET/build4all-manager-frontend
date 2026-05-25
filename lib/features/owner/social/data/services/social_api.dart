@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 
 import 'package:build4all_manager/core/network/dio_client.dart';
 import '../models/social_channel.dart';
+import '../models/social_post.dart';
 
 /// Thin Dio wrapper for the social-media module's REST surface.
 ///
@@ -81,6 +82,48 @@ class SocialApi {
     );
     final list = (r.data['connectedChannels'] as List).cast<Map<String, dynamic>>();
     return list.map(SocialChannel.fromJson).toList(growable: false);
+  }
+
+  // -------- per-item social: history + publish-now + overrides --------
+
+  Future<List<SocialPost>> listItemPosts(int itemId) async {
+    final r = await _dio.get('/owner/items/$itemId/social/posts');
+    final raw = (r.data as List).cast<Map<String, dynamic>>();
+    return raw.map(SocialPost.fromJson).toList(growable: false);
+  }
+
+  Future<SocialPost> publishNow(int itemId, int channelId) async {
+    final r = await _dio.post(
+      '/owner/items/$itemId/social/publish-now',
+      queryParameters: {'channelId': channelId},
+    );
+    return SocialPost.fromJson(r.data as Map<String, dynamic>);
+  }
+
+  Future<List<SocialItemOverride>> listOverrides(int itemId) async {
+    final r = await _dio.get('/owner/items/$itemId/social/overrides');
+    final raw = (r.data as List).cast<Map<String, dynamic>>();
+    return raw.map(SocialItemOverride.fromJson).toList(growable: false);
+  }
+
+  Future<SocialItemOverride> putOverride(
+    int itemId,
+    int channelId, {
+    bool? autoPublishOverride,
+    String? captionOverride,
+  }) async {
+    final r = await _dio.put(
+      '/owner/items/$itemId/social/overrides/$channelId',
+      data: {
+        'autoPublishOverride': autoPublishOverride,
+        'captionOverride': captionOverride,
+      },
+    );
+    return SocialItemOverride.fromJson(r.data as Map<String, dynamic>);
+  }
+
+  Future<void> deleteOverride(int itemId, int channelId) async {
+    await _dio.delete('/owner/items/$itemId/social/overrides/$channelId');
   }
 }
 
