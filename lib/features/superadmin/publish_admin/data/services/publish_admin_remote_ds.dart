@@ -28,27 +28,32 @@ class PublishAdminRemoteDs {
     return [];
   }
 
-  Future<void> approve(int requestId, String? notes) async {
-  await dio.post(
-    '/superadmin/publish/$requestId/approve',
-    data: {
-      'requestId': requestId,
-      if (notes != null && notes.trim().isNotEmpty) 'notes': notes.trim(),
-    },
-  );
-}
+  Future<void> approve(
+    int requestId,
+    String? notes,
+    int? firebaseProjectAccountId,
+  ) async {
+    await dio.post(
+      '/superadmin/publish/$requestId/approve',
+      data: {
+        'requestId': requestId,
+        if (notes != null && notes.trim().isNotEmpty) 'notes': notes.trim(),
+        if (firebaseProjectAccountId != null)
+          'firebaseProjectAccountId': firebaseProjectAccountId,
+      },
+    );
+  }
 
-Future<void> reject(int requestId, String? notes) async {
-  await dio.post(
-    '/superadmin/publish/$requestId/reject',
-    data: {
-      'requestId': requestId,
-      if (notes != null && notes.trim().isNotEmpty) 'notes': notes.trim(),
-    },
-  );
-}
+  Future<void> reject(int requestId, String? notes) async {
+    await dio.post(
+      '/superadmin/publish/$requestId/reject',
+      data: {
+        'requestId': requestId,
+        if (notes != null && notes.trim().isNotEmpty) 'notes': notes.trim(),
+      },
+    );
+  }
 
-  
   Future<List<PublisherProfileModel>> getProfiles() async {
     final res = await dio.get('/superadmin/publisher-profiles');
     final data = res.data;

@@ -3,7 +3,11 @@ import '../entities/publisher_profile.dart';
 
 abstract class PublishAdminRepo {
   Future<List<AppPublishRequestAdmin>> getRequests({required String status});
-  Future<void> approve({required int requestId, String? notes});
+  Future<void> approve({
+    required int requestId,
+    String? notes,
+    int? firebaseProjectAccountId,
+  });
   Future<void> reject({required int requestId, String? notes});
 
   Future<List<PublisherProfile>> getPublisherProfiles();

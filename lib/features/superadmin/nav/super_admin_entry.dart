@@ -1,5 +1,6 @@
 
 import 'package:build4all_manager/features/notifications_admin/presentation/screens/admin_notifications_screen.dart';
+import 'package:build4all_manager/features/superadmin/firebase_pool/presentation/screens/firebase_pool_screen.dart';
 import 'package:build4all_manager/features/superadmin/sprint_release/presentation/cubit/sprint_release_cubit.dart';
 import 'package:build4all_manager/features/superadmin/sprint_release/presentation/screens/sprint_release_screen.dart';
 import 'package:dio/dio.dart';
@@ -66,6 +67,12 @@ class SuperAdminEntry extends StatelessWidget {
         selectedIcon: Icons.publish_rounded,
         label: l10n.owner_nav_requests,
         page: PublishRequestsScreen(dio: dio),
+      ),
+      SuperAdminDestination(
+        icon: Icons.storage_outlined,
+        selectedIcon: Icons.storage_rounded,
+        label: 'Firebase Pool',
+        page: const FirebasePoolScreen(),
       ),
       SuperAdminDestination(
         icon: Icons.rocket_launch_outlined,
