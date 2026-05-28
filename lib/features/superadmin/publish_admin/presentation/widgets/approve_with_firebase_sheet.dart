@@ -1,9 +1,9 @@
 import 'package:build4all_manager/core/network/dio_client.dart';
+import 'package:build4all_manager/features/superadmin/firebase_pool/data/services/firebase_pool_remote_ds.dart';
+import 'package:build4all_manager/features/superadmin/firebase_pool/domain/entities/firebase_project_account.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../firebase_pool/data/models/firebase_project_account_model.dart';
-import '../../../../firebase_pool/data/services/firebase_pool_remote_ds.dart';
-import '../../../../firebase_pool/domain/entities/firebase_project_account.dart';
+
 
 typedef ApproveResult = ({String notes, int? firebaseProjectAccountId});
 
