@@ -17,8 +17,12 @@ class PublishAdminRepoImpl implements PublishAdminRepo {
   }
 
   @override
-  Future<void> approve({required int requestId, String? notes}) {
-    return remote.approve(requestId, notes);
+  Future<void> approve({
+    required int requestId,
+    String? notes,
+    int? firebaseProjectAccountId,
+  }) {
+    return remote.approve(requestId, notes, firebaseProjectAccountId);
   }
 
   @override

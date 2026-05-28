@@ -17,6 +17,7 @@ import '../../domain/usecases/reject_request.dart';
 import '../bloc/publish_request_detail_bloc.dart';
 import '../bloc/publish_request_detail_event.dart';
 import '../bloc/publish_request_detail_state.dart';
+import '../widgets/approve_with_firebase_sheet.dart';
 import '../widgets/decision_sheet.dart';
 
 class PublishRequestDetailScreen extends StatelessWidget {
@@ -286,226 +287,237 @@ class _View extends StatelessWidget {
                     ),
                   ],
                 )
-              else ...[
-                _PlatformCard(
-                  tone: _PlatformTone.android,
-                  title: androidTitle,
-                  subtitle: androidSubtitle,
-                  statusPill: _StatusPill(
-                    label: _niceStatus(context, item.status),
-                    type: _statusType(item.status),
+              else ...
+                [
+                  _PlatformCard(
+                    tone: _PlatformTone.android,
+                    title: androidTitle,
+                    subtitle: androidSubtitle,
+                    statusPill: _StatusPill(
+                      label: _niceStatus(context, item.status),
+                      type: _statusType(item.status),
+                    ),
+                    headerInlineLine: InlinePlatformsLine(
+                      androidText: androidLine,
+                      iosText: iosLine,
+                      dense: true,
+                    ),
+                    rows: [
+                      _kvRow(
+                        context,
+                        l10n.publish_details_label_package_name,
+                        item.packageNameSnapshot ?? '—',
+                      ),
+                      _kvRow(
+                        context,
+                        l10n.publish_table_version,
+                        item.androidVersionName ?? '—',
+                      ),
+                      _kvRow(
+                        context,
+                        l10n.publish_details_label_version_code,
+                        item.androidVersionCode?.toString() ?? '—',
+                      ),
+                      _kvRow(
+                        context,
+                        l10n.publish_details_label_last_build,
+                        _fmtDt(item.requestedAt) ?? '—',
+                      ),
+                      _kvRow(
+                        context,
+                        l10n.publish_details_file_apk,
+                        _hasUrl(item.apkUrl)
+                            ? l10n.publish_details_available
+                            : '—',
+                      ),
+                      _kvRow(
+                        context,
+                        l10n.publish_details_file_aab,
+                        _hasUrl(item.bundleUrl)
+                            ? l10n.publish_details_available
+                            : '—',
+                      ),
+                    ],
+                    downloads: [
+                      _DownloadAction(
+                        label: l10n.publish_details_file_aab,
+                        icon: Icons.download_rounded,
+                        enabled: _hasUrl(item.bundleUrl),
+                        onPressed: () =>
+                            _openUrl(context, _abs(item.bundleUrl)),
+                      ),
+                      _DownloadAction(
+                        label: l10n.publish_details_file_apk,
+                        icon: Icons.download_rounded,
+                        enabled: _hasUrl(item.apkUrl),
+                        onPressed: () => _openUrl(context, _abs(item.apkUrl)),
+                      ),
+                    ],
+                    primaryCtaLabel: l10n.publish_details_cta_play_store,
+                    primaryCtaEnabled: false,
+                    onPrimaryCta: () => _comingSoon(context),
+                    compact: isTight,
                   ),
-                  headerInlineLine: InlinePlatformsLine(
-                    androidText: androidLine,
-                    iosText: iosLine,
-                    dense: true,
+                  const SizedBox(height: 12),
+                  _PlatformCard(
+                    tone: _PlatformTone.ios,
+                    title: iosTitle,
+                    subtitle: iosSubtitle,
+                    statusPill: _StatusPill(
+                      label: _niceStatus(context, item.status),
+                      type: _statusType(item.status),
+                    ),
+                    headerInlineLine: InlinePlatformsLine(
+                      androidText: androidLine,
+                      iosText: iosLine,
+                      dense: true,
+                    ),
+                    rows: [
+                      _kvRow(
+                        context,
+                        l10n.publish_details_label_bundle_identifier,
+                        item.bundleIdSnapshot ?? '—',
+                      ),
+                      _kvRow(
+                        context,
+                        l10n.publish_table_version,
+                        item.iosVersionName ?? '—',
+                      ),
+                      _kvRow(
+                        context,
+                        l10n.publish_details_label_build_number,
+                        item.iosBuildNumber?.toString() ?? '—',
+                      ),
+                      _kvRow(
+                        context,
+                        l10n.publish_details_label_last_build,
+                        _fmtDt(item.requestedAt) ?? '—',
+                      ),
+                      _kvRow(
+                        context,
+                        l10n.publish_details_file_ipa,
+                        _hasUrl(item.ipaUrl)
+                            ? l10n.publish_details_available
+                            : '—',
+                      ),
+                    ],
+                    downloads: [
+                      _DownloadAction(
+                        label: l10n.publish_details_download_ipa,
+                        icon: Icons.download_rounded,
+                        enabled: _hasUrl(item.ipaUrl),
+                        onPressed: () => _openUrl(context, _abs(item.ipaUrl)),
+                      ),
+                    ],
+                    primaryCtaLabel: l10n.publish_details_cta_app_store,
+                    primaryCtaEnabled: false,
+                    onPrimaryCta: () => _comingSoon(context),
+                    compact: isTight,
                   ),
-                  rows: [
-                    _kvRow(
-                      context,
-                      l10n.publish_details_label_package_name,
-                      item.packageNameSnapshot ?? '—',
-                    ),
-                    _kvRow(
-                      context,
-                      l10n.publish_table_version,
-                      item.androidVersionName ?? '—',
-                    ),
-                    _kvRow(
-                      context,
-                      l10n.publish_details_label_version_code,
-                      item.androidVersionCode?.toString() ?? '—',
-                    ),
-                    _kvRow(
-                      context,
-                      l10n.publish_details_label_last_build,
-                      _fmtDt(item.requestedAt) ?? '—',
-                    ),
-                    _kvRow(
-                      context,
-                      l10n.publish_details_file_apk,
-                      _hasUrl(item.apkUrl)
-                          ? l10n.publish_details_available
-                          : '—',
-                    ),
-                    _kvRow(
-                      context,
-                      l10n.publish_details_file_aab,
-                      _hasUrl(item.bundleUrl)
-                          ? l10n.publish_details_available
-                          : '—',
-                    ),
-                  ],
-                  downloads: [
-                    _DownloadAction(
-                      label: l10n.publish_details_file_aab,
-                      icon: Icons.download_rounded,
-                      enabled: _hasUrl(item.bundleUrl),
-                      onPressed: () => _openUrl(context, _abs(item.bundleUrl)),
-                    ),
-                    _DownloadAction(
-                      label: l10n.publish_details_file_apk,
-                      icon: Icons.download_rounded,
-                      enabled: _hasUrl(item.apkUrl),
-                      onPressed: () => _openUrl(context, _abs(item.apkUrl)),
-                    ),
-                  ],
-                  primaryCtaLabel: l10n.publish_details_cta_play_store,
-                  primaryCtaEnabled: false,
-                  onPrimaryCta: () => _comingSoon(context),
-                  compact: isTight,
-                ),
-                const SizedBox(height: 12),
-                _PlatformCard(
-                  tone: _PlatformTone.ios,
-                  title: iosTitle,
-                  subtitle: iosSubtitle,
-                  statusPill: _StatusPill(
-                    label: _niceStatus(context, item.status),
-                    type: _statusType(item.status),
-                  ),
-                  headerInlineLine: InlinePlatformsLine(
-                    androidText: androidLine,
-                    iosText: iosLine,
-                    dense: true,
-                  ),
-                  rows: [
-                    _kvRow(
-                      context,
-                      l10n.publish_details_label_bundle_identifier,
-                      item.bundleIdSnapshot ?? '—',
-                    ),
-                    _kvRow(
-                      context,
-                      l10n.publish_table_version,
-                      item.iosVersionName ?? '—',
-                    ),
-                    _kvRow(
-                      context,
-                      l10n.publish_details_label_build_number,
-                      item.iosBuildNumber?.toString() ?? '—',
-                    ),
-                    _kvRow(
-                      context,
-                      l10n.publish_details_label_last_build,
-                      _fmtDt(item.requestedAt) ?? '—',
-                    ),
-                    _kvRow(
-                      context,
-                      l10n.publish_details_file_ipa,
-                      _hasUrl(item.ipaUrl)
-                          ? l10n.publish_details_available
-                          : '—',
-                    ),
-                  ],
-                  downloads: [
-                    _DownloadAction(
-                      label: l10n.publish_details_download_ipa,
-                      icon: Icons.download_rounded,
-                      enabled: _hasUrl(item.ipaUrl),
-                      onPressed: () => _openUrl(context, _abs(item.ipaUrl)),
-                    ),
-                  ],
-                  primaryCtaLabel: l10n.publish_details_cta_app_store,
-                  primaryCtaEnabled: false,
-                  onPrimaryCta: () => _comingSoon(context),
-                  compact: isTight,
-                ),
-              ],
+                ],
               if (item.shortDescription.trim().isNotEmpty ||
-                  item.fullDescription.trim().isNotEmpty) ...[
-                const SizedBox(height: 12),
-                _Card(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l10n.publish_section_descriptions,
-                        style:
-                            Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w900,
-                                  height: 1.15,
-                                ),
-                        strutStyle: _strut,
-                        textHeightBehavior: _thb,
-                      ),
-                      const SizedBox(height: 10),
-                      _label(context, l10n.publish_label_short),
-                      const SizedBox(height: 6),
-                      _safeText(context, item.shortDescription),
-                      const SizedBox(height: 10),
-                      _label(context, l10n.publish_label_full),
-                      const SizedBox(height: 6),
-                      _safeText(context, item.fullDescription),
-                    ],
-                  ),
-                ),
-              ],
-              if (item.screenshotsUrls.isNotEmpty ||
-                  (item.appIconUrl ?? '').isNotEmpty) ...[
-                const SizedBox(height: 12),
-                _Card(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l10n.publish_section_assets,
-                        style:
-                            Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w900,
-                                  height: 1.15,
-                                ),
-                        strutStyle: _strut,
-                        textHeightBehavior: _thb,
-                      ),
-                      const SizedBox(height: 10),
-                      _label(context, l10n.publish_label_icon),
-                      const SizedBox(height: 8),
-                      _iconPreview(context, _abs(item.appIconUrl)),
-                      const SizedBox(height: 12),
-                      _label(context, l10n.publish_label_screenshots),
-                      const SizedBox(height: 8),
-                      if (item.screenshotsUrls.isEmpty)
-                        _safeText(context, l10n.publish_label_no_screenshots)
-                      else
-                        LayoutBuilder(
-                          builder: (ctx, c) {
-                            final thumb = c.maxWidth < 360 ? 86.0 : 104.0;
-                            return Wrap(
-                              spacing: 10,
-                              runSpacing: 10,
-                              children: item.screenshotsUrls
-                                  .map((u) => _thumb(_abs(u), thumb))
-                                  .toList(),
-                            );
-                          },
+                  item.fullDescription.trim().isNotEmpty) ...
+                [
+                  const SizedBox(height: 12),
+                  _Card(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.publish_section_descriptions,
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium
+                              ?.copyWith(
+                                fontWeight: FontWeight.w900,
+                                height: 1.15,
+                              ),
+                          strutStyle: _strut,
+                          textHeightBehavior: _thb,
                         ),
-                    ],
+                        const SizedBox(height: 10),
+                        _label(context, l10n.publish_label_short),
+                        const SizedBox(height: 6),
+                        _safeText(context, item.shortDescription),
+                        const SizedBox(height: 10),
+                        _label(context, l10n.publish_label_full),
+                        const SizedBox(height: 6),
+                        _safeText(context, item.fullDescription),
+                      ],
+                    ),
                   ),
-                ),
-              ],
-              if ((item.adminNotes ?? '').trim().isNotEmpty) ...[
-                const SizedBox(height: 12),
-                _Card(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l10n.publish_section_admin_notes,
-                        style:
-                            Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w900,
-                                  height: 1.15,
-                                ),
-                        strutStyle: _strut,
-                        textHeightBehavior: _thb,
-                      ),
-                      const SizedBox(height: 10),
-                      _safeText(context, item.adminNotes!.trim()),
-                    ],
+                ],
+              if (item.screenshotsUrls.isNotEmpty ||
+                  (item.appIconUrl ?? '').isNotEmpty) ...
+                [
+                  const SizedBox(height: 12),
+                  _Card(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.publish_section_assets,
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium
+                              ?.copyWith(
+                                fontWeight: FontWeight.w900,
+                                height: 1.15,
+                              ),
+                          strutStyle: _strut,
+                          textHeightBehavior: _thb,
+                        ),
+                        const SizedBox(height: 10),
+                        _label(context, l10n.publish_label_icon),
+                        const SizedBox(height: 8),
+                        _iconPreview(context, _abs(item.appIconUrl)),
+                        const SizedBox(height: 12),
+                        _label(context, l10n.publish_label_screenshots),
+                        const SizedBox(height: 8),
+                        if (item.screenshotsUrls.isEmpty)
+                          _safeText(context, l10n.publish_label_no_screenshots)
+                        else
+                          LayoutBuilder(
+                            builder: (ctx, c) {
+                              final thumb = c.maxWidth < 360 ? 86.0 : 104.0;
+                              return Wrap(
+                                spacing: 10,
+                                runSpacing: 10,
+                                children: item.screenshotsUrls
+                                    .map((u) => _thumb(_abs(u), thumb))
+                                    .toList(),
+                              );
+                            },
+                          ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              if ((item.adminNotes ?? '').trim().isNotEmpty) ...
+                [
+                  const SizedBox(height: 12),
+                  _Card(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.publish_section_admin_notes,
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium
+                              ?.copyWith(
+                                fontWeight: FontWeight.w900,
+                                height: 1.15,
+                              ),
+                          strutStyle: _strut,
+                          textHeightBehavior: _thb,
+                        ),
+                        const SizedBox(height: 10),
+                        _safeText(context, item.adminNotes!.trim()),
+                      ],
+                    ),
+                  ),
+                ],
             ],
           ),
           bottomNavigationBar: SafeArea(
@@ -550,7 +562,8 @@ class _View extends StatelessWidget {
                         onPressed: (!state.item.isSubmitted || state.acting)
                             ? null
                             : () async {
-                                final notes = await DecisionSheet.open(
+                                final result =
+                                    await ApproveWithFirebaseSheet.open(
                                   context,
                                   title: l10n.publish_sheet_approve_title,
                                   confirmLabel: l10n.publish_action_approve,
@@ -558,11 +571,15 @@ class _View extends StatelessWidget {
                                   cancelLabel: l10n.common_cancel,
                                 );
 
-                                if (!context.mounted || notes == null) return;
+                                if (!context.mounted || result == null) return;
 
                                 context
                                     .read<PublishRequestDetailBloc>()
-                                    .add(PublishRequestApprove(notes));
+                                    .add(PublishRequestApprove(
+                                      result.notes,
+                                      firebaseProjectAccountId:
+                                          result.firebaseProjectAccountId,
+                                    ));
                               },
                       ),
                     ),
@@ -713,6 +730,7 @@ class _View extends StatelessWidget {
     if (x == 'REJECTED') return l10n.publish_status_rejected;
     if (x == 'PUBLISHED') return l10n.publish_status_published;
     if (x == 'DRAFT') return l10n.publish_status_draft;
+    if (x == 'PUBLISHING') return 'Publishing…';
 
     return s;
   }
@@ -722,7 +740,7 @@ class _View extends StatelessWidget {
     if (x == 'PUBLISHED') return _StatusType.success;
     if (x == 'REJECTED') return _StatusType.danger;
     if (x == 'IN_REVIEW') return _StatusType.neutral;
-    if (x == 'APPROVED') return _StatusType.success;
+    if (x == 'APPROVED' || x == 'PUBLISHING') return _StatusType.success;
     return _StatusType.info;
   }
 }
@@ -1070,11 +1088,13 @@ class _PlatformCard extends StatelessWidget {
                             subtitle,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style:
-                                Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      color: cs.onSurface.withOpacity(.65),
-                                      height: 1.2,
-                                    ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodySmall
+                                ?.copyWith(
+                                  color: cs.onSurface.withOpacity(.65),
+                                  height: 1.2,
+                                ),
                           ),
                         ],
                       ),
@@ -1205,11 +1225,12 @@ class _PlatformCard extends StatelessWidget {
                       const SizedBox(width: 6),
                       Text(
                         l10n.publish_details_manual_publish_instructions,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              fontWeight: FontWeight.w800,
-                              color: cs.onSurface.withOpacity(.75),
-                              height: 1.15,
-                            ),
+                        style:
+                            Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                  color: cs.onSurface.withOpacity(.75),
+                                  height: 1.15,
+                                ),
                       ),
                       const SizedBox(width: 6),
                       Icon(

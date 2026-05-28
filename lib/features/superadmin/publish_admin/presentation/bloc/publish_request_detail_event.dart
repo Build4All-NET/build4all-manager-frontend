@@ -4,7 +4,9 @@ class PublishRequestDetailInit extends PublishRequestDetailEvent {}
 
 class PublishRequestApprove extends PublishRequestDetailEvent {
   final String? notes;
-  PublishRequestApprove(this.notes);
+  final int? firebaseProjectAccountId;
+
+  PublishRequestApprove(this.notes, {this.firebaseProjectAccountId});
 }
 
 class PublishRequestReject extends PublishRequestDetailEvent {

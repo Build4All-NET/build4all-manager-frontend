@@ -24,7 +24,11 @@ class PublishRequestDetailBloc
       PublishRequestApprove e, Emitter<PublishRequestDetailState> emit) async {
     emit(state.copyWith(acting: true, error: null, success: null));
     try {
-      await approve(requestId: state.item.id, notes: e.notes);
+      await approve(
+        requestId: state.item.id,
+        notes: e.notes,
+        firebaseProjectAccountId: e.firebaseProjectAccountId,
+      );
       emit(state.copyWith(acting: false, success: 'approved'));
     } catch (err) {
       emit(state.copyWith(
