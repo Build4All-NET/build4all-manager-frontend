@@ -111,6 +111,7 @@ class _SuperAdminEntryState extends State<SuperAdminEntry> {
 
     return SuperAdminNavShell(
       backendMenuType: widget.backendMenuType,
+      override: SuperMenuType.drawer,
       destinations: _destinations!,
       initialIndex: widget.initialIndex,
     );
