@@ -155,8 +155,8 @@ class _FirebasePoolFormScreenState extends State<FirebasePoolFormScreen> {
             const SizedBox(height: 10),
             TextFormField(
               controller: _credentialsJson,
-              maxLines: _obscureJson ? 3 : 8,
-              minLines: 3,
+              maxLines: _obscureJson ? 1 : 8,
+              minLines: _obscureJson ? 1 : 3,
               decoration: InputDecoration(
                 labelText: _isEdit
                     ? 'Service Account JSON (optional update)'
