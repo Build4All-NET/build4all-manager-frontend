@@ -52,6 +52,7 @@ class _SuperAdminNavShellState extends State<SuperAdminNavShell>
     with TickerProviderStateMixin {
   late int _index;
   TabController? _tab;
+  late final Set<int> _visited; // pages mounted so far (lazy)
 
   SuperMenuType get _mode =>
       widget.override ?? _parseMenu(widget.backendMenuType);
@@ -60,6 +61,7 @@ class _SuperAdminNavShellState extends State<SuperAdminNavShell>
   void initState() {
     super.initState();
     _index = widget.initialIndex;
+    _visited = {_index}; // only mount the starting tab immediately
     _syncTabController();
     _clampIndex();
   }
@@ -134,7 +136,10 @@ class _SuperAdminNavShellState extends State<SuperAdminNavShell>
     final safe = i.clamp(0, widget.destinations.length - 1);
     if (safe == _index) return;
 
-    setState(() => _index = safe);
+    setState(() {
+      _visited.add(safe); // mount on first visit, keep alive after
+      _index = safe;
+    });
 
     if (_mode == SuperMenuType.top && _tab != null && _tab!.index != safe) {
       _tab!.animateTo(safe);
@@ -217,29 +222,19 @@ class _SuperAdminNavShellState extends State<SuperAdminNavShell>
   }
 
   Widget _buildBodyStack(List<SuperAdminDestination> pages) {
-    return Stack(
+    return IndexedStack(
+      index: _index,
       children: [
-        IndexedStack(
-          index: _index,
-          children: [
-            for (final d in pages)
-              KeyedSubtree(
-                key: ValueKey(d.label),
-                child: d.page,
-              ),
-          ],
-        ),
-        IgnorePointer(
-          child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 180),
-            switchInCurve: Curves.easeOut,
-            switchOutCurve: Curves.easeIn,
-            child: Container(
-              key: ValueKey(_index),
-              color: Colors.transparent,
-            ),
-          ),
-        ),
+        for (int i = 0; i < pages.length; i++)
+          _visited.contains(i)
+              ? KeyedSubtree(
+                  key: ValueKey(pages[i].label),
+                  child: pages[i].page,
+                )
+              : KeyedSubtree(
+                  key: ValueKey('__placeholder_$i'),
+                  child: const SizedBox.expand(),
+                ),
       ],
     );
   }
