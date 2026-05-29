@@ -1,6 +1,8 @@
 name: Build4All Manager (iOS) - Upload to TestFlight
 
 on:
+  repository_dispatch:
+    types: [owner_app_build_ios]
   workflow_dispatch:
     inputs:
       distribute_external:
@@ -20,7 +22,7 @@ jobs:
     runs-on: macos-15
 
     env:
-      BUNDLE_ID: "com.build4alluat.build4allmanager"
+      BUNDLE_ID: ${{ (github.event_name == 'repository_dispatch' && github.event.client_payload.CONFIG.IOS_BUNDLE_ID != '') && github.event.client_payload.CONFIG.IOS_BUNDLE_ID || 'com.build4alluat.build4allmanager' }}
 
       IOS_P12_B64: ${{ secrets.IOS_P12_B64 }}
       IOS_P12_PASSWORD: ${{ secrets.IOS_P12_PASSWORD }}
@@ -390,7 +392,14 @@ jobs:
           print(m.group(1) if m else "1.0.0")
           PY
           )"
-          BUILD_NUMBER="$((1000 + GITHUB_RUN_NUMBER))"
+
+          # Use build number from repository_dispatch payload when available
+          PAYLOAD_BUILD_NUMBER="${{ github.event.client_payload.CONFIG.IOS_BUILD_NUMBER }}"
+          if [ "${{ github.event_name }}" = "repository_dispatch" ] && [ -n "$PAYLOAD_BUILD_NUMBER" ]; then
+            BUILD_NUMBER="$PAYLOAD_BUILD_NUMBER"
+          else
+            BUILD_NUMBER="$((1000 + GITHUB_RUN_NUMBER))"
+          fi
 
           echo "BUILD_NAME=$BUILD_NAME" >> $GITHUB_ENV
           echo "BUILD_NUMBER=$BUILD_NUMBER" >> $GITHUB_ENV
@@ -472,6 +481,9 @@ jobs:
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             DIST_EXT="${{ github.event.inputs.distribute_external }}"
             CHANGELOG="${{ github.event.inputs.changelog }}"
+          elif [ "${{ github.event_name }}" = "repository_dispatch" ]; then
+            DIST_EXT="false"
+            CHANGELOG="CI build - ${{ github.event.client_payload.CONFIG.APP_NAME }} (${{ github.event.client_payload.BUILD_ID }})"
           else
             DIST_EXT="false"
             CHANGELOG="CI build (push)"
