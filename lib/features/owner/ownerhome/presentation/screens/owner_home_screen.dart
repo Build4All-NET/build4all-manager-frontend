@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:auto_size_text/auto_size_text.dart';
@@ -104,31 +105,53 @@ class _HomeBody extends StatefulWidget {
 
 class _HomeBodyState extends State<_HomeBody> {
   final TextEditingController _searchCtrl = TextEditingController();
+
   String _searchQuery = '';
+  bool _showBootSkeleton = true;
+  Timer? _bootTimer;
 
   @override
   void initState() {
     super.initState();
 
+    _bootTimer = Timer(const Duration(milliseconds: 700), () {
+      if (!mounted) return;
+
+      setState(() {
+        _showBootSkeleton = false;
+      });
+    });
+
     final current = OwnerMeStore.I.displayName.value;
-    if ((current ?? '').trim().isEmpty) {
-      final passed = widget.ownerName?.trim();
-      if (passed != null && passed.isNotEmpty) {
-        OwnerMeStore.I.setName(passed);
-      }
+
+    if ((current ?? '').trim().isNotEmpty &&
+        _looksLikeUsernameOrEmail(current!)) {
+      OwnerMeStore.I.clear();
+    }
+
+    final passedFirstName = _firstNameOnly(widget.ownerName);
+
+    if (passedFirstName.isNotEmpty &&
+        !_looksLikeUsernameOrEmail(widget.ownerName ?? '')) {
+      OwnerMeStore.I.setName(passedFirstName);
     }
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final fresh = await _loadDisplayName();
+
       if (!mounted) return;
+
       if ((fresh ?? '').trim().isNotEmpty) {
         OwnerMeStore.I.setName(fresh);
+      } else {
+        OwnerMeStore.I.clear();
       }
     });
   }
 
   @override
   void dispose() {
+    _bootTimer?.cancel();
     _searchCtrl.dispose();
     super.dispose();
   }
@@ -138,56 +161,108 @@ class _HomeBodyState extends State<_HomeBody> {
       final api = OwnerProfileApi(widget.dio);
       final dto = await api.getMe();
 
-      final first = dto.firstName.trim();
-      final last = dto.lastName.trim();
-      final fullName = [first, last].where((e) => e.isNotEmpty).join(' ').trim();
+      final firstName = dto.firstName.trim();
 
-      if (fullName.isNotEmpty) return fullName;
+      if (firstName.isNotEmpty && !_looksLikeUsernameOrEmail(firstName)) {
+        return firstName;
+      }
 
-      final u = dto.username.trim();
-      return u.isNotEmpty ? u : null;
+      final fullName = [dto.firstName.trim(), dto.lastName.trim()]
+          .where((part) => part.isNotEmpty)
+          .join(' ')
+          .trim();
+
+      final firstFromFull = _firstNameOnly(fullName);
+
+      if (firstFromFull.isNotEmpty &&
+          !_looksLikeUsernameOrEmail(firstFromFull)) {
+        return firstFromFull;
+      }
+
+      return null;
     } catch (_) {
-      final store = OwnerMeStore.I.displayName.value;
-      if ((store ?? '').trim().isNotEmpty) return store;
+      final stored = OwnerMeStore.I.displayName.value;
+      final safeStored = _firstNameOnly(stored);
 
-      final passed = widget.ownerName?.trim();
-      return (passed != null && passed.isNotEmpty) ? passed : null;
+      if (safeStored.isNotEmpty && !_looksLikeUsernameOrEmail(stored ?? '')) {
+        return safeStored;
+      }
+
+      final passed = _firstNameOnly(widget.ownerName);
+
+      if (passed.isNotEmpty &&
+          !_looksLikeUsernameOrEmail(widget.ownerName ?? '')) {
+        return passed;
+      }
+
+      return null;
     }
   }
 
-  bool _isEmail(String s) =>
-      RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(s.trim());
-
-  String _firstPartSafe(String? raw) {
-    if (raw == null) return '';
-    final s = raw.trim();
-    if (s.isEmpty) return '';
-    if (_isEmail(s)) return '';
-    if (s.startsWith('@')) return s.substring(1).trim();
-    return s.split(RegExp(r'\s+')).first.trim();
+  bool _isEmail(String value) {
+    return RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(value.trim());
   }
 
-  String? _errText(OwnerHomeState s) {
+  bool _looksLikeUsernameOrEmail(String value) {
+    final s = value.trim();
+
+    if (s.isEmpty) return true;
+    if (_isEmail(s)) return true;
+    if (s.startsWith('@')) return true;
+
+    if (s.contains('_')) return true;
+    if (s.contains('.')) return true;
+    if (s.contains('-')) return true;
+    if (RegExp(r'\d').hasMatch(s)) return true;
+
+    final lower = s.toLowerCase();
+
+    if (lower.contains('owner')) return true;
+    if (lower.contains('admin')) return true;
+    if (lower.contains('user')) return true;
+    if (lower.contains('manager')) return true;
+    if (lower.contains('build4all')) return true;
+
+    return false;
+  }
+
+  String _firstNameOnly(String? raw) {
+    final value = (raw ?? '').trim();
+
+    if (value.isEmpty) return '';
+    if (_looksLikeUsernameOrEmail(value)) return '';
+
+    return value.split(RegExp(r'\s+')).first.trim();
+  }
+
+  String? _errText(OwnerHomeState state) {
     try {
-      final dynamic d = s;
-      final e = d.error ?? d.errorMessage ?? d.message;
-      if (e == null) return null;
-      final t = e.toString();
-      return t.trim().isEmpty ? null : t;
+      final dynamic dynamicState = state;
+      final error = dynamicState.error ??
+          dynamicState.errorMessage ??
+          dynamicState.message;
+
+      if (error == null) return null;
+
+      final text = error.toString();
+      return text.trim().isEmpty ? null : text;
     } catch (_) {
       return null;
     }
   }
 
-  String _serverRootNoApi(Dio d) {
-    final base = d.options.baseUrl;
+  String _serverRootNoApi(Dio dio) {
+    final base = dio.options.baseUrl;
     return base.replaceFirst(RegExp(r'/api/?$'), '');
   }
 
-  String _norm(String? value) => (value ?? '').trim().toLowerCase();
+  String _norm(String? value) {
+    return (value ?? '').trim().toLowerCase();
+  }
 
   bool _matchesProject(OwnerProject app, String query) {
     final q = _norm(query);
+
     if (q.isEmpty) return true;
 
     final appName = _norm(app.appName);
@@ -203,8 +278,26 @@ class _HomeBodyState extends State<_HomeBody> {
 
   List<OwnerProject> _filteredProjects(List<OwnerProject> apps) {
     final q = _searchQuery.trim();
+
     if (q.isEmpty) return apps;
+
     return apps.where((app) => _matchesProject(app, q)).toList();
+  }
+
+  Future<void> _refresh(BuildContext context) async {
+    context.read<OwnerHomeBloc>().add(
+          OwnerHomeRefreshed(widget.ownerId),
+        );
+
+    final fresh = await _loadDisplayName();
+
+    if (!mounted) return;
+
+    if ((fresh ?? '').trim().isNotEmpty) {
+      OwnerMeStore.I.setName(fresh);
+    } else {
+      OwnerMeStore.I.clear();
+    }
   }
 
   @override
@@ -214,26 +307,30 @@ class _HomeBodyState extends State<_HomeBody> {
     final tt = Theme.of(context).textTheme;
     final ux = Theme.of(context).extension<UiTokens>()!;
 
-    final w = MediaQuery.of(context).size.width;
-    final pagePad = w >= 480
+    final width = MediaQuery.of(context).size.width;
+
+    final pagePad = width >= 480
         ? const EdgeInsets.symmetric(horizontal: 20, vertical: 16)
         : ux.pagePad;
 
-    final hello = l10n.owner_home_hello;
+    final hello = l10n.owner_home_hello.trim();
     final subtitle = l10n.owner_home_subtitle;
 
     return Padding(
       padding: pagePad,
       child: BlocConsumer<OwnerHomeBloc, OwnerHomeState>(
-        listenWhen: (prev, curr) {
-          final prevErr = _errText(prev);
-          final currErr = _errText(curr);
-          return prevErr != currErr && (currErr?.isNotEmpty ?? false);
+        listenWhen: (previous, current) {
+          final previousError = _errText(previous);
+          final currentError = _errText(current);
+
+          return previousError != currentError &&
+              (currentError?.isNotEmpty ?? false);
         },
         listener: (context, state) {
-          final msg = _errText(state);
-          if (msg != null && msg.trim().isNotEmpty) {
-            AppToast.error(context, msg);
+          final message = _errText(state);
+
+          if (message != null && message.trim().isNotEmpty) {
+            AppToast.error(context, message);
           }
         },
         builder: (context, state) {
@@ -243,231 +340,291 @@ class _HomeBodyState extends State<_HomeBody> {
               ? filteredApps
               : filteredApps.take(math.min(5, filteredApps.length)).toList();
 
+          final showNiceLoading = _showBootSkeleton ||
+              (state.loading &&
+                  state.platformProjects.isEmpty &&
+                  state.myApps.isEmpty);
+
           return RefreshIndicator(
-            onRefresh: () async {
-              context.read<OwnerHomeBloc>().add(
-                    OwnerHomeRefreshed(widget.ownerId),
-                  );
+            onRefresh: () => _refresh(context),
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 280),
+              switchInCurve: Curves.easeOutCubic,
+              switchOutCurve: Curves.easeInCubic,
+              child: showNiceLoading
+                  ? const _OwnerHomeSkeletonView(
+                      key: ValueKey('owner-home-skeleton'),
+                    )
+                  : CustomScrollView(
+                      key: const ValueKey('owner-home-content'),
+                      physics: const BouncingScrollPhysics(
+                        parent: AlwaysScrollableScrollPhysics(),
+                      ),
+                      slivers: [
+                        SliverToBoxAdapter(
+                          child: ValueListenableBuilder<String?>(
+                            valueListenable: OwnerMeStore.I.displayName,
+                            builder: (context, storedName, _) {
+                              final rawStored = storedName?.trim() ?? '';
 
-              final fresh = await _loadDisplayName();
-              if (!mounted) return;
-              if ((fresh ?? '').trim().isNotEmpty) {
-                OwnerMeStore.I.setName(fresh);
-              }
-            },
-            child: CustomScrollView(
-              physics: const BouncingScrollPhysics(
-                parent: AlwaysScrollableScrollPhysics(),
-              ),
-              slivers: [
-                SliverToBoxAdapter(
-                  child: ValueListenableBuilder<String?>(
-                    valueListenable: OwnerMeStore.I.displayName,
-                    builder: (context, storedName, _) {
-                      final display = _firstPartSafe(storedName);
-                      final greeting = display.isEmpty ? hello : '$hello $display';
+                              final display = rawStored.isEmpty ||
+                                      _looksLikeUsernameOrEmail(rawStored)
+                                  ? ''
+                                  : _firstNameOnly(rawStored);
 
-                      return Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                AutoSizeText(
-                                  greeting,
+                              final greeting =
+                                  display.isEmpty ? hello : '$hello $display';
+
+                              return Row(
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        AutoSizeText(
+                                          greeting,
+                                          maxLines: 1,
+                                          minFontSize: 16,
+                                          stepGranularity: 0.5,
+                                          overflow: TextOverflow.ellipsis,
+                                          style:
+                                              tt.headlineSmall?.copyWith(
+                                            fontWeight: FontWeight.w800,
+                                            color: cs.onSurface,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 6),
+                                        AutoSizeText(
+                                          subtitle,
+                                          maxLines: 2,
+                                          minFontSize: 12,
+                                          stepGranularity: 0.5,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: tt.bodyMedium?.copyWith(
+                                            color: cs.onSurfaceVariant,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
+                        ),
+
+                        const SliverToBoxAdapter(
+                          child: SizedBox(height: 12),
+                        ),
+
+                        SliverToBoxAdapter(
+                          child: _OwnerProjectsSearchField(
+                            controller: _searchCtrl,
+                            hintText: l10n.owner_home_search_hint,
+                            onChanged: (value) {
+                              setState(() {
+                                _searchQuery = value;
+                              });
+                            },
+                            onClear: () {
+                              _searchCtrl.clear();
+
+                              setState(() {
+                                _searchQuery = '';
+                              });
+                            },
+                          ),
+                        ),
+
+                        const SliverToBoxAdapter(
+                          child: SizedBox(height: 16),
+                        ),
+
+                        SliverToBoxAdapter(
+                          child: AutoSizeText(
+                            l10n.owner_home_chooseProject,
+                            maxLines: 1,
+                            minFontSize: 14,
+                            stepGranularity: 0.5,
+                            overflow: TextOverflow.ellipsis,
+                            style: tt.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w800,
+                              color: cs.onSurface,
+                            ),
+                          ),
+                        ),
+
+                        const SliverToBoxAdapter(
+                          child: SizedBox(height: 12),
+                        ),
+
+                        SliverPadding(
+                          padding: EdgeInsets.only(bottom: ux.radiusMd),
+                          sliver: SliverLayoutBuilder(
+                            builder: (context, constraints) {
+                              final cross = constraints.crossAxisExtent;
+
+                              final cols = cross >= 900
+                                  ? 4
+                                  : cross >= 600
+                                      ? 3
+                                      : 2;
+
+                              const spacing = 12.0;
+
+                              final cardWidth =
+                                  (cross - (spacing * (cols - 1))) / cols;
+
+                              final aspect = cardWidth < 190
+                                  ? 0.86
+                                  : cardWidth < 230
+                                      ? 0.95
+                                      : 1.05;
+
+                              final sorted = [...state.platformProjects]
+                                ..sort(
+                                  (a, b) => a.displayOrder
+                                      .compareTo(b.displayOrder),
+                                );
+
+                              final showPlatformSkeleton = state.loading &&
+                                  state.platformProjects.isEmpty;
+
+                              if (showPlatformSkeleton) {
+                                return SliverGrid(
+                                  gridDelegate:
+                                      SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: cols,
+                                    mainAxisSpacing: spacing,
+                                    crossAxisSpacing: spacing,
+                                    childAspectRatio: aspect,
+                                  ),
+                                  delegate: SliverChildBuilderDelegate(
+                                    (_, __) => const _SkeletonCard(),
+                                    childCount: cols * 2,
+                                  ),
+                                );
+                              }
+
+                              return SliverGrid(
+                                gridDelegate:
+                                    SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: cols,
+                                  mainAxisSpacing: spacing,
+                                  crossAxisSpacing: spacing,
+                                  childAspectRatio: aspect,
+                                ),
+                                delegate: SliverChildBuilderDelegate(
+                                  (context, index) {
+                                    final project = sorted[index];
+                                    final isAvailable = project.active;
+
+                                    return ProjectTemplateCard(
+                                      project: project,
+                                      isAvailable: isAvailable,
+                                      onOpen: () {
+                                        if (state.loading && sorted.isEmpty) {
+                                          AppToast.info(
+                                            context,
+                                            l10n.owner_home_loading_projects,
+                                          );
+                                          return;
+                                        }
+
+                                        context.push(
+                                          '/owner/project/${project.id}',
+                                          extra: {
+                                            'canRequest': isAvailable,
+                                            'projectId': project.id,
+                                            'projectType':
+                                                project.projectType ?? '',
+                                          },
+                                        );
+                                      },
+                                    );
+                                  },
+                                  childCount: sorted.length,
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+
+                        SliverToBoxAdapter(
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: AutoSizeText(
+                                  l10n.owner_projects_title,
                                   maxLines: 1,
-                                  minFontSize: 16,
+                                  minFontSize: 14,
                                   stepGranularity: 0.5,
                                   overflow: TextOverflow.ellipsis,
-                                  style: tt.headlineSmall?.copyWith(
+                                  style: tt.titleMedium?.copyWith(
                                     fontWeight: FontWeight.w800,
                                     color: cs.onSurface,
                                   ),
                                 ),
-                                const SizedBox(height: 6),
-                                AutoSizeText(
-                                  subtitle,
-                                  maxLines: 2,
+                              ),
+                              TextButton(
+                                onPressed: () => context.push('/owner/projects'),
+                                child: AutoSizeText(
+                                  l10n.owner_home_viewAll,
+                                  maxLines: 1,
                                   minFontSize: 12,
                                   stepGranularity: 0.5,
                                   overflow: TextOverflow.ellipsis,
-                                  style: tt.bodyMedium?.copyWith(
-                                    color: cs.onSurfaceVariant,
-                                  ),
                                 ),
-                              ],
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const SliverToBoxAdapter(
+                          child: SizedBox(height: 10),
+                        ),
+
+                        if (state.loading && state.myApps.isEmpty)
+                          const SliverToBoxAdapter(
+                            child: _LoadingList(),
+                          )
+                        else if (!state.loading && visibleApps.isEmpty)
+                          SliverToBoxAdapter(
+                            child: Padding(
+                              padding: const EdgeInsets.only(
+                                top: 6,
+                                bottom: 12,
+                              ),
+                              child: Text(
+                                hasSearch
+                                    ? l10n.owner_home_no_matching_projects
+                                    : l10n.owner_home_no_apps_yet,
+                                style: tt.bodyMedium?.copyWith(
+                                  color: cs.onSurfaceVariant,
+                                ),
+                              ),
                             ),
+                          )
+                        else
+                          SliverList.builder(
+                            itemCount: visibleApps.length,
+                            itemBuilder: (_, index) {
+                              final app = visibleApps[index];
+
+                              return _MyAppSummaryCard(
+                                app: app,
+                                serverRootNoApi:
+                                    _serverRootNoApi(widget.dio),
+                              );
+                            },
                           ),
-                        ],
-                      );
-                    },
-                  ),
-                ),
-                const SliverToBoxAdapter(child: SizedBox(height: 12)),
-                SliverToBoxAdapter(
-                  child: _OwnerProjectsSearchField(
-                    controller: _searchCtrl,
-                    hintText: l10n.owner_home_search_hint,
-                    onChanged: (value) {
-                      setState(() {
-                        _searchQuery = value;
-                      });
-                    },
-                    onClear: () {
-                      _searchCtrl.clear();
-                      setState(() {
-                        _searchQuery = '';
-                      });
-                    },
-                  ),
-                ),
-                const SliverToBoxAdapter(child: SizedBox(height: 16)),
-                SliverToBoxAdapter(
-                  child: AutoSizeText(
-                    l10n.owner_home_chooseProject,
-                    maxLines: 1,
-                    minFontSize: 14,
-                    stepGranularity: 0.5,
-                    overflow: TextOverflow.ellipsis,
-                    style: tt.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      color: cs.onSurface,
+
+                        const SliverToBoxAdapter(
+                          child: SizedBox(height: 12),
+                        ),
+                      ],
                     ),
-                  ),
-                ),
-                const SliverToBoxAdapter(child: SizedBox(height: 12)),
-                SliverPadding(
-                  padding: EdgeInsets.only(bottom: ux.radiusMd),
-                  sliver: SliverLayoutBuilder(
-                    builder: (context, constraints) {
-                      final cross = constraints.crossAxisExtent;
-                      final cols = cross >= 900 ? 4 : (cross >= 600 ? 3 : 2);
-                      const spacing = 12.0;
-
-                      final cardW = (cross - (spacing * (cols - 1))) / cols;
-                      final aspect =
-                          cardW < 190 ? 0.86 : (cardW < 230 ? 0.95 : 1.05);
-
-                      final sorted = [...state.platformProjects]
-                        ..sort((a, b) =>
-                            a.displayOrder.compareTo(b.displayOrder));
-
-                      if (sorted.isEmpty && state.loading) {
-                        return SliverGrid(
-                          gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: cols,
-                            mainAxisSpacing: spacing,
-                            crossAxisSpacing: spacing,
-                            childAspectRatio: aspect,
-                          ),
-                          delegate: SliverChildBuilderDelegate(
-                            (_, __) => const _SkeletonCard(),
-                            childCount: 4,
-                          ),
-                        );
-                      }
-
-                      return SliverGrid(
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: cols,
-                          mainAxisSpacing: spacing,
-                          crossAxisSpacing: spacing,
-                          childAspectRatio: aspect,
-                        ),
-                        delegate: SliverChildBuilderDelegate(
-                          (context, i) {
-                            final proj = sorted[i];
-                            final isAvailable = proj.active;
-
-                            return ProjectTemplateCard(
-                              project: proj,
-                              isAvailable: isAvailable,
-                              onOpen: () {
-                                if (state.loading && sorted.isEmpty) {
-                                  AppToast.info(
-                                    context,
-                                    l10n.owner_home_loading_projects,
-                                  );
-                                  return;
-                                }
-
-                                context.push(
-                                  '/owner/project/${proj.id}',
-                                  extra: {
-                                    'canRequest': isAvailable,
-                                    'projectId': proj.id,
-                                    'projectType': proj.projectType ?? '',
-                                  },
-                                );
-                              },
-                            );
-                          },
-                          childCount: sorted.length,
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                SliverToBoxAdapter(
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: AutoSizeText(
-                          l10n.owner_projects_title,
-                          maxLines: 1,
-                          minFontSize: 14,
-                          stepGranularity: 0.5,
-                          overflow: TextOverflow.ellipsis,
-                          style: tt.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w800,
-                            color: cs.onSurface,
-                          ),
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: () => context.push('/owner/projects'),
-                        child: AutoSizeText(
-                          l10n.owner_home_viewAll,
-                          maxLines: 1,
-                          minFontSize: 12,
-                          stepGranularity: 0.5,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SliverToBoxAdapter(child: SizedBox(height: 10)),
-                if (state.loading && state.myApps.isEmpty)
-                  const SliverToBoxAdapter(child: _LoadingList())
-                else if (visibleApps.isEmpty)
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 6, bottom: 12),
-                      child: Text(
-                        hasSearch
-                            ? l10n.owner_home_no_matching_projects
-                            : l10n.owner_home_no_apps_yet,
-                        style: tt.bodyMedium?.copyWith(
-                          color: cs.onSurfaceVariant,
-                        ),
-                      ),
-                    ),
-                  )
-                else
-                  SliverList.builder(
-                    itemCount: visibleApps.length,
-                    itemBuilder: (_, i) {
-                      final app = visibleApps[i];
-                      return _MyAppSummaryCard(
-                        app: app,
-                        serverRootNoApi: _serverRootNoApi(widget.dio),
-                      );
-                    },
-                  ),
-                const SliverToBoxAdapter(child: SizedBox(height: 12)),
-              ],
             ),
           );
         },
@@ -499,18 +656,25 @@ class _OwnerProjectsSearchField extends StatelessWidget {
       decoration: BoxDecoration(
         color: cs.surface,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: cs.outlineVariant.withOpacity(.7)),
+        border: Border.all(
+          color: cs.outlineVariant.withOpacity(.7),
+        ),
       ),
       child: Row(
         children: [
           const SizedBox(width: 14),
-          Icon(Icons.search_rounded, color: cs.onSurfaceVariant),
+          Icon(
+            Icons.search_rounded,
+            color: cs.onSurfaceVariant,
+          ),
           const SizedBox(width: 10),
           Expanded(
             child: TextField(
               controller: controller,
               onChanged: onChanged,
-              style: tt.bodyLarge?.copyWith(color: cs.onSurface),
+              style: tt.bodyLarge?.copyWith(
+                color: cs.onSurface,
+              ),
               decoration: InputDecoration(
                 hintText: hintText,
                 hintStyle: tt.bodyLarge?.copyWith(
@@ -537,17 +701,177 @@ class _OwnerProjectsSearchField extends StatelessWidget {
   }
 }
 
+class _OwnerHomeSkeletonView extends StatelessWidget {
+  const _OwnerHomeSkeletonView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    Widget bar({
+      required double width,
+      required double height,
+      double radius = 999,
+    }) {
+      return Container(
+        width: width,
+        height: height,
+        decoration: BoxDecoration(
+          color: cs.surfaceContainerHighest.withOpacity(.65),
+          borderRadius: BorderRadius.circular(radius),
+        ),
+      );
+    }
+
+    return CustomScrollView(
+      key: const ValueKey('owner-home-skeleton-scroll'),
+      physics: const BouncingScrollPhysics(
+        parent: AlwaysScrollableScrollPhysics(),
+      ),
+      slivers: [
+        SliverToBoxAdapter(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              bar(width: 150, height: 24),
+              const SizedBox(height: 8),
+              bar(width: 260, height: 13),
+              const SizedBox(height: 16),
+              Container(
+                height: 56,
+                decoration: BoxDecoration(
+                  color: cs.surface,
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(
+                    color: cs.outlineVariant.withOpacity(.7),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    const SizedBox(width: 14),
+                    Icon(
+                      Icons.search_rounded,
+                      color: cs.onSurfaceVariant.withOpacity(.5),
+                    ),
+                    const SizedBox(width: 10),
+                    bar(width: 180, height: 12),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              bar(width: 150, height: 18),
+              const SizedBox(height: 12),
+            ],
+          ),
+        ),
+        SliverLayoutBuilder(
+          builder: (context, constraints) {
+            final cross = constraints.crossAxisExtent;
+
+            final cols = cross >= 900
+                ? 4
+                : cross >= 600
+                    ? 3
+                    : 2;
+
+            const spacing = 12.0;
+
+            final cardWidth = (cross - (spacing * (cols - 1))) / cols;
+
+            final aspect = cardWidth < 190
+                ? 0.86
+                : cardWidth < 230
+                    ? 0.95
+                    : 1.05;
+
+            return SliverGrid(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: cols,
+                mainAxisSpacing: spacing,
+                crossAxisSpacing: spacing,
+                childAspectRatio: aspect,
+              ),
+              delegate: SliverChildBuilderDelegate(
+                (_, __) => const _SkeletonCard(),
+                childCount: cols * 2,
+              ),
+            );
+          },
+        ),
+        const SliverToBoxAdapter(
+          child: SizedBox(height: 18),
+        ),
+        SliverToBoxAdapter(
+          child: Row(
+            children: [
+              bar(width: 120, height: 18),
+              const Spacer(),
+              bar(width: 70, height: 14),
+            ],
+          ),
+        ),
+        const SliverToBoxAdapter(
+          child: SizedBox(height: 10),
+        ),
+        const SliverToBoxAdapter(
+          child: _LoadingList(),
+        ),
+        const SliverToBoxAdapter(
+          child: SizedBox(height: 18),
+        ),
+      ],
+    );
+  }
+}
+
 class _SkeletonCard extends StatelessWidget {
   const _SkeletonCard();
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+
     return Container(
       decoration: BoxDecoration(
         color: cs.surfaceContainerHighest.withOpacity(.40),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: cs.outlineVariant.withOpacity(.35)),
+        border: Border.all(
+          color: cs.outlineVariant.withOpacity(.35),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: cs.surface.withOpacity(.75),
+                borderRadius: BorderRadius.circular(14),
+              ),
+            ),
+            const Spacer(),
+            Container(
+              width: double.infinity,
+              height: 12,
+              decoration: BoxDecoration(
+                color: cs.surface.withOpacity(.75),
+                borderRadius: BorderRadius.circular(999),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              width: 90,
+              height: 10,
+              decoration: BoxDecoration(
+                color: cs.surface.withOpacity(.75),
+                borderRadius: BorderRadius.circular(999),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -558,19 +882,74 @@ class _LoadingList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return Column(
+      children: List.generate(4, (_) {
+        return const _MyAppSkeletonCard();
+      }),
+    );
+  }
+}
+
+class _MyAppSkeletonCard extends StatelessWidget {
+  const _MyAppSkeletonCard();
+
+  @override
+  Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
 
-    return Column(
-      children: List.generate(3, (i) {
-        return Container(
-          height: 64,
-          margin: const EdgeInsets.symmetric(vertical: 8),
-          decoration: BoxDecoration(
-            color: cs.surfaceContainerHighest.withOpacity(.45),
-            borderRadius: BorderRadius.circular(14),
+    Widget bar({
+      required double width,
+      required double height,
+      double radius = 999,
+    }) {
+      return Container(
+        width: width,
+        height: height,
+        decoration: BoxDecoration(
+          color: cs.surfaceContainerHighest.withOpacity(.65),
+          borderRadius: BorderRadius.circular(radius),
+        ),
+      );
+    }
+
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 6),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 14,
+        vertical: 12,
+      ),
+      decoration: BoxDecoration(
+        color: cs.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: cs.outlineVariant.withOpacity(.65),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: cs.surfaceContainerHighest.withOpacity(.65),
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
-        );
-      }),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                bar(width: 140, height: 13),
+                const SizedBox(height: 8),
+                bar(width: 220, height: 10),
+              ],
+            ),
+          ),
+          const SizedBox(width: 10),
+          bar(width: 26, height: 26, radius: 10),
+        ],
+      ),
     );
   }
 }
@@ -584,30 +963,50 @@ class _MyAppSummaryCard extends StatelessWidget {
     required this.serverRootNoApi,
   });
 
-  String _clean(String? s) => (s ?? '').trim();
+  String _clean(String? value) {
+    return (value ?? '').trim();
+  }
 
   String _statusLabel(BuildContext context, String raw) {
     final l10n = AppLocalizations.of(context)!;
-    final s = raw.toUpperCase();
+    final status = raw.toUpperCase();
 
-    if (s == 'ACTIVE') return l10n.common_status_active;
-    if (s.contains('TEST')) return l10n.common_status_test;
-    if (s.contains('LOCAL')) return l10n.common_status_local;
-    if (s.contains('PROD')) return l10n.common_status_production;
+    if (status == 'ACTIVE') return l10n.common_status_active;
+    if (status.contains('TEST')) return l10n.common_status_test;
+    if (status.contains('LOCAL')) return l10n.common_status_local;
+    if (status.contains('PROD')) return l10n.common_status_production;
 
     return raw;
   }
 
   (Color bg, Color fg) _statusColors(ColorScheme cs, String raw) {
-    final s = raw.toUpperCase();
-    if (s == 'ACTIVE') return (cs.primary.withOpacity(.12), cs.primary);
-    if (s.contains('TEST')) {
-      return (cs.tertiaryContainer.withOpacity(.30), cs.tertiary);
+    final status = raw.toUpperCase();
+
+    if (status == 'ACTIVE') {
+      return (
+        cs.primary.withOpacity(.12),
+        cs.primary,
+      );
     }
-    if (s.contains('LOCAL')) {
-      return (cs.secondary.withOpacity(.14), cs.secondary);
+
+    if (status.contains('TEST')) {
+      return (
+        cs.tertiaryContainer.withOpacity(.30),
+        cs.tertiary,
+      );
     }
-    return (cs.outlineVariant.withOpacity(.22), cs.onSurface);
+
+    if (status.contains('LOCAL')) {
+      return (
+        cs.secondary.withOpacity(.14),
+        cs.secondary,
+      );
+    }
+
+    return (
+      cs.outlineVariant.withOpacity(.22),
+      cs.onSurface,
+    );
   }
 
   @override
@@ -626,15 +1025,22 @@ class _MyAppSummaryCard extends StatelessWidget {
     final logoUrl = _clean(app.logoUrl);
     final fullLogo = logoUrl.isEmpty
         ? null
-        : (logoUrl.startsWith('http') ? logoUrl : '$serverRootNoApi$logoUrl');
+        : logoUrl.startsWith('http')
+            ? logoUrl
+            : '$serverRootNoApi$logoUrl';
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 6),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 14,
+        vertical: 12,
+      ),
       decoration: BoxDecoration(
         color: cs.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: cs.outlineVariant.withOpacity(.65)),
+        border: Border.all(
+          color: cs.outlineVariant.withOpacity(.65),
+        ),
       ),
       child: Row(
         children: [
@@ -644,7 +1050,9 @@ class _MyAppSummaryCard extends StatelessWidget {
             decoration: BoxDecoration(
               color: cs.surfaceContainerHighest.withOpacity(.35),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: cs.outlineVariant.withOpacity(.5)),
+              border: Border.all(
+                color: cs.outlineVariant.withOpacity(.5),
+              ),
             ),
             clipBehavior: Clip.antiAlias,
             child: fullLogo == null

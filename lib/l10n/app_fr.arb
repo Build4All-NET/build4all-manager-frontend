@@ -212,7 +212,7 @@
   "owner_requests_title": "Demandes",
   "owner_profile_title": "Profil",
 
-  "owner_home_hello": "👋 Salut,",
+  "owner_home_hello": "👋RSalut,",
   "owner_home_subtitle": "Gérez vos apps facilement",
   "owner_home_requestApp": "Demander mon app",
   "owner_home_myProjects": "Mes projets actifs",
@@ -1485,5 +1485,68 @@
   "super_proj_card_color": "Couleur accentuée de la carte",
   "super_proj_card_color_hint": "Couleur Hex (ex: #2563EB)",
   "super_proj_display_order": "Ordre d'affichage",
-  "super_proj_display_order_hint": "Les numéros inférieurs apparaissent en premier (ex: 1)"
+  "super_proj_display_order_hint": "Les numéros inférieurs apparaissent en premier (ex: 1)",
+  "publish_firebase_project_label": "Projet Firebase",
+"publish_firebase_auto_full": "AUTO – meilleur compte disponible",
+"publish_firebase_auto_short": "AUTO",
+"publish_firebase_default_full": "PAR DÉFAUT",
+"publish_firebase_default_short": "DEF",
+"publish_firebase_load_failed": "Impossible de charger les comptes Firebase",
+"publish_firebase_load_error_auto": "{error} – la sélection AUTO sera utilisée",
+"@publish_firebase_load_error_auto": {
+  "placeholders": {
+    "error": {
+      "type": "String"
+    }
+  }
+},
+"publish_firebase_remaining": "{android} Android / {ios} iOS restants",
+"@publish_firebase_remaining": {
+  "placeholders": {
+    "android": {
+      "type": "int"
+    },
+    "ios": {
+      "type": "int"
+    }
+  }
+},
+"publish_sheet_notes_optional": "Notes (optionnel)",
+"publish_share_package_title": "Partager le dossier de publication",
+"publish_share_package_subtitle": "Envoyer les informations de l’application, les données du store, les liens de build et les assets par email.",
+"publish_share_email": "Email",
+"publish_share_email_subject": "Demande de publication - {appName}",
+"@publish_share_email_subject": {
+  "placeholders": {
+    "appName": {
+      "type": "String"
+    }
+  }
+},
+"publish_share_email_intro": "Bonjour,\n\nVeuillez trouver ci-dessous les informations de publication de cette application.",
+"publish_share_email_footer": "Cordialement,\nBuild4All Super Admin",
+"publish_share_email_failed": "Impossible d’ouvrir l’application email",
+"publish_share_link_copied": "Lien copié",
+"publish_share_section_app_info": "INFORMATIONS APPLICATION",
+"publish_share_section_android": "ANDROID",
+"publish_share_section_ios": "IOS",
+"publish_share_section_publisher": "PROFIL ÉDITEUR",
+"publish_share_section_assets": "ASSETS",
+"publish_share_section_notes": "NOTES ADMIN",
+"publish_share_app_name": "Nom de l’application",
+"publish_share_developer_name": "Nom du développeur",
+"publish_share_developer_email": "Email du développeur",
+"publish_share_privacy_policy": "Politique de confidentialité",
+"publish_asset_open": "Ouvrir",
+"publish_asset_download": "Télécharger",
+"publish_asset_copy_link": "Copier le lien",
+"publish_label_logo": "Logo",
+"publish_label_screenshot": "Capture",
+"publish_details_label_category": "Catégorie",
+"publish_details_label_pricing": "Prix",
+"publish_share_assets_hint": "Pour afficher les images avec zoom et options de téléchargement, ouvrez l’écran des détails de la demande de publication.",
+"publish_assets_view_all": "Tout voir",
+"publish_assets_download_all": "Tout télécharger",
+"publish_assets_download_all_failed": "Impossible de télécharger tous les assets",
+"publish_assets_zoom_hint": "Pincez pour zoomer • Glissez pour voir les autres images"
 }

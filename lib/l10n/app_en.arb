@@ -193,7 +193,7 @@
   "owner_projects_title": "Projects",
   "owner_requests_title": "Requests",
   "owner_profile_title": "Profile",
-  "owner_home_hello": "👋 Hi,",
+  "owner_home_hello":"👋Hi,",
   "owner_home_subtitle": "Manage your apps easily",
   "owner_home_requestApp": "Request My App",
   "owner_home_myProjects": "My Active Projects",
@@ -1392,7 +1392,70 @@
   "super_proj_card_color": "Card accent color",
   "super_proj_card_color_hint": "Hex color (e.g. #2563EB)",
   "super_proj_display_order": "Display order",
-  "super_proj_display_order_hint": "Lower numbers appear first (e.g. 1)"
+  "super_proj_display_order_hint": "Lower numbers appear first (e.g. 1)",
+  "publish_firebase_project_label": "Firebase Project",
+"publish_firebase_auto_full": "AUTO – best available account",
+"publish_firebase_auto_short": "AUTO",
+"publish_firebase_default_full": "DEFAULT",
+"publish_firebase_default_short": "DEF",
+"publish_firebase_load_failed": "Could not load Firebase accounts",
+"publish_firebase_load_error_auto": "{error} – AUTO selection will be used",
+"@publish_firebase_load_error_auto": {
+  "placeholders": {
+    "error": {
+      "type": "String"
+    }
+  }
+},
+"publish_firebase_remaining": "{android} Android / {ios} iOS remaining",
+"@publish_firebase_remaining": {
+  "placeholders": {
+    "android": {
+      "type": "int"
+    },
+    "ios": {
+      "type": "int"
+    }
+  }
+},
+"publish_sheet_notes_optional": "Notes (optional)",
+"publish_share_package_title": "Share publishing package",
+"publish_share_package_subtitle": "Send app info, store listing, build links, and assets by email.",
+"publish_share_email": "Email",
+"publish_share_email_subject": "Publish Request - {appName}",
+"@publish_share_email_subject": {
+  "placeholders": {
+    "appName": {
+      "type": "String"
+    }
+  }
+},
+"publish_share_email_intro": "Hello,\n\nPlease find below the publishing information for this app.",
+"publish_share_email_footer": "Regards,\nBuild4All Super Admin",
+"publish_share_email_failed": "Could not open email app",
+"publish_share_link_copied": "Link copied",
+"publish_share_section_app_info": "APP INFORMATION",
+"publish_share_section_android": "ANDROID",
+"publish_share_section_ios": "IOS",
+"publish_share_section_publisher": "PUBLISHER PROFILE",
+"publish_share_section_assets": "ASSETS",
+"publish_share_section_notes": "ADMIN NOTES",
+"publish_share_app_name": "App Name",
+"publish_share_developer_name": "Developer Name",
+"publish_share_developer_email": "Developer Email",
+"publish_share_privacy_policy": "Privacy Policy",
+"publish_asset_open": "Open",
+"publish_asset_download": "Download",
+"publish_asset_copy_link": "Copy link",
+"publish_label_logo": "Logo",
+"publish_label_screenshot": "Screenshot",
+"publish_details_label_category": "Category",
+"publish_details_label_pricing": "Pricing",
+"publish_share_assets_hint": "For full image preview, zoom, and download actions, open the publish request details screen.",
+"publish_assets_view_all": "View all",
+"publish_assets_download_all": "Download all",
+"publish_assets_download_all_failed": "Could not download all assets",
+"publish_assets_zoom_hint": "Pinch to zoom • Swipe to view more images"
 
 
 

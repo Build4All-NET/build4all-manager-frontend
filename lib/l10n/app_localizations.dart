@@ -6674,34 +6674,298 @@ abstract class AppLocalizations {
   String get errCountryRequired;
 
   /// No description provided for @super_proj_display_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Display title'**
   String get super_proj_display_title;
 
   /// No description provided for @super_proj_display_title_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Short title shown on the app card (e.g. E-commerce)'**
   String get super_proj_display_title_hint;
 
   /// No description provided for @super_proj_display_description.
+  ///
+  /// In en, this message translates to:
+  /// **'Card description'**
   String get super_proj_display_description;
 
   /// No description provided for @super_proj_display_description_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Brief description shown under the title'**
   String get super_proj_display_description_hint;
 
   /// No description provided for @super_proj_icon_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Icon name'**
   String get super_proj_icon_name;
 
   /// No description provided for @super_proj_icon_name_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Flutter icon key (e.g. shopping_bag_rounded)'**
   String get super_proj_icon_name_hint;
 
   /// No description provided for @super_proj_card_color.
+  ///
+  /// In en, this message translates to:
+  /// **'Card accent color'**
   String get super_proj_card_color;
 
   /// No description provided for @super_proj_card_color_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Hex color (e.g. #2563EB)'**
   String get super_proj_card_color_hint;
 
   /// No description provided for @super_proj_display_order.
+  ///
+  /// In en, this message translates to:
+  /// **'Display order'**
   String get super_proj_display_order;
 
   /// No description provided for @super_proj_display_order_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Lower numbers appear first (e.g. 1)'**
   String get super_proj_display_order_hint;
+
+  /// No description provided for @publish_firebase_project_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Firebase Project'**
+  String get publish_firebase_project_label;
+
+  /// No description provided for @publish_firebase_auto_full.
+  ///
+  /// In en, this message translates to:
+  /// **'AUTO – best available account'**
+  String get publish_firebase_auto_full;
+
+  /// No description provided for @publish_firebase_auto_short.
+  ///
+  /// In en, this message translates to:
+  /// **'AUTO'**
+  String get publish_firebase_auto_short;
+
+  /// No description provided for @publish_firebase_default_full.
+  ///
+  /// In en, this message translates to:
+  /// **'DEFAULT'**
+  String get publish_firebase_default_full;
+
+  /// No description provided for @publish_firebase_default_short.
+  ///
+  /// In en, this message translates to:
+  /// **'DEF'**
+  String get publish_firebase_default_short;
+
+  /// No description provided for @publish_firebase_load_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load Firebase accounts'**
+  String get publish_firebase_load_failed;
+
+  /// No description provided for @publish_firebase_load_error_auto.
+  ///
+  /// In en, this message translates to:
+  /// **'{error} – AUTO selection will be used'**
+  String publish_firebase_load_error_auto(String error);
+
+  /// No description provided for @publish_firebase_remaining.
+  ///
+  /// In en, this message translates to:
+  /// **'{android} Android / {ios} iOS remaining'**
+  String publish_firebase_remaining(int android, int ios);
+
+  /// No description provided for @publish_sheet_notes_optional.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes (optional)'**
+  String get publish_sheet_notes_optional;
+
+  /// No description provided for @publish_share_package_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Share publishing package'**
+  String get publish_share_package_title;
+
+  /// No description provided for @publish_share_package_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Send app info, store listing, build links, and assets by email.'**
+  String get publish_share_package_subtitle;
+
+  /// No description provided for @publish_share_email.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get publish_share_email;
+
+  /// No description provided for @publish_share_email_subject.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish Request - {appName}'**
+  String publish_share_email_subject(String appName);
+
+  /// No description provided for @publish_share_email_intro.
+  ///
+  /// In en, this message translates to:
+  /// **'Hello,\n\nPlease find below the publishing information for this app.'**
+  String get publish_share_email_intro;
+
+  /// No description provided for @publish_share_email_footer.
+  ///
+  /// In en, this message translates to:
+  /// **'Regards,\nBuild4All Super Admin'**
+  String get publish_share_email_footer;
+
+  /// No description provided for @publish_share_email_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open email app'**
+  String get publish_share_email_failed;
+
+  /// No description provided for @publish_share_link_copied.
+  ///
+  /// In en, this message translates to:
+  /// **'Link copied'**
+  String get publish_share_link_copied;
+
+  /// No description provided for @publish_share_section_app_info.
+  ///
+  /// In en, this message translates to:
+  /// **'APP INFORMATION'**
+  String get publish_share_section_app_info;
+
+  /// No description provided for @publish_share_section_android.
+  ///
+  /// In en, this message translates to:
+  /// **'ANDROID'**
+  String get publish_share_section_android;
+
+  /// No description provided for @publish_share_section_ios.
+  ///
+  /// In en, this message translates to:
+  /// **'IOS'**
+  String get publish_share_section_ios;
+
+  /// No description provided for @publish_share_section_publisher.
+  ///
+  /// In en, this message translates to:
+  /// **'PUBLISHER PROFILE'**
+  String get publish_share_section_publisher;
+
+  /// No description provided for @publish_share_section_assets.
+  ///
+  /// In en, this message translates to:
+  /// **'ASSETS'**
+  String get publish_share_section_assets;
+
+  /// No description provided for @publish_share_section_notes.
+  ///
+  /// In en, this message translates to:
+  /// **'ADMIN NOTES'**
+  String get publish_share_section_notes;
+
+  /// No description provided for @publish_share_app_name.
+  ///
+  /// In en, this message translates to:
+  /// **'App Name'**
+  String get publish_share_app_name;
+
+  /// No description provided for @publish_share_developer_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Developer Name'**
+  String get publish_share_developer_name;
+
+  /// No description provided for @publish_share_developer_email.
+  ///
+  /// In en, this message translates to:
+  /// **'Developer Email'**
+  String get publish_share_developer_email;
+
+  /// No description provided for @publish_share_privacy_policy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get publish_share_privacy_policy;
+
+  /// No description provided for @publish_asset_open.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get publish_asset_open;
+
+  /// No description provided for @publish_asset_download.
+  ///
+  /// In en, this message translates to:
+  /// **'Download'**
+  String get publish_asset_download;
+
+  /// No description provided for @publish_asset_copy_link.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy link'**
+  String get publish_asset_copy_link;
+
+  /// No description provided for @publish_label_logo.
+  ///
+  /// In en, this message translates to:
+  /// **'Logo'**
+  String get publish_label_logo;
+
+  /// No description provided for @publish_label_screenshot.
+  ///
+  /// In en, this message translates to:
+  /// **'Screenshot'**
+  String get publish_label_screenshot;
+
+  /// No description provided for @publish_details_label_category.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get publish_details_label_category;
+
+  /// No description provided for @publish_details_label_pricing.
+  ///
+  /// In en, this message translates to:
+  /// **'Pricing'**
+  String get publish_details_label_pricing;
+
+  /// No description provided for @publish_share_assets_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'For full image preview, zoom, and download actions, open the publish request details screen.'**
+  String get publish_share_assets_hint;
+
+  /// No description provided for @publish_assets_view_all.
+  ///
+  /// In en, this message translates to:
+  /// **'View all'**
+  String get publish_assets_view_all;
+
+  /// No description provided for @publish_assets_download_all.
+  ///
+  /// In en, this message translates to:
+  /// **'Download all'**
+  String get publish_assets_download_all;
+
+  /// No description provided for @publish_assets_download_all_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not download all assets'**
+  String get publish_assets_download_all_failed;
+
+  /// No description provided for @publish_assets_zoom_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Pinch to zoom • Swipe to view more images'**
+  String get publish_assets_zoom_hint;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

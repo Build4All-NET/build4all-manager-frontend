@@ -360,9 +360,36 @@ Future<String?> _authRedirect(
 String? _extractDisplayName(Map<String, dynamic>? claims) {
   if (claims == null) return null;
 
-  String? pick(dynamic v) {
-    final s = v?.toString().trim();
-    return (s == null || s.isEmpty) ? null : s;
+  String? pick(dynamic value) {
+    final text = value?.toString().trim();
+    return text == null || text.isEmpty ? null : text;
+  }
+
+  bool isEmail(String value) {
+    return RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(value.trim());
+  }
+
+  bool looksLikeUsernameOrEmail(String value) {
+    final s = value.trim();
+
+    if (s.isEmpty) return true;
+    if (isEmail(s)) return true;
+    if (s.startsWith('@')) return true;
+
+    if (s.contains('_')) return true;
+    if (s.contains('.')) return true;
+    if (s.contains('-')) return true;
+    if (RegExp(r'\d').hasMatch(s)) return true;
+
+    final lower = s.toLowerCase();
+
+    if (lower.contains('owner')) return true;
+    if (lower.contains('admin')) return true;
+    if (lower.contains('user')) return true;
+    if (lower.contains('manager')) return true;
+    if (lower.contains('build4all')) return true;
+
+    return false;
   }
 
   final first = pick(claims['firstName']) ??
@@ -370,34 +397,30 @@ String? _extractDisplayName(Map<String, dynamic>? claims) {
       pick(claims['givenName']) ??
       pick(claims['firstname']);
 
-  final last = pick(claims['lastName']) ??
-      pick(claims['family_name']) ??
-      pick(claims['familyName']) ??
-      pick(claims['lastname']);
-
-  String? fullFromParts;
-  if (first != null && last != null) {
-    fullFromParts = '$first $last'.trim();
-  } else if (first != null) {
-    fullFromParts = first;
+  if (first != null && !looksLikeUsernameOrEmail(first)) {
+    return first.split(RegExp(r'\s+')).first.trim();
   }
 
-  final raw = fullFromParts ??
-      pick(claims['name']) ??
-      pick(claims['fullName']) ??
-      pick(claims['displayName']) ??
-      pick(claims['ownerName']) ??
-      pick(claims['adminName']) ??
-      pick(claims['username']) ??
-      pick(claims['preferred_username']);
+  final nameCandidates = [
+    pick(claims['name']),
+    pick(claims['fullName']),
+    pick(claims['displayName']),
+    pick(claims['ownerName']),
+    pick(claims['adminName']),
+  ];
 
-  if (raw == null) return null;
+  for (final candidate in nameCandidates) {
+    if (candidate == null) continue;
 
-  final isEmail =
-      RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(raw);
-  if (isEmail) return null;
+    if (!looksLikeUsernameOrEmail(candidate)) {
+      return candidate.split(RegExp(r'\s+')).first.trim();
+    }
+  }
 
-  return raw;
+  // Important:
+  // Do NOT fallback to username/preferred_username.
+  // It causes "Hello username" flash before /me returns firstName.
+  return null;
 }
 
 Future<(int?, String?)> _loadOwnerProfileFromJwt() async {

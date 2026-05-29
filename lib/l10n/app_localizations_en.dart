@@ -3354,22 +3354,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get super_proj_display_title => 'Display title';
 
   @override
-  String get super_proj_display_title_hint =>
-      'Short title shown on the app card (e.g. E-commerce)';
+  String get super_proj_display_title_hint => 'Short title shown on the app card (e.g. E-commerce)';
 
   @override
   String get super_proj_display_description => 'Card description';
 
   @override
-  String get super_proj_display_description_hint =>
-      'Brief description shown under the title';
+  String get super_proj_display_description_hint => 'Brief description shown under the title';
 
   @override
   String get super_proj_icon_name => 'Icon name';
 
   @override
-  String get super_proj_icon_name_hint =>
-      'Flutter icon key (e.g. shopping_bag_rounded)';
+  String get super_proj_icon_name_hint => 'Flutter icon key (e.g. shopping_bag_rounded)';
 
   @override
   String get super_proj_card_color => 'Card accent color';
@@ -3381,6 +3378,128 @@ class AppLocalizationsEn extends AppLocalizations {
   String get super_proj_display_order => 'Display order';
 
   @override
-  String get super_proj_display_order_hint =>
-      'Lower numbers appear first (e.g. 1)';
+  String get super_proj_display_order_hint => 'Lower numbers appear first (e.g. 1)';
+
+  @override
+  String get publish_firebase_project_label => 'Firebase Project';
+
+  @override
+  String get publish_firebase_auto_full => 'AUTO – best available account';
+
+  @override
+  String get publish_firebase_auto_short => 'AUTO';
+
+  @override
+  String get publish_firebase_default_full => 'DEFAULT';
+
+  @override
+  String get publish_firebase_default_short => 'DEF';
+
+  @override
+  String get publish_firebase_load_failed => 'Could not load Firebase accounts';
+
+  @override
+  String publish_firebase_load_error_auto(String error) {
+    return '$error – AUTO selection will be used';
+  }
+
+  @override
+  String publish_firebase_remaining(int android, int ios) {
+    return '$android Android / $ios iOS remaining';
+  }
+
+  @override
+  String get publish_sheet_notes_optional => 'Notes (optional)';
+
+  @override
+  String get publish_share_package_title => 'Share publishing package';
+
+  @override
+  String get publish_share_package_subtitle => 'Send app info, store listing, build links, and assets by email.';
+
+  @override
+  String get publish_share_email => 'Email';
+
+  @override
+  String publish_share_email_subject(String appName) {
+    return 'Publish Request - $appName';
+  }
+
+  @override
+  String get publish_share_email_intro => 'Hello,\n\nPlease find below the publishing information for this app.';
+
+  @override
+  String get publish_share_email_footer => 'Regards,\nBuild4All Super Admin';
+
+  @override
+  String get publish_share_email_failed => 'Could not open email app';
+
+  @override
+  String get publish_share_link_copied => 'Link copied';
+
+  @override
+  String get publish_share_section_app_info => 'APP INFORMATION';
+
+  @override
+  String get publish_share_section_android => 'ANDROID';
+
+  @override
+  String get publish_share_section_ios => 'IOS';
+
+  @override
+  String get publish_share_section_publisher => 'PUBLISHER PROFILE';
+
+  @override
+  String get publish_share_section_assets => 'ASSETS';
+
+  @override
+  String get publish_share_section_notes => 'ADMIN NOTES';
+
+  @override
+  String get publish_share_app_name => 'App Name';
+
+  @override
+  String get publish_share_developer_name => 'Developer Name';
+
+  @override
+  String get publish_share_developer_email => 'Developer Email';
+
+  @override
+  String get publish_share_privacy_policy => 'Privacy Policy';
+
+  @override
+  String get publish_asset_open => 'Open';
+
+  @override
+  String get publish_asset_download => 'Download';
+
+  @override
+  String get publish_asset_copy_link => 'Copy link';
+
+  @override
+  String get publish_label_logo => 'Logo';
+
+  @override
+  String get publish_label_screenshot => 'Screenshot';
+
+  @override
+  String get publish_details_label_category => 'Category';
+
+  @override
+  String get publish_details_label_pricing => 'Pricing';
+
+  @override
+  String get publish_share_assets_hint => 'For full image preview, zoom, and download actions, open the publish request details screen.';
+
+  @override
+  String get publish_assets_view_all => 'View all';
+
+  @override
+  String get publish_assets_download_all => 'Download all';
+
+  @override
+  String get publish_assets_download_all_failed => 'Could not download all assets';
+
+  @override
+  String get publish_assets_zoom_hint => 'Pinch to zoom • Swipe to view more images';
 }

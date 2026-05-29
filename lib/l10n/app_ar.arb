@@ -186,7 +186,7 @@
   "owner_projects_title": "المشاريع",
   "owner_requests_title": "الطلبات",
   "owner_profile_title": "الملف الشخصي",
-  "owner_home_hello": "👋 مرحباً،",
+  "owner_home_hello": "👋مرحباً،",
   "owner_home_subtitle": "إدارة تطبيقاتك بسهولة",
   "owner_home_requestApp": "اطلب تطبيقي",
   "owner_home_myProjects": "مشاريعي النشطة",
@@ -1330,5 +1330,69 @@
   "super_proj_card_color": "لون بطاقة المشروع",
   "super_proj_card_color_hint": "لون Hex (مثال: #2563EB)",
   "super_proj_display_order": "ترتيب العرض",
-  "super_proj_display_order_hint": "الأرقام الأصغر تظهر أولاً (مثال: 1)"
+  "super_proj_display_order_hint": "الأرقام الأصغر تظهر أولاً (مثال: 1)",
+  "publish_firebase_project_label": "مشروع Firebase",
+"publish_firebase_auto_full": "تلقائي – أفضل حساب متاح",
+"publish_firebase_auto_short": "تلقائي",
+"publish_firebase_default_full": "افتراضي",
+"publish_firebase_default_short": "افتراضي",
+"publish_firebase_load_failed": "تعذر تحميل حسابات Firebase",
+"publish_firebase_load_error_auto": "{error} – سيتم استخدام الاختيار التلقائي",
+"@publish_firebase_load_error_auto": {
+  "placeholders": {
+    "error": {
+      "type": "String"
+    }
+  }
+},
+"publish_firebase_remaining": "المتبقي: {android} أندرويد / {ios} iOS",
+"@publish_firebase_remaining": {
+  "placeholders": {
+    "android": {
+      "type": "int"
+    },
+    "ios": {
+      "type": "int"
+    }
+  }
+},
+"publish_sheet_notes_optional": "ملاحظات (اختياري)",
+"publish_share_package_title": "مشاركة ملف النشر",
+"publish_share_package_subtitle": "إرسال معلومات التطبيق، بيانات المتجر، روابط البناء، والصور عبر البريد الإلكتروني.",
+"publish_share_email": "إيميل",
+"publish_share_email_subject": "طلب نشر - {appName}",
+"@publish_share_email_subject": {
+  "placeholders": {
+    "appName": {
+      "type": "String"
+    }
+  }
+},
+"publish_share_email_intro": "مرحباً،\n\nيرجى الاطلاع أدناه على معلومات النشر الخاصة بهذا التطبيق.",
+"publish_share_email_footer": "مع التحية،\nBuild4All Super Admin",
+"publish_share_email_failed": "تعذر فتح تطبيق البريد الإلكتروني",
+"publish_share_link_copied": "تم نسخ الرابط",
+"publish_share_section_app_info": "معلومات التطبيق",
+"publish_share_section_android": "أندرويد",
+"publish_share_section_ios": "iOS",
+"publish_share_section_publisher": "ملف الناشر",
+"publish_share_section_assets": "الصور والملفات",
+"publish_share_section_notes": "ملاحظات الإدارة",
+"publish_share_app_name": "اسم التطبيق",
+"publish_share_developer_name": "اسم المطوّر",
+"publish_share_developer_email": "بريد المطوّر",
+"publish_share_privacy_policy": "سياسة الخصوصية",
+"publish_asset_open": "فتح",
+"publish_asset_download": "تحميل",
+"publish_asset_copy_link": "نسخ الرابط",
+"publish_label_logo": "الشعار",
+"publish_label_screenshot": "صورة",
+"publish_details_label_category": "الفئة",
+"publish_details_label_pricing": "السعر",
+"publish_share_assets_hint": "لعرض الصور بشكل كامل مع التكبير وخيارات التحميل، افتح شاشة تفاصيل طلب النشر.",
+"publish_assets_view_all": "عرض الكل",
+"publish_assets_download_all": "تحميل الكل",
+"publish_assets_download_all_failed": "تعذر تحميل كل الصور",
+"publish_assets_zoom_hint": "كبّر بإصبعين • اسحب للتنقل بين الصور"
+
 }

@@ -3354,22 +3354,19 @@ class AppLocalizationsFr extends AppLocalizations {
   String get super_proj_display_title => 'Titre affiché';
 
   @override
-  String get super_proj_display_title_hint =>
-      'Titre court affiché sur la carte de l\'application';
+  String get super_proj_display_title_hint => 'Titre court affiché sur la carte de l\'application';
 
   @override
   String get super_proj_display_description => 'Description de la carte';
 
   @override
-  String get super_proj_display_description_hint =>
-      'Description courte affichée sous le titre';
+  String get super_proj_display_description_hint => 'Description courte affichée sous le titre';
 
   @override
   String get super_proj_icon_name => 'Nom de l\'icône';
 
   @override
-  String get super_proj_icon_name_hint =>
-      'Clé d\'icône Flutter (ex: shopping_bag_rounded)';
+  String get super_proj_icon_name_hint => 'Clé d\'icône Flutter (ex: shopping_bag_rounded)';
 
   @override
   String get super_proj_card_color => 'Couleur accentuée de la carte';
@@ -3381,6 +3378,128 @@ class AppLocalizationsFr extends AppLocalizations {
   String get super_proj_display_order => 'Ordre d\'affichage';
 
   @override
-  String get super_proj_display_order_hint =>
-      'Les numéros inférieurs apparaissent en premier (ex: 1)';
+  String get super_proj_display_order_hint => 'Les numéros inférieurs apparaissent en premier (ex: 1)';
+
+  @override
+  String get publish_firebase_project_label => 'Projet Firebase';
+
+  @override
+  String get publish_firebase_auto_full => 'AUTO – meilleur compte disponible';
+
+  @override
+  String get publish_firebase_auto_short => 'AUTO';
+
+  @override
+  String get publish_firebase_default_full => 'PAR DÉFAUT';
+
+  @override
+  String get publish_firebase_default_short => 'DEF';
+
+  @override
+  String get publish_firebase_load_failed => 'Impossible de charger les comptes Firebase';
+
+  @override
+  String publish_firebase_load_error_auto(String error) {
+    return '$error – la sélection AUTO sera utilisée';
+  }
+
+  @override
+  String publish_firebase_remaining(int android, int ios) {
+    return '$android Android / $ios iOS restants';
+  }
+
+  @override
+  String get publish_sheet_notes_optional => 'Notes (optionnel)';
+
+  @override
+  String get publish_share_package_title => 'Partager le dossier de publication';
+
+  @override
+  String get publish_share_package_subtitle => 'Envoyer les informations de l’application, les données du store, les liens de build et les assets par email.';
+
+  @override
+  String get publish_share_email => 'Email';
+
+  @override
+  String publish_share_email_subject(String appName) {
+    return 'Demande de publication - $appName';
+  }
+
+  @override
+  String get publish_share_email_intro => 'Bonjour,\n\nVeuillez trouver ci-dessous les informations de publication de cette application.';
+
+  @override
+  String get publish_share_email_footer => 'Cordialement,\nBuild4All Super Admin';
+
+  @override
+  String get publish_share_email_failed => 'Impossible d’ouvrir l’application email';
+
+  @override
+  String get publish_share_link_copied => 'Lien copié';
+
+  @override
+  String get publish_share_section_app_info => 'INFORMATIONS APPLICATION';
+
+  @override
+  String get publish_share_section_android => 'ANDROID';
+
+  @override
+  String get publish_share_section_ios => 'IOS';
+
+  @override
+  String get publish_share_section_publisher => 'PROFIL ÉDITEUR';
+
+  @override
+  String get publish_share_section_assets => 'ASSETS';
+
+  @override
+  String get publish_share_section_notes => 'NOTES ADMIN';
+
+  @override
+  String get publish_share_app_name => 'Nom de l’application';
+
+  @override
+  String get publish_share_developer_name => 'Nom du développeur';
+
+  @override
+  String get publish_share_developer_email => 'Email du développeur';
+
+  @override
+  String get publish_share_privacy_policy => 'Politique de confidentialité';
+
+  @override
+  String get publish_asset_open => 'Ouvrir';
+
+  @override
+  String get publish_asset_download => 'Télécharger';
+
+  @override
+  String get publish_asset_copy_link => 'Copier le lien';
+
+  @override
+  String get publish_label_logo => 'Logo';
+
+  @override
+  String get publish_label_screenshot => 'Capture';
+
+  @override
+  String get publish_details_label_category => 'Catégorie';
+
+  @override
+  String get publish_details_label_pricing => 'Prix';
+
+  @override
+  String get publish_share_assets_hint => 'Pour afficher les images avec zoom et options de téléchargement, ouvrez l’écran des détails de la demande de publication.';
+
+  @override
+  String get publish_assets_view_all => 'Tout voir';
+
+  @override
+  String get publish_assets_download_all => 'Tout télécharger';
+
+  @override
+  String get publish_assets_download_all_failed => 'Impossible de télécharger tous les assets';
+
+  @override
+  String get publish_assets_zoom_hint => 'Pincez pour zoomer • Glissez pour voir les autres images';
 }
