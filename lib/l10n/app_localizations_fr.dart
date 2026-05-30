@@ -3520,4 +3520,43 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get super_nav_workflows => 'Flux de travail';
+
+  @override
+  String get super_nav_payment => 'Paiement';
+
+  @override
+  String get super_payment_title => 'Paiement';
+
+  @override
+  String get super_payment_management_title => 'Gestion des paiements';
+
+  @override
+  String get super_payment_management_subtitle => 'Gérez les forfaits, les tarifs, les méthodes de paiement et les types de facturation depuis un seul endroit.';
+
+  @override
+  String get super_payment_plans_title => 'Forfaits';
+
+  @override
+  String get super_payment_plans_subtitle => 'Créer et gérer les forfaits d’abonnement.';
+
+  @override
+  String get super_payment_plan_pricing_title => 'Tarification des forfaits';
+
+  @override
+  String get super_payment_plan_pricing_subtitle => 'Gérer les prix, les remises et les cycles de facturation.';
+
+  @override
+  String get super_payment_payment_methods_title => 'Méthodes de paiement';
+
+  @override
+  String get super_payment_payment_methods_subtitle => 'Gérer les méthodes de paiement utilisées pour facturer les propriétaires.';
+
+  @override
+  String get super_payment_billing_types_title => 'Types de facturation';
+
+  @override
+  String get super_payment_billing_types_subtitle => 'Gérer les catégories des méthodes de facturation.';
+
+  @override
+  String get super_payment_hint => 'Choisissez un module de paiement pour configurer la facturation des abonnements.';
 }

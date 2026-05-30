@@ -3520,4 +3520,43 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get super_nav_workflows => 'مسارات العمل';
+
+  @override
+  String get super_nav_payment => 'الدفع';
+
+  @override
+  String get super_payment_title => 'الدفع';
+
+  @override
+  String get super_payment_management_title => 'إدارة الدفع';
+
+  @override
+  String get super_payment_management_subtitle => 'إدارة الخطط والأسعار وطرق الدفع وأنواع الفوترة من مكان واحد.';
+
+  @override
+  String get super_payment_plans_title => 'الخطط';
+
+  @override
+  String get super_payment_plans_subtitle => 'إنشاء وإدارة خطط الاشتراك.';
+
+  @override
+  String get super_payment_plan_pricing_title => 'تسعير الخطط';
+
+  @override
+  String get super_payment_plan_pricing_subtitle => 'إدارة الأسعار والخصومات ودورات الفوترة.';
+
+  @override
+  String get super_payment_payment_methods_title => 'طرق الدفع';
+
+  @override
+  String get super_payment_payment_methods_subtitle => 'إدارة طرق الدفع المستخدمة لفوترة أصحاب المشاريع.';
+
+  @override
+  String get super_payment_billing_types_title => 'أنواع الفوترة';
+
+  @override
+  String get super_payment_billing_types_subtitle => 'إدارة تصنيفات طرق الفوترة.';
+
+  @override
+  String get super_payment_hint => 'اختاري قسماً من أقسام الدفع لإعداد فوترة الاشتراكات.';
 }

@@ -35,8 +35,7 @@ class _FirebasePoolView extends StatelessWidget {
       builder: (context, state) {
         return Scaffold(
           appBar: AppBar(
-            title: const Text('Firebase Project Pool'),
-            centerTitle: false,
+            
             actions: [
               if (state.loading && state.items.isNotEmpty)
                 const Padding(

@@ -1554,5 +1554,18 @@
   "super_nav_plan_pricing": "Tarification des forfaits",
   "super_nav_payment_methods": "Méthodes de paiement",
   "super_nav_billing_types": "Types de facturation",
-  "super_nav_workflows": "Flux de travail"
+  "super_nav_workflows": "Flux de travail",
+   "super_nav_payment": "Paiement",
+"super_payment_title": "Paiement",
+"super_payment_management_title": "Gestion des paiements",
+"super_payment_management_subtitle": "Gérez les forfaits, les tarifs, les méthodes de paiement et les types de facturation depuis un seul endroit.",
+"super_payment_plans_title": "Forfaits",
+"super_payment_plans_subtitle": "Créer et gérer les forfaits d’abonnement.",
+"super_payment_plan_pricing_title": "Tarification des forfaits",
+"super_payment_plan_pricing_subtitle": "Gérer les prix, les remises et les cycles de facturation.",
+"super_payment_payment_methods_title": "Méthodes de paiement",
+"super_payment_payment_methods_subtitle": "Gérer les méthodes de paiement utilisées pour facturer les propriétaires.",
+"super_payment_billing_types_title": "Types de facturation",
+"super_payment_billing_types_subtitle": "Gérer les catégories des méthodes de facturation.",
+"super_payment_hint": "Choisissez un module de paiement pour configurer la facturation des abonnements."
 }

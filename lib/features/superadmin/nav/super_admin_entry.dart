@@ -1,9 +1,6 @@
 import 'package:build4all_manager/features/notifications_admin/presentation/screens/admin_notifications_screen.dart';
 import 'package:build4all_manager/features/superadmin/firebase_pool/presentation/screens/firebase_pool_screen.dart';
-import 'package:build4all_manager/features/superadmin/payment_management/presentation/screens/license_plan_pricings_screen.dart';
-import 'package:build4all_manager/features/superadmin/payment_management/presentation/screens/payment_methods_screen.dart';
-import 'package:build4all_manager/features/superadmin/payment_management/presentation/screens/payment_types_screen.dart';
-import 'package:build4all_manager/features/superadmin/payment_management/presentation/screens/plans_screen.dart';
+import 'package:build4all_manager/features/superadmin/payment_management/presentation/screens/payment_management_screen.dart';
 import 'package:build4all_manager/features/superadmin/sprint_release/presentation/cubit/sprint_release_cubit.dart';
 import 'package:build4all_manager/features/superadmin/sprint_release/presentation/screens/sprint_release_screen.dart';
 import 'package:dio/dio.dart';
@@ -44,7 +41,7 @@ class SuperAdminEntry extends StatefulWidget {
 
 class _SuperAdminEntryState extends State<SuperAdminEntry> {
   // Cached to avoid recreating all page widgets on every rebuild.
-  // But we rebuild it when locale changes so drawer labels update correctly.
+  // Rebuilt only when locale changes so drawer labels update correctly.
   List<SuperAdminDestination>? _destinations;
   String? _lastLocaleTag;
 
@@ -62,7 +59,6 @@ class _SuperAdminEntryState extends State<SuperAdminEntry> {
         label: l10n.super_nav_dashboard,
         page: DashboardScreen(dio: widget.dio),
       ),
-
       SuperAdminDestination(
         icon: Icons.add_box_outlined,
         selectedIcon: Icons.add_box_rounded,
@@ -73,14 +69,12 @@ class _SuperAdminEntryState extends State<SuperAdminEntry> {
           tokenProvider: _tokenProvider,
         ),
       ),
-
       SuperAdminDestination(
         icon: Icons.publish_outlined,
         selectedIcon: Icons.publish_rounded,
         label: l10n.owner_nav_requests,
         page: PublishRequestsScreen(dio: widget.dio),
       ),
-
       SuperAdminDestination(
         icon: Icons.storage_outlined,
         selectedIcon: Icons.storage_rounded,
@@ -88,33 +82,12 @@ class _SuperAdminEntryState extends State<SuperAdminEntry> {
         page: const FirebasePoolScreen(),
       ),
 
-      // Payment / Pricing drawer items
+      // One clean drawer item for all payment submodules.
       SuperAdminDestination(
-        icon: Icons.layers_outlined,
-        selectedIcon: Icons.layers_rounded,
-        label: l10n.super_nav_plans,
-        page: const PlansScreen(),
-      ),
-
-      SuperAdminDestination(
-        icon: Icons.sell_outlined,
-        selectedIcon: Icons.sell_rounded,
-        label: l10n.super_nav_plan_pricing,
-        page: const LicensePlanPricingsScreen(),
-      ),
-
-      SuperAdminDestination(
-        icon: Icons.payments_outlined,
-        selectedIcon: Icons.payments_rounded,
-        label: l10n.super_nav_payment_methods,
-        page: const PaymentMethodsScreen(),
-      ),
-
-      SuperAdminDestination(
-        icon: Icons.category_outlined,
-        selectedIcon: Icons.category_rounded,
-        label: l10n.super_nav_billing_types,
-        page: const PaymentTypesScreen(),
+        icon: Icons.account_balance_wallet_outlined,
+        selectedIcon: Icons.account_balance_wallet_rounded,
+        label: l10n.super_nav_payment,
+        page: const PaymentManagementScreen(),
       ),
 
       SuperAdminDestination(
@@ -126,14 +99,12 @@ class _SuperAdminEntryState extends State<SuperAdminEntry> {
           child: const SprintReleaseScreen(),
         ),
       ),
-
       SuperAdminDestination(
         icon: Icons.notifications_none_outlined,
         selectedIcon: Icons.notifications,
         label: l10n.super_nav_notifications,
         page: const AdminNotificationsScreen(),
       ),
-
       SuperAdminDestination(
         icon: Icons.person_outline,
         selectedIcon: Icons.person,
@@ -148,9 +119,6 @@ class _SuperAdminEntryState extends State<SuperAdminEntry> {
     final l10n = AppLocalizations.of(context)!;
     final localeTag = Localizations.localeOf(context).toLanguageTag();
 
-    // Important:
-    // If user changes language, rebuild labels.
-    // Otherwise cached drawer labels stay in the old language.
     if (_destinations == null || _lastLocaleTag != localeTag) {
       _lastLocaleTag = localeTag;
       _destinations = _buildDestinations(l10n);

@@ -1399,6 +1399,20 @@
   "super_nav_plan_pricing": "تسعير الخطط",
   "super_nav_payment_methods": "طرق الدفع",
   "super_nav_billing_types": "أنواع الفوترة",
-  "super_nav_workflows": "مسارات العمل"
+  "super_nav_workflows": "مسارات العمل",
+   "super_nav_payment":  "الدفع",
+   "super_nav_payment": "الدفع",
+"super_payment_title": "الدفع",
+"super_payment_management_title": "إدارة الدفع",
+"super_payment_management_subtitle": "إدارة الخطط والأسعار وطرق الدفع وأنواع الفوترة من مكان واحد.",
+"super_payment_plans_title": "الخطط",
+"super_payment_plans_subtitle": "إنشاء وإدارة خطط الاشتراك.",
+"super_payment_plan_pricing_title": "تسعير الخطط",
+"super_payment_plan_pricing_subtitle": "إدارة الأسعار والخصومات ودورات الفوترة.",
+"super_payment_payment_methods_title": "طرق الدفع",
+"super_payment_payment_methods_subtitle": "إدارة طرق الدفع المستخدمة لفوترة أصحاب المشاريع.",
+"super_payment_billing_types_title": "أنواع الفوترة",
+"super_payment_billing_types_subtitle": "إدارة تصنيفات طرق الفوترة.",
+"super_payment_hint": "اختاري قسماً من أقسام الدفع لإعداد فوترة الاشتراكات."
 
 }

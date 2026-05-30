@@ -3520,4 +3520,43 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get super_nav_workflows => 'Workflows';
+
+  @override
+  String get super_nav_payment => 'Payment';
+
+  @override
+  String get super_payment_title => 'Payment';
+
+  @override
+  String get super_payment_management_title => 'Payment Management';
+
+  @override
+  String get super_payment_management_subtitle => 'Manage plans, pricing, payment methods, and billing types from one place.';
+
+  @override
+  String get super_payment_plans_title => 'Plans';
+
+  @override
+  String get super_payment_plans_subtitle => 'Create and manage subscription plans.';
+
+  @override
+  String get super_payment_plan_pricing_title => 'Plan Pricing';
+
+  @override
+  String get super_payment_plan_pricing_subtitle => 'Manage prices, discounts, and billing cycles.';
+
+  @override
+  String get super_payment_payment_methods_title => 'Payment Methods';
+
+  @override
+  String get super_payment_payment_methods_subtitle => 'Manage billing methods used by owners.';
+
+  @override
+  String get super_payment_billing_types_title => 'Billing Types';
+
+  @override
+  String get super_payment_billing_types_subtitle => 'Manage billing method categories.';
+
+  @override
+  String get super_payment_hint => 'Choose a payment module to configure subscription billing.';
 }

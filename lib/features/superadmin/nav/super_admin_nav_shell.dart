@@ -44,7 +44,6 @@ class SuperAdminNavShell extends StatefulWidget {
     this.initialIndex = 0,
   });
 
-
   State<SuperAdminNavShell> createState() => _SuperAdminNavShellState();
 }
 
@@ -52,7 +51,11 @@ class _SuperAdminNavShellState extends State<SuperAdminNavShell>
     with TickerProviderStateMixin {
   late int _index;
   TabController? _tab;
-  late final Set<int> _visited; // pages mounted so far (lazy)
+
+  // Lazy mount:
+  // The first tab is mounted immediately.
+  // Other tabs mount only on first visit, then stay alive.
+  late final Set<int> _visited;
 
   SuperMenuType get _mode =>
       widget.override ?? _parseMenu(widget.backendMenuType);
@@ -60,10 +63,11 @@ class _SuperAdminNavShellState extends State<SuperAdminNavShell>
   @override
   void initState() {
     super.initState();
-    _index = widget.initialIndex;
-    _visited = {_index}; // only mount the starting tab immediately
+
+    _index = _safeInitialIndex();
+    _visited = {_index};
+
     _syncTabController();
-    _clampIndex();
   }
 
   @override
@@ -77,50 +81,12 @@ class _SuperAdminNavShellState extends State<SuperAdminNavShell>
         oldWidget.destinations.length != widget.destinations.length;
 
     if (menuChanged || lenChanged) {
+      _index = _safeIndex(_index);
+      _visited
+        ..removeWhere((i) => i >= widget.destinations.length)
+        ..add(_index);
+
       _syncTabController();
-      _clampIndex();
-    }
-  }
-
-  void _clampIndex() {
-    if (widget.destinations.isEmpty) {
-      if (_index != 0) {
-        setState(() => _index = 0);
-      }
-      return;
-    }
-
-    final max = widget.destinations.length - 1;
-    final safe = _index.clamp(0, max);
-
-    if (safe != _index) {
-      setState(() => _index = safe);
-    }
-
-    if (_mode == SuperMenuType.top && _tab != null && _tab!.index != safe) {
-      _tab!.index = safe;
-    }
-  }
-
-  void _syncTabController() {
-    _tab?.dispose();
-    _tab = null;
-
-    if (_mode == SuperMenuType.top && widget.destinations.isNotEmpty) {
-      _tab = TabController(length: widget.destinations.length, vsync: this);
-
-      _tab!.addListener(() {
-        if (_tab!.indexIsChanging) return;
-        if (!mounted) return;
-
-        final safe = _tab!.index.clamp(0, widget.destinations.length - 1);
-        if (safe != _index) {
-          setState(() => _index = safe);
-        }
-      });
-
-      final safe = _index.clamp(0, widget.destinations.length - 1);
-      _tab!.index = safe;
     }
   }
 
@@ -130,28 +96,75 @@ class _SuperAdminNavShellState extends State<SuperAdminNavShell>
     super.dispose();
   }
 
+  int _safeInitialIndex() {
+    if (widget.destinations.isEmpty) return 0;
+
+    return widget.initialIndex.clamp(
+      0,
+      widget.destinations.length - 1,
+    );
+  }
+
+  int _safeIndex(int value) {
+    if (widget.destinations.isEmpty) return 0;
+
+    return value.clamp(
+      0,
+      widget.destinations.length - 1,
+    );
+  }
+
+  void _syncTabController() {
+    _tab?.dispose();
+    _tab = null;
+
+    if (_mode != SuperMenuType.top || widget.destinations.isEmpty) return;
+
+    _tab = TabController(
+      length: widget.destinations.length,
+      vsync: this,
+      initialIndex: _safeIndex(_index),
+    );
+
+    _tab!.addListener(() {
+      if (!mounted) return;
+
+      final safe = _safeIndex(_tab!.index);
+
+      if (safe == _index && _visited.contains(safe)) return;
+
+      setState(() {
+        _visited.add(safe);
+        _index = safe;
+      });
+    });
+  }
+
   void _goTo(int i) {
     if (widget.destinations.isEmpty) return;
 
-    final safe = i.clamp(0, widget.destinations.length - 1);
+    final safe = _safeIndex(i);
     if (safe == _index) return;
 
     setState(() {
-      _visited.add(safe); // mount on first visit, keep alive after
+      _visited.add(safe);
       _index = safe;
     });
 
-    if (_mode == SuperMenuType.top && _tab != null && _tab!.index != safe) {
+    if (_mode == SuperMenuType.top &&
+        _tab != null &&
+        _tab!.index != safe) {
       _tab!.animateTo(safe);
     }
   }
 
   String _title(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+
     if (widget.destinations.isEmpty) return l10n.nav_super_admin;
 
-    return widget
-        .destinations[_index.clamp(0, widget.destinations.length - 1)].label;
+    final safe = _safeIndex(_index);
+    return widget.destinations[safe].label;
   }
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
@@ -207,6 +220,7 @@ class _SuperAdminNavShellState extends State<SuperAdminNavShell>
                   tabAlignment: TabAlignment.start,
                   dividerHeight: 0,
                   labelStyle: const TextStyle(fontWeight: FontWeight.w800),
+                  onTap: _goTo,
                   tabs: [
                     for (final d in widget.destinations)
                       Tab(
@@ -222,17 +236,19 @@ class _SuperAdminNavShellState extends State<SuperAdminNavShell>
   }
 
   Widget _buildBodyStack(List<SuperAdminDestination> pages) {
+    final safeIndex = _safeIndex(_index);
+
     return IndexedStack(
-      index: _index,
+      index: safeIndex,
       children: [
         for (int i = 0; i < pages.length; i++)
           _visited.contains(i)
               ? KeyedSubtree(
-                  key: ValueKey(pages[i].label),
+                  key: ValueKey('super_admin_page_$i'),
                   child: pages[i].page,
                 )
               : KeyedSubtree(
-                  key: ValueKey('__placeholder_$i'),
+                  key: ValueKey('super_admin_placeholder_$i'),
                   child: const SizedBox.expand(),
                 ),
       ],
@@ -256,15 +272,18 @@ class _SuperAdminNavShellState extends State<SuperAdminNavShell>
     switch (_mode) {
       case SuperMenuType.top:
         return Scaffold(
+          resizeToAvoidBottomInset: true,
           appBar: _buildAppBar(context),
-          body: TabBarView(
-            controller: _tab,
-            children: [for (final d in pages) d.page],
-          ),
+
+          // Important:
+          // Do NOT use TabBarView here.
+          // IndexedStack keeps visited screens mounted and prevents reload.
+          body: _buildBodyStack(pages),
         );
 
       case SuperMenuType.drawer:
         return Scaffold(
+          resizeToAvoidBottomInset: true,
           appBar: _buildAppBar(context),
           drawer: _buildDrawer(context, pages),
           body: _buildBodyStack(pages),
@@ -273,15 +292,15 @@ class _SuperAdminNavShellState extends State<SuperAdminNavShell>
       case SuperMenuType.bottom:
       default:
         return Scaffold(
-  resizeToAvoidBottomInset: true,
-  appBar: _buildAppBar(context),
-  body: _buildBodyStack(pages),
-  bottomNavigationBar: _ProBottomBar(
-    index: _index,
-    onTap: _goTo,
-    destinations: pages,
-  ),
-);
+          resizeToAvoidBottomInset: true,
+          appBar: _buildAppBar(context),
+          body: _buildBodyStack(pages),
+          bottomNavigationBar: _ProBottomBar(
+            index: _safeIndex(_index),
+            onTap: _goTo,
+            destinations: pages,
+          ),
+        );
     }
   }
 
@@ -290,7 +309,7 @@ class _SuperAdminNavShellState extends State<SuperAdminNavShell>
     final cs = Theme.of(context).colorScheme;
 
     return NavigationDrawer(
-      selectedIndex: _index,
+      selectedIndex: _safeIndex(_index),
       onDestinationSelected: (i) {
         _goTo(i);
         Navigator.of(context).maybePop();
@@ -337,7 +356,11 @@ class _SuperAdminNavShellState extends State<SuperAdminNavShell>
           NavigationDrawerDestination(
             icon: Icon(d.icon),
             selectedIcon: Icon(d.selectedIcon),
-            label: Text(d.label),
+            label: Text(
+              d.label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
         const SizedBox(height: 12),
       ],
@@ -365,8 +388,8 @@ class _ProBottomBar extends StatelessWidget {
         textScaler: const TextScaler.linear(1.0),
       ),
       child: SafeArea(
-  top: false,
-  maintainBottomViewPadding: true,
+        top: false,
+        maintainBottomViewPadding: true,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(8, 6, 8, 8),
           child: Container(
@@ -389,7 +412,8 @@ class _ProBottomBar extends StatelessWidget {
               child: NavigationBarTheme(
                 data: NavigationBarThemeData(
                   height: 68,
-                  labelTextStyle: MaterialStateProperty.resolveWith<TextStyle>(
+                  labelTextStyle:
+                      MaterialStateProperty.resolveWith<TextStyle>(
                     (states) {
                       return const TextStyle(
                         fontSize: 9.5,
@@ -398,9 +422,12 @@ class _ProBottomBar extends StatelessWidget {
                       );
                     },
                   ),
-                  iconTheme: MaterialStateProperty.resolveWith<IconThemeData>(
+                  iconTheme:
+                      MaterialStateProperty.resolveWith<IconThemeData>(
                     (states) {
-                      final selected = states.contains(MaterialState.selected);
+                      final selected =
+                          states.contains(MaterialState.selected);
+
                       return IconThemeData(
                         size: selected ? 21 : 20,
                       );

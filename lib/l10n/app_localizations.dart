@@ -7002,6 +7002,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Workflows'**
   String get super_nav_workflows;
+
+  /// No description provided for @super_nav_payment.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment'**
+  String get super_nav_payment;
+
+  /// No description provided for @super_payment_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment'**
+  String get super_payment_title;
+
+  /// No description provided for @super_payment_management_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Management'**
+  String get super_payment_management_title;
+
+  /// No description provided for @super_payment_management_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage plans, pricing, payment methods, and billing types from one place.'**
+  String get super_payment_management_subtitle;
+
+  /// No description provided for @super_payment_plans_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Plans'**
+  String get super_payment_plans_title;
+
+  /// No description provided for @super_payment_plans_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create and manage subscription plans.'**
+  String get super_payment_plans_subtitle;
+
+  /// No description provided for @super_payment_plan_pricing_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan Pricing'**
+  String get super_payment_plan_pricing_title;
+
+  /// No description provided for @super_payment_plan_pricing_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage prices, discounts, and billing cycles.'**
+  String get super_payment_plan_pricing_subtitle;
+
+  /// No description provided for @super_payment_payment_methods_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Methods'**
+  String get super_payment_payment_methods_title;
+
+  /// No description provided for @super_payment_payment_methods_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage billing methods used by owners.'**
+  String get super_payment_payment_methods_subtitle;
+
+  /// No description provided for @super_payment_billing_types_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Billing Types'**
+  String get super_payment_billing_types_title;
+
+  /// No description provided for @super_payment_billing_types_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage billing method categories.'**
+  String get super_payment_billing_types_subtitle;
+
+  /// No description provided for @super_payment_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a payment module to configure subscription billing.'**
+  String get super_payment_hint;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
