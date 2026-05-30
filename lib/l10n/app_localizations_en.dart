@@ -3559,4 +3559,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get super_payment_hint => 'Choose a payment module to configure subscription billing.';
+
+  @override
+  String get super_nav_licenses => 'Licenses';
+
+  @override
+  String get super_nav_upgrade_requests => 'Upgrade Requests';
 }

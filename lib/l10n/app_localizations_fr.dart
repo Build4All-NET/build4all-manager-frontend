@@ -3559,4 +3559,10 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get super_payment_hint => 'Choisissez un module de paiement pour configurer la facturation des abonnements.';
+
+  @override
+  String get super_nav_licenses => 'Licences';
+
+  @override
+  String get super_nav_upgrade_requests => 'Demandes de mise à niveau';
 }

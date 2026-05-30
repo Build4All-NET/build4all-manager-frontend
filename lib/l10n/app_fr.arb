@@ -1567,5 +1567,7 @@
 "super_payment_payment_methods_subtitle": "Gérer les méthodes de paiement utilisées pour facturer les propriétaires.",
 "super_payment_billing_types_title": "Types de facturation",
 "super_payment_billing_types_subtitle": "Gérer les catégories des méthodes de facturation.",
-"super_payment_hint": "Choisissez un module de paiement pour configurer la facturation des abonnements."
+"super_payment_hint": "Choisissez un module de paiement pour configurer la facturation des abonnements.",
+"super_nav_licenses": "Licences",
+"super_nav_upgrade_requests": "Demandes de mise à niveau"
 }

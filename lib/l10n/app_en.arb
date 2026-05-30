@@ -1474,7 +1474,9 @@
 "super_payment_payment_methods_subtitle": "Manage billing methods used by owners.",
 "super_payment_billing_types_title": "Billing Types",
 "super_payment_billing_types_subtitle": "Manage billing method categories.",
-"super_payment_hint": "Choose a payment module to configure subscription billing."
+"super_payment_hint": "Choose a payment module to configure subscription billing.",
+"super_nav_licenses": "Licenses",
+"super_nav_upgrade_requests": "Upgrade Requests"
 
 
 

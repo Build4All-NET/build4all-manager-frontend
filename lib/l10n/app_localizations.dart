@@ -7080,6 +7080,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Choose a payment module to configure subscription billing.'**
   String get super_payment_hint;
+
+  /// No description provided for @super_nav_licenses.
+  ///
+  /// In en, this message translates to:
+  /// **'Licenses'**
+  String get super_nav_licenses;
+
+  /// No description provided for @super_nav_upgrade_requests.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade Requests'**
+  String get super_nav_upgrade_requests;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

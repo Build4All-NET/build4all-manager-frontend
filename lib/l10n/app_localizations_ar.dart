@@ -3559,4 +3559,10 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get super_payment_hint => 'اختاري قسماً من أقسام الدفع لإعداد فوترة الاشتراكات.';
+
+  @override
+  String get super_nav_licenses => 'التراخيص';
+
+  @override
+  String get super_nav_upgrade_requests => 'طلبات الترقية';
 }
