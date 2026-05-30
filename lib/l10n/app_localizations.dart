@@ -6966,6 +6966,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Pinch to zoom • Swipe to view more images'**
   String get publish_assets_zoom_hint;
+
+  /// No description provided for @super_nav_firebase_pool.
+  ///
+  /// In en, this message translates to:
+  /// **'Firebase Pool'**
+  String get super_nav_firebase_pool;
+
+  /// No description provided for @super_nav_plans.
+  ///
+  /// In en, this message translates to:
+  /// **'Plans'**
+  String get super_nav_plans;
+
+  /// No description provided for @super_nav_plan_pricing.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan Pricing'**
+  String get super_nav_plan_pricing;
+
+  /// No description provided for @super_nav_payment_methods.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Methods'**
+  String get super_nav_payment_methods;
+
+  /// No description provided for @super_nav_billing_types.
+  ///
+  /// In en, this message translates to:
+  /// **'Billing Types'**
+  String get super_nav_billing_types;
+
+  /// No description provided for @super_nav_workflows.
+  ///
+  /// In en, this message translates to:
+  /// **'Workflows'**
+  String get super_nav_workflows;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

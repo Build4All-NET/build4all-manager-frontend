@@ -3502,4 +3502,22 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get publish_assets_zoom_hint => 'كبّر بإصبعين • اسحب للتنقل بين الصور';
+
+  @override
+  String get super_nav_firebase_pool => 'مجموعة Firebase';
+
+  @override
+  String get super_nav_plans => 'الخطط';
+
+  @override
+  String get super_nav_plan_pricing => 'تسعير الخطط';
+
+  @override
+  String get super_nav_payment_methods => 'طرق الدفع';
+
+  @override
+  String get super_nav_billing_types => 'أنواع الفوترة';
+
+  @override
+  String get super_nav_workflows => 'مسارات العمل';
 }

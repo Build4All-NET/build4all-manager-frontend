@@ -25,6 +25,7 @@ class LicensePlanPricingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final api = LicensePlanPricingApi(DioClient.ensure());
     final repo = LicensePlanPricingRepositoryImpl(api);
+
     return BlocProvider(
       create: (_) => LicensePlanPricingBloc(
         getAll: GetLicensePlanPricings(repo),
@@ -46,18 +47,27 @@ class _LicensePlanPricingsView extends StatelessWidget {
     return BlocConsumer<LicensePlanPricingBloc, LicensePlanPricingState>(
       listenWhen: (p, c) => p.error != c.error || p.success != c.success,
       listener: (ctx, st) {
-        if (st.error?.isNotEmpty == true) AppToast.error(ctx, st.error!);
-        if (st.success?.isNotEmpty == true) AppToast.success(ctx, st.success!);
+        if (st.error?.isNotEmpty == true) {
+          AppToast.error(ctx, st.error!);
+        }
+
+        if (st.success?.isNotEmpty == true) {
+          AppToast.success(ctx, st.success!);
+        }
       },
       builder: (context, state) {
         return Scaffold(
           appBar: AppBar(
-            title: const Text('Plan Pricing'),
+            title: const Text(
+              'Plan Pricing',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
             centerTitle: false,
             actions: [
               if (state.loading && state.items.isNotEmpty)
                 const Padding(
-                  padding: EdgeInsets.only(right: 16),
+                  padding: EdgeInsets.only(right: 8),
                   child: SizedBox(
                     width: 20,
                     height: 20,
@@ -67,22 +77,28 @@ class _LicensePlanPricingsView extends StatelessWidget {
               IconButton(
                 icon: const Icon(Icons.refresh_rounded),
                 tooltip: 'Refresh',
-                onPressed: () => context
-                    .read<LicensePlanPricingBloc>()
-                    .add(RefreshLicensePlanPricings()),
+                onPressed: () {
+                  context
+                      .read<LicensePlanPricingBloc>()
+                      .add(RefreshLicensePlanPricings());
+                },
               ),
             ],
           ),
-          floatingActionButton: FloatingActionButton.extended(
+
+          floatingActionButton: _ResponsiveFab(
             onPressed: () => _openForm(context, null),
-            icon: const Icon(Icons.add_rounded),
-            label: const Text('Add Pricing'),
           ),
-          body: RefreshIndicator.adaptive(
-            onRefresh: () async => context
-                .read<LicensePlanPricingBloc>()
-                .add(RefreshLicensePlanPricings()),
-            child: _buildBody(context, state),
+
+          body: SafeArea(
+            child: RefreshIndicator.adaptive(
+              onRefresh: () async {
+                context
+                    .read<LicensePlanPricingBloc>()
+                    .add(RefreshLicensePlanPricings());
+              },
+              child: _buildBody(context, state),
+            ),
           ),
         );
       },
@@ -90,15 +106,21 @@ class _LicensePlanPricingsView extends StatelessWidget {
   }
 
   Widget _buildBody(BuildContext context, LicensePlanPricingState state) {
-    if (state.loading && state.items.isEmpty) return const PmLoadingView();
+    if (state.loading && state.items.isEmpty) {
+      return const PmLoadingView();
+    }
+
     if (state.error != null && state.items.isEmpty) {
       return PmErrorView(
         message: state.error!,
-        onRetry: () => context
-            .read<LicensePlanPricingBloc>()
-            .add(LoadLicensePlanPricings()),
+        onRetry: () {
+          context
+              .read<LicensePlanPricingBloc>()
+              .add(LoadLicensePlanPricings());
+        },
       );
     }
+
     if (state.items.isEmpty) {
       return const PmEmptyView(
         icon: Icons.sell_rounded,
@@ -106,35 +128,107 @@ class _LicensePlanPricingsView extends StatelessWidget {
         subtitle: 'Tap + to create the first pricing row.',
       );
     }
-    return ListView.separated(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
-      itemCount: state.items.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 10),
-      itemBuilder: (ctx, i) {
-        final item = state.items[i];
-        return LicensePlanPricingCard(
-          pricing: item,
-          isToggling: state.togglingIds.contains(item.id),
-          isDeleting: state.deletingIds.contains(item.id),
-          onToggle: (val) => context.read<LicensePlanPricingBloc>().add(
-                ToggleLicensePlanPricingActive(id: item.id, isActive: val),
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
+
+        final bool isPhone = width < 600;
+        final bool isTablet = width >= 600 && width < 1024;
+        final bool isDesktop = width >= 1024;
+
+        final double horizontalPadding = isPhone
+            ? 12
+            : isTablet
+                ? 24
+                : 32;
+
+        final double maxContentWidth = isDesktop ? 980 : double.infinity;
+
+        return Align(
+          alignment: Alignment.topCenter,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: maxContentWidth),
+            child: ListView.separated(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: EdgeInsets.fromLTRB(
+                horizontalPadding,
+                16,
+                horizontalPadding,
+                100,
               ),
-          onEdit: () => _openForm(context, item),
+              itemCount: state.items.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 10),
+              itemBuilder: (ctx, i) {
+                final item = state.items[i];
+
+                return LicensePlanPricingCard(
+                  pricing: item,
+                  isToggling: state.togglingIds.contains(item.id),
+                  isDeleting: state.deletingIds.contains(item.id),
+                  onToggle: (val) {
+                    context.read<LicensePlanPricingBloc>().add(
+                          ToggleLicensePlanPricingActive(
+                            id: item.id,
+                            isActive: val,
+                          ),
+                        );
+                  },
+                  onEdit: () => _openForm(context, item),
+                );
+              },
+            ),
+          ),
         );
       },
     );
   }
 
   Future<void> _openForm(
-      BuildContext context, LicensePlanPricing? existing) async {
+    BuildContext context,
+    LicensePlanPricing? existing,
+  ) async {
     final bloc = context.read<LicensePlanPricingBloc>();
+
     final result = await Navigator.of(context).push<bool>(
       MaterialPageRoute(
         builder: (_) => LicensePlanPricingFormScreen(existing: existing),
       ),
     );
+
     if (result == true && context.mounted) {
       bloc.add(RefreshLicensePlanPricings());
     }
+  }
+}
+
+class _ResponsiveFab extends StatelessWidget {
+  final VoidCallback onPressed;
+
+  const _ResponsiveFab({
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final width = MediaQuery.sizeOf(context).width;
+
+    if (width < 380) {
+      return FloatingActionButton(
+        onPressed: onPressed,
+        tooltip: 'Add Pricing',
+        child: const Icon(Icons.add_rounded),
+      );
+    }
+
+    return FloatingActionButton.extended(
+      onPressed: onPressed,
+      icon: const Icon(Icons.add_rounded),
+      label: const Text(
+        'Add Pricing',
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+    );
   }
 }

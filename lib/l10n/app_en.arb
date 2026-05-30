@@ -1455,7 +1455,13 @@
 "publish_assets_view_all": "View all",
 "publish_assets_download_all": "Download all",
 "publish_assets_download_all_failed": "Could not download all assets",
-"publish_assets_zoom_hint": "Pinch to zoom • Swipe to view more images"
+"publish_assets_zoom_hint": "Pinch to zoom • Swipe to view more images",
+"super_nav_firebase_pool": "Firebase Pool",
+  "super_nav_plans": "Plans",
+  "super_nav_plan_pricing": "Plan Pricing",
+  "super_nav_payment_methods": "Payment Methods",
+  "super_nav_billing_types": "Billing Types",
+  "super_nav_workflows": "Workflows"
 
 
 

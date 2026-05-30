@@ -3502,4 +3502,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get publish_assets_zoom_hint => 'Pinch to zoom • Swipe to view more images';
+
+  @override
+  String get super_nav_firebase_pool => 'Firebase Pool';
+
+  @override
+  String get super_nav_plans => 'Plans';
+
+  @override
+  String get super_nav_plan_pricing => 'Plan Pricing';
+
+  @override
+  String get super_nav_payment_methods => 'Payment Methods';
+
+  @override
+  String get super_nav_billing_types => 'Billing Types';
+
+  @override
+  String get super_nav_workflows => 'Workflows';
 }

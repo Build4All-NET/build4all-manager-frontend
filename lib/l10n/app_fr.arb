@@ -1548,5 +1548,11 @@
 "publish_assets_view_all": "Tout voir",
 "publish_assets_download_all": "Tout télécharger",
 "publish_assets_download_all_failed": "Impossible de télécharger tous les assets",
-"publish_assets_zoom_hint": "Pincez pour zoomer • Glissez pour voir les autres images"
+"publish_assets_zoom_hint": "Pincez pour zoomer • Glissez pour voir les autres images",
+ "super_nav_firebase_pool": "Pool Firebase",
+  "super_nav_plans": "Forfaits",
+  "super_nav_plan_pricing": "Tarification des forfaits",
+  "super_nav_payment_methods": "Méthodes de paiement",
+  "super_nav_billing_types": "Types de facturation",
+  "super_nav_workflows": "Flux de travail"
 }

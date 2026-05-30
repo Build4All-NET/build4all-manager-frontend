@@ -1393,6 +1393,12 @@
 "publish_assets_view_all": "عرض الكل",
 "publish_assets_download_all": "تحميل الكل",
 "publish_assets_download_all_failed": "تعذر تحميل كل الصور",
-"publish_assets_zoom_hint": "كبّر بإصبعين • اسحب للتنقل بين الصور"
+"publish_assets_zoom_hint": "كبّر بإصبعين • اسحب للتنقل بين الصور",
+  "super_nav_firebase_pool": "مجموعة Firebase",
+  "super_nav_plans": "الخطط",
+  "super_nav_plan_pricing": "تسعير الخطط",
+  "super_nav_payment_methods": "طرق الدفع",
+  "super_nav_billing_types": "أنواع الفوترة",
+  "super_nav_workflows": "مسارات العمل"
 
 }
