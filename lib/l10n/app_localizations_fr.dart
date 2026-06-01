@@ -2437,6 +2437,18 @@ class AppLocalizationsFr extends AppLocalizations {
   String get periodEndLabel => 'Fin de période';
 
   @override
+  String get license_timeline_title => 'Chronologie';
+
+  @override
+  String get subscription_status_scheduled => 'Planifié';
+
+  @override
+  String get payment_status_paid => 'Payé';
+
+  @override
+  String get payment_status_failed => 'Échoué';
+
+  @override
   String get daysLeftLabel => 'Jours restants';
 
   @override

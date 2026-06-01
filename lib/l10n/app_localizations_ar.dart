@@ -2437,6 +2437,18 @@ class AppLocalizationsAr extends AppLocalizations {
   String get periodEndLabel => 'نهاية المدة';
 
   @override
+  String get license_timeline_title => 'الجدول الزمني';
+
+  @override
+  String get subscription_status_scheduled => 'مجدول';
+
+  @override
+  String get payment_status_paid => 'مدفوع';
+
+  @override
+  String get payment_status_failed => 'فشل';
+
+  @override
   String get daysLeftLabel => 'الأيام المتبقية';
 
   @override

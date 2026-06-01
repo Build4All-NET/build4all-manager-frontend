@@ -2437,6 +2437,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get periodEndLabel => 'Period end';
 
   @override
+  String get license_timeline_title => 'Timeline';
+
+  @override
+  String get subscription_status_scheduled => 'Scheduled';
+
+  @override
+  String get payment_status_paid => 'Paid';
+
+  @override
+  String get payment_status_failed => 'Failed';
+
+  @override
   String get daysLeftLabel => 'Days left';
 
   @override
