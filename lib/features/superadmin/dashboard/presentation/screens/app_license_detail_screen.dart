@@ -169,8 +169,7 @@ class _AppLicenseDetailScreenState extends State<AppLicenseDetailScreen> {
             // ---- timeline ----
             _section(
               context,
-              // No localized "timeline" key yet; short literal as a stopgap.
-              title: 'Timeline',
+              title: l10n.license_timeline_title,
               children: [_buildTimeline(context)],
             ),
 
@@ -543,7 +542,7 @@ class _AppLicenseDetailScreenState extends State<AppLicenseDetailScreen> {
       case 'CANCELLED':
         return l10n.app_licenses_status_canceled;
       case 'SCHEDULED':
-        return 'Scheduled';
+        return l10n.subscription_status_scheduled;
       default:
         return (value ?? '').trim().isEmpty ? l10n.unknownLabel : value!;
     }
@@ -572,12 +571,14 @@ class _AppLicenseDetailScreenState extends State<AppLicenseDetailScreen> {
     final s = (status ?? '').toUpperCase();
     switch (s) {
       case 'PAID':
-        return 'Paid';
+        return l10n.payment_status_paid;
       case 'PENDING':
-      case 'OFFLINE_PENDING':
         return l10n.status_pending;
       case 'FAILED':
-        return 'Failed';
+        return l10n.payment_status_failed;
+      case 'CANCELED':
+      case 'CANCELLED':
+        return l10n.app_licenses_status_canceled;
       default:
         return s.isEmpty ? l10n.unknownLabel : s;
     }
@@ -589,9 +590,10 @@ class _AppLicenseDetailScreenState extends State<AppLicenseDetailScreen> {
       case 'PAID':
         return Colors.green;
       case 'PENDING':
-      case 'OFFLINE_PENDING':
         return Colors.orange;
       case 'FAILED':
+      case 'CANCELED':
+      case 'CANCELLED':
         return cs.error;
       default:
         return cs.secondary;
@@ -614,7 +616,8 @@ class _AppLicenseDetailScreenState extends State<AppLicenseDetailScreen> {
         return _Eff(
             l10n.common_status_active, Colors.green, Icons.verified_rounded);
       case 'SCHEDULED':
-        return _Eff('Scheduled', Colors.blue, Icons.event_rounded);
+        return _Eff(l10n.subscription_status_scheduled, Colors.blue,
+            Icons.event_rounded);
       case 'EXPIRED':
         return _Eff(l10n.app_licenses_status_expired, cs.error,
             Icons.hourglass_disabled_rounded);

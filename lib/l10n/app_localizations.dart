@@ -4873,6 +4873,30 @@ abstract class AppLocalizations {
   /// **'Period end'**
   String get periodEndLabel;
 
+  /// No description provided for @license_timeline_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Timeline'**
+  String get license_timeline_title;
+
+  /// No description provided for @subscription_status_scheduled.
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled'**
+  String get subscription_status_scheduled;
+
+  /// No description provided for @payment_status_paid.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid'**
+  String get payment_status_paid;
+
+  /// No description provided for @payment_status_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get payment_status_failed;
+
   /// No description provided for @daysLeftLabel.
   ///
   /// In en, this message translates to:
