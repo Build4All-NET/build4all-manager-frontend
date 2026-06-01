@@ -2449,6 +2449,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get payment_status_failed => 'Failed';
 
   @override
+  String get app_licenses_cancel_title => 'Cancel license';
+
+  @override
+  String app_licenses_cancel_confirm(Object plan) {
+    return 'Cancel the $plan license? Once the app has no active license the owner is blocked from the dashboard (the app stays open to end users, and the owner can renew).';
+  }
+
+  @override
+  String get app_licenses_cancel_confirm_action => 'Yes, cancel';
+
+  @override
+  String get app_licenses_cancel_done => 'License canceled.';
+
+  @override
+  String get app_licenses_owner_blocked =>
+      'No active license — the owner is blocked from the dashboard. The app stays open to end users; the owner can renew to regain access.';
+
+  @override
   String get daysLeftLabel => 'Days left';
 
   @override

@@ -40,27 +40,40 @@ class SuperAdminAppLicenseDetail {
 }
 
 class LicensePeriod {
+  final int? subscriptionId;
   final String? planCode;
   final String? planName;
   final String? status;
   final DateTime? periodStart;
   final DateTime? periodEnd;
+  final bool cancelable;
 
   const LicensePeriod({
+    this.subscriptionId,
     this.planCode,
     this.planName,
     this.status,
     this.periodStart,
     this.periodEnd,
+    this.cancelable = false,
   });
 
   factory LicensePeriod.fromJson(Map<String, dynamic> json) {
+    int? parseInt(dynamic v) {
+      if (v == null) return null;
+      if (v is int) return v;
+      if (v is num) return v.toInt();
+      return int.tryParse(v.toString());
+    }
+
     return LicensePeriod(
+      subscriptionId: parseInt(json['subscriptionId']),
       planCode: json['planCode']?.toString(),
       planName: json['planName']?.toString(),
       status: json['status']?.toString(),
       periodStart: _date(json['periodStart']),
       periodEnd: _date(json['periodEnd']),
+      cancelable: json['cancelable'] == true,
     );
   }
 }

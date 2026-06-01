@@ -2449,6 +2449,24 @@ class AppLocalizationsAr extends AppLocalizations {
   String get payment_status_failed => 'فشل';
 
   @override
+  String get app_licenses_cancel_title => 'إلغاء الترخيص';
+
+  @override
+  String app_licenses_cancel_confirm(Object plan) {
+    return 'إلغاء ترخيص $plan؟ عندما لا يبقى للتطبيق أي ترخيص نشط، يُمنع المالك من لوحة التحكم (يبقى التطبيق متاحًا للمستخدمين، ويمكن للمالك التجديد).';
+  }
+
+  @override
+  String get app_licenses_cancel_confirm_action => 'نعم، إلغاء';
+
+  @override
+  String get app_licenses_cancel_done => 'تم إلغاء الترخيص.';
+
+  @override
+  String get app_licenses_owner_blocked =>
+      'لا يوجد ترخيص نشط — المالك ممنوع من لوحة التحكم. يبقى التطبيق متاحًا للمستخدمين؛ ويمكن للمالك التجديد لاستعادة الوصول.';
+
+  @override
   String get daysLeftLabel => 'الأيام المتبقية';
 
   @override

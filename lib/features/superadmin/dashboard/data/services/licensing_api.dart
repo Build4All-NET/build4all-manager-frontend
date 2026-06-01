@@ -29,6 +29,13 @@ class LicensingApi {
   Future<Response> cancelLicense(int aupId) =>
       dio.post('/licensing/apps/$aupId/cancel-license');
 
+  /// POST /api/licensing/apps/{aupId}/subscriptions/{subscriptionId}/cancel
+  /// Cancels a single license (active or scheduled). The response carries
+  /// `ownerBlocked` (true once the app has no live license left) and
+  /// `liveLicensesRemaining`.
+  Future<Response> cancelSubscription(int aupId, int subscriptionId) =>
+      dio.post('/licensing/apps/$aupId/subscriptions/$subscriptionId/cancel');
+
   /// POST /api/licensing/upgrade-requests/{id}/mark-paid
   Future<Response> markUpgradeRequestPaid(int requestId) =>
       dio.post('/licensing/upgrade-requests/$requestId/mark-paid');

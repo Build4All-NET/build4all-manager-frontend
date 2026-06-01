@@ -4897,6 +4897,36 @@ abstract class AppLocalizations {
   /// **'Failed'**
   String get payment_status_failed;
 
+  /// No description provided for @app_licenses_cancel_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel license'**
+  String get app_licenses_cancel_title;
+
+  /// No description provided for @app_licenses_cancel_confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel the {plan} license? Once the app has no active license the owner is blocked from the dashboard (the app stays open to end users, and the owner can renew).'**
+  String app_licenses_cancel_confirm(Object plan);
+
+  /// No description provided for @app_licenses_cancel_confirm_action.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, cancel'**
+  String get app_licenses_cancel_confirm_action;
+
+  /// No description provided for @app_licenses_cancel_done.
+  ///
+  /// In en, this message translates to:
+  /// **'License canceled.'**
+  String get app_licenses_cancel_done;
+
+  /// No description provided for @app_licenses_owner_blocked.
+  ///
+  /// In en, this message translates to:
+  /// **'No active license — the owner is blocked from the dashboard. The app stays open to end users; the owner can renew to regain access.'**
+  String get app_licenses_owner_blocked;
+
   /// No description provided for @daysLeftLabel.
   ///
   /// In en, this message translates to:

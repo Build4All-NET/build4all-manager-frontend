@@ -2449,6 +2449,24 @@ class AppLocalizationsFr extends AppLocalizations {
   String get payment_status_failed => 'Échoué';
 
   @override
+  String get app_licenses_cancel_title => 'Annuler la licence';
+
+  @override
+  String app_licenses_cancel_confirm(Object plan) {
+    return 'Annuler la licence $plan ? Une fois que l\'application n\'a plus de licence active, le propriétaire est bloqué du tableau de bord (l\'application reste ouverte aux utilisateurs, et le propriétaire peut renouveler).';
+  }
+
+  @override
+  String get app_licenses_cancel_confirm_action => 'Oui, annuler';
+
+  @override
+  String get app_licenses_cancel_done => 'Licence annulée.';
+
+  @override
+  String get app_licenses_owner_blocked =>
+      'Aucune licence active — le propriétaire est bloqué du tableau de bord. L\'application reste ouverte aux utilisateurs ; le propriétaire peut renouveler pour récupérer l\'accès.';
+
+  @override
   String get daysLeftLabel => 'Jours restants';
 
   @override
