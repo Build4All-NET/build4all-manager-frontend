@@ -101,11 +101,18 @@ class _AppLicenseDetailScreenState extends State<AppLicenseDetailScreen> {
       final res = await _api.cancelSubscription(item.aupId, id);
       if (!mounted) return;
       final data = res.data;
+      final ok = !(data is Map && data['success'] == false);
       final message = (data is Map && data['message'] is String)
           ? data['message'] as String
           : l10n.app_licenses_cancel_done;
-      AppToast.success(context, message);
-      await _load();
+      if (ok) {
+        AppToast.success(context, message);
+        await _load();
+      } else {
+        // e.g. tried to cancel a license while a newer one is stacked after it
+        AppToast.error(context, message);
+        await _load();
+      }
     } catch (e) {
       if (!mounted) return;
       AppToast.error(context, ApiErrorHandler.message(e));
