@@ -1,4 +1,5 @@
 import 'package:build4all_manager/features/superadmin/dashboard/data/models/super_admin_app_license_row.dart';
+import 'package:build4all_manager/features/superadmin/dashboard/data/models/super_admin_app_license_detail.dart';
 import 'package:dio/dio.dart';
 
 class LicensingApi {
@@ -51,5 +52,14 @@ class LicensingApi {
     return data
         .map((e) => SuperAdminAppLicenseRow.fromJson(e as Map<String, dynamic>))
         .toList();
+  }
+
+  /// GET /api/licensing/apps/{aupId}/license-detail
+  Future<SuperAdminAppLicenseDetail> appLicenseDetail(int aupId) async {
+    final res = await dio.get('/licensing/apps/$aupId/license-detail');
+    final data = res.data;
+    return SuperAdminAppLicenseDetail.fromJson(
+      data is Map<String, dynamic> ? data : <String, dynamic>{},
+    );
   }
 }
