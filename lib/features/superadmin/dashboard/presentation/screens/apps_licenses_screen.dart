@@ -7,6 +7,13 @@ import 'package:flutter/material.dart';
 
 import '../../data/models/super_admin_app_license_row.dart';
 import '../../data/services/licensing_api.dart';
+import 'app_license_detail_screen.dart';
+
+// Filter tokens. A filter is either "all", one of these special tokens, or a
+// plain plan code (e.g. "FREE", "BASIC", "SMART") derived from the data.
+const String _kAll = '__ALL__';
+const String _kPending = '__PENDING__';
+const String _kBlocked = '__BLOCKED__';
 
 class AppsLicensesScreen extends StatefulWidget {
   const AppsLicensesScreen({super.key});
@@ -24,9 +31,7 @@ class _AppsLicensesScreenState extends State<AppsLicensesScreen> {
 
   List<SuperAdminAppLicenseRow> _items = const [];
   String _query = '';
-  _LicenseFilter _filter = _LicenseFilter.all;
-
-  final Set<int> _expandedIds = <int>{};
+  String _filter = _kAll;
 
   int? _cancelingAupId;
 
@@ -61,61 +66,75 @@ class _AppsLicensesScreenState extends State<AppsLicensesScreen> {
   }
 
   Future<void> _cancelLicense(SuperAdminAppLicenseRow item) async {
-  final confirmed = await showDialog<bool>(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: const Text('Cancel License'),
-      content: Text(
-        'Are you sure you want to cancel the license for ${item.appName}?',
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Cancel License'),
+        content: Text(
+          'Are you sure you want to cancel the license for ${item.appName}?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('No'),
+          ),
+          FilledButton.icon(
+            onPressed: () => Navigator.of(context).pop(true),
+            icon: const Icon(Icons.cancel_outlined),
+            label: const Text('Yes, Cancel'),
+          ),
+        ],
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(false),
-          child: const Text('No'),
-        ),
-        FilledButton.icon(
-          onPressed: () => Navigator.of(context).pop(true),
-          icon: const Icon(Icons.cancel_outlined),
-          label: const Text('Yes, Cancel'),
-        ),
-      ],
-    ),
-  );
+    );
 
-  if (confirmed != true) return;
+    if (confirmed != true) return;
 
-  setState(() {
-    _cancelingAupId = item.aupId;
-  });
-
-  try {
-    final res = await _api.cancelLicense(item.aupId);
-
-    if (!mounted) return;
-
-    String message = 'Done successfully';
-    final data = res.data;
-
-    if (data is Map<String, dynamic>) {
-      final backendMessage = data['message']?.toString();
-      if (backendMessage != null && backendMessage.trim().isNotEmpty) {
-        message = backendMessage;
-      }
-    }
-
-    AppToast.success(context, message);
-
-    await _load();
-  } catch (e) {
-    if (!mounted) return;
-    AppToast.error(context, ApiErrorHandler.message(e));
-  } finally {
-    if (!mounted) return;
     setState(() {
-      _cancelingAupId = null;
+      _cancelingAupId = item.aupId;
     });
+
+    try {
+      final res = await _api.cancelLicense(item.aupId);
+      if (!mounted) return;
+
+      String message = 'Done successfully';
+      final data = res.data;
+      if (data is Map<String, dynamic>) {
+        final backendMessage = data['message']?.toString();
+        if (backendMessage != null && backendMessage.trim().isNotEmpty) {
+          message = backendMessage;
+        }
+      }
+      AppToast.success(context, message);
+      await _load();
+    } catch (e) {
+      if (!mounted) return;
+      AppToast.error(context, ApiErrorHandler.message(e));
+    } finally {
+      if (!mounted) return;
+      setState(() {
+        _cancelingAupId = null;
+      });
+    }
   }
-}
+
+  Future<void> _openDetail(SuperAdminAppLicenseRow item) async {
+    final isActive =
+        (item.subscriptionStatus ?? '').toUpperCase() == 'ACTIVE';
+    final result = await Navigator.of(context).push<String>(
+      MaterialPageRoute(
+        builder: (_) => AppLicenseDetailScreen(
+          item: item,
+          canCancel: isActive && _cancelingAupId == null,
+        ),
+      ),
+    );
+    if (result == 'cancel') {
+      await _cancelLicense(item);
+    }
+  }
+
+  // ----- filtering / sorting -----
 
   bool _matchesSearch(SuperAdminAppLicenseRow item) {
     final q = _query.trim().toLowerCase();
@@ -140,21 +159,15 @@ class _AppsLicensesScreenState extends State<AppsLicensesScreen> {
   }
 
   bool _matchesFilter(SuperAdminAppLicenseRow item) {
-    final plan = (item.planCode ?? '').toUpperCase();
-
     switch (_filter) {
-      case _LicenseFilter.all:
+      case _kAll:
         return true;
-      case _LicenseFilter.pending:
+      case _kPending:
         return (item.upgradeRequestStatus ?? '').toUpperCase() == 'PENDING';
-      case _LicenseFilter.blocked:
+      case _kBlocked:
         return item.canAccessDashboard == false;
-      case _LicenseFilter.free:
-        return plan == 'FREE';
-      case _LicenseFilter.proHosted:
-        return plan != 'FREE' && item.requiresDedicatedServer != true;
-      case _LicenseFilter.dedicated:
-        return item.requiresDedicatedServer == true;
+      default:
+        return (item.planCode ?? '').toUpperCase() == _filter;
     }
   }
 
@@ -164,44 +177,48 @@ class _AppsLicensesScreenState extends State<AppsLicensesScreen> {
         .toList();
 
     list.sort((a, b) {
-      final aPending =
-          (a.upgradeRequestStatus ?? '').toUpperCase() == 'PENDING';
-      final bPending =
-          (b.upgradeRequestStatus ?? '').toUpperCase() == 'PENDING';
-
-      if (aPending != bPending) {
-        return aPending ? -1 : 1;
-      }
-
-      final aBlocked = a.canAccessDashboard == false;
-      final bBlocked = b.canAccessDashboard == false;
-
-      if (aBlocked != bBlocked) {
-        return aBlocked ? -1 : 1;
-      }
-
+      final byRank = _attentionRank(a).compareTo(_attentionRank(b));
+      if (byRank != 0) return byRank;
       return a.appName.toLowerCase().compareTo(b.appName.toLowerCase());
     });
 
     return list;
   }
 
-  void _toggleExpanded(int aupId) {
-    setState(() {
-      if (_expandedIds.contains(aupId)) {
-        _expandedIds.remove(aupId);
-      } else {
-        _expandedIds.add(aupId);
-      }
-    });
+  // Lower rank = higher in the list ("needs attention first").
+  int _attentionRank(SuperAdminAppLicenseRow e) {
+    if (e.canAccessDashboard == false) return 0; // blocked
+    if ((e.upgradeRequestStatus ?? '').toUpperCase() == 'PENDING') return 1;
+    final s = (e.subscriptionStatus ?? '').toUpperCase();
+    if (s == 'EXPIRED') return 2;
+    if (s == 'CANCELED' || s == 'CANCELLED') return 3;
+    if (s == 'SCHEDULED') return 4;
+    if (s == 'ACTIVE') return 5;
+    return 6;
   }
 
-  String _dateText(DateTime? date) {
-    if (date == null) return '-';
-    final y = date.year.toString().padLeft(4, '0');
-    final m = date.month.toString().padLeft(2, '0');
-    final d = date.day.toString().padLeft(2, '0');
-    return '$y-$m-$d';
+  // Distinct plan codes present in the data (FREE first, then alphabetical).
+  List<String> get _planCodes {
+    final set = <String>{};
+    for (final e in _items) {
+      final c = (e.planCode ?? '').toUpperCase().trim();
+      if (c.isNotEmpty) set.add(c);
+    }
+    final list = set.toList();
+    list.sort((a, b) {
+      if (a == 'FREE') return -1;
+      if (b == 'FREE') return 1;
+      return a.compareTo(b);
+    });
+    return list;
+  }
+
+  // ----- formatting -----
+
+  String _prettyPlan(AppLocalizations l10n, String code) {
+    if (code == 'FREE') return l10n.app_licenses_plan_free;
+    if (code.isEmpty) return l10n.unknownLabel;
+    return code[0].toUpperCase() + code.substring(1).toLowerCase();
   }
 
   String _usersText(SuperAdminAppLicenseRow item, AppLocalizations l10n) {
@@ -210,96 +227,47 @@ class _AppsLicensesScreenState extends State<AppsLicensesScreen> {
     return '$active / $allowed';
   }
 
-  String _yesNo(bool? value, AppLocalizations l10n) {
-    if (value == true) return l10n.yes;
-    if (value == false) return l10n.no;
-    return l10n.unknownLabel;
-  }
-
-  String _filterLabel(_LicenseFilter filter, AppLocalizations l10n) {
-    switch (_filter) {
-      case _LicenseFilter.all:
-        return l10n.app_licenses_filter_all;
-      case _LicenseFilter.pending:
-        return l10n.app_licenses_filter_pending;
-      case _LicenseFilter.blocked:
-        return l10n.app_licenses_filter_blocked;
-      case _LicenseFilter.free:
-        return l10n.app_licenses_filter_free;
-      case _LicenseFilter.proHosted:
-        return l10n.app_licenses_filter_pro_hosted;
-      case _LicenseFilter.dedicated:
-        return l10n.app_licenses_filter_dedicated;
-    }
-  }
-
-  String _planLabel(AppLocalizations l10n, String? code, String? planName) {
-    final raw = (code ?? '').toUpperCase();
-
-    if (raw == 'FREE') return l10n.app_licenses_plan_free;
-    if ((planName ?? '').trim().isNotEmpty) return planName!.trim();
-    if ((code ?? '').trim().isNotEmpty) return code!;
-    return l10n.unknownLabel;
-  }
-
-  String _statusLabel(AppLocalizations l10n, String? value) {
-    final s = (value ?? '').toUpperCase();
-
-    switch (s) {
-      case 'ACTIVE':
-        return l10n.common_status_active;
-      case 'PENDING':
-        return l10n.status_pending;
-      case 'APPROVED':
-        return l10n.publish_status_approved;
-      case 'REJECTED':
-        return l10n.publish_status_rejected;
-      case 'EXPIRED':
-        return l10n.app_licenses_status_expired;
-      case 'SUSPENDED':
-        return l10n.app_licenses_status_suspended;
-      case 'DELETED':
-        return l10n.app_licenses_status_deleted;
-      case 'CANCELED':
-      case 'CANCELLED':
-        return l10n.app_licenses_status_canceled;
-      default:
-        return (value ?? '').trim().isEmpty ? l10n.unknownLabel : value!;
-    }
-  }
-
-  Color _statusColor(BuildContext context, String? value) {
+  _Eff _effectiveStatus(BuildContext context, SuperAdminAppLicenseRow item) {
+    final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
-    final s = (value ?? '').toUpperCase();
 
+    if (item.canAccessDashboard == false) {
+      return _Eff(l10n.app_licenses_stat_blocked, cs.error, Icons.block_rounded);
+    }
+    if ((item.upgradeRequestStatus ?? '').toUpperCase() == 'PENDING') {
+      return _Eff(l10n.status_pending, Colors.orange, Icons.schedule_rounded);
+    }
+    final s = (item.subscriptionStatus ?? '').toUpperCase();
     switch (s) {
       case 'ACTIVE':
-      case 'APPROVED':
-        return Colors.green;
-      case 'PENDING':
-        return Colors.orange;
-      case 'FREE':
-        return cs.primary;
+        return _Eff(
+            l10n.common_status_active, Colors.green, Icons.verified_rounded);
+      case 'SCHEDULED':
+        return _Eff('Scheduled', Colors.blue, Icons.event_rounded);
       case 'EXPIRED':
-      case 'REJECTED':
-      case 'SUSPENDED':
-      case 'DELETED':
+        return _Eff(l10n.app_licenses_status_expired, cs.error,
+            Icons.hourglass_disabled_rounded);
       case 'CANCELED':
       case 'CANCELLED':
-        return cs.error;
-      default:
-        return cs.secondary;
+        return _Eff(l10n.app_licenses_status_canceled, cs.error,
+            Icons.cancel_outlined);
+      case 'SUSPENDED':
+        return _Eff(l10n.app_licenses_status_suspended, cs.error,
+            Icons.pause_circle_outline_rounded);
     }
+    if ((item.planCode ?? '').toUpperCase() == 'FREE') {
+      return _Eff(l10n.app_licenses_plan_free, cs.primary,
+          Icons.workspace_premium_outlined);
+    }
+    return _Eff(l10n.unknownLabel, cs.secondary, Icons.help_outline_rounded);
   }
 
-  Widget _chip(
-    BuildContext context,
-    String text,
-    Color color, {
-    IconData? icon,
-  }) {
+  // ----- small widgets -----
+
+  Widget _chip(BuildContext context, String text, Color color,
+      {IconData? icon}) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
         color: color.withOpacity(.10),
         borderRadius: BorderRadius.circular(999),
@@ -309,150 +277,40 @@ class _AppsLicensesScreenState extends State<AppsLicensesScreen> {
         mainAxisSize: MainAxisSize.min,
         children: [
           if (icon != null) ...[
-            Icon(icon, size: 14, color: color),
-            const SizedBox(width: 6),
+            Icon(icon, size: 13, color: color),
+            const SizedBox(width: 5),
           ],
           Text(
             text,
             style: TextStyle(
-              color: color,
-              fontWeight: FontWeight.w700,
-              fontSize: 12,
-            ),
+                color: color, fontWeight: FontWeight.w800, fontSize: 11.5),
           ),
         ],
       ),
     );
   }
 
-  Widget _metricCard(
-    BuildContext context, {
-    required IconData icon,
-    required String label,
-    required String value,
-    required Color color,
-  }) {
+  Widget _planFilterChip(BuildContext context,
+      {required String label, required bool selected, required VoidCallback onTap}) {
     final cs = Theme.of(context).colorScheme;
-
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: cs.surfaceContainerHighest.withOpacity(.5),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: cs.outlineVariant.withOpacity(.4)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 34,
-            height: 34,
-            decoration: BoxDecoration(
-              color: color.withOpacity(.10),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(icon, color: color, size: 18),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: cs.onSurfaceVariant,
-                        fontWeight: FontWeight.w600,
-                      ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  value,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w800,
-                      ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _detailRow(BuildContext context, String label, String value) {
-    final cs = Theme.of(context).colorScheme;
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 150,
-            child: Text(
-              label,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: cs.onSurfaceVariant,
-                    fontWeight: FontWeight.w700,
-                  ),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value.isEmpty ? '-' : value,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _filterChip(
-    BuildContext context, {
-    required String label,
-    required bool selected,
-    required VoidCallback onTap,
-    required IconData icon,
-  }) {
-    final cs = Theme.of(context).colorScheme;
-
     return InkWell(
       borderRadius: BorderRadius.circular(999),
       onTap: onTap,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 160),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
         decoration: BoxDecoration(
           color: selected ? cs.primary : cs.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(999),
-          border: Border.all(
-            color: selected ? cs.primary : cs.outlineVariant,
-          ),
+          border: Border.all(color: selected ? cs.primary : cs.outlineVariant),
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 16,
-              color: selected ? cs.onPrimary : cs.onSurfaceVariant,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              label,
-              style: TextStyle(
-                color: selected ? cs.onPrimary : cs.onSurface,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ],
+        child: Text(
+          label,
+          style: TextStyle(
+            color: selected ? cs.onPrimary : cs.onSurface,
+            fontWeight: FontWeight.w700,
+            fontSize: 13,
+          ),
         ),
       ),
     );
@@ -462,149 +320,109 @@ class _AppsLicensesScreenState extends State<AppsLicensesScreen> {
     final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
 
-    final pendingCount = _items
-        .where((e) => (e.upgradeRequestStatus ?? '').toUpperCase() == 'PENDING')
-        .length;
-    final blockedCount =
-        _items.where((e) => e.canAccessDashboard == false).length;
-    final freeCount =
-        _items.where((e) => (e.planCode ?? '').toUpperCase() == 'FREE').length;
-    final proCount = _items
-        .where((e) =>
-            (e.planCode ?? '').toUpperCase() != 'FREE' &&
-            e.requiresDedicatedServer != true)
-        .length;
-    final dedicatedCount =
-        _items.where((e) => e.requiresDedicatedServer == true).length;
-
     return Container(
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: cs.surface,
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: cs.outlineVariant.withOpacity(.5)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            l10n.appLicensesTitle,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w900,
-                ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            l10n.appLicensesSubtitle,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: cs.onSurfaceVariant,
-                ),
-          ),
-          const SizedBox(height: 14),
           TextField(
             onChanged: (v) => setState(() => _query = v),
             decoration: InputDecoration(
               prefixIcon: const Icon(Icons.search_rounded),
               hintText: l10n.searchAppsHint,
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(12),
               ),
               filled: true,
               isDense: true,
             ),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 11),
           Wrap(
-            spacing: 10,
-            runSpacing: 10,
+            spacing: 7,
+            runSpacing: 7,
             children: [
-              _filterChip(
+              _planFilterChip(
                 context,
-                label: _filterLabel(_LicenseFilter.all, l10n),
-                selected: _filter == _LicenseFilter.all,
-                icon: Icons.apps_rounded,
-                onTap: () => setState(() => _filter = _LicenseFilter.all),
+                label: l10n.app_licenses_filter_all,
+                selected: _filter == _kAll,
+                onTap: () => setState(() => _filter = _kAll),
               ),
-              _filterChip(
-                context,
-                label: _filterLabel(_LicenseFilter.pending, l10n),
-                selected: _filter == _LicenseFilter.pending,
-                icon: Icons.schedule_rounded,
-                onTap: () => setState(() => _filter = _LicenseFilter.pending),
-              ),
-              _filterChip(
-                context,
-                label: _filterLabel(_LicenseFilter.blocked, l10n),
-                selected: _filter == _LicenseFilter.blocked,
-                icon: Icons.block_rounded,
-                onTap: () => setState(() => _filter = _LicenseFilter.blocked),
-              ),
-              _filterChip(
-                context,
-                label: _filterLabel(_LicenseFilter.free, l10n),
-                selected: _filter == _LicenseFilter.free,
-                icon: Icons.workspace_premium_outlined,
-                onTap: () => setState(() => _filter = _LicenseFilter.free),
-              ),
-              _filterChip(
-                context,
-                label: _filterLabel(_LicenseFilter.proHosted, l10n),
-                selected: _filter == _LicenseFilter.proHosted,
-                icon: Icons.cloud_done_rounded,
-                onTap: () => setState(() => _filter = _LicenseFilter.proHosted),
-              ),
-              _filterChip(
-                context,
-                label: _filterLabel(_LicenseFilter.dedicated, l10n),
-                selected: _filter == _LicenseFilter.dedicated,
-                icon: Icons.dns_rounded,
-                onTap: () => setState(() => _filter = _LicenseFilter.dedicated),
-              ),
+              for (final code in _planCodes)
+                _planFilterChip(
+                  context,
+                  label: _prettyPlan(l10n, code),
+                  selected: _filter == code,
+                  onTap: () => setState(() => _filter = code),
+                ),
             ],
           ),
-          const SizedBox(height: 14),
-          Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            children: [
-              _chip(
-                context,
-                '${l10n.app_licenses_stat_total}: ${_items.length}',
-                cs.primary,
-                icon: Icons.inventory_2_outlined,
-              ),
-              _chip(
-                context,
-                '${l10n.app_licenses_stat_pending}: $pendingCount',
-                Colors.orange,
-                icon: Icons.schedule_rounded,
-              ),
-              _chip(
-                context,
-                '${l10n.app_licenses_stat_blocked}: $blockedCount',
-                cs.error,
-                icon: Icons.block_rounded,
-              ),
-              _chip(
-                context,
-                '${l10n.app_licenses_stat_free}: $freeCount',
-                cs.primary,
-                icon: Icons.workspace_premium_outlined,
-              ),
-              _chip(
-                context,
-                '${l10n.app_licenses_stat_pro_hosted}: $proCount',
-                Colors.blue,
-                icon: Icons.cloud_done_rounded,
-              ),
-              _chip(
-                context,
-                '${l10n.app_licenses_stat_dedicated}: $dedicatedCount',
-                Colors.deepPurple,
-                icon: Icons.dns_rounded,
-              ),
-            ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionStrip(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    final pendingCount = _items
+        .where((e) => (e.upgradeRequestStatus ?? '').toUpperCase() == 'PENDING')
+        .length;
+    final blockedCount =
+        _items.where((e) => e.canAccessDashboard == false).length;
+
+    if (pendingCount == 0 && blockedCount == 0) {
+      return const SizedBox.shrink();
+    }
+
+    Widget item(int count, String token, Color color, IconData icon) {
+      final selected = _filter == token;
+      return Expanded(
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () => setState(() => _filter = selected ? _kAll : token),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+            decoration: BoxDecoration(
+              color: color.withOpacity(selected ? .16 : .08),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                  color: color.withOpacity(selected ? .55 : .25)),
+            ),
+            child: Row(
+              children: [
+                Icon(icon, size: 16, color: color),
+                const SizedBox(width: 8),
+                Text('$count',
+                    style: TextStyle(
+                        color: color,
+                        fontWeight: FontWeight.w900,
+                        fontSize: 16)),
+                const Spacer(),
+                Icon(Icons.chevron_right_rounded,
+                    size: 16, color: color.withOpacity(.7)),
+              ],
+            ),
           ),
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Row(
+        children: [
+          if (pendingCount > 0)
+            item(pendingCount, _kPending, Colors.orange,
+                Icons.schedule_rounded),
+          if (pendingCount > 0 && blockedCount > 0) const SizedBox(width: 8),
+          if (blockedCount > 0)
+            item(blockedCount, _kBlocked, cs.error, Icons.block_rounded),
         ],
       ),
     );
@@ -614,280 +432,111 @@ class _AppsLicensesScreenState extends State<AppsLicensesScreen> {
     final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
 
-    final isPending =
-        (item.upgradeRequestStatus ?? '').toUpperCase() == 'PENDING';
-    final isBlocked = item.canAccessDashboard == false;
-    final isExpanded = _expandedIds.contains(item.aupId);
-
-    final planColor = _statusColor(context, item.planCode);
-    final subColor = _statusColor(context, item.subscriptionStatus);
-
-    final isActiveSubscription =
-        (item.subscriptionStatus ?? '').toUpperCase() == 'ACTIVE';
-    final isCanceling = _cancelingAupId == item.aupId;
+    final eff = _effectiveStatus(context, item);
+    final planCode = (item.planCode ?? '').toUpperCase();
+    final planLabel = _prettyPlan(l10n, planCode);
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 14),
+      margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: cs.surface,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: isPending
-              ? Colors.orange.withOpacity(.28)
-              : isBlocked
-                  ? cs.error.withOpacity(.24)
-                  : cs.outlineVariant.withOpacity(.45),
-        ),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: eff.color.withOpacity(.30)),
       ),
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => _openDetail(item),
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Container(width: 6, color: eff.color),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(14, 14, 10, 14),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
                         children: [
+                          _chip(context, eff.label, eff.color, icon: eff.icon),
+                          const Spacer(),
+                          _chip(context, planLabel, cs.primary),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        item.appName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(fontWeight: FontWeight.w900),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        [
+                          item.ownerName ?? item.ownerUsername ?? '-',
+                          item.projectName ?? '-',
+                        ].join(' • '),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style:
+                            Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: cs.onSurfaceVariant,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Icon(Icons.people_alt_rounded,
+                              size: 15, color: cs.onSurfaceVariant),
+                          const SizedBox(width: 5),
                           Text(
-                            item.appName,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                            _usersText(item, l10n),
                             style: Theme.of(context)
                                 .textTheme
-                                .titleMedium
-                                ?.copyWith(fontWeight: FontWeight.w900),
+                                .bodySmall
+                                ?.copyWith(fontWeight: FontWeight.w700),
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            [
-                              item.ownerName ?? item.ownerUsername ?? '-',
-                              item.projectName ?? '-',
-                            ].join(' • '),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style:
-                                Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                      color: cs.onSurfaceVariant,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: () => _toggleExpanded(item.aupId),
-                      icon: Icon(
-                        isExpanded
-                            ? Icons.keyboard_arrow_up_rounded
-                            : Icons.keyboard_arrow_down_rounded,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    _chip(
-                      context,
-                      _planLabel(l10n, item.planCode, item.planName),
-                      planColor,
-                      icon: Icons.workspace_premium_outlined,
-                    ),
-                    _chip(
-                      context,
-                      _statusLabel(l10n, item.subscriptionStatus),
-                      subColor,
-                      icon: Icons.verified_rounded,
-                    ),
-                    if (isPending)
-                      _chip(
-                        context,
-                        l10n.app_licenses_pending_request,
-                        Colors.orange,
-                        icon: Icons.schedule_rounded,
-                      ),
-                    if (isBlocked)
-                      _chip(
-                        context,
-                        l10n.app_licenses_filter_blocked,
-                        cs.error,
-                        icon: Icons.block_rounded,
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    final compact = constraints.maxWidth < 760;
-                    final boxes = [
-                      _metricCard(
-                        context,
-                        icon: Icons.people_alt_rounded,
-                        label: l10n.usersLabel,
-                        value: _usersText(item, l10n),
-                        color: cs.primary,
-                      ),
-                      _metricCard(
-                        context,
-                        icon: Icons.event_available_rounded,
-                        label: l10n.daysLeftLabel,
-                        value: item.daysLeft?.toString() ?? '-',
-                        color: Colors.teal,
-                      ),
-                      _metricCard(
-                        context,
-                        icon: item.canAccessDashboard == false
-                            ? Icons.lock_outline_rounded
-                            : Icons.check_circle_outline_rounded,
-                        label: l10n.dashboardAccessLabel,
-                        value: item.canAccessDashboard == true
-                            ? l10n.yes
-                            : item.canAccessDashboard == false
-                                ? l10n.no
-                                : l10n.unknownLabel,
-                        color: item.canAccessDashboard == false
-                            ? cs.error
-                            : Colors.green,
-                      ),
-                    ];
-
-                    if (compact) {
-                      return Column(
-                        children: [
-                          for (int i = 0; i < boxes.length; i++) ...[
-                            boxes[i],
-                            if (i != boxes.length - 1)
-                              const SizedBox(height: 10),
+                          const SizedBox(width: 14),
+                          if (_showDaysLeft(item)) ...[
+                            Icon(Icons.event_available_rounded,
+                                size: 15, color: cs.onSurfaceVariant),
+                            const SizedBox(width: 5),
+                            Text(
+                              '${item.daysLeft} ${l10n.daysLeftLabel}',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(fontWeight: FontWeight.w700),
+                            ),
                           ],
+                          const Spacer(),
+                          Icon(Icons.chevron_right_rounded,
+                              color: cs.onSurfaceVariant),
                         ],
-                      );
-                    }
-
-                    return Row(
-                      children: [
-                        Expanded(child: boxes[0]),
-                        const SizedBox(width: 10),
-                        Expanded(child: boxes[1]),
-                        const SizedBox(width: 10),
-                        Expanded(child: boxes[2]),
-                      ],
-                    );
-                  },
-                ),
-                if (isPending) ...[
-                  const SizedBox(height: 12),
-                  _StatusBanner(
-                    icon: Icons.schedule_rounded,
-                    color: Colors.orange,
-                    text: l10n.app_licenses_pending_banner,
-                  ),
-                ],
-                if (isBlocked) ...[
-                  const SizedBox(height: 10),
-                  _StatusBanner(
-                    icon: Icons.warning_amber_rounded,
-                    color: cs.error,
-                    text:
-                        '${l10n.app_licenses_filter_blocked}: ${item.blockingReason ?? l10n.unknownLabel}',
-                  ),
-                ],
-                const SizedBox(height: 12),
-                Wrap(
-                  spacing: 10,
-                  runSpacing: 10,
-                  children: [
-                    OutlinedButton.icon(
-                      onPressed: (isActiveSubscription && !isCanceling)
-                          ? () => _cancelLicense(item)
-                          : null,
-                      icon: isCanceling
-                          ? const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Icon(Icons.cancel_outlined),
-                      label: Text(
-                        isCanceling ? 'Canceling...' : 'Cancel License',
                       ),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: cs.error,
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ],
-            ),
-          ),
-          AnimatedCrossFade(
-            duration: const Duration(milliseconds: 180),
-            crossFadeState: isExpanded
-                ? CrossFadeState.showSecond
-                : CrossFadeState.showFirst,
-            firstChild: const SizedBox.shrink(),
-            secondChild: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-              child: Column(
-                children: [
-                  Divider(color: cs.outlineVariant.withOpacity(.55)),
-                  _detailRow(context, l10n.idLabel, item.aupId.toString()),
-                  _detailRow(context, l10n.slugLabel, item.slug ?? '-'),
-                  _detailRow(context, l10n.emailLabel, item.ownerEmail ?? '-'),
-                  _detailRow(context, l10n.projectLabel, item.projectName ?? '-'),
-                  _detailRow(
-                    context,
-                    l10n.planLabel,
-                    _planLabel(l10n, item.planCode, item.planName),
-                  ),
-                  _detailRow(
-                    context,
-                    l10n.subscriptionStatusLabel,
-                    _statusLabel(l10n, item.subscriptionStatus),
-                  ),
-                  _detailRow(
-                    context,
-                    l10n.periodEndLabel,
-                    _dateText(item.periodEnd),
-                  ),
-                  _detailRow(
-                    context,
-                    l10n.remainingLabel,
-                    item.usersRemaining?.toString() ?? l10n.unlimitedLabel,
-                  ),
-                  _detailRow(
-                    context,
-                    l10n.requiresDedicatedServerLabel,
-                    _yesNo(item.requiresDedicatedServer, l10n),
-                  ),
-                  _detailRow(
-                    context,
-                    l10n.dedicatedInfraReadyLabel,
-                    _yesNo(item.dedicatedInfraReady, l10n),
-                  ),
-                  _detailRow(
-                    context,
-                    l10n.blockingReasonLabel,
-                    item.blockingReason ?? '-',
-                  ),
-                  _detailRow(
-                    context,
-                    l10n.app_licenses_request_status_label,
-                    _statusLabel(l10n, item.upgradeRequestStatus),
-                  ),
-                ],
               ),
-            ),
+            ],
           ),
-        ],
+        ),
       ),
     );
+  }
+
+  // Only count down when the app is genuinely active (hide for
+  // blocked / expired / canceled, per the design).
+  bool _showDaysLeft(SuperAdminAppLicenseRow item) {
+    if (item.daysLeft == null) return false;
+    if (item.canAccessDashboard == false) return false;
+    final s = (item.subscriptionStatus ?? '').toUpperCase();
+    return s == 'ACTIVE' || s == 'SCHEDULED' || s == 'FREE' || s.isEmpty;
   }
 
   @override
@@ -924,10 +573,11 @@ class _AppsLicensesScreenState extends State<AppsLicensesScreen> {
                   )
                 : ListView(
                     physics: const AlwaysScrollableScrollPhysics(),
-                    padding: const EdgeInsets.fromLTRB(16, 14, 16, 24),
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
                     children: [
                       _buildTopPanel(context),
-                      const SizedBox(height: 16),
+                      _buildActionStrip(context),
+                      const SizedBox(height: 14),
                       if (items.isEmpty)
                         _EmptyStateCard(
                           icon: Icons.inbox_outlined,
@@ -947,53 +597,11 @@ class _AppsLicensesScreenState extends State<AppsLicensesScreen> {
   }
 }
 
-enum _LicenseFilter {
-  all,
-  pending,
-  blocked,
-  free,
-  proHosted,
-  dedicated,
-}
-
-class _StatusBanner extends StatelessWidget {
-  final IconData icon;
+class _Eff {
+  final String label;
   final Color color;
-  final String text;
-
-  const _StatusBanner({
-    required this.icon,
-    required this.color,
-    required this.text,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: color.withOpacity(.10),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: color.withOpacity(.24)),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: color, size: 18),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              text,
-              style: TextStyle(
-                color: color,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  final IconData icon;
+  const _Eff(this.label, this.color, this.icon);
 }
 
 class _LicensesLoadingView extends StatelessWidget {
@@ -1008,19 +616,19 @@ class _LicensesLoadingView extends StatelessWidget {
         height: h,
         decoration: BoxDecoration(
           color: cs.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(22),
+          borderRadius: BorderRadius.circular(18),
         ),
       );
     }
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 14, 16, 24),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
       children: [
-        box(190),
-        const SizedBox(height: 16),
-        box(220),
+        box(120),
         const SizedBox(height: 14),
-        box(220),
+        box(120),
+        const SizedBox(height: 12),
+        box(120),
       ],
     );
   }
@@ -1052,11 +660,7 @@ class _ScreenErrorCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Icon(
-            Icons.error_outline_rounded,
-            size: 54,
-            color: cs.error,
-          ),
+          Icon(Icons.error_outline_rounded, size: 54, color: cs.error),
           const SizedBox(height: 12),
           Text(
             title,
@@ -1109,11 +713,7 @@ class _EmptyStateCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Icon(
-            icon,
-            size: 54,
-            color: cs.onSurfaceVariant,
-          ),
+          Icon(icon, size: 54, color: cs.onSurfaceVariant),
           const SizedBox(height: 12),
           Text(
             title,
