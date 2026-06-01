@@ -335,9 +335,9 @@ class _UpgradeHeroPanel extends StatelessWidget {
     final statusColor = isPending ? Colors.orange : Colors.green;
 
     return Container(
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(18),
         gradient: LinearGradient(
           colors: [
             cs.primary.withOpacity(.10),
@@ -358,80 +358,74 @@ class _UpgradeHeroPanel extends StatelessWidget {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Row(
             children: [
-              Container(
-                width: 52,
-                height: 52,
-                decoration: BoxDecoration(
-                  color: cs.primary.withOpacity(.12),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Icon(
-                  Icons.upgrade_rounded,
-                  color: cs.primary,
-                  size: 28,
-                ),
-              ),
-              const SizedBox(width: 12),
+              Icon(Icons.upgrade_rounded, color: cs.primary, size: 18),
+              const SizedBox(width: 8),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l10n.upgrade_requests_title,
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.w900,
-                          ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      l10n.upgrade_requests_hero_subtitle,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: cs.onSurfaceVariant,
-                            fontWeight: FontWeight.w500,
-                          ),
-                    ),
-                  ],
+                child: Text(
+                  l10n.upgrade_requests_hero_subtitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: cs.onSurfaceVariant,
+                        fontWeight: FontWeight.w500,
+                      ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          Wrap(
-            spacing: 10,
-            runSpacing: 10,
+          const SizedBox(height: 10),
+          Row(
             children: [
-              _TinyStatChip(
-                icon: Icons.inventory_2_outlined,
-                label: l10n.upgrade_requests_stat_total,
-                value: '$total',
-                color: cs.primary,
+              Expanded(
+                child: _TinyStatChip(
+                  icon: Icons.inventory_2_outlined,
+                  label: l10n.upgrade_requests_stat_total,
+                  value: '$total',
+                  color: cs.primary,
+                ),
               ),
-              _TinyStatChip(
-                icon: Icons.visibility_outlined,
-                label: l10n.upgrade_requests_stat_shown,
-                value: '$filtered',
-                color: cs.secondary,
+              const SizedBox(width: 8),
+              Expanded(
+                child: _TinyStatChip(
+                  icon: Icons.visibility_outlined,
+                  label: l10n.upgrade_requests_stat_shown,
+                  value: '$filtered',
+                  color: cs.secondary,
+                ),
               ),
-              _TinyStatChip(
-                icon: statusIcon,
-                label: statusLabel,
-                value: '$total',
-                color: statusColor,
+              const SizedBox(width: 8),
+              Expanded(
+                child: _TinyStatChip(
+                  icon: statusIcon,
+                  label: statusLabel,
+                  value: '$total',
+                  color: statusColor,
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 14),
-          TextField(
-            onChanged: onSearch,
-            decoration: InputDecoration(
-              prefixIcon: const Icon(Icons.search_rounded),
-              hintText: l10n.upgrade_requests_search_hint,
-              filled: true,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
+          const SizedBox(height: 10),
+          SizedBox(
+            height: 42,
+            child: TextField(
+              onChanged: onSearch,
+              style: Theme.of(context).textTheme.bodyMedium,
+              decoration: InputDecoration(
+                isDense: true,
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                prefixIcon: const Icon(Icons.search_rounded, size: 18),
+                prefixIconConstraints:
+                    const BoxConstraints(minWidth: 38, minHeight: 38),
+                hintText: l10n.upgrade_requests_search_hint,
+                filled: true,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             ),
           ),
@@ -922,22 +916,28 @@ class _TinyStatChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
       decoration: BoxDecoration(
         color: color.withOpacity(.10),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(color: color.withOpacity(.22)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 16, color: color),
-          const SizedBox(width: 8),
-          Text(
-            '$label: $value',
-            style: TextStyle(
-              color: color,
-              fontWeight: FontWeight.w800,
+          Icon(icon, size: 13, color: color),
+          const SizedBox(width: 5),
+          Flexible(
+            child: Text(
+              '$label: $value',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: color,
+                fontWeight: FontWeight.w800,
+                fontSize: 11.5,
+              ),
             ),
           ),
         ],
