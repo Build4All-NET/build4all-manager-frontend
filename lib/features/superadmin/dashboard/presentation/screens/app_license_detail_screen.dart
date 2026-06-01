@@ -1,6 +1,7 @@
 import 'package:build4all_manager/core/network/dio_client.dart';
 import 'package:build4all_manager/l10n/app_localizations.dart';
 import 'package:build4all_manager/shared/utils/ApiErrorHandler.dart';
+import 'package:build4all_manager/shared/widgets/app_toast.dart';
 import 'package:flutter/material.dart';
 
 import '../../data/models/super_admin_app_license_detail.dart';
@@ -37,6 +38,7 @@ class _AppLicenseDetailScreenState extends State<AppLicenseDetailScreen> {
   bool _loading = true;
   String? _error;
   SuperAdminAppLicenseDetail? _detail;
+  int? _cancelingSubId;
 
   SuperAdminAppLicenseRow get item => widget.item;
 
@@ -65,6 +67,50 @@ class _AppLicenseDetailScreenState extends State<AppLicenseDetailScreen> {
         _error = ApiErrorHandler.message(e);
         _loading = false;
       });
+    }
+  }
+
+  Future<void> _cancelPeriod(LicensePeriod p) async {
+    final l10n = AppLocalizations.of(context)!;
+    final id = p.subscriptionId;
+    if (id == null || _cancelingSubId != null) return;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.app_licenses_cancel_title),
+        content: Text(l10n.app_licenses_cancel_confirm(
+            _planLabel(l10n, p.planCode, p.planName))),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l10n.no),
+          ),
+          FilledButton.tonalIcon(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            icon: const Icon(Icons.cancel_outlined, size: 18),
+            label: Text(l10n.app_licenses_cancel_confirm_action),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    setState(() => _cancelingSubId = id);
+    try {
+      final res = await _api.cancelSubscription(item.aupId, id);
+      if (!mounted) return;
+      final data = res.data;
+      final message = (data is Map && data['message'] is String)
+          ? data['message'] as String
+          : l10n.app_licenses_cancel_done;
+      AppToast.success(context, message);
+      await _load();
+    } catch (e) {
+      if (!mounted) return;
+      AppToast.error(context, ApiErrorHandler.message(e));
+    } finally {
+      if (mounted) setState(() => _cancelingSubId = null);
     }
   }
 
@@ -164,6 +210,17 @@ class _AppLicenseDetailScreenState extends State<AppLicenseDetailScreen> {
                     text: l10n.app_licenses_pending_request,
                   ),
                 ],
+              ),
+
+            // owner-blocked callout (no active license)
+            if ((_detail?.summary ?? item).canAccessDashboard == false)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 14),
+                child: _StatusBanner(
+                  icon: Icons.lock_outline_rounded,
+                  color: cs.error,
+                  text: l10n.app_licenses_owner_blocked,
+                ),
               ),
 
             // ---- timeline ----
@@ -304,8 +361,27 @@ class _AppLicenseDetailScreenState extends State<AppLicenseDetailScreen> {
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
           ),
+          if (p.cancelable && p.subscriptionId != null) _cancelButton(context, p),
         ],
       ),
+    );
+  }
+
+  Widget _cancelButton(BuildContext context, LicensePeriod p) {
+    final cs = Theme.of(context).colorScheme;
+    final busy = _cancelingSubId == p.subscriptionId;
+    final disabled = _cancelingSubId != null;
+    return IconButton(
+      visualDensity: VisualDensity.compact,
+      tooltip: AppLocalizations.of(context)!.app_licenses_cancel_title,
+      onPressed: disabled ? null : () => _cancelPeriod(p),
+      icon: busy
+          ? const SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : Icon(Icons.cancel_outlined, size: 18, color: cs.error),
     );
   }
 

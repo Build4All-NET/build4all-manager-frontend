@@ -1026,6 +1026,16 @@
   "subscription_status_scheduled": "Scheduled",
   "payment_status_paid": "Paid",
   "payment_status_failed": "Failed",
+  "app_licenses_cancel_title": "Cancel license",
+  "app_licenses_cancel_confirm": "Cancel the {plan} license? Once the app has no active license the owner is blocked from the dashboard (the app stays open to end users, and the owner can renew).",
+  "@app_licenses_cancel_confirm": {
+    "placeholders": {
+      "plan": {}
+    }
+  },
+  "app_licenses_cancel_confirm_action": "Yes, cancel",
+  "app_licenses_cancel_done": "License canceled.",
+  "app_licenses_owner_blocked": "No active license — the owner is blocked from the dashboard. The app stays open to end users; the owner can renew to regain access.",
   "daysLeftLabel": "Days left",
   "usersLabel": "Users",
   "remainingLabel": "Remaining",
