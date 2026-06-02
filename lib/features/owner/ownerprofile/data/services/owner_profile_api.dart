@@ -51,6 +51,15 @@ class OwnerProfileApi {
     });
   }
 
+  Future<void> deleteMyAccount({required String password}) async {
+  await dio.delete(
+    '/admin/users/me',
+    data: {
+      'password': password,
+    },
+  );
+}
+
   Future<void> resendPhoneChange() async {
     await dio.post('/admin/users/me/resend-phone-change');
   }

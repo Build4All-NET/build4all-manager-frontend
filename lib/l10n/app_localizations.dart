@@ -7146,6 +7146,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Upgrade Requests'**
   String get super_nav_upgrade_requests;
+
+  /// No description provided for @owner_profile_delete_action.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Account'**
+  String get owner_profile_delete_action;
+
+  /// No description provided for @owner_profile_delete_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Request permanent deletion of your account.'**
+  String get owner_profile_delete_subtitle;
+
+  /// No description provided for @owner_profile_delete_confirm_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete your account?'**
+  String get owner_profile_delete_confirm_title;
+
+  /// No description provided for @owner_profile_delete_confirm_message.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account will be disabled immediately. After 30 days, your personal information will be permanently removed or anonymized.'**
+  String get owner_profile_delete_confirm_message;
+
+  /// No description provided for @owner_profile_delete_password_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your password'**
+  String get owner_profile_delete_password_hint;
+
+  /// No description provided for @owner_profile_delete_password_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Password is required to delete your account.'**
+  String get owner_profile_delete_password_required;
+
+  /// No description provided for @owner_profile_delete_success.
+  ///
+  /// In en, this message translates to:
+  /// **'Account deletion requested successfully. Your account is disabled and will be permanently anonymized after 30 days.'**
+  String get owner_profile_delete_success;
+
+  /// No description provided for @owner_profile_delete_incorrect_password.
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect password'**
+  String get owner_profile_delete_incorrect_password;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

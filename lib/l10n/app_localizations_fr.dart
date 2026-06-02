@@ -2463,8 +2463,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get app_licenses_cancel_done => 'Licence annulée.';
 
   @override
-  String get app_licenses_owner_blocked =>
-      'Aucune licence active — le propriétaire est bloqué du tableau de bord. L\'application reste ouverte aux utilisateurs ; le propriétaire peut renouveler pour récupérer l\'accès.';
+  String get app_licenses_owner_blocked => 'Aucune licence active — le propriétaire est bloqué du tableau de bord. L\'application reste ouverte aux utilisateurs ; le propriétaire peut renouveler pour récupérer l\'accès.';
 
   @override
   String get daysLeftLabel => 'Jours restants';
@@ -3595,4 +3594,28 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get super_nav_upgrade_requests => 'Demandes de mise à niveau';
+
+  @override
+  String get owner_profile_delete_action => 'Supprimer le compte';
+
+  @override
+  String get owner_profile_delete_subtitle => 'Demander la suppression définitive de votre compte.';
+
+  @override
+  String get owner_profile_delete_confirm_title => 'Supprimer votre compte ?';
+
+  @override
+  String get owner_profile_delete_confirm_message => 'Votre compte sera désactivé immédiatement. Après 30 jours, vos informations personnelles seront supprimées ou anonymisées définitivement.';
+
+  @override
+  String get owner_profile_delete_password_hint => 'Entrez votre mot de passe';
+
+  @override
+  String get owner_profile_delete_password_required => 'Le mot de passe est requis pour supprimer votre compte.';
+
+  @override
+  String get owner_profile_delete_success => 'La demande de suppression du compte a été envoyée avec succès. Votre compte est désactivé et vos informations personnelles seront anonymisées définitivement après 30 jours.';
+
+  @override
+  String get owner_profile_delete_incorrect_password => 'Mot de passe incorrect';
 }

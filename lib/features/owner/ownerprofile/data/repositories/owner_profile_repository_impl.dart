@@ -50,6 +50,11 @@ class OwnerProfileRepositoryImpl implements IOwnerProfileRepository {
       api.verifyPhoneChange(code);
 
   @override
+Future<void> deleteMyAccount({required String password}) {
+  return api.deleteMyAccount(password: password);
+}    
+
+  @override
   Future<void> resendPhoneChange() =>
       api.resendPhoneChange();
 }

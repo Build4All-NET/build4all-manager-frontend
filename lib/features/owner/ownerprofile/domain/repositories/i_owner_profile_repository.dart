@@ -14,4 +14,5 @@ abstract class IOwnerProfileRepository {
     Future<void> requestPhoneChange(String newPhone);
   Future<void> verifyPhoneChange(String code);
   Future<void> resendPhoneChange();
+  Future<void> deleteMyAccount({required String password});
 }

@@ -1424,6 +1424,14 @@
 "super_payment_billing_types_subtitle": "إدارة تصنيفات طرق الفوترة.",
 "super_payment_hint": "اختاري قسماً من أقسام الدفع لإعداد فوترة الاشتراكات.",
 "super_nav_licenses": "التراخيص",
-"super_nav_upgrade_requests": "طلبات الترقية"
+"super_nav_upgrade_requests": "طلبات الترقية",
+"owner_profile_delete_action": "حذف الحساب",
+  "owner_profile_delete_subtitle": "طلب حذف حسابك بشكل دائم.",
+  "owner_profile_delete_confirm_title": "هل تريد حذف حسابك؟",
+  "owner_profile_delete_confirm_message": "سيتم تعطيل حسابك فورًا. بعد 30 يومًا، ستتم إزالة معلوماتك الشخصية أو إخفاء هويتها بشكل دائم.",
+  "owner_profile_delete_password_hint": "أدخل كلمة المرور",
+  "owner_profile_delete_password_required": "كلمة المرور مطلوبة لحذف حسابك.",
+  "owner_profile_delete_success": "تم إرسال طلب حذف الحساب بنجاح. تم تعطيل حسابك وسيتم إخفاء بياناتك الشخصية بشكل دائم بعد 30 يومًا."
 
+,"owner_profile_delete_incorrect_password": "كلمة المرور غير صحيحة."
 }

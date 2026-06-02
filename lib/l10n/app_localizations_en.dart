@@ -2463,8 +2463,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get app_licenses_cancel_done => 'License canceled.';
 
   @override
-  String get app_licenses_owner_blocked =>
-      'No active license — the owner is blocked from the dashboard. The app stays open to end users; the owner can renew to regain access.';
+  String get app_licenses_owner_blocked => 'No active license — the owner is blocked from the dashboard. The app stays open to end users; the owner can renew to regain access.';
 
   @override
   String get daysLeftLabel => 'Days left';
@@ -3595,4 +3594,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get super_nav_upgrade_requests => 'Upgrade Requests';
+
+  @override
+  String get owner_profile_delete_action => 'Delete Account';
+
+  @override
+  String get owner_profile_delete_subtitle => 'Request permanent deletion of your account.';
+
+  @override
+  String get owner_profile_delete_confirm_title => 'Delete your account?';
+
+  @override
+  String get owner_profile_delete_confirm_message => 'Your account will be disabled immediately. After 30 days, your personal information will be permanently removed or anonymized.';
+
+  @override
+  String get owner_profile_delete_password_hint => 'Enter your password';
+
+  @override
+  String get owner_profile_delete_password_required => 'Password is required to delete your account.';
+
+  @override
+  String get owner_profile_delete_success => 'Account deletion requested successfully. Your account is disabled and will be permanently anonymized after 30 days.';
+
+  @override
+  String get owner_profile_delete_incorrect_password => 'Incorrect password';
 }

@@ -2463,8 +2463,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get app_licenses_cancel_done => 'تم إلغاء الترخيص.';
 
   @override
-  String get app_licenses_owner_blocked =>
-      'لا يوجد ترخيص نشط — المالك ممنوع من لوحة التحكم. يبقى التطبيق متاحًا للمستخدمين؛ ويمكن للمالك التجديد لاستعادة الوصول.';
+  String get app_licenses_owner_blocked => 'لا يوجد ترخيص نشط — المالك ممنوع من لوحة التحكم. يبقى التطبيق متاحًا للمستخدمين؛ ويمكن للمالك التجديد لاستعادة الوصول.';
 
   @override
   String get daysLeftLabel => 'الأيام المتبقية';
@@ -3595,4 +3594,28 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get super_nav_upgrade_requests => 'طلبات الترقية';
+
+  @override
+  String get owner_profile_delete_action => 'حذف الحساب';
+
+  @override
+  String get owner_profile_delete_subtitle => 'طلب حذف حسابك بشكل دائم.';
+
+  @override
+  String get owner_profile_delete_confirm_title => 'هل تريد حذف حسابك؟';
+
+  @override
+  String get owner_profile_delete_confirm_message => 'سيتم تعطيل حسابك فورًا. بعد 30 يومًا، ستتم إزالة معلوماتك الشخصية أو إخفاء هويتها بشكل دائم.';
+
+  @override
+  String get owner_profile_delete_password_hint => 'أدخل كلمة المرور';
+
+  @override
+  String get owner_profile_delete_password_required => 'كلمة المرور مطلوبة لحذف حسابك.';
+
+  @override
+  String get owner_profile_delete_success => 'تم إرسال طلب حذف الحساب بنجاح. تم تعطيل حسابك وسيتم إخفاء بياناتك الشخصية بشكل دائم بعد 30 يومًا.';
+
+  @override
+  String get owner_profile_delete_incorrect_password => 'كلمة المرور غير صحيحة.';
 }
