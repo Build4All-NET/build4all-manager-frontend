@@ -3618,4 +3618,16 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get owner_profile_delete_incorrect_password => 'كلمة المرور غير صحيحة.';
+
+  @override
+  String get accountPendingDeletionTitle => ' الحساب قيد الحذف';
+
+  @override
+  String get accountPendingDeletionMessage => 'طلب حذف حسابك قيد المعالجة. إذا غيرت رأيك، يمكنك إعادة تنشيط حسابك قبل أن يتم الحذف النهائي بعد 30 يومًا.';
+
+  @override
+  String get reactivateAccount => 'إعادة تنشيط الحساب';
+
+  @override
+  String get accountReactivatedSuccessfully => 'تم إعادة تنشيط حسابك بنجاح. إذا لم تكن أنت من طلب الحذف، نوصي بتغيير كلمة المرور الخاصة بك كإجراء أمني.';
 }

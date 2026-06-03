@@ -7194,6 +7194,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Incorrect password'**
   String get owner_profile_delete_incorrect_password;
+
+  /// No description provided for @accountPendingDeletionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Account scheduled for deletion'**
+  String get accountPendingDeletionTitle;
+
+  /// No description provided for @accountPendingDeletionMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This account is scheduled for deletion. You can reactivate it within 30 days before it is permanently anonymized.'**
+  String get accountPendingDeletionMessage;
+
+  /// No description provided for @reactivateAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Reactivate Account'**
+  String get reactivateAccount;
+
+  /// No description provided for @accountReactivatedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Account reactivated successfully'**
+  String get accountReactivatedSuccessfully;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -13,15 +13,56 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final LogoutUseCase logoutUseCase;
   final GetStoredRoleUseCase getRoleUseCase;
 
-  AuthBloc({
-    required this.loginUseCase,
-    required this.logoutUseCase,
-    required this.getRoleUseCase,
-  }) : super(AuthInitial) {
-    on<LoginSubmitted>(_onLogin);
-    on<LoggedOut>(_onLogout);
-    on<CheckSession>(_onCheck);
+ AuthBloc({
+  required this.loginUseCase,
+  required this.logoutUseCase,
+  required this.getRoleUseCase,
+}) : super(AuthInitial) {
+  on<LoginSubmitted>(_onLogin);
+  on<ReactivateAdminDeletionSubmitted>(_onReactivateAdminDeletion);
+  on<LoggedOut>(_onLogout);
+  on<CheckSession>(_onCheck);
+}
+
+Future<void> _onReactivateAdminDeletion(
+  ReactivateAdminDeletionSubmitted e,
+  Emitter<AuthState> emit,
+) async {
+  emit(state.copyWith(
+    loading: true,
+    error: null,
+    errorCode: null,
+    role: null,
+  ));
+
+  try {
+    await loginUseCase.reactivateDeletion(e.identifier, e.password);
+    final role = await getRoleUseCase();
+
+    emit(state.copyWith(
+      loading: false,
+      role: role,
+      error: null,
+      errorCode: null,
+    ));
+  } catch (err) {
+    if (err is AuthFailure) {
+      emit(state.copyWith(
+        loading: false,
+        role: null,
+        error: err.message,
+        errorCode: err.code,
+      ));
+    } else {
+      emit(state.copyWith(
+        loading: false,
+        role: null,
+        error: ApiErrorHandler.message(err),
+        errorCode: 'UNKNOWN',
+      ));
+    }
   }
+}
 
   Future<void> _onLogin(LoginSubmitted e, Emitter<AuthState> emit) async {
     emit(state.copyWith(

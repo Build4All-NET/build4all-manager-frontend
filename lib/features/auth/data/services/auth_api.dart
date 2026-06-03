@@ -23,6 +23,19 @@ class AuthApi {
     );
   }
 
+Future<Response> reactivateAdminDeletion({
+  required String identifier,
+  required String password,
+}) {
+  return _dio.post(
+    '/auth/admin/reactivate-deletion',
+    data: {
+      'identifier': identifier.trim(),
+      'password': password,
+    },
+  );
+}
+
   Future<Response> refresh(String refreshToken) {
     return _dio.post(
       '/auth/refresh',

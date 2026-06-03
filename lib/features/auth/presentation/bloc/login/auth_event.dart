@@ -14,6 +14,17 @@ class LoginSubmitted extends AuthEvent {
   List<Object?> get props => [identifier, password];
 }
 
+
+class ReactivateAdminDeletionSubmitted extends AuthEvent {
+  final String identifier;
+  final String password;
+
+  ReactivateAdminDeletionSubmitted(this.identifier, this.password);
+
+  @override
+  List<Object?> get props => [identifier, password];
+}
+
 class LoggedOut extends AuthEvent {}
 
 class CheckSession extends AuthEvent {}

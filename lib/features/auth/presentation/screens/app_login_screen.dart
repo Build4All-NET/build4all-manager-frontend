@@ -14,21 +14,20 @@ import 'package:build4all_manager/features/auth/domain/usecases/logout_usecase.d
 import 'package:build4all_manager/features/auth/presentation/bloc/login/auth_bloc.dart';
 import 'package:build4all_manager/features/auth/presentation/bloc/login/auth_event.dart';
 import 'package:build4all_manager/features/auth/presentation/bloc/login/auth_state.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../l10n/app_localizations.dart';
-import '../../../../shared/widgets/app_text_field.dart';
 import '../../../../shared/widgets/app_button.dart';
+import '../../../../shared/widgets/app_text_field.dart';
 import '../../../../shared/widgets/app_toast.dart';
 
 Future<void> _initPushSafely() async {
   try {
     await FirebasePushService().initForAdmin();
   } catch (_) {
-    // ignore push init errors here so login navigation is never blocked
+    // Ignore push init errors here so login navigation is never blocked.
   }
 }
 
@@ -38,6 +37,81 @@ void _goAfterFrame(BuildContext context, String route) {
       context.go(route);
     }
   });
+}
+
+Future<bool> _showReactivateDeletionSheet(BuildContext context) async {
+  final l10n = AppLocalizations.of(context)!;
+  final cs = Theme.of(context).colorScheme;
+  final tt = Theme.of(context).textTheme;
+
+  final result = await showModalBottomSheet<bool>(
+    context: context,
+    useSafeArea: true,
+    showDragHandle: true,
+    backgroundColor: cs.surface,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(
+        top: Radius.circular(20),
+      ),
+    ),
+    builder: (ctx) {
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(16, 10, 16, 18),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: CircleAvatar(
+                backgroundColor: cs.primary.withOpacity(.12),
+                child: Icon(
+                  Icons.restore_rounded,
+                  color: cs.primary,
+                ),
+              ),
+              title: Text(
+                l10n.accountPendingDeletionTitle,
+                style: tt.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              subtitle: Padding(
+                padding: const EdgeInsets.only(top: 6),
+                child: Text(
+                  l10n.accountPendingDeletionMessage,
+                  style: tt.bodyMedium?.copyWith(
+                    color: cs.onSurfaceVariant,
+                    height: 1.35,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 14),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.of(ctx).pop(false),
+                    child: Text(l10n.cancel ?? 'Cancel'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: FilledButton.icon(
+                    onPressed: () => Navigator.of(ctx).pop(true),
+                    icon: const Icon(Icons.check_circle_outline_rounded),
+                    label: Text(l10n.reactivateAccount),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    },
+  );
+
+  return result == true;
 }
 
 enum _LoginErrorType {
@@ -172,9 +246,20 @@ class AppLoginScreen extends StatelessWidget {
         getRoleUseCase: GetStoredRoleUseCase(repo),
       ),
       child: BlocListener<AuthBloc, AuthState>(
-        listenWhen: (p, c) => p.role != c.role || p.error != c.error,
+        listenWhen: (previous, current) {
+          return previous.role != current.role ||
+              previous.error != current.error ||
+              previous.errorCode != current.errorCode;
+        },
         listener: (context, state) {
           final role = (state.role ?? '').toUpperCase();
+
+          // Special case is handled inside _LoginForm because it owns the
+          // identifier/password controllers.
+          if (state.errorCode == 'ACCOUNT_PENDING_DELETION') {
+            return;
+          }
+
           final friendlyError = state.errorCode == 'SERVER_DOWN'
               ? 'Server unavailable. Please try again shortly.'
               : _mapLoginError(context, state.error);
@@ -186,7 +271,6 @@ class AppLoginScreen extends StatelessWidget {
 
           if (role == 'SUPER_ADMIN') {
             AppToast.success(context, l10n.msgWelcomeBack);
-
             _goAfterFrame(context, '/manager');
             unawaited(_initPushSafely());
             return;
@@ -194,7 +278,6 @@ class AppLoginScreen extends StatelessWidget {
 
           if (role.isNotEmpty) {
             AppToast.success(context, l10n.msgWelcomeBack);
-
             _goAfterFrame(context, '/owner');
             unawaited(_initPushSafely());
           }
@@ -223,7 +306,8 @@ class AppLoginScreen extends StatelessWidget {
                           constraints: BoxConstraints(maxWidth: cardMaxWidth),
                           child: _FrostedCard(
                             child: Padding(
-                              padding: const EdgeInsets.fromLTRB(24, 28, 24, 20),
+                              padding:
+                                  const EdgeInsets.fromLTRB(24, 28, 24, 20),
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
@@ -234,7 +318,8 @@ class AppLoginScreen extends StatelessWidget {
                                         tag: 'brand',
                                         child: CircleAvatar(
                                           radius: 30,
-                                          backgroundColor: cs.primary.withOpacity(.12),
+                                          backgroundColor:
+                                              cs.primary.withOpacity(.12),
                                           child: Text(
                                             'B4',
                                             style: TextStyle(
@@ -253,7 +338,9 @@ class AppLoginScreen extends StatelessWidget {
                                     style: Theme.of(context)
                                         .textTheme
                                         .titleLarge
-                                        ?.copyWith(fontWeight: FontWeight.w700),
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.w700,
+                                        ),
                                   ),
                                   const SizedBox(height: 6),
                                   Text(
@@ -270,7 +357,8 @@ class AppLoginScreen extends StatelessWidget {
                                   const _LoginForm(),
                                   const SizedBox(height: 16),
                                   TextButton(
-                                    onPressed: () => context.go('/owner/register'),
+                                    onPressed: () =>
+                                        context.go('/owner/register'),
                                     child: Text.rich(
                                       TextSpan(
                                         children: [
@@ -334,6 +422,8 @@ class _LoginFormState extends State<_LoginForm> {
   final _idNode = FocusNode();
   final _pwNode = FocusNode();
 
+  bool _reactivationSheetOpen = false;
+
   @override
   void dispose() {
     _identifier.dispose();
@@ -370,8 +460,34 @@ class _LoginFormState extends State<_LoginForm> {
     FocusScope.of(context).unfocus();
 
     context.read<AuthBloc>().add(
-          LoginSubmitted(_identifier.text.trim(), _password.text),
+          LoginSubmitted(
+            _identifier.text.trim(),
+            _password.text,
+          ),
         );
+  }
+
+  Future<void> _handlePendingDeletion(BuildContext context) async {
+    if (_reactivationSheetOpen) return;
+
+    _reactivationSheetOpen = true;
+
+    try {
+      final shouldReactivate = await _showReactivateDeletionSheet(context);
+
+      if (!mounted) return;
+
+      if (shouldReactivate) {
+        context.read<AuthBloc>().add(
+              ReactivateAdminDeletionSubmitted(
+                _identifier.text.trim(),
+                _password.text,
+              ),
+            );
+      }
+    } finally {
+      _reactivationSheetOpen = false;
+    }
   }
 
   @override
@@ -379,9 +495,21 @@ class _LoginFormState extends State<_LoginForm> {
     final cs = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context)!;
 
-    return BlocBuilder<AuthBloc, AuthState>(
+    return BlocConsumer<AuthBloc, AuthState>(
+      listenWhen: (previous, current) {
+        return previous.errorCode != current.errorCode ||
+            previous.error != current.error;
+      },
+      listener: (context, state) async {
+        if (state.errorCode == 'ACCOUNT_PENDING_DELETION') {
+          await _handlePendingDeletion(context);
+        }
+      },
       builder: (context, state) {
-        final friendlyError = _mapLoginError(context, state.error);
+        final friendlyError =
+            state.errorCode == 'ACCOUNT_PENDING_DELETION'
+                ? null
+                : _mapLoginError(context, state.error);
 
         return Form(
           key: _formKey,
@@ -440,11 +568,13 @@ class _LoginFormState extends State<_LoginForm> {
 
 class _Header extends StatelessWidget {
   final String title;
+
   const _Header({required this.title});
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+
     return SizedBox(
       height: 260,
       child: Stack(
@@ -457,19 +587,26 @@ class _Header extends StatelessWidget {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
-              borderRadius:
-                  const BorderRadius.vertical(bottom: Radius.circular(36)),
+              borderRadius: const BorderRadius.vertical(
+                bottom: Radius.circular(36),
+              ),
             ),
           ),
           Positioned(
             top: 24,
             left: -30,
-            child: _Blob(color: Colors.white.withOpacity(.08), size: 120),
+            child: _Blob(
+              color: Colors.white.withOpacity(.08),
+              size: 120,
+            ),
           ),
           Positioned(
             top: 0,
             right: -18,
-            child: _Blob(color: Colors.white.withOpacity(.10), size: 90),
+            child: _Blob(
+              color: Colors.white.withOpacity(.10),
+              size: 90,
+            ),
           ),
           Positioned.fill(
             top: 18,
@@ -497,37 +634,48 @@ class _Header extends StatelessWidget {
 class _Blob extends StatelessWidget {
   final Color color;
   final double size;
-  const _Blob({required this.color, required this.size});
+
+  const _Blob({
+    required this.color,
+    required this.size,
+  });
 
   @override
-  Widget build(BuildContext context) => Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          color: color,
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: color.withOpacity(.4),
-              blurRadius: 24,
-              spreadRadius: 2,
-            ),
-          ],
-        ),
-      );
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: color,
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(.4),
+            blurRadius: 24,
+            spreadRadius: 2,
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _FrostedCard extends StatelessWidget {
   final Widget child;
+
   const _FrostedCard({required this.child});
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+
     return ClipRRect(
       borderRadius: BorderRadius.circular(22),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        filter: ImageFilter.blur(
+          sigmaX: 10,
+          sigmaY: 10,
+        ),
         child: DecoratedBox(
           decoration: BoxDecoration(
             color: cs.surface.withOpacity(.92),
@@ -539,7 +687,9 @@ class _FrostedCard extends StatelessWidget {
                 offset: Offset(0, 10),
               ),
             ],
-            border: Border.all(color: cs.outlineVariant.withOpacity(.5)),
+            border: Border.all(
+              color: cs.outlineVariant.withOpacity(.5),
+            ),
           ),
           child: child,
         ),

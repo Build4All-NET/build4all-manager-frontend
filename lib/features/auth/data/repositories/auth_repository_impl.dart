@@ -92,6 +92,78 @@ class AuthRepositoryImpl implements IAuthRepository {
   }
 
   @override
+Future<(AuthToken, AppUser)> reactivateAdminDeletion({
+  required String identifier,
+  required String password,
+}) async {
+  try {
+    final res = await api.reactivateAdminDeletion(
+      identifier: identifier,
+      password: password,
+    );
+
+    final dto = LoginResponseDto.fromJson(res.data as Map<String, dynamic>);
+
+    final role = dto.role.toString().toUpperCase();
+
+    final userOrAdmin = dto.userOrAdmin;
+    final user = AppUser(
+      id: (userOrAdmin['id'] as num?)?.toInt() ?? 0,
+      username: (userOrAdmin['username'] ?? '').toString(),
+      firstName: (userOrAdmin['firstName'] ?? '').toString(),
+      lastName: (userOrAdmin['lastName'] ?? '').toString(),
+      email: (userOrAdmin['email'] ?? '').toString(),
+      role: role,
+    );
+
+    await sessionManager.saveSession(
+      token: dto.token,
+      role: role,
+      refreshToken: dto.refreshToken,
+    );
+
+    return (AuthToken(dto.token), user);
+  } on DioException catch (e) {
+    final status = e.response?.statusCode;
+
+    final isServerDown =
+        e.type == DioExceptionType.connectionError ||
+        e.type == DioExceptionType.connectionTimeout ||
+        e.type == DioExceptionType.receiveTimeout ||
+        e.type == DioExceptionType.sendTimeout ||
+        (status != null && status >= 500);
+
+    if (isServerDown) {
+      throw const AuthFailure(
+        code: 'SERVER_DOWN',
+        message: 'Server unavailable. Please try again shortly.',
+      );
+    }
+
+    final data = e.response?.data;
+
+    if (data is Map) {
+      final code = (data['code'] ?? 'REACTIVATION_ERROR').toString();
+      final msg =
+          (data['error'] ?? data['message'] ?? ApiErrorHandler.message(e))
+              .toString();
+
+      throw AuthFailure(code: code, message: msg);
+    }
+
+    throw AuthFailure(
+      code: 'NETWORK_ERROR',
+      message: ApiErrorHandler.message(e),
+    );
+  } catch (e) {
+    throw AuthFailure(
+      code: 'REACTIVATION_ERROR',
+      message: ApiErrorHandler.message(e),
+    );
+  }
+}
+
+  @override
   Future<void> logout() async {
     try {
       final (_, _, refresh) = await sessionManager.readSession();

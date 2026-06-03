@@ -1433,5 +1433,9 @@
   "owner_profile_delete_password_required": "كلمة المرور مطلوبة لحذف حسابك.",
   "owner_profile_delete_success": "تم إرسال طلب حذف الحساب بنجاح. تم تعطيل حسابك وسيتم إخفاء بياناتك الشخصية بشكل دائم بعد 30 يومًا."
 
-,"owner_profile_delete_incorrect_password": "كلمة المرور غير صحيحة."
+,"owner_profile_delete_incorrect_password": "كلمة المرور غير صحيحة.",
+"accountPendingDeletionTitle": " الحساب قيد الحذف",
+"accountPendingDeletionMessage": "طلب حذف حسابك قيد المعالجة. إذا غيرت رأيك، يمكنك إعادة تنشيط حسابك قبل أن يتم الحذف النهائي بعد 30 يومًا.",
+"reactivateAccount": "إعادة تنشيط الحساب",
+"accountReactivatedSuccessfully": "تم إعادة تنشيط حسابك بنجاح. إذا لم تكن أنت من طلب الحذف، نوصي بتغيير كلمة المرور الخاصة بك كإجراء أمني."
 }

@@ -1498,7 +1498,11 @@
   "owner_profile_delete_password_hint": "Enter your password",
   "owner_profile_delete_password_required": "Password is required to delete your account.",
   "owner_profile_delete_success": "Account deletion requested successfully. Your account is disabled and will be permanently anonymized after 30 days."
-,"owner_profile_delete_incorrect_password": "Incorrect password"
+,"owner_profile_delete_incorrect_password": "Incorrect password",
+"accountPendingDeletionTitle": "Account scheduled for deletion",
+"accountPendingDeletionMessage": "This account is scheduled for deletion. You can reactivate it within 30 days before it is permanently anonymized.",
+"reactivateAccount": "Reactivate Account",
+"accountReactivatedSuccessfully": "Account reactivated successfully"
 
 
 

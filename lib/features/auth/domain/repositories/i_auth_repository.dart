@@ -7,6 +7,11 @@ abstract class IAuthRepository {
     required String password,
   });
 
+  Future<(AuthToken, AppUser)> reactivateAdminDeletion({
+  required String identifier,
+  required String password,
+});
+
   Future<void> logout();
   Future<bool> isLoggedIn();
   Future<String> getStoredRole();

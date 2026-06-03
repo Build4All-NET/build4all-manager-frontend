@@ -3618,4 +3618,16 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get owner_profile_delete_incorrect_password => 'Mot de passe incorrect';
+
+  @override
+  String get accountPendingDeletionTitle => 'Compte en attente de suppression';
+
+  @override
+  String get accountPendingDeletionMessage => 'Ce compte est programmé pour être supprimé. Vous pouvez le réactiver dans les 30 jours qui précèdent sa suppression définitive.';
+
+  @override
+  String get reactivateAccount => 'éactiver le compte';
+
+  @override
+  String get accountReactivatedSuccessfully => 'Compte réactivé avec succès';
 }

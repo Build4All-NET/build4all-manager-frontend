@@ -3618,4 +3618,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get owner_profile_delete_incorrect_password => 'Incorrect password';
+
+  @override
+  String get accountPendingDeletionTitle => 'Account scheduled for deletion';
+
+  @override
+  String get accountPendingDeletionMessage => 'This account is scheduled for deletion. You can reactivate it within 30 days before it is permanently anonymized.';
+
+  @override
+  String get reactivateAccount => 'Reactivate Account';
+
+  @override
+  String get accountReactivatedSuccessfully => 'Account reactivated successfully';
 }
