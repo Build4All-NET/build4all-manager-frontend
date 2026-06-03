@@ -215,31 +215,33 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
     final repo = ProjectsRepositoryImpl(api);
     final usecase = CreateProjectUseCase(repo);
 
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider(
-          create: (_) => CreateProjectBloc(
-            usecase: usecase,
-            tokenProvider: widget.tokenProvider,
-          ),
-        ),
-        BlocProvider(
-          create: (_) {
-            final tutorialApi = TutorialApi(widget.dio);
-            final tutorialRepo = TutorialRepositoryImpl(tutorialApi);
+   return MultiBlocProvider(
+  providers: [
+    BlocProvider(
+      create: (_) => CreateProjectBloc(
+        usecase: usecase,
+        tokenProvider: widget.tokenProvider,
+      ),
+    ),
+    BlocProvider(
+      create: (_) {
+        final tutorialApi = TutorialApi(widget.dio);
+        final tutorialRepo = TutorialRepositoryImpl(tutorialApi);
 
-            final getGuide = GetOwnerGuideVideo(tutorialRepo);
-            final uploadGuide = UploadOwnerGuideVideo(tutorialRepo);
+        final getGuide = GetOwnerGuideVideo(tutorialRepo);
+        final uploadGuide = UploadOwnerGuideVideo(tutorialRepo);
 
-            return TutorialVideoBloc(
-              getOwnerGuide: getGuide,
-              uploadOwnerGuide: uploadGuide,
-              tokenProvider: widget.tokenProvider,
-            )..add(const TutorialVideoStarted());
-          },
-        ),
-      ],
-      child: DefaultTabController(
+        return TutorialVideoBloc(
+          getOwnerGuide: getGuide,
+          uploadOwnerGuide: uploadGuide,
+          tokenProvider: widget.tokenProvider,
+        )..add(const TutorialVideoStarted());
+      },
+    ),
+  ],
+  child: Builder(
+    builder: (blocContext) {
+      return DefaultTabController(
         length: 2,
         child: SafeArea(
           child: Column(
@@ -249,7 +251,7 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
                 padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
                 child: Text(
                   l10n.super_create_project_subtitle,
-                  style: Theme.of(context).textTheme.bodyMedium,
+                  style: Theme.of(blocContext).textTheme.bodyMedium,
                 ),
               ),
 
@@ -258,7 +260,7 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
                 child: Container(
                   padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
-                    color: Theme.of(context)
+                    color: Theme.of(blocContext)
                         .colorScheme
                         .surfaceContainerHighest
                         .withOpacity(.65),
@@ -268,7 +270,7 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
                     dividerColor: Colors.transparent,
                     indicatorSize: TabBarIndicatorSize.tab,
                     indicator: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surface,
+                      color: Theme.of(blocContext).colorScheme.surface,
                       borderRadius: BorderRadius.circular(11),
                     ),
                     tabs: const [
@@ -319,8 +321,11 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
                       onActiveChanged: (value) {
                         setState(() => _active = value);
                       },
-                      onSubmit: () => _submit(context),
-                      onReset: () => _resetForm(context),
+
+                      // ✅ IMPORTANT FIX:
+                      // use blocContext, not the parent context
+                      onSubmit: () => _submit(blocContext),
+                      onReset: () => _resetForm(blocContext),
                     ),
                   ],
                 ),
@@ -328,8 +333,10 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
             ],
           ),
         ),
-      ),
-    );
+      );
+    },
+  ),
+);
   }
 
   void _resetForm(BuildContext context) {
