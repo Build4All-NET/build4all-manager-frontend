@@ -37,8 +37,17 @@ class FirebasePushService {
       );
 
       if (!kIsWeb && Platform.isIOS) {
-        final apnsToken = await _messaging.getAPNSToken();
+        // APNS token may not be ready immediately after launch; retry briefly.
+        String? apnsToken;
+        for (int i = 0; i < 5 && apnsToken == null; i++) {
+          apnsToken = await _messaging.getAPNSToken();
+          if (apnsToken == null) await Future.delayed(const Duration(seconds: 1));
+        }
         debugPrint('FirebasePushService: iOS APNS token => $apnsToken');
+        if (apnsToken == null) {
+          debugPrint('FirebasePushService: APNS token unavailable, skipping FCM token fetch');
+          return;
+        }
       }
 
       final token = await _messaging.getToken();

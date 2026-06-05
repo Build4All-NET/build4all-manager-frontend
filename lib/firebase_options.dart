@@ -64,7 +64,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '814148375402',
     projectId: 'build4all-manager',
     storageBucket: 'build4all-manager.firebasestorage.app',
-    iosBundleId: 'com.build4all.build4allmanager',
+    iosBundleId: 'com.build4alluat.build4allmanager',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
@@ -73,7 +73,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '814148375402',
     projectId: 'build4all-manager',
     storageBucket: 'build4all-manager.firebasestorage.app',
-    iosBundleId: 'com.build4all.build4allmanager',
+    iosBundleId: 'com.build4alluat.build4allmanager',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
