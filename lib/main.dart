@@ -83,13 +83,17 @@ Future<void> main() async {
 
     debugPrint('Foreground FCM received => title=$title, body=$body');
 
-    try {
-      await LocalNotificationService().show(
-        title: title,
-        body: body,
-      );
-    } catch (e) {
-      debugPrint('Local foreground notification show failed => $e');
+    // iOS shows foreground notifications natively via setForegroundNotificationPresentationOptions;
+    // showing a local notification on top would cause duplicates.
+    if (kIsWeb || defaultTargetPlatform != TargetPlatform.iOS) {
+      try {
+        await LocalNotificationService().show(
+          title: title,
+          body: body,
+        );
+      } catch (e) {
+        debugPrint('Local foreground notification show failed => $e');
+      }
     }
   });
 
