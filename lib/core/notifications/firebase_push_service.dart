@@ -58,15 +58,6 @@ class FirebasePushService {
         }
       });
 
-      FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-        debugPrint(
-          'FirebasePushService: foreground message received => '
-          'title=${message.notification?.title}, '
-          'body=${message.notification?.body}, '
-          'data=${message.data}',
-        );
-      });
-
       FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
         debugPrint(
           'FirebasePushService: notification opened app => '

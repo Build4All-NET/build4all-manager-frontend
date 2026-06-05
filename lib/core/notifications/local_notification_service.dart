@@ -16,9 +16,14 @@ class LocalNotificationService {
 
     const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
 
+    // Permissions on iOS are handled by firebase_messaging.requestPermission(); skip here.
     const initSettings = InitializationSettings(
       android: androidSettings,
-      iOS: DarwinInitializationSettings(),
+      iOS: DarwinInitializationSettings(
+        requestAlertPermission: false,
+        requestBadgePermission: false,
+        requestSoundPermission: false,
+      ),
     );
 
     await _plugin.initialize(initSettings);
