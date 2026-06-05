@@ -170,6 +170,7 @@ jobs:
             ./ci_fastlane --version
           else
             echo "⚠️ No Gemfile → fallback to gem install (with --force to avoid console conflicts)"
+            gem install multi_json -N
             gem install cocoapods -N
             gem install fastlane -N --force
             # xcodeproj is usually pulled by cocoapods, but keep this to guarantee patch step works:
