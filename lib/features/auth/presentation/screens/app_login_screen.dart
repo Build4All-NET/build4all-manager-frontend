@@ -314,22 +314,34 @@ class AppLoginScreen extends StatelessWidget {
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      Hero(
-                                        tag: 'brand',
-                                        child: CircleAvatar(
-                                          radius: 30,
-                                          backgroundColor:
-                                              cs.primary.withOpacity(.12),
-                                          child: Text(
-                                            'B4',
-                                            style: TextStyle(
-                                              color: cs.primary,
-                                              fontWeight: FontWeight.w800,
-                                              fontSize: 18,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
+                                     Hero(
+  tag: 'brand',
+  child: Container(
+    width: 64,
+    height: 64,
+    padding: const EdgeInsets.all(8),
+    decoration: BoxDecoration(
+      color: cs.surface,
+      shape: BoxShape.circle,
+      border: Border.all(
+        color: cs.outlineVariant.withOpacity(.6),
+      ),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(.08),
+          blurRadius: 18,
+          offset: const Offset(0, 8),
+        ),
+      ],
+    ),
+    child: ClipOval(
+      child: Image.asset(
+        'assets/icon/app_icon.png',
+        fit: BoxFit.contain,
+      ),
+    ),
+  ),
+),
                                     ],
                                   ),
                                   const SizedBox(height: 12),

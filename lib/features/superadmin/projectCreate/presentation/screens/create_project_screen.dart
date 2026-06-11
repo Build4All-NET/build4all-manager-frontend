@@ -1,3 +1,4 @@
+import 'package:build4all_manager/features/superadmin/tutorial/domain/usecases/save_owner_guide_url.dart';
 import 'package:build4all_manager/features/superadmin/tutorial/presentation/superadmin/bloc/tutorial_video_event.dart';
 import 'package:build4all_manager/features/superadmin/tutorial/presentation/superadmin/widgets/tutorial_video_card.dart';
 import 'package:dio/dio.dart';
@@ -229,13 +230,15 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
         final tutorialRepo = TutorialRepositoryImpl(tutorialApi);
 
         final getGuide = GetOwnerGuideVideo(tutorialRepo);
-        final uploadGuide = UploadOwnerGuideVideo(tutorialRepo);
+final uploadGuide = UploadOwnerGuideVideo(tutorialRepo);
+final saveGuideUrl = SaveOwnerGuideUrl(tutorialRepo);
 
-        return TutorialVideoBloc(
-          getOwnerGuide: getGuide,
-          uploadOwnerGuide: uploadGuide,
-          tokenProvider: widget.tokenProvider,
-        )..add(const TutorialVideoStarted());
+return TutorialVideoBloc(
+  getOwnerGuide: getGuide,
+  uploadOwnerGuide: uploadGuide,
+  saveOwnerGuideUrl: saveGuideUrl,
+  tokenProvider: widget.tokenProvider,
+)..add(const TutorialVideoStarted());
       },
     ),
   ],

@@ -13,9 +13,18 @@ class TutorialVideoRefreshRequested extends TutorialVideoEvent {
 class TutorialVideoUploadRequested extends TutorialVideoEvent {
   final String filePath;
   final String fileName;
+
   const TutorialVideoUploadRequested({
     required this.filePath,
     required this.fileName,
+  });
+}
+
+class TutorialVideoUrlSaveRequested extends TutorialVideoEvent {
+  final String videoUrl;
+
+  const TutorialVideoUrlSaveRequested({
+    required this.videoUrl,
   });
 }
 

@@ -7,6 +7,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:video_player/video_player.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:build4all_manager/core/network/url_utils.dart' as urlu;
 
@@ -28,17 +29,16 @@ class _OwnerGuidePreviewCardState extends State<OwnerGuidePreviewCard> {
   bool _loading = true;
   bool _videoLoading = false;
   String? _error;
-  String? _videoPath; // raw from api (/uploads/...)
-  String? _videoUrl; // absolute
+  String? _videoPath;
+  String? _videoUrl;
   bool _showControls = true;
   Timer? _hideControlsTimer;
 
-  TutorialApi? _api;
+  late final TutorialApi _api = TutorialApi(widget.dio);
 
   @override
   void initState() {
     super.initState();
-    _api = TutorialApi(widget.dio);
     _load();
   }
 
@@ -52,6 +52,7 @@ class _OwnerGuidePreviewCardState extends State<OwnerGuidePreviewCard> {
   Future<void> _disposeController() async {
     final c = _controller;
     _controller = null;
+
     if (c != null) {
       c.removeListener(_onVideoTick);
       await c.dispose();
@@ -63,21 +64,17 @@ class _OwnerGuidePreviewCardState extends State<OwnerGuidePreviewCard> {
     setState(() {});
   }
 
-  void _restartAutoHideTimer() {
-    _hideControlsTimer?.cancel();
-    final c = _controller;
-    if (c == null) return;
-    if (!c.value.isInitialized) return;
-    if (!c.value.isPlaying) return;
-
-    _hideControlsTimer = Timer(const Duration(seconds: 3), () {
-      if (!mounted) return;
-      setState(() => _showControls = false);
-    });
-  }
-
   String _absUrl(String? path) {
     return urlu.absUrlFromDioBaseUrl(widget.dio.options.baseUrl, path);
+  }
+
+  bool _isDirectVideoUrl(String url) {
+    final clean = url.toLowerCase().split('?').first;
+
+    return clean.endsWith('.mp4') ||
+        clean.endsWith('.mov') ||
+        clean.endsWith('.m4v') ||
+        clean.contains('/uploads/');
   }
 
   Future<void> _load() async {
@@ -90,13 +87,14 @@ class _OwnerGuidePreviewCardState extends State<OwnerGuidePreviewCard> {
     });
 
     try {
-      final path = await _api!.getOwnerGuide(); // public endpoint
+      final path = await _api.getOwnerGuide();
       final cleaned = (path == null || path.trim().isEmpty) ? null : path.trim();
 
       _videoPath = cleaned;
 
       await _disposeController();
 
+      // ✅ If no video exists, owner details shows nothing.
       if (cleaned == null) {
         if (!mounted) return;
         setState(() {
@@ -108,6 +106,7 @@ class _OwnerGuidePreviewCardState extends State<OwnerGuidePreviewCard> {
 
       final abs = _absUrl(cleaned);
       final uri = Uri.tryParse(abs);
+
       if (uri == null) {
         if (!mounted) return;
         setState(() {
@@ -118,11 +117,24 @@ class _OwnerGuidePreviewCardState extends State<OwnerGuidePreviewCard> {
         return;
       }
 
+      // ✅ If URL is not direct mp4/upload video, show simple open button.
+      // Example: YouTube links cannot play with video_player directly.
+      if (!_isDirectVideoUrl(abs)) {
+        if (!mounted) return;
+        setState(() {
+          _videoUrl = abs;
+          _loading = false;
+          _videoLoading = false;
+        });
+        return;
+      }
+
       setState(() {
         _videoLoading = true;
       });
 
       final controller = VideoPlayerController.networkUrl(uri);
+
       await controller.initialize();
       await controller.setLooping(false);
       await controller.setVolume(1.0);
@@ -142,14 +154,29 @@ class _OwnerGuidePreviewCardState extends State<OwnerGuidePreviewCard> {
         _videoLoading = false;
         _showControls = true;
       });
-       } catch (e) {
+    } catch (e) {
       if (!mounted) return;
+
       setState(() {
         _loading = false;
         _videoLoading = false;
         _error = ApiErrorHandler.message(e);
       });
     }
+  }
+
+  void _restartAutoHideTimer() {
+    _hideControlsTimer?.cancel();
+
+    final c = _controller;
+    if (c == null) return;
+    if (!c.value.isInitialized) return;
+    if (!c.value.isPlaying) return;
+
+    _hideControlsTimer = Timer(const Duration(seconds: 3), () {
+      if (!mounted) return;
+      setState(() => _showControls = false);
+    });
   }
 
   Future<void> _togglePlayPause() async {
@@ -183,9 +210,20 @@ class _OwnerGuidePreviewCardState extends State<OwnerGuidePreviewCard> {
     _restartAutoHideTimer();
   }
 
+  Future<void> _openExternal() async {
+    final url = _videoUrl;
+    if (url == null || url.trim().isEmpty) return;
+
+    final uri = Uri.tryParse(url);
+    if (uri == null) return;
+
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
+
   Future<void> _openFullscreen() async {
     final c = _controller;
     final url = _videoUrl;
+
     if (c == null || url == null || !c.value.isInitialized) return;
 
     final currentPos = c.value.position;
@@ -220,6 +258,23 @@ class _OwnerGuidePreviewCardState extends State<OwnerGuidePreviewCard> {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
 
+    // ✅ While loading, show nothing in owner details.
+    // This avoids empty placeholder/jumping UI.
+    if (_loading) {
+      return const SizedBox.shrink();
+    }
+
+    // ✅ If no video, show nothing.
+    if (_videoPath == null || _videoPath!.trim().isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    // ✅ If backend/API error, show nothing for owner side.
+    // Owner should not see technical error in details.
+    if (_error != null) {
+      return const SizedBox.shrink();
+    }
+
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -237,131 +292,37 @@ class _OwnerGuidePreviewCardState extends State<OwnerGuidePreviewCard> {
               Expanded(
                 child: Text(
                   l10n.tutorial_ownerGuide_title,
-                  style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+                  style: tt.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
               ),
               IconButton(
                 tooltip: l10n.tutorial_common_refresh,
-                onPressed: _loading || _videoLoading ? null : _load,
+                onPressed: _videoLoading ? null : _load,
                 icon: const Icon(Icons.refresh_rounded),
               ),
             ],
           ),
-          const SizedBox(height: 6),
-          Text(
-            l10n.tutorial_ownerGuide_subtitle,
-            style: tt.bodySmall?.copyWith(
-              color: cs.onSurface.withOpacity(.75),
-              height: 1.25,
-            ),
-          ),
+
           const SizedBox(height: 12),
 
-          if (_loading) ...[
-            const LinearProgressIndicator(minHeight: 8),
-            const SizedBox(height: 8),
-            Text(
-              l10n.tutorial_common_loading,
-              style: tt.bodySmall?.copyWith(
-                color: cs.onSurface.withOpacity(.75),
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ] else if (_error != null) ...[
-            Container(
+          if (_videoUrl != null && _controller == null) ...[
+            // ✅ For YouTube / external URLs: video_player cannot play them.
+            // Show clean button only.
+            SizedBox(
               width: double.infinity,
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: cs.errorContainer.withOpacity(.35),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    l10n.tutorial_common_failedToLoad,
-                    style: tt.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: cs.error,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    _error!,
-                    style: tt.bodySmall?.copyWith(
-                      color: cs.onSurface.withOpacity(.75),
-                    ),
-                    maxLines: 4,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 8),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton.icon(
-                      onPressed: _load,
-                      icon: const Icon(Icons.refresh_rounded),
-                      label: Text(l10n.tutorial_common_retry),
-                    ),
-                  ),
-                ],
+              child: FilledButton.icon(
+                onPressed: _openExternal,
+                icon: const Icon(Icons.play_circle_outline_rounded),
+                label: const Text('Watch tutorial'),
               ),
             ),
-          ] else if (_controller == null || !_controller!.value.isInitialized) ...[
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: cs.surfaceContainerHighest.withOpacity(.35),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                l10n.tutorial_ownerGuide_notSetYet,
-                style: tt.bodyMedium?.copyWith(
-                  color: cs.onSurface.withOpacity(.8),
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ] else ...[
+          ] else if (_controller != null &&
+              _controller!.value.isInitialized) ...[
             _buildVideoPlayer(context),
-            const SizedBox(height: 12),
-
-            // ✅ L10N tutorial steps (now visible under the video)
-            Text(
-              l10n.owner_proj_details_tutorial_steps_title,
-              style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w800),
-            ),
-            const SizedBox(height: 8),
-            _StepItem(index: 1, text: l10n.owner_proj_details_tutorial_step_1),
-            _StepItem(index: 2, text: l10n.owner_proj_details_tutorial_step_2),
-            _StepItem(index: 3, text: l10n.owner_proj_details_tutorial_step_3),
-            _StepItem(index: 4, text: l10n.owner_proj_details_tutorial_step_4),
-            _StepItem(index: 5, text: l10n.owner_proj_details_tutorial_step_5),
-            _StepItem(index: 6, text: l10n.owner_proj_details_tutorial_step_6),
-            _StepItem(index: 7, text: l10n.owner_proj_details_tutorial_step_7),
-            _StepItem(index: 8, text: l10n.owner_proj_details_tutorial_step_8),
-
-            const SizedBox(height: 10),
-
-            // Optional debug path display
-           /*  if (_videoPath != null)
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: cs.surfaceContainerHighest.withOpacity(.28),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Text(
-                  _videoPath!,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: tt.bodySmall?.copyWith(
-                    color: cs.onSurface.withOpacity(.75),
-                    fontWeight: FontWeight.w600,
-                  ),
-                ), 
-              ),*/
+          ] else ...[
+            const SizedBox.shrink(),
           ],
         ],
       ),
@@ -411,7 +372,8 @@ class _OwnerGuidePreviewCardState extends State<OwnerGuidePreviewCard> {
                         _CircleControlButton(
                           icon: Icons.replay_10_rounded,
                           tooltip: l10n.tutorial_player_back10,
-                          onTap: () => _seekRelative(const Duration(seconds: -10)),
+                          onTap: () =>
+                              _seekRelative(const Duration(seconds: -10)),
                         ),
                         const SizedBox(width: 10),
                         _CircleControlButton(
@@ -428,7 +390,8 @@ class _OwnerGuidePreviewCardState extends State<OwnerGuidePreviewCard> {
                         _CircleControlButton(
                           icon: Icons.forward_10_rounded,
                           tooltip: l10n.tutorial_player_forward10,
-                          onTap: () => _seekRelative(const Duration(seconds: 10)),
+                          onTap: () =>
+                              _seekRelative(const Duration(seconds: 10)),
                         ),
                       ],
                     ),
@@ -464,7 +427,8 @@ class _OwnerGuidePreviewCardState extends State<OwnerGuidePreviewCard> {
                         if (_showControls)
                           Container(
                             width: double.infinity,
-                            padding: const EdgeInsets.fromLTRB(10, 6, 10, 8),
+                            padding:
+                                const EdgeInsets.fromLTRB(10, 6, 10, 8),
                             color: Colors.black.withOpacity(.28),
                             child: Text(
                               '${_fmt(pos)} / ${_fmt(dur)}',
@@ -523,54 +487,6 @@ class _OwnerGuidePreviewCardState extends State<OwnerGuidePreviewCard> {
 
     if (h > 0) return '${two(h)}:${two(m)}:${two(s)}';
     return '${two(m)}:${two(s)}';
-  }
-}
-
-class _StepItem extends StatelessWidget {
-  final int index;
-  final String text;
-
-  const _StepItem({
-    required this.index,
-    required this.text,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            height: 24,
-            width: 24,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: cs.primary.withOpacity(.10),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              '$index',
-              style: tt.labelMedium?.copyWith(
-                color: cs.primary,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              text,
-              style: tt.bodyMedium?.copyWith(height: 1.25),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }
 
@@ -661,6 +577,7 @@ class _OwnerGuideFullscreenPlayerPageState
   Future<void> _init() async {
     try {
       final c = VideoPlayerController.networkUrl(Uri.parse(widget.videoUrl));
+
       await c.initialize();
       await c.seekTo(widget.initialPosition);
       await c.setLooping(false);
@@ -694,8 +611,10 @@ class _OwnerGuideFullscreenPlayerPageState
 
   void _restartAutoHideTimer() {
     _hideControlsTimer?.cancel();
+
     final c = _controller;
     if (c == null || !c.value.isPlaying) return;
+
     _hideControlsTimer = Timer(const Duration(seconds: 3), () {
       if (!mounted) return;
       setState(() => _showControls = false);
@@ -705,12 +624,15 @@ class _OwnerGuideFullscreenPlayerPageState
   @override
   void dispose() {
     _hideControlsTimer?.cancel();
+
     final c = _controller;
     _controller = null;
+
     if (c != null) {
       c.removeListener(_tick);
       c.dispose();
     }
+
     _exitFullscreenUi();
     super.dispose();
   }
@@ -718,6 +640,7 @@ class _OwnerGuideFullscreenPlayerPageState
   Future<void> _togglePlayPause() async {
     final c = _controller;
     if (c == null || !c.value.isInitialized) return;
+
     if (c.value.isPlaying) {
       await c.pause();
       if (!mounted) return;
@@ -733,11 +656,14 @@ class _OwnerGuideFullscreenPlayerPageState
   Future<void> _seekRelative(Duration delta) async {
     final c = _controller;
     if (c == null || !c.value.isInitialized) return;
+
     final current = c.value.position;
     final duration = c.value.duration;
+
     var target = current + delta;
     if (target < Duration.zero) target = Duration.zero;
     if (target > duration) target = duration;
+
     await c.seekTo(target);
     _restartAutoHideTimer();
   }
@@ -747,7 +673,9 @@ class _OwnerGuideFullscreenPlayerPageState
     final h = totalSec ~/ 3600;
     final m = (totalSec % 3600) ~/ 60;
     final s = totalSec % 60;
+
     String two(int n) => n.toString().padLeft(2, '0');
+
     if (h > 0) return '${two(h)}:${two(m)}:${two(s)}';
     return '${two(m)}:${two(s)}';
   }
@@ -815,7 +743,8 @@ class _OwnerGuideFullscreenPlayerPageState
                                     Icons.fullscreen_exit_rounded,
                                     color: Colors.white,
                                   ),
-                                  tooltip: l10n.tutorial_player_exitFullscreen,
+                                  tooltip:
+                                      l10n.tutorial_player_exitFullscreen,
                                 ),
                               ],
                             ),

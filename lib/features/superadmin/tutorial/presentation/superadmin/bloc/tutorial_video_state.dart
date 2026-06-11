@@ -1,8 +1,9 @@
 class TutorialVideoState {
   final bool loading;
   final bool uploading;
-  final double progress; // 0..1
-  final String? videoPath; // can be /uploads/... OR full URL
+  final bool savingUrl;
+  final double progress;
+  final String? videoPath;
   final String? pickedFileName;
   final String? error;
   final String? message;
@@ -10,6 +11,7 @@ class TutorialVideoState {
   const TutorialVideoState({
     required this.loading,
     required this.uploading,
+    required this.savingUrl,
     required this.progress,
     this.videoPath,
     this.pickedFileName,
@@ -20,6 +22,7 @@ class TutorialVideoState {
   factory TutorialVideoState.initial() => const TutorialVideoState(
         loading: true,
         uploading: false,
+        savingUrl: false,
         progress: 0.0,
         videoPath: null,
         pickedFileName: null,
@@ -30,20 +33,25 @@ class TutorialVideoState {
   TutorialVideoState copyWith({
     bool? loading,
     bool? uploading,
+    bool? savingUrl,
     double? progress,
     String? videoPath,
     String? pickedFileName,
     String? error,
     String? message,
+    bool clearVideoPath = false,
+    bool clearPickedFileName = false,
     bool clearError = false,
     bool clearMessage = false,
   }) {
     return TutorialVideoState(
       loading: loading ?? this.loading,
       uploading: uploading ?? this.uploading,
+      savingUrl: savingUrl ?? this.savingUrl,
       progress: progress ?? this.progress,
-      videoPath: videoPath ?? this.videoPath,
-      pickedFileName: pickedFileName ?? this.pickedFileName,
+      videoPath: clearVideoPath ? null : (videoPath ?? this.videoPath),
+      pickedFileName:
+          clearPickedFileName ? null : (pickedFileName ?? this.pickedFileName),
       error: clearError ? null : (error ?? this.error),
       message: clearMessage ? null : (message ?? this.message),
     );

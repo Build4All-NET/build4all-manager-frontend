@@ -3,6 +3,7 @@ import '../services/tutorial_api.dart';
 
 class TutorialRepositoryImpl implements TutorialRepository {
   final TutorialApi api;
+
   TutorialRepositoryImpl(this.api);
 
   @override
@@ -20,6 +21,17 @@ class TutorialRepositoryImpl implements TutorialRepository {
       token: token,
       filePath: filePath,
       onSendProgress: onSendProgress,
+    );
+  }
+
+  @override
+  Future<String?> saveOwnerGuideUrl({
+    required String token,
+    required String videoUrl,
+  }) {
+    return api.saveOwnerGuideUrl(
+      token: token,
+      videoUrl: videoUrl,
     );
   }
 }

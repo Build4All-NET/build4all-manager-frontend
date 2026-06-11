@@ -6,4 +6,9 @@ abstract class TutorialRepository {
     required String filePath,
     required void Function(int sent, int total) onSendProgress,
   });
+
+  Future<String?> saveOwnerGuideUrl({
+    required String token,
+    required String videoUrl,
+  });
 }

@@ -12,13 +12,26 @@ import '../bloc/tutorial_video_bloc.dart';
 import '../bloc/tutorial_video_event.dart';
 import '../bloc/tutorial_video_state.dart';
 
-class TutorialVideoCard extends StatelessWidget {
+class TutorialVideoCard extends StatefulWidget {
   final String dioBaseUrl;
 
   const TutorialVideoCard({
     super.key,
     required this.dioBaseUrl,
   });
+
+  @override
+  State<TutorialVideoCard> createState() => _TutorialVideoCardState();
+}
+
+class _TutorialVideoCardState extends State<TutorialVideoCard> {
+  final TextEditingController _urlCtrl = TextEditingController();
+
+  @override
+  void dispose() {
+    _urlCtrl.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +45,7 @@ class TutorialVideoCard extends StatelessWidget {
           AppToast.error(context, state.error!);
           context.read<TutorialVideoBloc>().add(const TutorialVideoClearUi());
         }
+
         if (state.message != null && state.message!.trim().isNotEmpty) {
           AppToast.success(context, state.message!);
           context.read<TutorialVideoBloc>().add(const TutorialVideoClearUi());
@@ -42,7 +56,7 @@ class TutorialVideoCard extends StatelessWidget {
             ? l10n.tutorial_ownerGuide_notSetYet
             : state.videoPath!;
 
-        final busy = state.loading || state.uploading;
+        final busy = state.loading || state.uploading || state.savingUrl;
 
         return Container(
           padding: const EdgeInsets.all(14),
@@ -68,7 +82,7 @@ class TutorialVideoCard extends StatelessWidget {
                   ),
                   IconButton(
                     tooltip: l10n.tutorial_common_refresh,
-                    onPressed: state.uploading
+                    onPressed: busy
                         ? null
                         : () => context
                             .read<TutorialVideoBloc>()
@@ -77,7 +91,9 @@ class TutorialVideoCard extends StatelessWidget {
                   ),
                 ],
               ),
+
               const SizedBox(height: 6),
+
               Text(
                 l10n.tutorial_ownerGuide_subtitle,
                 style: tt.bodySmall?.copyWith(
@@ -85,6 +101,7 @@ class TutorialVideoCard extends StatelessWidget {
                   height: 1.25,
                 ),
               ),
+
               const SizedBox(height: 12),
 
               Container(
@@ -123,7 +140,66 @@ class TutorialVideoCard extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: 12),
+
+              const SizedBox(height: 14),
+
+              Text(
+                'Use video link',
+                style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w800),
+              ),
+              const SizedBox(height: 8),
+
+              TextField(
+                controller: _urlCtrl,
+                enabled: !busy,
+                keyboardType: TextInputType.url,
+                textInputAction: TextInputAction.done,
+                decoration: InputDecoration(
+                  hintText: 'https://youtube.com/...',
+                  prefixIcon: const Icon(Icons.link_rounded),
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.clear_rounded),
+                    onPressed: busy ? null : () => _urlCtrl.clear(),
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 10),
+
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: busy ? null : () => _saveUrl(context),
+                  icon: const Icon(Icons.save_rounded),
+                  label: Text(
+                    state.savingUrl ? 'Saving...' : 'Save video link',
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              Row(
+                children: [
+                  Expanded(child: Divider(color: cs.outlineVariant)),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    child: Text(
+                      'OR',
+                      style: tt.labelMedium?.copyWith(
+                        color: cs.onSurfaceVariant,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                  Expanded(child: Divider(color: cs.outlineVariant)),
+                ],
+              ),
+
+              const SizedBox(height: 16),
 
               if (busy) ...[
                 LinearProgressIndicator(
@@ -152,12 +228,12 @@ class TutorialVideoCard extends StatelessWidget {
                     ),
                   ),
                 ],
+                const SizedBox(height: 12),
               ],
 
-              const SizedBox(height: 12),
               SizedBox(
                 width: double.infinity,
-                child: FilledButton.icon(
+                child: OutlinedButton.icon(
                   onPressed: busy ? null : () => _pickAndUpload(context),
                   icon: const Icon(Icons.upload_rounded),
                   label: Text(
@@ -175,7 +251,25 @@ class TutorialVideoCard extends StatelessWidget {
   }
 
   String _absUrl(String? path) {
-    return urlu.absUrlFromDioBaseUrl(dioBaseUrl, path);
+    return urlu.absUrlFromDioBaseUrl(widget.dioBaseUrl, path);
+  }
+
+  Future<void> _saveUrl(BuildContext context) async {
+    final url = _urlCtrl.text.trim();
+
+    if (url.isEmpty) {
+      AppToast.error(context, 'Video URL is required');
+      return;
+    }
+
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      AppToast.error(context, 'Video URL must start with http:// or https://');
+      return;
+    }
+
+    context.read<TutorialVideoBloc>().add(
+          TutorialVideoUrlSaveRequested(videoUrl: url),
+        );
   }
 
   Future<void> _open(BuildContext context, TutorialVideoState state) async {
@@ -189,6 +283,7 @@ class TutorialVideoCard extends StatelessWidget {
     }
 
     final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+
     if (!ok) {
       AppToast.error(context, l10n.tutorial_ownerGuide_could_not_open_video);
     }
@@ -197,7 +292,11 @@ class TutorialVideoCard extends StatelessWidget {
   Future<void> _copy(BuildContext context, TutorialVideoState state) async {
     final l10n = AppLocalizations.of(context)!;
     final abs = _absUrl(state.videoPath);
+
     await Clipboard.setData(ClipboardData(text: abs));
+
+    if (!context.mounted) return;
+
     AppToast.success(context, l10n.tutorial_ownerGuide_copied_link);
   }
 
@@ -209,6 +308,7 @@ class TutorialVideoCard extends StatelessWidget {
       allowedExtensions: const ['mp4'],
       withData: false,
     );
+
     if (picked == null || picked.files.isEmpty) return;
 
     final f = picked.files.single;

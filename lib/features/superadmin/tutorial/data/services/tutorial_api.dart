@@ -3,6 +3,7 @@ import 'package:http_parser/http_parser.dart';
 
 class TutorialApi {
   final Dio dio;
+
   TutorialApi(this.dio);
 
   Future<String?> getOwnerGuide({String? token}) async {
@@ -14,9 +15,37 @@ class TutorialApi {
     );
 
     final data = r.data;
+
     if (data is Map && data['data'] is Map) {
       return data['data']['videoUrl']?.toString();
     }
+
+    return null;
+  }
+
+  Future<String?> saveOwnerGuideUrl({
+    required String token,
+    required String videoUrl,
+  }) async {
+    final r = await dio.put(
+      '/superadmin/tutorial/owner-guide',
+      data: {
+        'videoUrl': videoUrl.trim(),
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer ${token.trim()}',
+          'Content-Type': 'application/json',
+        },
+      ),
+    );
+
+    final data = r.data;
+
+    if (data is Map && data['data'] is Map) {
+      return data['data']['videoUrl']?.toString();
+    }
+
     return null;
   }
 
@@ -46,9 +75,11 @@ class TutorialApi {
     );
 
     final data = r.data;
+
     if (data is Map && data['data'] is Map) {
       return data['data']['videoUrl']?.toString();
     }
+
     return null;
   }
 }
