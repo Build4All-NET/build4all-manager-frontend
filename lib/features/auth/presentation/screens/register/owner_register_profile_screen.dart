@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
+import 'package:intl_phone_field/countries.dart' as phone_countries;
+
 import '../../../../../l10n/app_localizations.dart';
 import '../../../../../shared/widgets/app_text_field.dart';
 import '../../../../../shared/widgets/app_button.dart';
@@ -36,6 +38,11 @@ class _OwnerRegisterProfileScreenState
   final _last = TextEditingController();
   final _countryDisplay = TextEditingController();
 
+  // Removes Israel from IntlPhoneField country selector.
+  late final _phoneCountries = phone_countries.countries
+      .where((country) => country.code.toUpperCase() != 'IL')
+      .toList();
+
   String? _fullPhone;
   int? _selectedCountryId;
   List<CountryModel> _countries = [];
@@ -56,12 +63,45 @@ class _OwnerRegisterProfileScreenState
     super.dispose();
   }
 
+  CountryModel? _findCanada(List<CountryModel> countries) {
+    for (final country in countries) {
+      if (country.iso2Code.trim().toUpperCase() == 'CA') {
+        return country;
+      }
+    }
+
+    for (final country in countries) {
+      if (country.name.trim().toLowerCase() == 'canada') {
+        return country;
+      }
+    }
+
+    return null;
+  }
+
   Future<void> _fetchCountries() async {
     try {
-      final countries = await CountryApi(widget.dio).getActiveCountries();
+      final rawCountries = await CountryApi(widget.dio).getActiveCountries();
+
+      // Remove Israel from owner country dropdown.
+      final countries = rawCountries.where((country) {
+        final iso = country.iso2Code.trim().toUpperCase();
+        final name = country.name.trim().toLowerCase();
+
+        return iso != 'IL' && !name.contains('israel');
+      }).toList();
+
+      final canada = _findCanada(countries);
+
       if (!mounted) return;
+
       setState(() {
         _countries = countries;
+
+        // Default selected country = Canada.
+        _selectedCountryId = canada?.id;
+        _countryDisplay.text = canada?.name ?? '';
+
         _loadingCountries = false;
       });
     } catch (_) {
@@ -129,6 +169,7 @@ class _OwnerRegisterProfileScreenState
     Widget? suffixIcon,
   }) {
     final cs = Theme.of(context).colorScheme;
+
     return InputDecoration(
       labelText: label,
       hintText: hint,
@@ -162,6 +203,7 @@ class _OwnerRegisterProfileScreenState
           AppToast.error(context, state.error!);
           return;
         }
+
         if (state.completed) {
           AppToast.success(context, l10n.msgOwnerRegistered);
           _goToLogin();
@@ -176,7 +218,9 @@ class _OwnerRegisterProfileScreenState
                 constraints: const BoxConstraints(maxWidth: 520),
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 20),
+                    horizontal: 16,
+                    vertical: 20,
+                  ),
                   keyboardDismissBehavior:
                       ScrollViewKeyboardDismissBehavior.onDrag,
                   child: Form(
@@ -193,6 +237,7 @@ class _OwnerRegisterProfileScreenState
                               _required(v, l10n.errUsernameRequired),
                         ),
                         const SizedBox(height: 14),
+
                         AppTextField(
                           controller: _first,
                           label: l10n.lblFirstName,
@@ -202,6 +247,7 @@ class _OwnerRegisterProfileScreenState
                               _required(v, l10n.errFirstNameRequired),
                         ),
                         const SizedBox(height: 14),
+
                         AppTextField(
                           controller: _last,
                           label: l10n.lblLastName,
@@ -213,8 +259,11 @@ class _OwnerRegisterProfileScreenState
                         const SizedBox(height: 14),
 
                         // Phone field
+                        // Israel removed from the selector.
+                        // Default phone country = Canada.
                         IntlPhoneField(
-                          initialCountryCode: 'LB',
+                          countries: _phoneCountries,
+                          initialCountryCode: 'CA',
                           decoration: _inputDeco(
                             context,
                             label: l10n.lblPhone,
@@ -229,9 +278,11 @@ class _OwnerRegisterProfileScreenState
                                 phone.number.trim().isEmpty) {
                               return l10n.errPhoneRequired;
                             }
+
                             if (phone.number.trim().length < 6) {
                               return l10n.errPhoneInvalid;
                             }
+
                             return null;
                           },
                         ),
@@ -239,6 +290,8 @@ class _OwnerRegisterProfileScreenState
                         const SizedBox(height: 14),
 
                         // Searchable country picker trigger
+                        // Israel removed from the countries list.
+                        // Default country = Canada.
                         TextFormField(
                           controller: _countryDisplay,
                           readOnly: true,
@@ -249,8 +302,7 @@ class _OwnerRegisterProfileScreenState
                             context,
                             label: l10n.lblCountry,
                             hint: l10n.hintSelectCountry,
-                            prefixIcon:
-                                const Icon(Icons.public_outlined),
+                            prefixIcon: const Icon(Icons.public_outlined),
                             suffixIcon: _loadingCountries
                                 ? const Padding(
                                     padding: EdgeInsets.all(12),
@@ -258,11 +310,11 @@ class _OwnerRegisterProfileScreenState
                                       width: 20,
                                       height: 20,
                                       child: CircularProgressIndicator(
-                                          strokeWidth: 2),
+                                        strokeWidth: 2,
+                                      ),
                                     ),
                                   )
-                                : const Icon(
-                                    Icons.arrow_drop_down_rounded),
+                                : const Icon(Icons.arrow_drop_down_rounded),
                           ),
                           validator: (_) => _selectedCountryId == null
                               ? l10n.errCountryRequired
@@ -270,21 +322,23 @@ class _OwnerRegisterProfileScreenState
                         ),
 
                         const SizedBox(height: 24),
+
                         AppButton(
                           label: l10n.btnCreateAccount,
                           isBusy: state.loading,
                           expand: true,
-                          trailing:
-                              const Icon(Icons.check_circle_rounded),
-                          onPressed: state.loading
-                              ? null
-                              : () => _submit(l10n),
+                          trailing: const Icon(Icons.check_circle_rounded),
+                          onPressed:
+                              state.loading ? null : () => _submit(l10n),
                         ),
+
                         const SizedBox(height: 10),
+
                         TextButton(
                           onPressed: _goToLogin,
                           child: Text(l10n.alreadyHaveAccountLogin),
                         ),
+
                         const SizedBox(height: 16),
                       ],
                     ),
@@ -329,6 +383,7 @@ class _CountryPickerSheetState extends State<_CountryPickerSheet> {
 
   void _filter() {
     final q = _searchCtrl.text.trim().toLowerCase();
+
     setState(() {
       _filtered = q.isEmpty
           ? List.of(widget.countries)
@@ -371,6 +426,7 @@ class _CountryPickerSheetState extends State<_CountryPickerSheet> {
                   ),
                 ),
                 const SizedBox(height: 14),
+
                 TextField(
                   controller: _searchCtrl,
                   autofocus: true,
@@ -380,7 +436,9 @@ class _CountryPickerSheetState extends State<_CountryPickerSheet> {
                     filled: true,
                     fillColor: cs.surfaceContainerHighest,
                     contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 12),
+                      horizontal: 14,
+                      vertical: 12,
+                    ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none,
@@ -391,23 +449,25 @@ class _CountryPickerSheetState extends State<_CountryPickerSheet> {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide:
-                          BorderSide(color: cs.primary, width: 1.4),
+                      borderSide: BorderSide(
+                        color: cs.primary,
+                        width: 1.4,
+                      ),
                     ),
                   ),
                 ),
               ],
             ),
           ),
+
           Expanded(
             child: _filtered.isEmpty
                 ? Center(
                     child: Text(
                       'No countries found',
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodyMedium
-                          ?.copyWith(color: cs.onSurfaceVariant),
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: cs.onSurfaceVariant,
+                          ),
                     ),
                   )
                 : ListView.builder(
@@ -419,7 +479,9 @@ class _CountryPickerSheetState extends State<_CountryPickerSheet> {
 
                       return ListTile(
                         contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 2),
+                          horizontal: 16,
+                          vertical: 2,
+                        ),
                         leading: Icon(
                           Icons.public_outlined,
                           color: isSelected
@@ -429,21 +491,22 @@ class _CountryPickerSheetState extends State<_CountryPickerSheet> {
                         ),
                         title: Text(
                           c.name,
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyLarge
-                              ?.copyWith(
-                                color: isSelected
-                                    ? cs.primary
-                                    : cs.onSurface,
-                                fontWeight: isSelected
-                                    ? FontWeight.w700
-                                    : FontWeight.normal,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                    color: isSelected
+                                        ? cs.primary
+                                        : cs.onSurface,
+                                    fontWeight: isSelected
+                                        ? FontWeight.w700
+                                        : FontWeight.normal,
+                                  ),
                         ),
                         trailing: isSelected
-                            ? Icon(Icons.check_rounded,
-                                color: cs.primary, size: 20)
+                            ? Icon(
+                                Icons.check_rounded,
+                                color: cs.primary,
+                                size: 20,
+                              )
                             : null,
                         onTap: () {
                           widget.onSelected(c);

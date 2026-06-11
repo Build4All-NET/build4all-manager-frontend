@@ -10,6 +10,10 @@ class OwnerProfile {
   final bool notifyUserFeedback;
   final String? phoneNumber;
 
+  final int? countryId;
+  final String? countryName;
+  final String? countryIso2Code;
+
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -23,13 +27,14 @@ class OwnerProfile {
     this.businessId,
     required this.notifyItemUpdates,
     required this.notifyUserFeedback,
+    this.phoneNumber,
+    this.countryId,
+    this.countryName,
+    this.countryIso2Code,
     this.createdAt,
     this.updatedAt,
-    this.phoneNumber,
   });
 
   String get fullName =>
       [firstName, lastName].where((e) => e.isNotEmpty).join(' ');
-
-      
 }

@@ -9,15 +9,22 @@ import 'package:flutter/services.dart';
 
 class ProfileInfoCard extends StatelessWidget {
   final OwnerProfile p;
-  const ProfileInfoCard({super.key, required this.p});
+
+  const ProfileInfoCard({
+    super.key,
+    required this.p,
+  });
 
   Future<void> _copy(BuildContext context, String text) async {
     final l10n = AppLocalizations.of(context)!;
     final cleaned = text.trim();
+
     if (cleaned.isEmpty) return;
 
     await Clipboard.setData(ClipboardData(text: cleaned));
+
     if (!context.mounted) return;
+
     AppToast.success(context, l10n.copied ?? 'Copied');
   }
 
@@ -35,7 +42,7 @@ class ProfileInfoCard extends StatelessWidget {
       Widget? trailing,
     }) {
       final color = tint ?? cs.primary;
-      final shown = value.isEmpty ? '—' : value;
+      final shown = value.trim().isEmpty ? '—' : value.trim();
 
       return ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16),
@@ -66,6 +73,7 @@ class ProfileInfoCard extends StatelessWidget {
 
     final email = p.email.trim();
     final phone = (p.phoneNumber ?? '').trim();
+    final country = (p.countryName ?? '').trim();
 
     return Card(
       elevation: 0,
@@ -87,16 +95,18 @@ class ProfileInfoCard extends StatelessWidget {
                     minFontSize: 14,
                     stepGranularity: 0.5,
                     overflow: TextOverflow.ellipsis,
-                    style:
-                        tt.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+                    style: tt.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
                 ),
               ],
             ),
           ),
+
           Divider(height: 1, color: cs.outlineVariant.withOpacity(.7)),
 
-          // ✅ Email
+          // Email
           row(
             icon: Icons.mail_outline_rounded,
             label: l10n.owner_profile_email,
@@ -111,7 +121,7 @@ class ProfileInfoCard extends StatelessWidget {
           ),
           const Divider(indent: 72, endIndent: 12),
 
-          // ✅ Phone
+          // Phone
           row(
             icon: Icons.phone_outlined,
             label: l10n.owner_profile_phone,
@@ -126,7 +136,15 @@ class ProfileInfoCard extends StatelessWidget {
           ),
           const Divider(indent: 72, endIndent: 12),
 
-          // ✅ Full name
+          // Country
+          row(
+            icon: Icons.public_outlined,
+            label: l10n.lblCountry,
+            value: country,
+          ),
+          const Divider(indent: 72, endIndent: 12),
+
+          // Full name
           row(
             icon: Icons.person_outline_rounded,
             label: l10n.owner_profile_name,
@@ -134,7 +152,7 @@ class ProfileInfoCard extends StatelessWidget {
           ),
           const Divider(indent: 72, endIndent: 12),
 
-          // ✅ Username
+          // Username
           row(
             icon: Icons.alternate_email_rounded,
             label: l10n.owner_profile_username ?? 'Username',

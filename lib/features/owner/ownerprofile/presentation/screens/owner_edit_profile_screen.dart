@@ -9,6 +9,7 @@ import 'package:build4all_manager/shared/utils/ApiErrorHandler.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl_phone_field/countries.dart' as phone_countries;
 
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:intl_phone_field/phone_number.dart';
@@ -50,7 +51,13 @@ class _OwnerEditProfileScreenState extends State<OwnerEditProfileScreen> {
       TextEditingController(text: widget.initial.email);
 
   late final TextEditingController _phoneCtrl = TextEditingController();
-  String _initialCountryCode = 'LB';
+
+// Removes Israel from IntlPhoneField country selector.
+late final _phoneCountries = phone_countries.countries
+    .where((country) => country.code.toUpperCase() != 'IL')
+    .toList();
+
+String _initialCountryCode = 'CA';
   String _originalPhone = '';
   String? _fullPhone;
   bool _phoneWasManuallyEdited = false;
@@ -95,13 +102,19 @@ class _OwnerEditProfileScreenState extends State<OwnerEditProfileScreen> {
 
     if (_originalPhone.isNotEmpty) {
       try {
-        final parsed =
-            PhoneNumber.fromCompleteNumber(completeNumber: _originalPhone);
-        _initialCountryCode = parsed.countryISOCode;
-        _phoneCtrl.text = parsed.number;
-        _fullPhone = parsed.completeNumber;
+      final parsed =
+    PhoneNumber.fromCompleteNumber(completeNumber: _originalPhone);
+
+final parsedIso = parsed.countryISOCode.trim().toUpperCase();
+
+// If old saved phone is Israel, do not initialize the picker with IL.
+// Keep Canada instead.
+_initialCountryCode = parsedIso == 'IL' ? 'CA' : parsedIso;
+
+_phoneCtrl.text = parsed.number;
+_fullPhone = parsed.completeNumber;
       } catch (_) {
-        _initialCountryCode = 'LB';
+        _initialCountryCode = 'CA';
         _phoneCtrl.text = _originalPhone.replaceAll('+', '');
       }
     }
@@ -990,9 +1003,10 @@ class _OwnerEditProfileScreenState extends State<OwnerEditProfileScreen> {
                             const SizedBox(height: 12),
                             _topHint(l10n, l10n.owner_profile_phone),
                             IntlPhoneField(
-                              controller: _phoneCtrl,
-                              focusNode: _phoneFocusNode,
-                              initialCountryCode: _initialCountryCode,
+  countries: _phoneCountries,
+  controller: _phoneCtrl,
+  focusNode: _phoneFocusNode,
+  initialCountryCode: _initialCountryCode,
                               disableLengthCheck: false,
                               decoration: phoneDeco(),
                               onChanged: (phone) {
