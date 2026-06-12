@@ -517,6 +517,24 @@ abstract class AppLocalizations {
   /// **'Enter email'**
   String get profile_email_hint;
 
+  /// No description provided for @profile_phone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone number (support contact)'**
+  String get profile_phone;
+
+  /// No description provided for @profile_phone_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. +216 12 345 678'**
+  String get profile_phone_hint;
+
+  /// No description provided for @profile_phone_invalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid phone number'**
+  String get profile_phone_invalid;
+
   /// No description provided for @profile_save_changes.
   ///
   /// In en, this message translates to:
