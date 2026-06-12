@@ -931,6 +931,10 @@
   "owner_proj_details_ecom_m10": "Import/export des données (CSV/Excel)",
 
   "download_ios": "Installez TestFlight pour ouvrir l’application",
+  "contact_support_title": "Contacter le support",
+  "contact_support_subtitle": "Discutez avec nous sur WhatsApp",
+  "contact_support_message": "Bonjour, j'ai besoin d'aide avec l'application Build4All manager.",
+  "contact_support_unavailable": "Le support n'est pas disponible pour le moment.",
   "owner_profile_edit_title": "Modifier le profil",
   "owner_profile_edit_save": "Enregistrer",
   "owner_profile_edit_saved": "Profil mis à jour",

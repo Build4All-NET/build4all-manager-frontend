@@ -1969,6 +1969,18 @@ class AppLocalizationsAr extends AppLocalizations {
   String get download_ios => 'ثبّت TestFlight لفتح التطبيق';
 
   @override
+  String get contact_support_title => 'التواصل مع الدعم';
+
+  @override
+  String get contact_support_subtitle => 'تواصل معنا عبر واتساب';
+
+  @override
+  String get contact_support_message => 'مرحباً، أحتاج إلى مساعدة بخصوص تطبيق Build4All للإدارة.';
+
+  @override
+  String get contact_support_unavailable => 'خدمة الدعم غير متاحة حالياً.';
+
+  @override
   String get owner_profile_edit_title => 'تعديل الملف الشخصي';
 
   @override
