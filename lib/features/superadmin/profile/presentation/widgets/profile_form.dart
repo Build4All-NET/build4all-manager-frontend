@@ -30,6 +30,8 @@ class _ProfileFormState extends State<ProfileForm> {
       TextEditingController(text: widget.me.username);
   late final TextEditingController _email =
       TextEditingController(text: widget.me.email);
+  late final TextEditingController _phone =
+      TextEditingController(text: widget.me.phoneNumber);
 
   @override
   void dispose() {
@@ -37,6 +39,7 @@ class _ProfileFormState extends State<ProfileForm> {
     _last.dispose();
     _user.dispose();
     _email.dispose();
+    _phone.dispose();
     super.dispose();
   }
 
@@ -92,6 +95,23 @@ class _ProfileFormState extends State<ProfileForm> {
               return ok ? null : l10n.err_email;
             },
           ),
+          const SizedBox(height: 12),
+          AppTextField(
+            label: l10n.profile_phone,
+            hint: l10n.profile_phone_hint,
+            prefix: const Icon(Icons.phone_outlined),
+            controller: _phone,
+            enabled: !disabled,
+            keyboardType: TextInputType.phone,
+            validator: (v) {
+              // Optional, but if set it doubles as the public support/WhatsApp
+              // number, so it must look like a real international phone.
+              final s = (v ?? '').trim();
+              if (s.isEmpty) return null;
+              final ok = RegExp(r'^\+?[0-9 ()\-]{6,20}$').hasMatch(s);
+              return ok ? null : l10n.profile_phone_invalid;
+            },
+          ),
           const SizedBox(height: 16),
           AppButton(
             expand: true,
@@ -108,6 +128,7 @@ class _ProfileFormState extends State<ProfileForm> {
                         lastName: _last.text.trim(),
                         username: _user.text.trim(),
                         email: _email.text.trim(),
+                        phoneNumber: _phone.text.trim(),
                       ),
                     );
                   },

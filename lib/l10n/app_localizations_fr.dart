@@ -219,6 +219,15 @@ class AppLocalizationsFr extends AppLocalizations {
   String get profile_email_hint => 'Saisir l’e-mail';
 
   @override
+  String get profile_phone => 'Numéro de téléphone (contact support)';
+
+  @override
+  String get profile_phone_hint => 'ex. +216 12 345 678';
+
+  @override
+  String get profile_phone_invalid => 'Saisissez un numéro de téléphone valide';
+
+  @override
   String get profile_save_changes => 'Enregistrer les modifications';
 
   @override

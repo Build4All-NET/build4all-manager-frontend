@@ -219,6 +219,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get profile_email_hint => 'أدخل البريد الإلكتروني';
 
   @override
+  String get profile_phone => 'رقم الهاتف (جهة اتصال الدعم)';
+
+  @override
+  String get profile_phone_hint => 'مثال: ‎+216 12 345 678';
+
+  @override
+  String get profile_phone_invalid => 'أدخل رقم هاتف صحيح';
+
+  @override
   String get profile_save_changes => 'حفظ التغييرات';
 
   @override

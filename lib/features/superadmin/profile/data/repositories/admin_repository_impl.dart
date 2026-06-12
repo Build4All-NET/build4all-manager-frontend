@@ -22,6 +22,7 @@ class AdminRepositoryImpl implements IAdminRepository {
       lastName: profile.lastName,
       username: profile.username,
       email: profile.email,
+      phoneNumber: profile.phoneNumber,
       notifyItemUpdates: profile.notifyItemUpdates,
       notifyUserFeedback: profile.notifyUserFeedback,
     );

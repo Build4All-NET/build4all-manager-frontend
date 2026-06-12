@@ -7,6 +7,7 @@ class AdminProfileModel extends AdminProfile {
     required super.lastName,
     required super.username,
     required super.email,
+    required super.phoneNumber,
     required super.notifyItemUpdates,
     required super.notifyUserFeedback,
   });
@@ -18,6 +19,7 @@ class AdminProfileModel extends AdminProfile {
       lastName: (j['lastName'] ?? '').toString(),
       username: (j['username'] ?? '').toString(),
       email: (j['email'] ?? '').toString(),
+      phoneNumber: (j['phoneNumber'] ?? '').toString(),
       notifyItemUpdates: (j['notifyItemUpdates'] ?? false) as bool,
       notifyUserFeedback: (j['notifyUserFeedback'] ?? false) as bool,
     );
@@ -28,6 +30,7 @@ class AdminProfileModel extends AdminProfile {
         'lastName': lastName,
         'username': username,
         'email': email,
+        'phoneNumber': phoneNumber,
       };
 
   Map<String, dynamic> toNotificationsUpdateBody() => {
