@@ -842,7 +842,11 @@
   "owner_proj_details_ecom_m9": "Analytics: revenue, conversion, AOV",
   "owner_proj_details_ecom_m10": "Import/export data (CSV/Excel)",
   "download_ios":"Use TestFlight to open"
-, "owner_profile_edit_title": "Edit profile",
+, "contact_support_title": "Contact support",
+  "contact_support_subtitle": "Chat with us on WhatsApp",
+  "contact_support_message": "Hello, I need help with the Build4All manager app.",
+  "contact_support_unavailable": "Support contact is not available right now.",
+  "owner_profile_edit_title": "Edit profile",
   "owner_profile_edit_save": "Save",
   "owner_profile_edit_saved": "Profile updated",
   "owner_profile_edit_invalid_email": "Invalid email",

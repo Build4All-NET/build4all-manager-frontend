@@ -3961,6 +3961,30 @@ abstract class AppLocalizations {
   /// **'Use TestFlight to open'**
   String get download_ios;
 
+  /// No description provided for @contact_support_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact support'**
+  String get contact_support_title;
+
+  /// No description provided for @contact_support_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat with us on WhatsApp'**
+  String get contact_support_subtitle;
+
+  /// No description provided for @contact_support_message.
+  ///
+  /// In en, this message translates to:
+  /// **'Hello, I need help with the Build4All manager app.'**
+  String get contact_support_message;
+
+  /// No description provided for @contact_support_unavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Support contact is not available right now.'**
+  String get contact_support_unavailable;
+
   /// No description provided for @owner_profile_edit_title.
   ///
   /// In en, this message translates to:

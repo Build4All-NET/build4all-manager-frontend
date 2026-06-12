@@ -1969,6 +1969,18 @@ class AppLocalizationsFr extends AppLocalizations {
   String get download_ios => 'Installez TestFlight pour ouvrir l’application';
 
   @override
+  String get contact_support_title => 'Contacter le support';
+
+  @override
+  String get contact_support_subtitle => 'Discutez avec nous sur WhatsApp';
+
+  @override
+  String get contact_support_message => 'Bonjour, j\'ai besoin d\'aide avec l\'application Build4All manager.';
+
+  @override
+  String get contact_support_unavailable => 'Le support n\'est pas disponible pour le moment.';
+
+  @override
   String get owner_profile_edit_title => 'Modifier le profil';
 
   @override
