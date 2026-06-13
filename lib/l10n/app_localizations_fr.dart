@@ -1981,6 +1981,17 @@ class AppLocalizationsFr extends AppLocalizations {
   String get contact_support_title => 'Contacter le support';
 
   @override
+  String get open_ticket_title => 'Ouvrir un ticket';
+
+  @override
+  String get open_ticket_subtitle =>
+      'Soumettez un problème à notre équipe d\'assistance';
+
+  @override
+  String get open_ticket_failed =>
+      'Impossible d\'ouvrir le portail des tickets.';
+
+  @override
   String get contact_support_subtitle => 'Discutez avec nous sur WhatsApp';
 
   @override
