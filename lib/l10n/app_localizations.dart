@@ -3985,6 +3985,24 @@ abstract class AppLocalizations {
   /// **'Contact support'**
   String get contact_support_title;
 
+  /// No description provided for @open_ticket_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Open a ticket'**
+  String get open_ticket_title;
+
+  /// No description provided for @open_ticket_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit an issue to our support team'**
+  String get open_ticket_subtitle;
+
+  /// No description provided for @open_ticket_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open the ticket portal.'**
+  String get open_ticket_failed;
+
   /// No description provided for @contact_support_subtitle.
   ///
   /// In en, this message translates to:
